@@ -16,7 +16,7 @@ const AboutPage = () => {
             <p>
               Established in 2025, Golden Nest has been redefining luxury hospitality 
               with its exceptional service and world-class amenities. Located in the 
-              heart of the Hohoe - Ghana, we offer a sanctuary of peace and elegance.
+              heart of Hohoe - Ghana, we offer a sanctuary of peace and elegance.
             </p>
             
           </div>
