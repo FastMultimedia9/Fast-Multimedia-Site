@@ -5,6 +5,18 @@ import './Footer.css';
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
+  // Fallback text for each social media platform
+  const socialPlatforms = [
+    { name: 'Facebook', icon: 'fab fa-facebook-f', fallback: 'FB' },
+    { name: 'Twitter', icon: 'fab fa-twitter', fallback: 'TW' },
+    { name: 'Instagram', icon: 'fab fa-instagram', fallback: 'IG' },
+    { name: 'LinkedIn', icon: 'fab fa-linkedin-in', fallback: 'IN' },
+    { name: 'YouTube', icon: 'fab fa-youtube', fallback: 'YT' },
+    { name: 'Pinterest', icon: 'fab fa-pinterest-p', fallback: 'PN' },
+    { name: 'Behance', icon: 'fab fa-behance', fallback: 'BE' },
+    { name: 'Dribbble', icon: 'fab fa-dribbble', fallback: 'DR' }
+  ];
+
   return (
     <footer className="footer">
       <div className="footer-main">
@@ -26,30 +38,20 @@ const Footer = () => {
                 looking to elevate their brand.
               </p>
               <div className="footer-social">
-                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Facebook">
-                  <i className="fab fa-facebook-f"></i>
-                </a>
-                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Twitter">
-                  <i className="fab fa-twitter"></i>
-                </a>
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Instagram">
-                  <i className="fab fa-instagram"></i>
-                </a>
-                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-link" title="LinkedIn">
-                  <i className="fab fa-linkedin-in"></i>
-                </a>
-                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="social-link" title="YouTube">
-                  <i className="fab fa-youtube"></i>
-                </a>
-                <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Pinterest">
-                  <i className="fab fa-pinterest-p"></i>
-                </a>
-                <a href="https://behance.net" target="_blank" rel="noopener noreferrer" className="social-link" title="Behance">
-                  <i className="fab fa-behance"></i>
-                </a>
-                <a href="https://dribbble.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Dribbble">
-                  <i className="fab fa-dribbble"></i>
-                </a>
+                {socialPlatforms.map((platform, index) => (
+                  <a 
+                    key={index}
+                    href={`https://${platform.name.toLowerCase()}.com`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-link"
+                    title={platform.name}
+                  >
+                    <i className={platform.icon}>
+                      <span className="social-fallback">{platform.fallback}</span>
+                    </i>
+                  </a>
+                ))}
               </div>
             </div>
 
@@ -78,18 +80,24 @@ const Footer = () => {
               <h3 className="footer-title">Contact Info</h3>
               <ul className="footer-contact-info">
                 <li>
-                  <i className="fas fa-map-marker-alt"></i>
+                  <div className="contact-icon">
+                    <i className="fas fa-map-marker-alt"></i>
+                  </div>
                   <span>Kpong, Tema Akosombo Road</span>
                 </li>
                 <li>
-                  <i className="fas fa-phone-alt"></i>
-                  <div>
+                  <div className="contact-icon">
+                    <i className="fas fa-phone-alt"></i>
+                  </div>
+                  <div className="contact-details">
                     <span>+233 505-159-131</span>
                     <span>+233 548-890-306</span>
                   </div>
                 </li>
                 <li>
-                  <i className="fas fa-envelope"></i>
+                  <div className="contact-icon">
+                    <i className="fas fa-envelope"></i>
+                  </div>
                   <span>fasttech227@gmail.com</span>
                 </li>
               </ul>
