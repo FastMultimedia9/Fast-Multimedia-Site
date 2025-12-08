@@ -26,19 +26,28 @@ const Footer = () => {
                 looking to elevate their brand.
               </p>
               <div className="footer-social">
-                <a href="#facebook" className="social-link">
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Facebook">
                   <i className="fab fa-facebook-f"></i>
                 </a>
-                <a href="#twitter" className="social-link">
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Twitter">
                   <i className="fab fa-twitter"></i>
                 </a>
-                <a href="#instagram" className="social-link">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Instagram">
                   <i className="fab fa-instagram"></i>
                 </a>
-                <a href="#linkedin" className="social-link">
+                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-link" title="LinkedIn">
                   <i className="fab fa-linkedin-in"></i>
                 </a>
-                <a href="#dribbble" className="social-link">
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="social-link" title="YouTube">
+                  <i className="fab fa-youtube"></i>
+                </a>
+                <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Pinterest">
+                  <i className="fab fa-pinterest-p"></i>
+                </a>
+                <a href="https://behance.net" target="_blank" rel="noopener noreferrer" className="social-link" title="Behance">
+                  <i className="fab fa-behance"></i>
+                </a>
+                <a href="https://dribbble.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Dribbble">
                   <i className="fab fa-dribbble"></i>
                 </a>
               </div>
@@ -74,8 +83,10 @@ const Footer = () => {
                 </li>
                 <li>
                   <i className="fas fa-phone-alt"></i>
-                  <span>+233 505-159-131</span>
-                  <span>+233 548-890-306</span>
+                  <div>
+                    <span>+233 505-159-131</span>
+                    <span>+233 548-890-306</span>
+                  </div>
                 </li>
                 <li>
                   <i className="fas fa-envelope"></i>
