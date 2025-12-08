@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import './Homepage.css';
+import { Link } from 'react-router-dom';
+import './HomePage.css';
 
-const Homepage = () => {
-  // Animation on scroll effect
+const HomePage = () => {
   useEffect(() => {
     const animateOnScroll = () => {
       const elements = document.querySelectorAll('.animate-on-scroll');
@@ -18,7 +18,7 @@ const Homepage = () => {
     };
 
     window.addEventListener('scroll', animateOnScroll);
-    animateOnScroll(); // Trigger once on load
+    animateOnScroll();
     
     return () => window.removeEventListener('scroll', animateOnScroll);
   }, []);
@@ -41,12 +41,12 @@ const Homepage = () => {
             We craft memorable brand identities that connect with your audience.
           </p>
           <div className="hero-buttons">
-            <button className="btn btn-primary">
+            <Link to="/contact" className="btn btn-primary">
               <i className="fas fa-rocket"></i> Start Your Project
-            </button>
-            <button className="btn btn-secondary">
-              <i className="fas fa-play-circle"></i> Watch Showreel
-            </button>
+            </Link>
+            <Link to="/portfolio" className="btn btn-secondary">
+              <i className="fas fa-images"></i> View Portfolio
+            </Link>
           </div>
           <div className="hero-stats">
             <div className="stat-item">
@@ -70,22 +70,19 @@ const Homepage = () => {
             <div className="shape shape-3"></div>
           </div>
           <div className="hero-image-container">
-            <img 
-              src="https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
-              alt="Creative Design Process" 
-              className="hero-image"
-            />
-            <div className="image-overlay"></div>
+            <div className="hero-image-placeholder">
+              <i className="fas fa-palette"></i>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Services Preview Section */}
-      <section id="services" className="services-section">
+      {/* Services Section */}
+      <section id="services" className="services-section section">
         <div className="section-header animate-on-scroll">
           <h2 className="section-title">Our Design Services</h2>
           <p className="section-subtitle">
-            We offer a complete range of design services to elevate your brand
+            Comprehensive design solutions tailored to your business needs
           </p>
         </div>
         
@@ -98,11 +95,12 @@ const Homepage = () => {
             <p className="service-description">
               Create a unique visual identity that communicates your brand's values and personality.
             </p>
-            <div className="service-features">
-              <span className="feature">Logo Design</span>
-              <span className="feature">Color Palette</span>
-              <span className="feature">Typography</span>
-            </div>
+            <ul className="service-features">
+              <li>Logo Design</li>
+              <li>Color Palette</li>
+              <li>Typography System</li>
+              <li>Brand Guidelines</li>
+            </ul>
           </div>
           
           <div className="service-card animate-on-scroll">
@@ -113,11 +111,12 @@ const Homepage = () => {
             <p className="service-description">
               Design intuitive and engaging digital experiences that users love.
             </p>
-            <div className="service-features">
-              <span className="feature">Wireframing</span>
-              <span className="feature">Prototyping</span>
-              <span className="feature">User Testing</span>
-            </div>
+            <ul className="service-features">
+              <li>Wireframing</li>
+              <li>Prototyping</li>
+              <li>User Testing</li>
+              <li>Responsive Design</li>
+            </ul>
           </div>
           
           <div className="service-card animate-on-scroll">
@@ -128,23 +127,24 @@ const Homepage = () => {
             <p className="service-description">
               Create compelling marketing materials that drive engagement and conversions.
             </p>
-            <div className="service-features">
-              <span className="feature">Social Media</span>
-              <span className="feature">Print Materials</span>
-              <span className="feature">Digital Ads</span>
-            </div>
+            <ul className="service-features">
+              <li>Social Media Graphics</li>
+              <li>Print Materials</li>
+              <li>Digital Ads</li>
+              <li>Email Campaigns</li>
+            </ul>
           </div>
         </div>
         
         <div className="section-cta animate-on-scroll">
-          <button className="btn btn-outline">
+          <Link to="/contact" className="btn btn-outline">
             <i className="fas fa-list"></i> View All Services
-          </button>
+          </Link>
         </div>
       </section>
 
-      {/* Portfolio Preview Section */}
-      <section id="portfolio" className="portfolio-section">
+      {/* Portfolio Preview */}
+      <section className="portfolio-preview section">
         <div className="section-header animate-on-scroll">
           <h2 className="section-title">Featured Projects</h2>
           <p className="section-subtitle">
@@ -155,17 +155,16 @@ const Homepage = () => {
         <div className="portfolio-grid">
           <div className="portfolio-item animate-on-scroll">
             <div className="portfolio-image">
-              <img 
-                src="https://images.unsplash.com/photo-1634942537034-2531766767d1?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
-                alt="Brand Identity Project"
-              />
+              <div className="image-placeholder">
+                <i className="fas fa-leaf"></i>
+              </div>
               <div className="portfolio-overlay">
                 <div className="overlay-content">
                   <h4>EcoBrand Identity</h4>
                   <p>Complete brand identity for sustainable products company</p>
-                  <button className="btn btn-small">
-                    <i className="fas fa-eye"></i> View Case Study
-                  </button>
+                  <Link to="/portfolio" className="btn btn-small">
+                    <i className="fas fa-eye"></i> View Project
+                  </Link>
                 </div>
               </div>
             </div>
@@ -173,17 +172,16 @@ const Homepage = () => {
           
           <div className="portfolio-item animate-on-scroll">
             <div className="portfolio-image">
-              <img 
-                src="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
-                alt="Mobile App Design"
-              />
+              <div className="image-placeholder">
+                <i className="fas fa-mobile-alt"></i>
+              </div>
               <div className="portfolio-overlay">
                 <div className="overlay-content">
                   <h4>Finance Mobile App</h4>
                   <p>UI/UX design for personal finance management app</p>
-                  <button className="btn btn-small">
-                    <i className="fas fa-eye"></i> View Case Study
-                  </button>
+                  <Link to="/portfolio" className="btn btn-small">
+                    <i className="fas fa-eye"></i> View Project
+                  </Link>
                 </div>
               </div>
             </div>
@@ -191,17 +189,16 @@ const Homepage = () => {
           
           <div className="portfolio-item animate-on-scroll">
             <div className="portfolio-image">
-              <img 
-                src="https://images.unsplash.com/photo-1545235617-9465d2a55698?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
-                alt="Packaging Design"
-              />
+              <div className="image-placeholder">
+                <i className="fas fa-shopping-bag"></i>
+              </div>
               <div className="portfolio-overlay">
                 <div className="overlay-content">
                   <h4>Organic Food Packaging</h4>
                   <p>Packaging design for organic food product line</p>
-                  <button className="btn btn-small">
-                    <i className="fas fa-eye"></i> View Case Study
-                  </button>
+                  <Link to="/portfolio" className="btn btn-small">
+                    <i className="fas fa-eye"></i> View Project
+                  </Link>
                 </div>
               </div>
             </div>
@@ -209,9 +206,9 @@ const Homepage = () => {
         </div>
         
         <div className="section-cta animate-on-scroll">
-          <button className="btn btn-primary">
+          <Link to="/portfolio" className="btn btn-primary">
             <i className="fas fa-images"></i> View Full Portfolio
-          </button>
+          </Link>
         </div>
       </section>
 
@@ -225,12 +222,12 @@ const Homepage = () => {
               Get a free consultation and quote.
             </p>
             <div className="cta-buttons">
-              <button className="btn btn-light">
+              <Link to="/contact" className="btn btn-light">
                 <i className="fas fa-calendar-alt"></i> Schedule Call
-              </button>
-              <button className="btn btn-outline-light">
+              </Link>
+              <Link to="/contact" className="btn btn-outline-light">
                 <i className="fas fa-download"></i> Download Brochure
-              </button>
+              </Link>
             </div>
           </div>
           <div className="cta-visual">
@@ -244,4 +241,4 @@ const Homepage = () => {
   );
 };
 
-export default Homepage;
+export default HomePage;
