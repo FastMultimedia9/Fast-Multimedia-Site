@@ -90,7 +90,7 @@ const Footer = () => {
         <div className="container">
           <div className="footer-bottom-content">
             <p className="copyright">
-              &copy; {currentYear} Creative Studio. All rights reserved.
+              &copy; {currentYear} Fast Multimedia. All rights reserved.
             </p>
             <div className="footer-legal">
               <a href="#privacy">Privacy Policy</a>

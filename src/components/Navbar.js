@@ -34,11 +34,11 @@ const Navbar = () => {
         {/* Logo */}
         <Link to="/" className="logo">
           <div className="logo-icon">
-            <span className="logo-icon-text">CS</span>
+            <span className="logo-icon-text">FM</span>
           </div>
           <div className="logo-text">
-            <span className="logo-primary">Creative</span>
-            <span className="logo-secondary">Studio</span>
+            <span className="logo-primary">Fast</span>
+            <span className="logo-secondary">Multimedia</span>
           </div>
         </Link>
 
