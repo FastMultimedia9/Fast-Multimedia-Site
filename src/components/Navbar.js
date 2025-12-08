@@ -86,7 +86,7 @@ const Navbar = () => {
             <span className="cta-icon">
               <i className="fas fa-paper-plane"></i>
             </span>
-            <span className="cta-text">Get Quote</span>
+           
           </Link>
         </div>
 
