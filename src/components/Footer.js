@@ -70,11 +70,12 @@ const Footer = () => {
               <ul className="footer-contact-info">
                 <li>
                   <i className="fas fa-map-marker-alt"></i>
-                  <span>123 Design Street, San Francisco, CA 94107</span>
+                  <span>Kpong, Tema Akosombo Road</span>
                 </li>
                 <li>
                   <i className="fas fa-phone-alt"></i>
-                  <span>+1 (555) 123-4567</span>
+                  <span>+233 505-159-131</span>
+                  <span>+233 548-890-306</span>
                 </li>
                 <li>
                   <i className="fas fa-envelope"></i>
