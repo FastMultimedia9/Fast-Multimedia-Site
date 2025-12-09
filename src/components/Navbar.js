@@ -23,8 +23,8 @@ const Navbar = () => {
       <div className="navbar-container">
         {/* Logo */}
         <Link to="/" className="navbar-logo">
-          <div className="logo-icon">
-            <i className="fas fa-palette"></i>
+          <div className="logo-text">
+            <i className="FM"></i>
           </div>
           <div className="logo-text">
             <span className="logo-primary">Fast</span>
