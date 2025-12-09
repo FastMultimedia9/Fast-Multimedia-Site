@@ -1,40 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+// Navbar.js
+import React, { useState } from 'react';
+import { Link, NavLink } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const location = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    setIsOpen(false);
-  }, [location]);
-
-  const isActive = (path) => {
-    return location.pathname === path ? 'active' : '';
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
 
+  const navLinks = [
+    { path: '/', name: 'Home', icon: 'fas fa-home' },
+    { path: '/portfolio', name: 'Portfolio', icon: 'fas fa-images' },
+    { path: '/services', name: 'Services', icon: 'fas fa-paint-brush' },
+    { path: '/about', name: 'About', icon: 'fas fa-info-circle' },
+    { path: '/contact', name: 'Contact', icon: 'fas fa-envelope' },
+  ];
+
   return (
-    <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+    <nav className="navbar">
       <div className="navbar-container">
         {/* Logo */}
-        <Link to="/" className="logo">
+        <Link to="/" className="navbar-logo">
           <div className="logo-icon">
-            <span className="logo-icon-text">FM</span>
+            <i className="fas fa-palette"></i>
           </div>
           <div className="logo-text">
             <span className="logo-primary">Fast</span>
@@ -42,92 +32,39 @@ const Navbar = () => {
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="nav-menu">
-          <ul className="nav-list">
-            <li className="nav-item">
-              <Link to="/" className={`nav-link ${isActive('/')}`}>
-                <span className="nav-icon">
-                  <i className="fas fa-home"></i>
-                </span>
-                <span className="nav-text">Home</span>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/portfolio" className={`nav-link ${isActive('/portfolio')}`}>
-                <span className="nav-icon">
-                  <i className="fas fa-briefcase"></i>
-                </span>
-                <span className="nav-text">Portfolio</span>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/about" className={`nav-link ${isActive('/about')}`}>
-                <span className="nav-icon">
-                  <i className="fas fa-users"></i>
-                </span>
-                <span className="nav-text">About</span>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/contact" className={`nav-link ${isActive('/contact')}`}>
-                <span className="nav-icon">
-                  <i className="fas fa-envelope"></i>
-                </span>
-                <span className="nav-text">Contact</span>
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Call-to-action button */}
-       
-
         {/* Mobile Menu Toggle */}
-        <div 
-          className={`mobile-toggle ${isOpen ? 'open' : ''}`} 
-          onClick={() => setIsOpen(!isOpen)}
+        <button 
+          className="navbar-toggle" 
+          onClick={toggleMenu}
+          aria-label="Toggle navigation menu"
         >
-          <span className="toggle-line"></span>
-          <span className="toggle-line"></span>
-          <span className="toggle-line"></span>
-        </div>
-      </div>
+          <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
+        </button>
 
-      {/* Mobile Menu */}
-      <div className={`mobile-menu ${isOpen ? 'open' : ''}`}>
-        <ul className="mobile-nav-list">
-          <li className="mobile-nav-item">
-            <Link to="/" className={`mobile-nav-link ${isActive('/')}`} onClick={() => setIsOpen(false)}>
-              <i className="fas fa-home"></i>
-              Home
-            </Link>
-          </li>
-          <li className="mobile-nav-item">
-            <Link to="/portfolio" className={`mobile-nav-link ${isActive('/portfolio')}`} onClick={() => setIsOpen(false)}>
-              <i className="fas fa-briefcase"></i>
-              Portfolio
-            </Link>
-          </li>
-          <li className="mobile-nav-item">
-            <Link to="/about" className={`mobile-nav-link ${isActive('/about')}`} onClick={() => setIsOpen(false)}>
-              <i className="fas fa-users"></i>
-              About
-            </Link>
-          </li>
-          <li className="mobile-nav-item">
-            <Link to="/contact" className={`mobile-nav-link ${isActive('/contact')}`} onClick={() => setIsOpen(false)}>
-              <i className="fas fa-envelope"></i>
-              Contact
-            </Link>
-          </li>
-          <li className="mobile-nav-item">
-            <Link to="/contact" className="mobile-cta-button" onClick={() => setIsOpen(false)}>
-              <i className="fas fa-paper-plane"></i>
-              Get Free Quote
-            </Link>
-          </li>
-        </ul>
+        {/* Navigation Links */}
+        <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
+          {navLinks.map((link) => (
+            <NavLink
+              key={link.path}
+              to={link.path}
+              className={({ isActive }) => 
+                `nav-link ${isActive ? 'active' : ''}`
+              }
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <i className={link.icon}></i>
+              <span>{link.name}</span>
+            </NavLink>
+          ))}
+        </div>
+
+        {/* Call to Action Button */}
+        <div className="navbar-cta">
+          <Link to="/contact" className="btn btn-primary">
+            <i className="fas fa-rocket"></i>
+            Get Quote
+          </Link>
+        </div>
       </div>
     </nav>
   );
