@@ -1,19 +1,31 @@
 // Navbar.js
 import React, { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const handleNavigation = (path) => {
+    // Close mobile menu
+    setIsMenuOpen(false);
+    
+    // Scroll to top
+    window.scrollTo(0, 0);
+    
+    // Navigate to the page
+    navigate(path);
+  };
+
   const navLinks = [
     { path: '/', name: 'Home', icon: 'fas fa-home' },
-    { path: '/portfolio', name: 'Portfolio', icon: 'fas fa-images' },
     { path: '/services', name: 'Services', icon: 'fas fa-paint-brush' },
+    { path: '/portfolio', name: 'Portfolio', icon: 'fas fa-images' },
     { path: '/about', name: 'About', icon: 'fas fa-info-circle' },
     { path: '/contact', name: 'Contact', icon: 'fas fa-envelope' },
   ];
@@ -22,9 +34,9 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         {/* Logo */}
-        <Link to="/" className="navbar-logo">
+        <Link to="/" className="navbar-logo" onClick={() => handleNavigation('/')}>
           <div className="logo-icon">
-            <i className="FM"></i>
+            <i className="fas fa-palette"></i>
           </div>
           <div className="logo-text">
             <span className="logo-primary">Fast</span>
@@ -50,7 +62,7 @@ const Navbar = () => {
               className={({ isActive }) => 
                 `nav-link ${isActive ? 'active' : ''}`
               }
-              onClick={() => setIsMenuOpen(false)}
+              onClick={() => handleNavigation(link.path)}
             >
               <i className={link.icon}></i>
               <span>{link.name}</span>
@@ -60,7 +72,7 @@ const Navbar = () => {
 
         {/* Call to Action Button */}
         <div className="navbar-cta">
-          <Link to="/contact" className="btn btn-primary">
+          <Link to="/contact" className="btn btn-primary" onClick={() => handleNavigation('/contact')}>
             <i className="fas fa-rocket"></i>
             Get Quote
           </Link>
