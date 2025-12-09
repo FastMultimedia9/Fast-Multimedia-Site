@@ -192,17 +192,19 @@
   transform: translateX(3px);
 }
 
-/* Contact Info */
+/* Contact Info - REMOVED BACKGROUNDS */
 .contact-info {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  background: transparent !important;
 }
 
 .contact-item {
   display: flex;
   align-items: flex-start;
   gap: 15px;
+  background: transparent !important;
 }
 
 .contact-icon {
@@ -222,6 +224,7 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
+  background: transparent !important;
 }
 
 .contact-text span,
