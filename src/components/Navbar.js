@@ -25,8 +25,7 @@ const Navbar = () => {
   const navLinks = [
     { path: '/', name: 'Home', icon: 'fas fa-home' },
     { path: '/services', name: 'Services', icon: 'fas fa-paint-brush' },
-    { path: '/work', name: 'Work', icon: 'fas fa-briefcase' },
-    { path: '/process', name: 'Process', icon: 'fas fa-cogs' },
+    { path: '/portfolio', name: 'Portfolio', icon: 'fas fa-images' },
     { path: '/about', name: 'About', icon: 'fas fa-info-circle' },
     { path: '/blog', name: 'Blog', icon: 'fas fa-blog' },
     { path: '/contact', name: 'Contact', icon: 'fas fa-envelope' },
