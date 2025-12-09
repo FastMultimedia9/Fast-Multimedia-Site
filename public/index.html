@@ -1,259 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <!-- Favicon & App Icons -->
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Fast Multimedia - Professional graphic design studio creating beautiful brand identities, UI/UX designs, and marketing materials. Award-winning design services.">
+    <meta name="keywords" content="graphic design, brand identity, UI/UX design, logo design, web design, packaging design, Fast Multimedia">
+    <meta name="author" content="Fast Multimedia">
+    <meta property="og:title" content="Fast Multimedia | Professional Graphic Design Studio">
+    <meta property="og:description" content="Transforming ideas into stunning visual experiences. Award-winning graphic design services.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fastmultimedia.com">
+    <meta property="og:image" content="https://fastmultimedia.com/images/og-image.jpg">
     
-    <!-- Viewport & Mobile Optimization -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://fastmultimedia.com">
+    
+    <!-- Title -->
+    <title>Fast Multimedia | Professional Graphic Design Studio</title>
+    
+    <!-- Preconnect to important domains -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
     
     <!-- Theme Color for Mobile Browsers -->
-    <meta name="theme-color" content="#0A2540" />
-    <meta name="msapplication-TileColor" content="#0A2540" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#6c63ff">
     
-    <!-- Primary Meta Tags -->
-    <title>Golden Nest Hotel | Luxury Accommodation & World-Class Service</title>
-    <meta name="description" content="Experience luxury at Golden Nest Hotel. Premium accommodation, fine dining, and exceptional service in the heart of the city. Book your stay today." />
-    <meta name="keywords" content="luxury hotel, premium accommodation, fine dining, spa, resort, luxury suites, hotel booking" />
-    <meta name="author" content="Golden Nest Hotel" />
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://goldennest.com/" />
-    <meta property="og:title" content="Golden Nest Hotel | Luxury Accommodation" />
-    <meta property="og:description" content="Experience luxury at Golden Nest Hotel. Premium accommodation, fine dining, and exceptional service." />
-    <meta property="og:image" content="%PUBLIC_URL%/social-banner.jpg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://goldennest.com/" />
-    <meta property="twitter:title" content="Golden Nest Hotel | Luxury Accommodation" />
-    <meta property="twitter:description" content="Experience luxury at Golden Nest Hotel. Premium accommodation, fine dining, and exceptional service." />
-    <meta property="twitter:image" content="%PUBLIC_URL%/social-banner.jpg" />
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    
-    <!-- Preconnect to external domains for performance -->
-    <link rel="preconnect" href="https://images.unsplash.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" />
-    <link rel="dns-prefetch" href="https://images.unsplash.com" />
-    
-    <!-- Structured Data / Schema.org -->
+    <!-- Structured Data for SEO -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Hotel",
-      "name": "Golden Nest Hotel",
-      "description": "Luxury hotel offering premium accommodation, fine dining, and world-class amenities.",
-      "url": "https://goldennest.com",
+      "@type": "ProfessionalService",
+      "name": "Fast Multimedia",
+      "description": "Award-winning graphic design studio specializing in brand identity, UI/UX design, and marketing materials.",
+      "url": "https://fastmultimedia.com",
+      "logo": "https://fastmultimedia.com/logo.png",
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "123 Luxury Street",
-        "addressLocality": "Golden City",
-        "addressRegion": "GC",
-        "postalCode": "10001",
-        "addressCountry": "USA"
+        "streetAddress": "Kpong, Tema Akosombo Road",
+        "addressLocality": "Kpong",
+        "addressRegion": "Greater Accra",
+        "addressCountry": "Ghana"
       },
-      "telephone": "+1-234-567-8900",
-      "email": "info@goldennest.com",
-      "priceRange": "$$$",
-      "starRating": {
-        "@type": "Rating",
-        "ratingValue": "5"
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+233-505-159-131",
+        "contactType": "Customer Service",
+        "email": "fasttech227@gmail.com",
+        "availableLanguage": ["English"]
       },
-      "amenities": [
-        "Free WiFi",
-        "Swimming Pool",
-        "Spa",
-        "Fitness Center",
-        "Restaurant",
-        "Room Service",
-        "Concierge"
-      ],
-      "checkinTime": "15:00",
-      "checkoutTime": "12:00",
-      "image": [
-        "https://images.unsplash.com/photo-1566073771259-6a8506099945",
-        "https://images.unsplash.com/photo-1611892440504-42a792e24d32",
-        "https://images.unsplash.com/photo-1584132967334-10e028bd69f7"
+      "serviceArea": {
+        "@type": "Place",
+        "name": "Worldwide"
+      },
+      "sameAs": [
+        "https://facebook.com/fastmultimedia",
+        "https://instagram.com/fastmultimedia",
+        "https://twitter.com/fastmultimedia",
+        "https://linkedin.com/company/fastmultimedia"
       ]
     }
     </script>
-    
-    <!-- PWA Configuration -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <meta name="application-name" content="Golden Nest Hotel" />
-    
-    <!-- iOS Safari PWA -->
-    <meta name="apple-mobile-web-app-title" content="Golden Nest" />
-    
-    <!-- Windows Tiles -->
-    <meta name="msapplication-TileImage" content="%PUBLIC_URL%/mstile-144x144.png" />
-    
-    <!-- Preload Critical Assets -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" as="style" />
-    
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://goldennest.com" />
-  </head>
-  
-  <body>
-    <!-- No Script Fallback -->
+</head>
+<body>
+    <!-- NoScript Fallback -->
     <noscript>
-      <div style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #0A2540 0%, #1A365D 100%);
-        color: white;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: 20px;
-        z-index: 9999;
-      ">
-        <h1 style="
-          font-family: 'Playfair Display', serif;
-          font-size: 2.5rem;
-          margin-bottom: 20px;
-          color: #D4AF37;
-        ">
-          Fast Multimedia
-        </h1>
-        <p style="
-          font-family: 'Inter', sans-serif;
-          font-size: 1.2rem;
-          max-width: 600px;
-          line-height: 1.6;
-          margin-bottom: 30px;
-        ">
-          JavaScript is required to view our website. Please enable JavaScript in your browser settings to experience our luxury hotel website.
-        </p>
-        <div style="margin-top: 20px;">
-          <p style="margin-bottom: 10px;">You can also:</p>
-          <p>📞 Call us: <strong>+1 (234) 567-8900</strong></p>
-          <p>✉️ Email: <strong>info@goldennest.com</strong></p>
+        <div style="text-align: center; padding: 50px; background: #f8f9ff; color: #333;">
+            <h1>Fast Multimedia - Graphic Design Studio</h1>
+            <p>JavaScript is required to run this application. Please enable JavaScript in your browser to view our website.</p>
+            <p>You can also contact us directly:</p>
+            <p>📞 Phone: +233 505-159-131 | +233 548-890-306</p>
+            <p>📧 Email: fasttech227@gmail.com</p>
+            <p>📍 Location: Kpong, Tema Akosombo Road</p>
         </div>
-      </div>
     </noscript>
     
-    <!-- Root Element for React -->
+    <!-- Root element for React -->
     <div id="root"></div>
     
-    <!-- Loading Animation -->
-    <div id="loading-splash" style="
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #0A2540 0%, #1A365D 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease;
-    ">
-      <div class="logo-animation" style="
-        width: 100px;
-        height: 100px;
-        border: 3px solid rgba(212, 175, 55, 0.3);
-        border-top-color: #D4AF37;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-bottom: 30px;
-      "></div>
-      <h2 style="
-        font-family: 'Playfair Display', serif;
-        color: #D4AF37;
-        font-size: 2rem;
-        margin-bottom: 10px;
-        animation: pulse 2s infinite;
-      ">
-        Golden Nest
-      </h2>
-      <p style="
-        font-family: 'Inter', sans-serif;
-        color: white;
-        opacity: 0.8;
-        font-size: 1rem;
-      ">
-        Loading luxury experience...
-      </p>
+    <!-- Loading fallback -->
+    <div id="loading-fallback" style="display: none; text-align: center; padding: 100px; font-family: 'Inter', sans-serif;">
+        <div style="width: 50px; height: 50px; border: 3px solid #f3f3f3; border-top: 3px solid #6c63ff; border-radius: 50%; margin: 0 auto 20px; animation: spin 1s linear infinite;"></div>
+        <h2 style="color: #2a2d43;">Loading Fast Multimedia...</h2>
+        <style>
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
     </div>
     
-    <!-- Preload Images -->
-    <div style="display: none;">
-      <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945" alt="preload" />
-      <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32" alt="preload" />
-      <img src="https://images.unsplash.com/photo-1584132967334-10e028bd69f7" alt="preload" />
-      <img src="https://images.unsplash.com/photo-1564501049418-3c27787d01e8" alt="preload" />
-    </div>
-    
-    <!-- Animation Styles -->
-    <style>
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
-      }
-      
-      /* Hide loading splash when React loads */
-      body.loaded #loading-splash {
-        opacity: 0;
-        pointer-events: none;
-      }
-    </style>
-    
-    <!-- Script to hide loading screen -->
+    <!-- Script to show loading fallback until React loads -->
     <script>
-      // Hide loading splash when page is fully loaded
-      window.addEventListener('load', function() {
-        setTimeout(function() {
-          document.body.classList.add('loaded');
-          setTimeout(function() {
-            var splash = document.getElementById('loading-splash');
-            if (splash) splash.style.display = 'none';
-          }, 500);
-        }, 1000);
-      });
-      
-      // Fallback in case load event doesn't fire
-      setTimeout(function() {
-        document.body.classList.add('loaded');
-        var splash = document.getElementById('loading-splash');
-        if (splash) splash.style.display = 'none';
-      }, 3000);
+        document.addEventListener('DOMContentLoaded', function() {
+            var root = document.getElementById('root');
+            var loading = document.getElementById('loading-fallback');
+            
+            if (!root.hasChildNodes()) {
+                loading.style.display = 'block';
+            }
+            
+            // Hide loading when React renders
+            var observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList' && mutation.target === root) {
+                        if (root.hasChildNodes()) {
+                            loading.style.display = 'none';
+                            observer.disconnect();
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(root, { childList: true });
+        });
     </script>
     
-    <!-- Analytics Script (Example - Add your own tracking ID) -->
-    <!--
-    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <!-- Performance optimization script -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'GA_MEASUREMENT_ID');
+        // Service worker registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+        
+        // Preload critical images
+        window.addEventListener('load', function() {
+            const criticalImages = [
+                'https://images.unsplash.com/photo-1558655146-364adaf1fcc9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+                'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+            ];
+            
+            criticalImages.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+        });
     </script>
-    -->
-  </body>
+</body>
 </html>
