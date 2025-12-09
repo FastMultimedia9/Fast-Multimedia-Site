@@ -23,7 +23,7 @@ const Navbar = () => {
       <div className="navbar-container">
         {/* Logo */}
         <Link to="/" className="navbar-logo">
-          <div className="logo-text">
+          <div className="logo-icon">
             <i className="FM"></i>
           </div>
           <div className="logo-text">
