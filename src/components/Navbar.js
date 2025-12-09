@@ -64,6 +64,7 @@ const Navbar = () => {
           className="navbar-toggle" 
           onClick={toggleMenu}
           aria-label="Toggle navigation menu"
+          aria-expanded={isMenuOpen}
         >
           <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
         </button>
@@ -80,10 +81,16 @@ const Navbar = () => {
               >
                 <button 
                   className="dropdown-toggle"
-                  onClick={() => window.innerWidth <= 768 ? toggleResources() : null}
+                  onClick={() => {
+                    if (window.innerWidth <= 768) {
+                      toggleResources();
+                    }
+                  }}
+                  aria-expanded={isResourcesOpen}
+                  aria-haspopup="true"
                 >
                   <i className={link.icon}></i>
-                  <span>{link.name} <i className="fas fa-chevron-down"></i></span>
+                  <span>{link.name} <i className="fas fa-chevron-down dropdown-arrow"></i></span>
                 </button>
                 
                 <div className={`dropdown-menu ${isResourcesOpen ? 'show' : ''}`}>
@@ -108,6 +115,7 @@ const Navbar = () => {
                   `nav-link ${isActive ? 'active' : ''}`
                 }
                 onClick={() => handleNavigation(link.path)}
+                end
               >
                 <i className={link.icon}></i>
                 <span>{link.name}</span>
