@@ -8,20 +8,24 @@ import AboutPage from './pages/AboutPage';
 import PortfolioPage from './pages/PortfolioPage';
 import ServicesPage from './pages/ServicesPage';
 import BlogPage from './pages/BlogPage';
+import ResourcesPage from './pages/ResourcesPage';
+import TrainingPage from './pages/resources/TrainingPage';
+import TutorialsPage from './pages/resources/TutorialsPage';
+import TemplatesPage from './pages/resources/TemplatesPage';
+import ToolsPage from './pages/resources/ToolsPage';
+import EbooksPage from './pages/resources/EbooksPage';
+import AffiliatesPage from './pages/resources/AffiliatesPage';
 import ContactPage from './pages/ContactPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import CookiePolicy from './pages/CookiePolicy';
 import './App.css';
 
-// Scroll to top component
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
-
   return null;
 };
 
@@ -38,6 +42,13 @@ function App() {
             <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/blog" element={<BlogPage />} />
+            <Route path="/resources" element={<ResourcesPage />} />
+            <Route path="/resources/training" element={<TrainingPage />} />
+            <Route path="/resources/tutorials" element={<TutorialsPage />} />
+            <Route path="/resources/templates" element={<TemplatesPage />} />
+            <Route path="/resources/tools" element={<ToolsPage />} />
+            <Route path="/resources/ebooks" element={<EbooksPage />} />
+            <Route path="/resources/affiliates" element={<AffiliatesPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />

@@ -5,20 +5,22 @@ import './Navbar.css';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+    if (isResourcesOpen) setIsResourcesOpen(false);
+  };
+
+  const toggleResources = () => {
+    setIsResourcesOpen(!isResourcesOpen);
   };
 
   const handleNavigation = (path) => {
-    // Close mobile menu
     setIsMenuOpen(false);
-    
-    // Scroll to top
+    setIsResourcesOpen(false);
     window.scrollTo(0, 0);
-    
-    // Navigate to the page
     navigate(path);
   };
 
@@ -28,6 +30,18 @@ const Navbar = () => {
     { path: '/portfolio', name: 'Portfolio', icon: 'fas fa-images' },
     { path: '/about', name: 'About', icon: 'fas fa-info-circle' },
     { path: '/blog', name: 'Blog', icon: 'fas fa-blog' },
+    { 
+      name: 'Resources', 
+      icon: 'fas fa-book-open',
+      submenu: [
+        { path: '/resources/training', name: 'Training Courses', icon: 'fas fa-graduation-cap' },
+        { path: '/resources/tutorials', name: 'Video Tutorials', icon: 'fas fa-video' },
+        { path: '/resources/templates', name: 'Free Templates', icon: 'fas fa-file-download' },
+        { path: '/resources/tools', name: 'Design Tools', icon: 'fas fa-tools' },
+        { path: '/resources/ebooks', name: 'Free eBooks', icon: 'fas fa-book' },
+        { path: '/resources/affiliates', name: 'Affiliate Products', icon: 'fas fa-star' }
+      ]
+    },
     { path: '/contact', name: 'Contact', icon: 'fas fa-envelope' },
   ];
 
@@ -57,17 +71,48 @@ const Navbar = () => {
         {/* Navigation Links */}
         <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
           {navLinks.map((link) => (
-            <NavLink
-              key={link.path}
-              to={link.path}
-              className={({ isActive }) => 
-                `nav-link ${isActive ? 'active' : ''}`
-              }
-              onClick={() => handleNavigation(link.path)}
-            >
-              <i className={link.icon}></i>
-              <span>{link.name}</span>
-            </NavLink>
+            link.submenu ? (
+              <div 
+                key={link.name} 
+                className={`nav-link dropdown ${isResourcesOpen ? 'open' : ''}`}
+                onMouseEnter={() => window.innerWidth > 768 && setIsResourcesOpen(true)}
+                onMouseLeave={() => window.innerWidth > 768 && setIsResourcesOpen(false)}
+              >
+                <button 
+                  className="dropdown-toggle"
+                  onClick={() => window.innerWidth <= 768 ? toggleResources() : null}
+                >
+                  <i className={link.icon}></i>
+                  <span>{link.name} <i className="fas fa-chevron-down"></i></span>
+                </button>
+                
+                <div className={`dropdown-menu ${isResourcesOpen ? 'show' : ''}`}>
+                  {link.submenu.map((subitem) => (
+                    <Link
+                      key={subitem.path}
+                      to={subitem.path}
+                      className="dropdown-item"
+                      onClick={() => handleNavigation(subitem.path)}
+                    >
+                      <i className={subitem.icon}></i>
+                      <span>{subitem.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                className={({ isActive }) => 
+                  `nav-link ${isActive ? 'active' : ''}`
+                }
+                onClick={() => handleNavigation(link.path)}
+              >
+                <i className={link.icon}></i>
+                <span>{link.name}</span>
+              </NavLink>
+            )
           ))}
         </div>
 
