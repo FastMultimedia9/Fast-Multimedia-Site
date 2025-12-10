@@ -11,7 +11,7 @@ const Footer = () => {
     { 
       name: 'Facebook', 
       icon: 'fab fa-facebook-f', 
-      url: 'https://facebook.com',
+      url: 'https://facebook.com/profile.php?id=100063646042170',
       color: '#1877f2'
     },
     { 
@@ -23,39 +23,28 @@ const Footer = () => {
     { 
       name: 'Instagram', 
       icon: 'fab fa-instagram', 
-      url: 'https://instagram.com',
+      url: 'https://instagram.com/fastmultimedia9/',
       color: '#e4405f'
     },
     { 
       name: 'LinkedIn', 
       icon: 'fab fa-linkedin-in', 
-      url: 'https://linkedin.com',
+      url: 'https://linkedin.com/fast-multimedia-bb548b285',
       color: '#0077b5'
     },
     { 
       name: 'YouTube', 
       icon: 'fab fa-youtube', 
-      url: 'https://youtube.com',
+      url: 'https://youtube.com/@FastTech2026',
       color: '#ff0000'
     },
     { 
       name: 'Pinterest', 
       icon: 'fab fa-pinterest-p', 
-      url: 'https://pinterest.com',
+      url: 'https://pinterest.com/fasttech227/',
       color: '#bd081c'
     },
-    { 
-      name: 'Behance', 
-      icon: 'fab fa-behance', 
-      url: 'https://behance.net',
-      color: '#0057ff'
-    },
-    { 
-      name: 'Dribbble', 
-      icon: 'fab fa-dribbble', 
-      url: 'https://dribbble.com',
-      color: '#ea4c89'
-    }
+   
   ];
 
   const services = [
