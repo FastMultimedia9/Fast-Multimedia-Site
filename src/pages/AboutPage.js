@@ -29,7 +29,7 @@ const AboutPage = () => {
       name: 'Teye James',
       role: 'Founder & Creative Director',
       bio: 'With over 8 years in graphic design and tech solutions, Collins leads our vision to provide exceptional design and technical services.',
-      image: '/images/team/Teye-James.jpg'
+      image: '/images/Teye-James.jpg'
     },
     {
       id: 2,
@@ -40,10 +40,10 @@ const AboutPage = () => {
     },
     {
       id: 3,
-      name: 'Kwame Boateng',
+      name: 'Tawiah Nicholas Tetteh',
       role: 'Tech Support Lead',
       bio: 'With extensive experience in computer systems and networking, Kwame ensures all tech solutions are reliable and efficient.',
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
+      image: '/images/Nichola Tetteh.jpg'
     },
     {
       id: 4,
