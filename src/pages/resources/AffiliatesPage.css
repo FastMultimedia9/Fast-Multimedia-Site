@@ -1,0 +1,483 @@
+/* AffiliatesPage.css */
+.affiliates-page {
+  padding-top: 0;
+}
+
+/* Hero Section */
+.affiliates-hero {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.9), rgba(255, 193, 7, 0.9)),
+              url('https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
+  background-size: cover;
+  background-position: center;
+  color: white;
+  padding: 140px 5% 100px;
+  text-align: center;
+}
+
+.affiliates-hero .hero-badge {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.affiliates-hero .hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.affiliates-hero .hero-subtitle {
+  font-size: 1.3rem;
+  max-width: 700px;
+  margin: 0 auto 40px;
+  opacity: 0.95;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.affiliates-hero .btn {
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.affiliates-hero .btn-outline {
+  background: transparent;
+  color: white;
+  border-color: white;
+}
+
+.affiliates-hero .btn-outline:hover {
+  background: white;
+  color: #ff6b6b;
+}
+
+/* How It Works */
+.how-it-works {
+  padding: 100px 5%;
+  background: white;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.step-card {
+  text-align: center;
+  padding: 40px 30px;
+  background: #f8f9ff;
+  border-radius: 12px;
+  position: relative;
+}
+
+.step-number {
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #6c63ff, #4ecdc4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
+}
+
+.step-content h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.step-content p {
+  color: #666;
+  line-height: 1.6;
+}
+
+/* Commissions Section */
+.commissions-section {
+  padding: 100px 5%;
+  background: #f8f9ff;
+}
+
+.commissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+}
+
+.commission-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.commission-card:hover {
+  transform: translateY(-10px);
+}
+
+.commission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f2ff;
+}
+
+.commission-header h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.commission-rate {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #06d6a0;
+}
+
+.commission-details {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.detail i {
+  color: #6c63ff;
+}
+
+.commission-description {
+  color: #666;
+  line-height: 1.6;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Marketing Materials */
+.materials-section {
+  padding: 100px 5%;
+  background: white;
+}
+
+.materials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.material-card {
+  text-align: center;
+  padding: 40px 30px;
+  background: #f8f9ff;
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+.material-card:hover {
+  transform: translateY(-10px);
+}
+
+.material-icon {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #6c63ff, #4ecdc4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 25px;
+  color: white;
+  font-size: 28px;
+}
+
+.material-card h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.material-formats {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.format-tag {
+  background: #e9f7ef;
+  color: #06d6a0;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.material-description {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.material-sizes {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.size-tag {
+  background: #f0f2ff;
+  color: #6c63ff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Success Stories */
+.stories-section {
+  padding: 100px 5%;
+  background: #f8f9ff;
+}
+
+.stories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+}
+
+.story-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.story-content {
+  margin-bottom: 25px;
+}
+
+.story-testimonial {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #555;
+  font-style: italic;
+  position: relative;
+  padding-left: 30px;
+}
+
+.story-testimonial::before {
+  content: '"';
+  font-size: 4rem;
+  color: #6c63ff;
+  opacity: 0.2;
+  position: absolute;
+  top: -20px;
+  left: 0;
+}
+
+.story-author {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.author-avatar {
+  width: 60px;
+  height: 60px;
+  background: #f0f2ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.author-info h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.author-niche {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.author-earnings {
+  color: #06d6a0;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* FAQ Section */
+.faq-section {
+  padding: 100px 5%;
+  background: white;
+}
+
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+}
+
+.faq-item {
+  background: #f8f9ff;
+  padding: 30px;
+  border-radius: 12px;
+  border-left: 4px solid #6c63ff;
+}
+
+.faq-item h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.faq-item p {
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* CTA Section */
+.affiliates-cta {
+  padding: 100px 5%;
+  background: linear-gradient(135deg, #0A2540, #1a365d);
+  color: white;
+  text-align: center;
+}
+
+.affiliates-cta h2 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.affiliates-cta p {
+  font-size: 1.2rem;
+  max-width: 700px;
+  margin: 0 auto 40px;
+  opacity: 0.95;
+  line-height: 1.6;
+}
+
+.affiliates-cta .btn {
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.affiliates-cta .btn-outline {
+  background: transparent;
+  color: white;
+  border-color: white;
+}
+
+.affiliates-cta .btn-outline:hover {
+  background: white;
+  color: #0A2540;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .affiliates-hero .hero-title {
+    font-size: 2.8rem;
+  }
+  
+  .steps-grid {
+    gap: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .affiliates-hero {
+    padding: 120px 5% 80px;
+  }
+  
+  .affiliates-hero .hero-title {
+    font-size: 2.3rem;
+  }
+  
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .affiliates-hero .btn {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .steps-grid,
+  .commissions-grid,
+  .materials-grid,
+  .stories-grid,
+  .faq-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .commission-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .affiliates-hero {
+    padding: 100px 5% 60px;
+  }
+  
+  .affiliates-hero .hero-title {
+    font-size: 2rem;
+  }
+  
+  .commission-details {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .story-author {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .affiliates-cta .btn {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 15px;
+  }
+}

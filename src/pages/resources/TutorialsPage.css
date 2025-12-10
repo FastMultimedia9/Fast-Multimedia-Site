@@ -1,0 +1,482 @@
+/* TutorialsPage.css */
+.tutorials-page {
+  padding-top: 0;
+}
+
+/* Hero Section */
+.tutorials-hero {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.9), rgba(255, 193, 7, 0.9)),
+              url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
+  background-size: cover;
+  background-position: center;
+  color: white;
+  padding: 140px 5% 100px;
+  text-align: center;
+}
+
+.tutorials-hero .hero-badge {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tutorials-hero .hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.tutorials-hero .hero-subtitle {
+  font-size: 1.3rem;
+  max-width: 700px;
+  margin: 0 auto 40px;
+  opacity: 0.95;
+}
+
+.tutorials-hero .hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  margin-top: 60px;
+}
+
+/* Categories Filter */
+.categories-section {
+  padding: 40px 5%;
+  background: #f8f9ff;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.categories-filter {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.category-btn {
+  padding: 12px 24px;
+  border: 2px solid #6c63ff;
+  background: transparent;
+  color: #6c63ff;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.category-btn:hover {
+  background: rgba(108, 99, 255, 0.1);
+}
+
+.category-btn.active {
+  background: #6c63ff;
+  color: white;
+}
+
+/* Tutorials Grid */
+.tutorials-grid-section {
+  padding: 80px 5%;
+  background: white;
+}
+
+.tutorials-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.tutorials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 30px;
+  margin-bottom: 60px;
+}
+
+.tutorial-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tutorial-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.tutorial-thumbnail {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.tutorial-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.tutorial-card:hover .tutorial-thumbnail img {
+  transform: scale(1.05);
+}
+
+.thumbnail-overlay {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.duration {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.free-badge {
+  background: #06d6a0;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.premium-badge {
+  background: #ffd166;
+  color: #333;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tutorial-content {
+  padding: 25px;
+}
+
+.tutorial-meta {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.level-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.level-badge.beginner {
+  background: #e9f7ef;
+  color: #06d6a0;
+}
+
+.level-badge.intermediate {
+  background: #fff4e6;
+  color: #ff9f1c;
+}
+
+.level-badge.advanced {
+  background: #ffeaea;
+  color: #ff6b6b;
+}
+
+.category-tag {
+  background: #f0f2ff;
+  color: #6c63ff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tutorial-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.tutorial-description {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.tutorial-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.tutorial-stats {
+  display: flex;
+  gap: 15px;
+  color: #999;
+  font-size: 14px;
+}
+
+.tutorial-stats i {
+  margin-right: 5px;
+}
+
+.watch-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.watch-btn.free {
+  background: #06d6a0;
+  color: white;
+}
+
+.watch-btn.free:hover {
+  background: #05b887;
+}
+
+.watch-btn.premium {
+  background: #ffd166;
+  color: #333;
+}
+
+.watch-btn.premium:hover {
+  background: #ffc233;
+}
+
+/* Pricing Section */
+.pricing-section {
+  padding: 100px 5%;
+  background: #f8f9ff;
+}
+
+.pricing-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.pricing-card {
+  background: white;
+  border-radius: 12px;
+  padding: 40px 30px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.pricing-card:hover {
+  transform: translateY(-10px);
+}
+
+.pricing-card.popular {
+  border: 2px solid #6c63ff;
+}
+
+.pricing-card .popular-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #6c63ff;
+  color: white;
+  padding: 6px 20px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pricing-header {
+  margin-bottom: 30px;
+}
+
+.pricing-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.price {
+  margin-bottom: 10px;
+}
+
+.amount {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #6c63ff;
+}
+
+.period {
+  display: block;
+  color: #666;
+  margin-top: 5px;
+}
+
+.savings {
+  color: #06d6a0;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 30px 0;
+  text-align: left;
+}
+
+.features li {
+  padding: 10px 0;
+  color: #666;
+  position: relative;
+  padding-left: 30px;
+}
+
+.features li i {
+  position: absolute;
+  left: 0;
+  top: 10px;
+}
+
+.features li i.fa-check {
+  color: #06d6a0;
+}
+
+.features li i.fa-times {
+  color: #ff6b6b;
+}
+
+/* CTA Section */
+.tutorials-cta {
+  padding: 100px 5%;
+  background: linear-gradient(135deg, #ff6b6b, #ff9f1c);
+  color: white;
+  text-align: center;
+}
+
+.tutorials-cta h2 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.tutorials-cta p {
+  font-size: 1.2rem;
+  max-width: 700px;
+  margin: 0 auto 40px;
+  opacity: 0.95;
+  line-height: 1.6;
+}
+
+.tutorials-cta .btn {
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.tutorials-cta .btn-outline {
+  background: transparent;
+  color: white;
+  border-color: white;
+}
+
+.tutorials-cta .btn-outline:hover {
+  background: white;
+  color: #ff6b6b;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .tutorials-hero .hero-title {
+    font-size: 2.8rem;
+  }
+  
+  .tutorials-hero .hero-stats {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tutorials-hero {
+    padding: 120px 5% 80px;
+  }
+  
+  .tutorials-hero .hero-title {
+    font-size: 2.3rem;
+  }
+  
+  .tutorials-hero .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .tutorials-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pricing-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .tutorials-hero .hero-stats {
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  
+  .tutorials-cta .btn {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .tutorials-hero {
+    padding: 100px 5% 60px;
+  }
+  
+  .tutorials-hero .hero-title {
+    font-size: 2rem;
+  }
+  
+  .tutorials-hero .hero-stats {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .categories-filter {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  
+  .tutorials-cta h2 {
+    font-size: 2.2rem;
+  }
+  
+  .tutorial-footer {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  
+  .watch-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
