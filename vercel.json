@@ -1,13 +1,12 @@
 {
   "redirects": [
     {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.fastmultimedia.site"
-        }
-      ],
+      "source": "http://www.fastmultimedia.site/:path*",
+      "destination": "https://fastmultimedia.site/:path*",
+      "permanent": true
+    },
+    {
+      "source": "https://www.fastmultimedia.site/:path*",
       "destination": "https://fastmultimedia.site/:path*",
       "permanent": true
     }
