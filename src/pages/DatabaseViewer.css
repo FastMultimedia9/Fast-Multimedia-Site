@@ -1,0 +1,80 @@
+/* 404 Page Styles */
+.not-found-page {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.not-found-page h1 {
+  font-size: 48px;
+  color: #2d3748;
+  margin-bottom: 20px;
+}
+
+.not-found-page p {
+  font-size: 18px;
+  color: #718096;
+  margin-bottom: 30px;
+}
+
+.back-home-btn {
+  display: inline-block;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+.back-home-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+/* Admin Route Indicator */
+.admin-route-indicator {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #667eea;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  z-index: 1000;
+  opacity: 0.8;
+}
+
+/* Test Page Styles (for TestSupabase) */
+.test-page-container {
+  padding: 40px;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.test-page-container h1 {
+  text-align: center;
+  margin-bottom: 40px;
+  color: #2d3748;
+}
+
+.test-results {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+}
+
+.test-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
