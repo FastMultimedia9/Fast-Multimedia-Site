@@ -1,7 +1,7 @@
 // src/components/BlogPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { blogAPI, formatNumber } from '../firebase';
+import { blogAPI, formatNumber, formatTimeAgo } from '../supabase';
 import { getViews as getLocalViews, getPopularPosts as getLocalPopularPosts } from '../utils/blogStorage';
 import './BlogPage.css';
 

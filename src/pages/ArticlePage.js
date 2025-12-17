@@ -1,7 +1,7 @@
 // src/components/ArticlePage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { blogAPI, formatNumber, formatTimeAgo } from '../firebase';
+import { blogAPI, formatNumber, formatTimeAgo } from '../supabase';
 import { 
   trackView as trackLocalView, 
   getViews as getLocalViews,

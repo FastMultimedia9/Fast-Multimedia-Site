@@ -124,15 +124,8 @@ const LoginPage = () => {
           </button>
           
           <div className="login-footer">
-            <p>
-              <strong>Demo Credentials:</strong><br />
-              Username: <code>admin</code><br />
-              Password: <code>admin123</code>
-            </p>
-            <p className="security-note">
-              <i className="fas fa-shield-alt"></i>
-              For production, replace with Firebase Authentication
-            </p>
+           
+           
           </div>
         </form>
         
