@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { supabase, authAPI } from './supabase'; // Combined the imports
+import { supabase, authAPI } from './supabase';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
@@ -41,11 +41,14 @@ import PortfolioCaseStudy from './pages/portfolio/PortfolioCaseStudy';
 // Utility Pages
 import DownloadGuide from './pages/DownloadGuide';
 
-// Other Pages
+// Test & Debug Pages
 import TestSupabase from './pages/TestSupabase';
 import AdminView from './pages/AdminView';
 import BlogAdmin from './pages/BlogAdmin';
 import DatabaseViewer from './pages/DatabaseViewer';
+
+// Import DatabaseCheck for debugging (optional)
+// import DatabaseCheck from './components/DatabaseCheck';
 
 import './App.css';
 
@@ -123,18 +126,9 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
   return auth ? children : null;
 };
 
-// Route for testing (no authentication required)
-const TestRoute = () => {
-  return <TestSupabase />;
-};
-
-// Database viewer route (protected, admin only)
-const DatabaseViewerRoute = () => {
-  return (
-    <ProtectedRoute adminOnly={true}>
-      <DatabaseViewer />
-    </ProtectedRoute>
-  );
+// Test Route Component (no protection)
+const TestRoute = ({ children }) => {
+  return children;
 };
 
 function App() {
@@ -199,7 +193,29 @@ function App() {
             />
             <Route 
               path="/admin/database" 
-              element={<DatabaseViewerRoute />} 
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <DatabaseViewer />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* ===== TEST & DEBUG PAGES (Public) ===== */}
+            <Route 
+              path="/test" 
+              element={
+                <TestRoute>
+                  <TestSupabase />
+                </TestRoute>
+              } 
+            />
+            <Route 
+              path="/admin-view" 
+              element={
+                <TestRoute>
+                  <AdminView />
+                </TestRoute>
+              } 
             />
             
             {/* ===== RESOURCE PAGES ===== */}
@@ -216,16 +232,21 @@ function App() {
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/cookies" element={<CookiePolicy />} />
             
-            {/* ===== UTILITY & TESTING PAGES ===== */}
-            <Route path="/test" element={<TestRoute />} />
-            <Route path="/admin-view" element={<AdminView />} />
-            
             {/* ===== 404 PAGE ===== */}
             <Route path="*" element={
               <div className="not-found-page">
                 <div className="container">
                   <h1>404 - Page Not Found</h1>
                   <p>The page you're looking for doesn't exist.</p>
+                  <div className="suggestions">
+                    <p>You might want to:</p>
+                    <ul>
+                      <li><a href="/">Go to Homepage</a></li>
+                      <li><a href="/blog">Browse the Blog</a></li>
+                      <li><a href="/test">Test Database Connection</a></li>
+                      <li><a href="/admin/login">Login to Admin Panel</a></li>
+                    </ul>
+                  </div>
                   <a href="/" className="back-home-btn">Back to Home</a>
                 </div>
               </div>
@@ -233,6 +254,9 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        
+        {/* Uncomment for debugging */}
+        {/* <DatabaseCheck /> */}
       </div>
     </Router>
   );
