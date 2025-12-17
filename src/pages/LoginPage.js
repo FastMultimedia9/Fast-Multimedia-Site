@@ -143,10 +143,17 @@ const LoginPage = () => {
           </div>
           
           <div className="login-info">
-            <h3><i className="fas fa-info-circle"></i> Demo Credentials</h3>
-            <div className="demo-credentials">
-              <p><strong>Admin:</strong> admin@example.com / admin123</p>
-              <p><strong>User:</strong> user@example.com / user123</p>
+            <h3><i className="fas fa-info-circle"></i> Authentication</h3>
+            <div className="auth-tech">
+              <span className="tech-badge">
+                <i className="fas fa-database"></i> Supabase Auth
+              </span>
+              <span className="tech-badge">
+                <i className="fas fa-shield-alt"></i> Secure Login
+              </span>
+              <span className="tech-badge">
+                <i className="fas fa-lock"></i> Password Hashing
+              </span>
             </div>
           </div>
         </div>

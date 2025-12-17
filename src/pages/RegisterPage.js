@@ -11,12 +11,17 @@ const RegisterPage = () => {
     password: '',
     confirmPassword: '',
     role: 'user',
+    adminPassword: '',
     agreedToTerms: false
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
   const navigate = useNavigate();
+
+  // Secret admin password - CHANGE THIS IN PRODUCTION!
+  const ADMIN_SECRET_PASSWORD = 'ADMIN2024';
 
   // Check if user is already logged in
   useEffect(() => {
@@ -39,14 +44,44 @@ const RegisterPage = () => {
     checkAuth();
   }, [navigate]);
 
-  // Handle registration form
+  // Handle registration form changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     
-    setFormData(prev => ({
-      ...prev,
+    const newFormData = {
+      ...formData,
       [name]: type === 'checkbox' ? checked : value
-    }));
+    };
+    
+    // If role changes to user, clear admin password
+    if (name === 'role' && value === 'user') {
+      newFormData.adminPassword = '';
+      setShowAdminPassword(false);
+    }
+    
+    // If role changes to admin, show admin password field
+    if (name === 'role' && value === 'admin') {
+      setShowAdminPassword(true);
+    }
+    
+    setFormData(newFormData);
+  };
+
+  // Validate admin password
+  const validateAdminPassword = () => {
+    if (formData.role !== 'admin') return true;
+    
+    if (!formData.adminPassword.trim()) {
+      setError('Admin password is required for administrator registration');
+      return false;
+    }
+    
+    if (formData.adminPassword !== ADMIN_SECRET_PASSWORD) {
+      setError('Invalid admin password. Administrator registration requires special authorization.');
+      return false;
+    }
+    
+    return true;
   };
 
   const handleSubmit = async (e) => {
@@ -67,6 +102,11 @@ const RegisterPage = () => {
 
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters');
+      return;
+    }
+
+    // Validate admin password if needed
+    if (!validateAdminPassword()) {
       return;
     }
 
@@ -105,8 +145,10 @@ const RegisterPage = () => {
           password: '',
           confirmPassword: '',
           role: 'user',
+          adminPassword: '',
           agreedToTerms: false
         });
+        setShowAdminPassword(false);
         
         // Redirect after successful registration
         setTimeout(() => {
@@ -238,10 +280,33 @@ const RegisterPage = () => {
               </select>
               <small className="role-hint">
                 {formData.role === 'admin' 
-                  ? 'Admin accounts can manage all content and users'
-                  : 'Regular users can create posts and comment'}
+                  ? 'Admin accounts can manage all content and users. Requires special authorization.'
+                  : 'Regular users can create posts and comment on articles.'}
               </small>
             </div>
+
+            {/* Admin Password Field - Only shown when admin is selected */}
+            {showAdminPassword && (
+              <div className="form-group admin-password-field">
+                <label htmlFor="adminPassword">
+                  <i className="fas fa-shield-alt"></i> Admin Authorization Password *
+                </label>
+                <input
+                  type="password"
+                  id="adminPassword"
+                  name="adminPassword"
+                  value={formData.adminPassword}
+                  onChange={handleChange}
+                  placeholder="Enter admin authorization password"
+                  disabled={isLoading}
+                  className={formData.adminPassword ? 'has-value' : ''}
+                />
+                <small className="admin-password-hint">
+                  <i className="fas fa-info-circle"></i> This password is required to register as an administrator.
+                  Contact the system administrator if you need this access.
+                </small>
+              </div>
+            )}
 
             <div className="form-options">
               <div className="checkbox-group">
@@ -313,6 +378,10 @@ const RegisterPage = () => {
             
             <div className="setup-instructions">
               <p><strong>Note:</strong> You will be automatically logged in after registration.</p>
+              <p className="admin-note">
+                <i className="fas fa-shield-alt"></i> Administrator registration requires special authorization.
+                Please select "Regular User" if you don't have admin privileges.
+              </p>
             </div>
           </div>
         </div>
