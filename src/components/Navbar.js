@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { authAPI, supabase } from '../supabase'; // Import supabase directly
+import { authAPI, supabase } from '../supabase';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -12,14 +12,18 @@ const Navbar = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const user = await authAPI.getCurrentUserWithProfile();
-      setCurrentUser(user);
-      setUserRole(user?.profile?.role || null);
+      try {
+        const user = await authAPI.getCurrentUserWithProfile();
+        setCurrentUser(user);
+        setUserRole(user?.profile?.role || null);
+      } catch (error) {
+        console.error('Auth check error:', error);
+      }
     };
     
     checkAuth();
     
-    // Listen for auth state changes - FIXED: Use supabase directly, not authAPI.supabase
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session) {
@@ -90,6 +94,20 @@ const Navbar = () => {
             src="/logo.png" 
             alt="Fast Multimedia Logo" 
             className="navbar-logo-image"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.parentElement.innerHTML = `
+                <div class="logo-text-fallback">
+                  <div class="logo-icon">
+                    <i class="fas fa-rocket"></i>
+                  </div>
+                  <div class="logo-text">
+                    <span class="logo-primary">Fast Multimedia</span>
+                    <span class="logo-secondary">Creative Solutions</span>
+                  </div>
+                </div>
+              `;
+            }}
           />
         </Link>
 
@@ -159,26 +177,28 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* User Account Section */}
+        {/* User Account Section - COMPACT VERSION */}
         <div className="navbar-account">
           {currentUser ? (
             <div className="user-dropdown">
-              <button className="user-toggle">
+              <button className="user-toggle compact">
                 <i className="fas fa-user-circle"></i>
-                <span className="user-name">
-                  {currentUser.profile?.name || currentUser.email?.split('@')[0]}
+                <span className="user-name compact">
+                  {currentUser.profile?.name?.split(' ')[0] || 
+                   currentUser.email?.split('@')[0]?.substring(0, 10) ||
+                   'User'}
                 </span>
-                <i className="fas fa-chevron-down"></i>
+                <i className="fas fa-chevron-down compact-arrow"></i>
               </button>
-              <div className="dropdown-menu user-menu">
-                <div className="dropdown-header">
-                  <div className="user-info">
-                    <i className="fas fa-user-circle user-avatar"></i>
-                    <div>
-                      <strong>{currentUser.profile?.name || 'User'}</strong>
-                      <small>{currentUser.email}</small>
-                      <span className={`role-badge ${userRole}`}>
-                        {userRole === 'admin' ? 'Administrator' : 'Regular User'}
+              <div className="dropdown-menu user-menu compact">
+                <div className="dropdown-header compact">
+                  <div className="user-info compact">
+                    <i className="fas fa-user-circle user-avatar compact"></i>
+                    <div className="user-details-compact">
+                      <strong className="compact">{currentUser.profile?.name || 'User'}</strong>
+                      <small className="compact">{currentUser.email?.substring(0, 20)}...</small>
+                      <span className={`role-badge compact ${userRole}`}>
+                        {userRole === 'admin' ? 'Admin' : 'User'}
                       </span>
                     </div>
                   </div>
@@ -186,38 +206,38 @@ const Navbar = () => {
                 
                 <Link 
                   to={userRole === 'admin' ? '/admin' : '/user/dashboard'}
-                  className="dropdown-item"
+                  className="dropdown-item compact"
                   onClick={() => handleNavigation(userRole === 'admin' ? '/admin' : '/user/dashboard')}
                 >
                   <i className="fas fa-columns"></i>
-                  <span>{userRole === 'admin' ? 'Admin Dashboard' : 'My Dashboard'}</span>
+                  <span>{userRole === 'admin' ? 'Admin Panel' : 'My Dashboard'}</span>
                 </Link>
                 
                 {userRole === 'user' && (
                   <Link 
                     to="/user/dashboard?tab=create-post"
-                    className="dropdown-item"
+                    className="dropdown-item compact"
                     onClick={() => handleNavigation('/user/dashboard?tab=create-post')}
                   >
-                    <i className="fas fa-plus-circle"></i>
+                    <i className="fas fa-plus"></i>
                     <span>Create Post</span>
                   </Link>
                 )}
                 
                 <Link 
                   to="/blog"
-                  className="dropdown-item"
+                  className="dropdown-item compact"
                   onClick={() => handleNavigation('/blog')}
                 >
                   <i className="fas fa-newspaper"></i>
-                  <span>View Blog</span>
+                  <span>Blog</span>
                 </Link>
                 
-                <div className="dropdown-divider"></div>
+                <div className="dropdown-divider compact"></div>
                 
                 <button 
                   onClick={handleLogout}
-                  className="dropdown-item logout"
+                  className="dropdown-item logout compact"
                 >
                   <i className="fas fa-sign-out-alt"></i>
                   <span>Logout</span>
@@ -225,29 +245,29 @@ const Navbar = () => {
               </div>
             </div>
           ) : (
-            <div className="auth-links">
+            <div className="auth-links compact">
               <Link 
                 to="/admin/login" 
-                className="btn btn-outline"
+                className="btn btn-outline compact"
                 onClick={() => handleNavigation('/admin/login')}
               >
                 <i className="fas fa-sign-in-alt"></i>
-                <span>Login</span>
+                <span className="auth-text">Login</span>
               </Link>
               <Link 
                 to="/register" 
-                className="btn btn-primary"
+                className="btn btn-primary compact"
                 onClick={() => handleNavigation('/register')}
               >
                 <i className="fas fa-user-plus"></i>
-                <span>Register</span>
+                <span className="auth-text">Register</span>
               </Link>
             </div>
           )}
 
-          {/* Call to Action Button */}
-          <div className="navbar-cta">
-            <Link to="/contact" className="btn btn-primary" onClick={() => handleNavigation('/contact')}>
+          {/* Call to Action Button - COMPACT */}
+          <div className="navbar-cta compact">
+            <Link to="/contact" className="btn btn-primary compact" onClick={() => handleNavigation('/contact')}>
               <i className="fas fa-rocket"></i>
               <span className="cta-text">Get Quote</span>
             </Link>

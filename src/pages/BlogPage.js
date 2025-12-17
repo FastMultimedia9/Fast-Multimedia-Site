@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase, blogAPI, formatNumber, authAPI } from '../supabase'; // Added supabase import
+import { supabase, blogAPI, formatNumber, authAPI } from '../supabase';
 import './BlogPage.css';
 
 const BlogPage = () => {
@@ -18,12 +18,13 @@ const BlogPage = () => {
   });
   const [currentUser, setCurrentUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const authorInfo = {
     name: "Laurie Pressman",
     bio: "Vice President, Pantone Color Institute™",
-    avatar: "https://images.ctfassets.net/svmwj4tfnwbc/90gVEDVzZuNfqdwcpN7C8/8f8c0f62087dde525f58ab64eed4771d/headshot-pantone-color-institute-laurie-pressman.webpw=200&auto=format&fit=crop",
+    avatar: "https://images.ctfassets.net/svmwj4tfnwbc/90gVEDVzZuNfqdwcpN7C8/8f8c0f62087dde525f58ab64eed4771d/headshot-pantone-color-institute-laurie-pressman.webp?w=200&auto=format&fit=crop",
     social: {
       twitter: "#",
       linkedin: "#",
@@ -45,92 +46,85 @@ const BlogPage = () => {
       design: posts.filter(p => p.category === 'design').length,
       development: posts.filter(p => p.category === 'development').length,
       business: posts.filter(p => p.category === 'business').length,
-      general: posts.filter(p => p.category === 'general').length
+      general: posts.filter(p => p.category === 'general' || !p.category).length
     };
     setCategoryCounts(counts);
-    
-    // Update categories array
-    categories.forEach(cat => {
-      cat.count = counts[cat.id];
-    });
   };
 
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
+  // Function to fetch posts with error handling
+  const fetchPosts = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      console.log('Fetching posts...');
       
-      try {
-        // Get current user and role
-        const user = await authAPI.getCurrentUserWithProfile();
-        setCurrentUser(user);
-        setUserRole(user?.profile?.role || null);
-        
-        // Get posts based on user role
-        let posts;
-        if (user?.profile?.role === 'admin') {
-          // Admin sees all posts
-          posts = await blogAPI.getPosts();
-        } else if (user) {
-          // Regular user sees published posts + their own posts
-          posts = await blogAPI.getUserPosts(user.id);
-        } else {
-          // Guest only sees published posts
-          const { data } = await supabase
-            .from('posts')
-            .select('*')
-            .eq('published', true)
-            .order('created_at', { ascending: false });
-          posts = data || []; // Fixed: should be data not posts
-        }
-        
-        console.log('Posts loaded:', posts);
-        
-        if (posts && posts.length > 0) {
-          setBlogPosts(posts);
-          calculateCategoryCounts(posts);
-          
-          // Get popular posts (only published for non-admins)
-          let popular;
-          if (user?.profile?.role === 'admin') {
-            popular = await blogAPI.getPopularPosts(5);
-          } else {
-            const publishedPosts = posts.filter(p => p.published);
-            popular = [...publishedPosts]
-              .sort((a, b) => (b.views || 0) - (a.views || 0))
-              .slice(0, 5);
-          }
-          setPopularPosts(popular);
-        } else {
-          console.log('No posts found in database');
-          setBlogPosts([]);
-          calculateCategoryCounts([]);
-          setPopularPosts([]);
-        }
-      } catch (error) {
-        console.error('Error loading data:', error);
-        setBlogPosts([]);
-        calculateCategoryCounts([]);
-        setPopularPosts([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadData();
-    
-    // Set up real-time listener for posts
-    const unsubscribe = blogAPI.onPostsUpdate((posts) => {
+      // Get current user and role
+      const user = await authAPI.getCurrentUserWithProfile();
+      setCurrentUser(user);
+      const role = user?.profile?.role || null;
+      setUserRole(role);
+      console.log('User role:', role);
+      
+      let posts = [];
+      
+      // Use blogAPI.getUserPosts which handles permissions correctly
+      posts = await blogAPI.getUserPosts(user?.id);
+      
+      console.log('Posts fetched:', posts);
+      
       if (posts && posts.length > 0) {
         setBlogPosts(posts);
         calculateCategoryCounts(posts);
         
-        // Update popular posts
-        const sorted = [...posts].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
-        setPopularPosts(sorted);
+        // Get popular posts
+        let popular = [];
+        if (role === 'admin') {
+          // Admin sees all popular posts
+          popular = await blogAPI.getPopularPosts(5);
+        } else {
+          // Others see popular published posts
+          const publishedPosts = posts.filter(p => p.published);
+          popular = [...publishedPosts]
+            .sort((a, b) => (b.views || 0) - (a.views || 0))
+            .slice(0, 5);
+        }
+        setPopularPosts(popular || []);
+      } else {
+        console.log('No posts found');
+        setBlogPosts([]);
+        calculateCategoryCounts([]);
+        setPopularPosts([]);
       }
-    });
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      setError(err.message || 'Failed to load posts');
+      setBlogPosts([]);
+      calculateCategoryCounts([]);
+      setPopularPosts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
     
-    return () => unsubscribe();
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('posts-channel')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'posts' }, 
+        () => {
+          console.log('Posts updated, refetching...');
+          fetchPosts();
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleReadMore = async (postId) => {
@@ -158,54 +152,25 @@ const BlogPage = () => {
       setBlogPosts(filtered);
       setActiveCategory('all');
     } else {
-      // Reload posts
-      const reloadPosts = async () => {
-        const user = await authAPI.getCurrentUserWithProfile();
-        let posts;
-        
-        if (user?.profile?.role === 'admin') {
-          posts = await blogAPI.getPosts();
-        } else if (user) {
-          posts = await blogAPI.getUserPosts(user.id);
-        } else {
-          const { data } = await supabase
-            .from('posts')
-            .select('*')
-            .eq('published', true)
-            .order('created_at', { ascending: false });
-          posts = data || []; // Fixed: should be data not posts
-        }
-        
-        setBlogPosts(posts);
-        calculateCategoryCounts(posts);
-      };
-      reloadPosts();
+      fetchPosts();
+      setActiveCategory('all');
     }
   };
 
   const handleCategoryClick = async (categoryId) => {
     setActiveCategory(categoryId);
+    setSearchQuery('');
     
-    const user = await authAPI.getCurrentUserWithProfile();
-    let allPosts;
+    // Reset to all posts first
+    await fetchPosts();
     
-    if (user?.profile?.role === 'admin') {
-      allPosts = await blogAPI.getPosts();
-    } else if (user) {
-      allPosts = await blogAPI.getUserPosts(user.id);
-    } else {
-      const { data } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('published', true)
-        .order('created_at', { ascending: false });
-      allPosts = data || []; // Fixed: should be data not posts
-    }
-    
-    if (categoryId === 'all') {
-      setBlogPosts(allPosts);
-    } else {
-      const filtered = allPosts.filter(post => post.category === categoryId);
+    // Then filter if needed
+    if (categoryId !== 'all') {
+      const allPosts = await blogAPI.getUserPosts(currentUser?.id);
+      const filtered = allPosts.filter(post => 
+        post.category === categoryId || 
+        (!post.category && categoryId === 'general')
+      );
       setBlogPosts(filtered);
     }
   };
@@ -228,14 +193,17 @@ const BlogPage = () => {
 
   const filteredPosts = activeCategory === 'all' 
     ? blogPosts 
-    : blogPosts.filter(post => post.category === activeCategory);
+    : blogPosts.filter(post => 
+        post.category === activeCategory || 
+        (!post.category && activeCategory === 'general')
+      );
 
   const featuredPost = blogPosts.find(post => post.featured && (post.published || userRole === 'admin')) || 
                       (blogPosts.length > 0 ? blogPosts[0] : null);
 
   // Function to get category display name
   const getCategoryDisplayName = (category) => {
-    if (!category) return 'General';
+    if (!category || category === 'general') return 'General';
     return category.charAt(0).toUpperCase() + category.slice(1);
   };
 
@@ -244,6 +212,24 @@ const BlogPage = () => {
       <div className="blog-loading">
         <div className="spinner"></div>
         <p>Loading articles...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="blog-error">
+        <div className="container">
+          <i className="fas fa-exclamation-triangle error-icon"></i>
+          <h2>Error Loading Posts</h2>
+          <p>{error}</p>
+          <button onClick={fetchPosts} className="retry-btn">
+            <i className="fas fa-redo"></i> Try Again
+          </button>
+          <p className="error-hint">
+            Make sure your database tables are set up correctly in Supabase.
+          </p>
+        </div>
       </div>
     );
   }
@@ -308,7 +294,14 @@ const BlogPage = () => {
               <div className="container">
                 <div className="featured-post-card">
                   <div className="featured-post-image">
-                    <img src={featuredPost.image_url} alt={featuredPost.title} />
+                    <img 
+                      src={featuredPost.image_url} 
+                      alt={featuredPost.title}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&auto=format&fit=crop`;
+                      }}
+                    />
                     <div className="featured-badge">Featured</div>
                     {!featuredPost.published && (
                       <div className="draft-badge">Draft</div>
@@ -379,7 +372,7 @@ const BlogPage = () => {
                       onClick={() => handleCategoryClick(category.id)}
                     >
                       {category.name}
-                      <span className="category-count">({category.count})</span>
+                      <span className="category-count">({categoryCounts[category.id]})</span>
                     </button>
                   ))}
                 </div>
@@ -418,7 +411,14 @@ const BlogPage = () => {
                       .map(post => (
                       <div key={post.id} className="blog-card">
                         <div className="blog-card-image">
-                          <img src={post.image_url} alt={post.title} />
+                          <img 
+                            src={post.image_url} 
+                            alt={post.title}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000)}?w=400&auto=format&fit=crop`;
+                            }}
+                          />
                           <div className="category-tag">{getCategoryDisplayName(post.category)}</div>
                           {!post.published && (
                             <div className="draft-tag">Draft</div>
@@ -459,7 +459,7 @@ const BlogPage = () => {
                     ))}
                   </div>
 
-                  {/* Pagination - Simple version for now */}
+                  {/* Pagination */}
                   <div className="pagination">
                     <button className="pagination-btn disabled">← Previous</button>
                     <div className="page-numbers">
@@ -603,7 +603,7 @@ const BlogPage = () => {
                   onClick={() => handleCategoryClick(category.id)}
                 >
                   <span>{category.name}</span>
-                  <span className="count">{category.count}</span>
+                  <span className="count">{categoryCounts[category.id]}</span>
                 </button>
               ))}
             </div>

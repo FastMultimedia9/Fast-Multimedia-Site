@@ -15,7 +15,14 @@ const getSupabase = () => {
         autoRefreshToken: true,
         detectSessionInUrl: true,
         storage: localStorage,
-        storageKey: 'sb-ymqlxvvschytbkkjexvd-auth-token'
+        storageKey: 'sb-auth-token',
+        // Disable email confirmation for development
+        autoConfirmEmail: true
+      },
+      global: {
+        headers: {
+          'Content-Type': 'application/json'
+        }
       }
     });
   }
@@ -28,20 +35,26 @@ export const supabase = getSupabase();
 // Test connection
 export const testConnection = async () => {
   try {
-    const { data, error } = await supabase.from('posts').select('*').limit(1)
+    // Simple test query
+    const { data, error } = await supabase
+      .from('posts')
+      .select('id')
+      .limit(1);
+    
     if (error) {
-      console.error('❌ Connection failed:', error.message)
-      return false
+      console.error('❌ Connection failed:', error.message);
+      return false;
     }
-    console.log('✅ Connected to Supabase! Sample data:', data)
-    return true
+    
+    console.log('✅ Connected to Supabase!');
+    return true;
   } catch (error) {
-    console.error('❌ Connection error:', error)
-    return false
+    console.error('❌ Connection error:', error);
+    return false;
   }
 }
 
-// Data transformation functions that match YOUR schema
+// Data transformation functions
 const transformPostData = (post) => {
   if (!post) return null;
   
@@ -57,13 +70,13 @@ const transformPostData = (post) => {
     comments: parseInt(post.comments_count || 0),
     likes: parseInt(post.likes || 0),
     featured: post.featured || false,
-    published: post.published !== false, // Default to true
+    published: post.published !== false,
     created_at: post.created_at || new Date().toISOString(),
     updated_at: post.updated_at || new Date().toISOString(),
-    readTime: '5 min read', // Calculated or default
-    author: post.users?.name || 'Author',
+    readTime: '5 min read',
+    author: post.users?.name || post.users?.username || 'Author',
     author_id: post.user_id,
-    user_id: post.user_id // Keep for consistency
+    user_id: post.user_id
   };
 };
 
@@ -72,7 +85,7 @@ const transformPostsData = (posts) => {
   return posts.map(transformPostData).filter(Boolean);
 };
 
-// Blog API functions - UPDATED FOR YOUR SCHEMA
+// Blog API functions
 export const blogAPI = {
   // Get posts based on user role
   async getPosts() {
@@ -90,8 +103,7 @@ export const blogAPI = {
         return []
       }
       
-      const transformed = transformPostsData(data);
-      return transformed || []
+      return transformPostsData(data) || []
     } catch (error) {
       console.error('Error in getPosts:', error)
       return []
@@ -112,17 +124,7 @@ export const blogAPI = {
         `)
         .order('created_at', { ascending: false });
       
-      // If not admin, only show user's posts or published posts
-      if (!isAdmin) {
-        if (userId) {
-          query = query.eq('user_id', userId);
-        } else if (user) {
-          query = query.or(`user_id.eq.${user.id},published.eq.true`);
-        } else {
-          query = query.eq('published', true);
-        }
-      }
-      
+      // If not admin, filter client-side
       const { data, error } = await query;
       
       if (error) {
@@ -130,7 +132,22 @@ export const blogAPI = {
         return [];
       }
       
-      return transformPostsData(data) || [];
+      const transformed = transformPostsData(data) || [];
+      
+      // Client-side filtering
+      if (!isAdmin) {
+        if (userId && user) {
+          return transformed.filter(post => post.user_id === userId);
+        } else if (user) {
+          return transformed.filter(post => 
+            post.user_id === user.id || post.published === true
+          );
+        } else {
+          return transformed.filter(post => post.published === true);
+        }
+      }
+      
+      return transformed;
     } catch (error) {
       console.error('Error in getUserPosts:', error);
       return [];
@@ -171,7 +188,7 @@ export const blogAPI = {
           users:user_id (name, username, email)
         `)
         .order('views', { ascending: false })
-        .limit(limit)
+        .limit(limit);
       
       if (error) {
         console.error('Error getting popular posts:', error)
@@ -478,13 +495,13 @@ export const blogAPI = {
   }
 };
 
-// Authentication API - UPDATED FOR YOUR SCHEMA
+// Authentication API - SIMPLIFIED VERSION
 export const authAPI = {
   async register(email, password, name, username, role = 'user') {
     try {
       console.log('Starting registration for:', { email, name, username, role });
       
-      // Create the auth user
+      // Disable email confirmation for immediate login
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -493,19 +510,63 @@ export const authAPI = {
             name: name,
             username: username,
             role: role
-          }
+          },
+          // Disable email confirmation
+          emailRedirectTo: `${window.location.origin}/login`
         }
       });
 
       if (error) {
+        console.error('Supabase auth error:', error);
         return { 
           success: false, 
-          error: error.message || 'Authentication failed' 
+          error: error.message || 'Registration failed. Please try again.' 
         };
       }
 
       if (data.user) {
-        // The trigger will automatically create the user profile
+        console.log('Auth user created:', data.user.id);
+        
+        // Try to manually create user profile with retry
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (retryCount < maxRetries) {
+          try {
+            const { error: profileError } = await supabase
+              .from('users')
+              .insert({
+                id: data.user.id,
+                email: email,
+                username: username,
+                name: name,
+                role: role
+              })
+              .select();
+            
+            if (!profileError) break;
+            
+            console.warn(`Profile creation attempt ${retryCount + 1} failed:`, profileError);
+            retryCount++;
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+          } catch (profileErr) {
+            console.error('Profile creation exception:', profileErr);
+            retryCount++;
+          }
+        }
+        
+        // Auto-login after registration
+        const loginResult = await this.adminLogin(email, password);
+        
+        if (loginResult.success) {
+          return {
+            success: true,
+            user: loginResult.user,
+            profile: loginResult.profile,
+            message: 'Registration successful! You are now logged in.'
+          };
+        }
+        
         return {
           success: true,
           user: data.user,
@@ -538,12 +599,15 @@ export const authAPI = {
       });
 
       if (error) {
+        console.error('Login error:', error);
         let errorMessage = 'Invalid email or password';
         
         if (error.message.includes('Invalid login credentials')) {
           errorMessage = 'Invalid email or password. Please check your credentials.';
         } else if (error.message.includes('Email not confirmed')) {
           errorMessage = 'Please check your email to confirm your account before logging in.';
+        } else {
+          errorMessage = error.message;
         }
         
         return { 
@@ -553,17 +617,32 @@ export const authAPI = {
       }
 
       if (data.user) {
-        // Get user profile
-        const { data: profile } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
+        // Try to get user profile, but don't fail if it doesn't exist
+        let profile = { role: 'user', name: data.user.email?.split('@')[0] || 'User' };
+        
+        try {
+          const { data: profileData, error: profileError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', data.user.id)
+            .maybeSingle(); // Use maybeSingle to avoid throwing error if no profile
+          
+          if (!profileError && profileData) {
+            profile = profileData;
+          } else if (profileError && !profileError.message.includes('No rows found')) {
+            console.warn('Profile fetch error (non-critical):', profileError);
+          }
+        } catch (profileErr) {
+          console.warn('Profile fetch exception:', profileErr);
+        }
 
-        // Store in localStorage for backward compatibility
+        // Store in localStorage
         localStorage.setItem('admin_logged_in', 'true');
         localStorage.setItem('admin_username', data.user.email);
         localStorage.setItem('admin_session', Date.now().toString());
+        if (profile.role === 'admin') {
+          localStorage.setItem('admin_role', 'admin');
+        }
 
         return {
           success: true,
@@ -585,20 +664,36 @@ export const authAPI = {
 
   async getCurrentUserWithProfile() {
     try {
-      const { data: authData } = await supabase.auth.getUser();
+      // Get auth session first
+      const { data: sessionData } = await supabase.auth.getSession();
       
-      if (!authData.user) return null;
+      if (!sessionData?.session) {
+        return null;
+      }
       
-      // Get user profile with role
-      const { data: profile, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authData.user.id)
-        .single();
+      // Get user from session
+      const { data: authData, error: authError } = await supabase.auth.getUser();
       
-      if (error) {
-        console.error('Error fetching user profile:', error);
-        return authData.user;
+      if (authError || !authData?.user) {
+        console.error('Auth error:', authError);
+        return null;
+      }
+      
+      // Try to get profile
+      let profile = { role: 'user', name: authData.user.email?.split('@')[0] || 'User' };
+      
+      try {
+        const { data: profileData } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', authData.user.id)
+          .maybeSingle();
+        
+        if (profileData) {
+          profile = profileData;
+        }
+      } catch (profileErr) {
+        console.warn('Profile fetch in getCurrentUserWithProfile:', profileErr);
       }
       
       return {
@@ -614,7 +709,7 @@ export const authAPI = {
   async getCurrentUser() {
     try {
       const { data } = await supabase.auth.getUser();
-      return data.user;
+      return data?.user || null;
     } catch (error) {
       console.error('Get current user error:', error);
       return null;
@@ -632,15 +727,21 @@ export const authAPI = {
   },
 
   async isAdmin() {
+    // Check localStorage first (for backward compatibility)
+    if (localStorage.getItem('admin_role') === 'admin') {
+      return true;
+    }
+    
+    // Then check from profile
     const role = await this.getUserRole();
     return role === 'admin';
   },
 
   async isLoggedIn() {
     try {
-      // Check Supabase auth
+      // Check Supabase auth session
       const { data } = await supabase.auth.getSession();
-      const hasSession = !!data.session;
+      const hasSession = !!data?.session;
       
       // Also check localStorage for backward compatibility
       const localStorageAuth = localStorage.getItem('admin_logged_in') === 'true';
@@ -651,6 +752,7 @@ export const authAPI = {
         localStorage.removeItem('admin_logged_in');
         localStorage.removeItem('admin_username');
         localStorage.removeItem('admin_session');
+        localStorage.removeItem('admin_role');
         return false;
       }
       
@@ -669,6 +771,7 @@ export const authAPI = {
       localStorage.removeItem('admin_logged_in');
       localStorage.removeItem('admin_username');
       localStorage.removeItem('admin_session');
+      localStorage.removeItem('admin_role');
       
       if (error) {
         console.error('Logout error:', error);
@@ -688,6 +791,7 @@ export const authAPI = {
       });
 
       if (error) {
+        console.error('Reset password error:', error);
         return { success: false, error: error.message };
       }
 
@@ -696,6 +800,7 @@ export const authAPI = {
         message: 'Password reset instructions sent to your email.'
       };
     } catch (error) {
+      console.error('Reset password exception:', error);
       return { success: false, error: 'Password reset failed. Please try again.' };
     }
   },
@@ -710,6 +815,7 @@ export const authAPI = {
       localStorage.removeItem('admin_logged_in');
       localStorage.removeItem('admin_username');
       localStorage.removeItem('admin_session');
+      localStorage.removeItem('admin_role');
       return false;
     }
     
@@ -755,12 +861,12 @@ export const formatTimeAgo = (timestamp) => {
   return 'Just now';
 };
 
-// Test the connection and sync data
+// Test the connection
 console.log('🔧 Testing Supabase connection...');
 testConnection().then(success => {
   if (success) {
     console.log('🎉 Supabase is ready to use!');
   } else {
-    console.warn('⚠️ Supabase connection failed. Check your credentials and tables.');
+    console.warn('⚠️ Supabase connection failed.');
   }
 });

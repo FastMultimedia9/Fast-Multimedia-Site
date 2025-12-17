@@ -17,9 +17,18 @@ const LoginPage = () => {
   // Check if already logged in
   useEffect(() => {
     const checkAuth = async () => {
-      const isLoggedIn = await authAPI.isLoggedIn();
-      if (isLoggedIn || authAPI.checkLocalStorageAuth()) {
-        navigate('/admin');
+      try {
+        const isLoggedIn = await authAPI.isLoggedIn();
+        if (isLoggedIn) {
+          const user = await authAPI.getCurrentUserWithProfile();
+          if (user?.profile?.role === 'admin') {
+            navigate('/admin');
+          } else {
+            navigate('/blog');
+          }
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
       }
     };
     
@@ -51,28 +60,23 @@ const LoginPage = () => {
           localStorage.setItem('admin_remember', 'true');
         }
         
-        // Clear any previous errors
-        setError('');
-        
-        // Show temporary success message
+        // Show success message
         setError('success:Login successful! Redirecting...');
         
-        // Small delay for better UX
+        // Redirect based on user role
         setTimeout(() => {
-          navigate('/admin');
-        }, 1000);
+          if (result.isAdmin) {
+            navigate('/admin');
+          } else {
+            navigate('/blog');
+          }
+        }, 500);
       } else {
-        // Check for specific error messages
-        if (result.error.includes('check your email to confirm')) {
-          setError(`Email not confirmed. Please check your inbox for the confirmation email. 
-          If you didn't receive it, try registering again or contact support.`);
-        } else {
-          setError(result.error || 'Invalid email or password');
-        }
+        setError(result.error || 'Invalid email or password');
       }
     } catch (error) {
-      setError('Login failed. Please try again.');
       console.error('Login error:', error);
+      setError('Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -99,8 +103,8 @@ const LoginPage = () => {
         setError(result.error || 'Failed to send reset instructions');
       }
     } catch (error) {
-      setError('Password reset failed. Please try again.');
       console.error('Reset password error:', error);
+      setError('Password reset failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -121,35 +125,28 @@ const LoginPage = () => {
             <div className="login-logo">
               <i className="fas fa-cogs"></i>
             </div>
-            <h1>Admin Dashboard</h1>
+            <h1>Blog Dashboard</h1>
             <p className="login-tagline">
               Secure login powered by Supabase authentication
             </p>
           </div>
           
           <div className="login-features">
-            <h3><i className="fas fa-check-circle"></i> Security Features</h3>
+            <h3><i className="fas fa-check-circle"></i> Features</h3>
             <ul>
-              <li><i className="fas fa-shield-alt"></i> End-to-end encryption</li>
-              <li><i className="fas fa-user-check"></i> Role-based access control</li>
-              <li><i className="fas fa-history"></i> Session management</li>
-              <li><i className="fas fa-key"></i> Secure password hashing</li>
-              <li><i className="fas fa-bell"></i> Login activity monitoring</li>
+              <li><i className="fas fa-blog"></i> Create and manage blog posts</li>
+              <li><i className="fas fa-comments"></i> Comment on articles</li>
+              <li><i className="fas fa-chart-line"></i> Track post analytics</li>
+              <li><i className="fas fa-users"></i> User role management</li>
+              <li><i className="fas fa-bell"></i> Real-time updates</li>
             </ul>
           </div>
           
           <div className="login-info">
-            <h3><i className="fas fa-info-circle"></i> Authentication</h3>
-            <div className="tech-stack">
-              <span className="tech-badge supabase">
-                <i className="fas fa-database"></i> Supabase Auth
-              </span>
-              <span className="tech-badge jwt">
-                <i className="fas fa-key"></i> JWT Tokens
-              </span>
-              <span className="tech-badge secure">
-                <i className="fas fa-lock"></i> HTTPS Only
-              </span>
+            <h3><i className="fas fa-info-circle"></i> Demo Credentials</h3>
+            <div className="demo-credentials">
+              <p><strong>Admin:</strong> admin@example.com / admin123</p>
+              <p><strong>User:</strong> user@example.com / user123</p>
             </div>
           </div>
         </div>
@@ -164,7 +161,7 @@ const LoginPage = () => {
                 </div>
                 
                 <form onSubmit={handleResetPassword} className="login-form">
-                  {error && (
+                  {error && !resetSuccess && (
                     <div className="alert alert-error">
                       <i className="fas fa-exclamation-triangle"></i>
                       <span>{error}</span>
@@ -172,7 +169,7 @@ const LoginPage = () => {
                   )}
                   
                   {resetSuccess && (
-                    <div className="alert alert-info">
+                    <div className="alert alert-success">
                       <i className="fas fa-check-circle"></i>
                       <span>{resetSuccess}</span>
                     </div>
@@ -230,8 +227,8 @@ const LoginPage = () => {
             ) : (
               <>
                 <div className="login-header">
-                  <h2>Admin Sign In</h2>
-                  <p>Enter your credentials to access the admin panel</p>
+                  <h2>Sign In</h2>
+                  <p>Enter your credentials to access your account</p>
                 </div>
                 
                 <form onSubmit={handleLogin} className="login-form">
@@ -239,13 +236,6 @@ const LoginPage = () => {
                     <div className={`alert ${error.includes('success:') ? 'alert-success' : 'alert-error'}`}>
                       <i className={`fas ${error.includes('success:') ? 'fa-check-circle' : 'fa-exclamation-triangle'}`}></i>
                       <span>{error.includes('success:') ? error.replace('success:', '') : error}</span>
-                    </div>
-                  )}
-                  
-                  {resetSuccess && (
-                    <div className="alert alert-info">
-                      <i className="fas fa-check-circle"></i>
-                      <span>{resetSuccess}</span>
                     </div>
                   )}
                   
