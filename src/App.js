@@ -47,9 +47,6 @@ import AdminView from './pages/AdminView';
 import BlogAdmin from './pages/BlogAdmin';
 import DatabaseViewer from './pages/DatabaseViewer';
 
-// Import DatabaseCheck for debugging (optional)
-// import DatabaseCheck from './components/DatabaseCheck';
-
 import './App.css';
 
 const ScrollToTop = () => {
@@ -98,13 +95,14 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
           }
         } else {
           setAuth(false);
-          window.location.href = '/admin/login';
+          // Redirect to login page (not admin/login)
+          window.location.href = '/login';
           return;
         }
       } catch (error) {
         console.error('Auth check error:', error);
         setAuth(false);
-        window.location.href = '/admin/login';
+        window.location.href = '/login';
         return;
       } finally {
         setLoading(false);
@@ -153,6 +151,7 @@ function App() {
             <Route path="/blog/:id" element={<ArticlePage />} />
             
             {/* ===== AUTH PAGES ===== */}
+            <Route path="/login" element={<LoginPage />} /> {/* ADDED THIS LINE */}
             <Route path="/admin/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             
@@ -244,7 +243,8 @@ function App() {
                       <li><a href="/">Go to Homepage</a></li>
                       <li><a href="/blog">Browse the Blog</a></li>
                       <li><a href="/test">Test Database Connection</a></li>
-                      <li><a href="/admin/login">Login to Admin Panel</a></li>
+                      <li><a href="/login">Login</a></li>
+                      <li><a href="/admin/login">Admin Login</a></li>
                     </ul>
                   </div>
                   <a href="/" className="back-home-btn">Back to Home</a>
@@ -254,9 +254,6 @@ function App() {
           </Routes>
         </main>
         <Footer />
-        
-        {/* Uncomment for debugging */}
-        {/* <DatabaseCheck /> */}
       </div>
     </Router>
   );
