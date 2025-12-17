@@ -16,9 +16,14 @@ const LoginPage = () => {
 
   // Check if already logged in
   useEffect(() => {
-    if (authAPI.isLoggedIn()) {
-      navigate('/admin');
-    }
+    const checkAuth = async () => {
+      const isLoggedIn = await authAPI.isLoggedIn();
+      if (isLoggedIn || authAPI.checkLocalStorageAuth()) {
+        navigate('/admin');
+      }
+    };
+    
+    checkAuth();
   }, [navigate]);
 
   const handleLogin = async (e) => {
@@ -46,15 +51,24 @@ const LoginPage = () => {
           localStorage.setItem('admin_remember', 'true');
         }
         
-        // Show success message
+        // Clear any previous errors
         setError('');
+        
+        // Show temporary success message
+        setError('success:Login successful! Redirecting...');
         
         // Small delay for better UX
         setTimeout(() => {
           navigate('/admin');
-        }, 500);
+        }, 1000);
       } else {
-        setError(result.error || 'Invalid email or password');
+        // Check for specific error messages
+        if (result.error.includes('check your email to confirm')) {
+          setError(`Email not confirmed. Please check your inbox for the confirmation email. 
+          If you didn't receive it, try registering again or contact support.`);
+        } else {
+          setError(result.error || 'Invalid email or password');
+        }
       }
     } catch (error) {
       setError('Login failed. Please try again.');
@@ -63,8 +77,6 @@ const LoginPage = () => {
       setIsLoading(false);
     }
   };
-
-  
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
@@ -139,7 +151,6 @@ const LoginPage = () => {
                 <i className="fas fa-lock"></i> HTTPS Only
               </span>
             </div>
-           
           </div>
         </div>
         
@@ -225,9 +236,9 @@ const LoginPage = () => {
                 
                 <form onSubmit={handleLogin} className="login-form">
                   {error && (
-                    <div className={`alert ${error.includes('Invalid') ? 'alert-error' : 'alert-info'}`}>
-                      <i className={`fas ${error.includes('Invalid') ? 'fa-exclamation-triangle' : 'fa-info-circle'}`}></i>
-                      <span>{error}</span>
+                    <div className={`alert ${error.includes('success:') ? 'alert-success' : 'alert-error'}`}>
+                      <i className={`fas ${error.includes('success:') ? 'fa-check-circle' : 'fa-exclamation-triangle'}`}></i>
+                      <span>{error.includes('success:') ? error.replace('success:', '') : error}</span>
                     </div>
                   )}
                   
@@ -248,7 +259,7 @@ const LoginPage = () => {
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="admin@example.com"
+                        placeholder="your@email.com"
                         className="login-input"
                         required
                         disabled={isLoading}
@@ -294,8 +305,6 @@ const LoginPage = () => {
                         Remember me
                       </label>
                     </div>
-                    
-                   
                   </div>
                   
                   <button 
@@ -315,9 +324,18 @@ const LoginPage = () => {
                       </>
                     )}
                   </button>
-                  
-                  <div className="login-hint">
-                    <p><i className="fas fa-lightbulb"></i> Demo: <strong>admin@example.com</strong> / <strong>admin123</strong></p>
+
+                  {/* Registration Link */}
+                  <div className="register-link">
+                    <p>Don't have an account? 
+                      <button 
+                        type="button"
+                        onClick={() => navigate('/register')}
+                        className="register-btn"
+                      >
+                        Create Account
+                      </button>
+                    </p>
                   </div>
                 </form>
               </>

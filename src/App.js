@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // Add useState
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { supabase } from './supabase'; // Import supabase
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
@@ -15,6 +16,7 @@ import ContactPage from './pages/ContactPage';
 // Admin Pages
 import AdminPanel from './pages/AdminPanel';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 // Resource Pages
 import ResourcesPage from './pages/ResourcesPage';
@@ -36,7 +38,7 @@ import PortfolioCaseStudy from './pages/portfolio/PortfolioCaseStudy';
 // Utility Pages
 import DownloadGuide from './pages/DownloadGuide';
 
-// NEW PAGES - Add these imports
+// Other Pages
 import TestSupabase from './pages/TestSupabase';
 import AdminView from './pages/AdminView';
 import BlogAdmin from './pages/BlogAdmin';
@@ -52,28 +54,96 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Authentication check
-const isAuthenticated = () => {
-  return localStorage.getItem('admin_logged_in') === 'true';
+// Authentication check - supports both Supabase and localStorage
+const isAuthenticated = async () => {
+  // Check localStorage first (for backward compatibility)
+  const localStorageAuth = localStorage.getItem('admin_logged_in') === 'true';
+  const sessionTime = parseInt(localStorage.getItem('admin_session') || '0');
+  const currentTime = Date.now();
+  
+  if (localStorageAuth && (currentTime - sessionTime) > 24 * 60 * 60 * 1000) {
+    localStorage.removeItem('admin_logged_in');
+    localStorage.removeItem('admin_username');
+    localStorage.removeItem('admin_session');
+    return false;
+  }
+  
+  if (localStorageAuth) return true;
+  
+  // Check Supabase auth
+  try {
+    const { data } = await supabase.auth.getSession();
+    return !!data.session;
+  } catch (error) {
+    console.error('Auth check error:', error);
+    return false;
+  }
 };
 
+// Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  if (!isAuthenticated()) {
+  const [auth, setAuth] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isAuth = await isAuthenticated();
+      setAuth(isAuth);
+      setLoading(false);
+    };
+    
+    checkAuth();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="auth-loading">
+        <div className="spinner"></div>
+        <p>Checking authentication...</p>
+      </div>
+    );
+  }
+
+  if (!auth) {
     return <Navigate to="/admin/login" replace />;
   }
+  
   return children;
 };
 
-// NEW: Route for testing (no authentication required)
+// Route for testing (no authentication required)
 const TestRoute = () => {
   return <TestSupabase />;
 };
 
-// NEW: Database viewer route (protected)
+// Database viewer route (protected)
 const DatabaseViewerRoute = () => {
-  if (!isAuthenticated()) {
+  const [auth, setAuth] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isAuth = await isAuthenticated();
+      setAuth(isAuth);
+      setLoading(false);
+    };
+    
+    checkAuth();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="auth-loading">
+        <div className="spinner"></div>
+        <p>Checking authentication...</p>
+      </div>
+    );
+  }
+
+  if (!auth) {
     return <Navigate to="/admin/login" replace />;
   }
+  
   return <DatabaseViewer />;
 };
 
@@ -98,8 +168,11 @@ function App() {
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:id" element={<ArticlePage />} />
             
-            {/* ===== ADMIN PAGES ===== */}
+            {/* ===== AUTH PAGES ===== */}
             <Route path="/admin/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            
+            {/* ===== ADMIN PAGES (PROTECTED) ===== */}
             <Route 
               path="/admin" 
               element={
