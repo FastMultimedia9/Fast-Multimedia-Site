@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'; // Add useState
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { supabase } from './supabase'; // Import supabase
+import { supabase, authAPI } from './supabase'; // Combined the imports
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
@@ -17,6 +17,9 @@ import ContactPage from './pages/ContactPage';
 import AdminPanel from './pages/AdminPanel';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+
+// User Pages
+import UserDashboard from './pages/UserDashboard';
 
 // Resource Pages
 import ResourcesPage from './pages/ResourcesPage';
@@ -54,42 +57,55 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Authentication check - supports both Supabase and localStorage
-const isAuthenticated = async () => {
-  // Check localStorage first (for backward compatibility)
-  const localStorageAuth = localStorage.getItem('admin_logged_in') === 'true';
-  const sessionTime = parseInt(localStorage.getItem('admin_session') || '0');
-  const currentTime = Date.now();
-  
-  if (localStorageAuth && (currentTime - sessionTime) > 24 * 60 * 60 * 1000) {
-    localStorage.removeItem('admin_logged_in');
-    localStorage.removeItem('admin_username');
-    localStorage.removeItem('admin_session');
-    return false;
-  }
-  
-  if (localStorageAuth) return true;
-  
-  // Check Supabase auth
-  try {
-    const { data } = await supabase.auth.getSession();
-    return !!data.session;
-  } catch (error) {
-    console.error('Auth check error:', error);
-    return false;
-  }
-};
-
-// Protected Route Component
-const ProtectedRoute = ({ children }) => {
+// Protected Route Component with Role-Based Access
+const ProtectedRoute = ({ children, adminOnly = false }) => {
   const [auth, setAuth] = useState(false);
+  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
-      const isAuth = await isAuthenticated();
-      setAuth(isAuth);
-      setLoading(false);
+      try {
+        const user = await authAPI.getCurrentUserWithProfile();
+        
+        if (user) {
+          setAuth(true);
+          const role = user.profile?.role || 'user';
+          setUserRole(role);
+          
+          // Redirect based on role and route
+          const currentPath = window.location.pathname;
+          
+          if (adminOnly && role !== 'admin') {
+            // Non-admin trying to access admin-only route
+            window.location.href = '/user/dashboard';
+            return;
+          }
+          
+          if (!adminOnly && role === 'admin' && currentPath.includes('/user/')) {
+            // Admin trying to access user dashboard
+            window.location.href = '/admin';
+            return;
+          }
+          
+          if (!adminOnly && role === 'user' && currentPath.includes('/admin/')) {
+            // User trying to access admin area
+            window.location.href = '/user/dashboard';
+            return;
+          }
+        } else {
+          setAuth(false);
+          window.location.href = '/admin/login';
+          return;
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setAuth(false);
+        window.location.href = '/admin/login';
+        return;
+      } finally {
+        setLoading(false);
+      }
     };
     
     checkAuth();
@@ -104,11 +120,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  if (!auth) {
-    return <Navigate to="/admin/login" replace />;
-  }
-  
-  return children;
+  return auth ? children : null;
 };
 
 // Route for testing (no authentication required)
@@ -116,35 +128,13 @@ const TestRoute = () => {
   return <TestSupabase />;
 };
 
-// Database viewer route (protected)
+// Database viewer route (protected, admin only)
 const DatabaseViewerRoute = () => {
-  const [auth, setAuth] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const isAuth = await isAuthenticated();
-      setAuth(isAuth);
-      setLoading(false);
-    };
-    
-    checkAuth();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="auth-loading">
-        <div className="spinner"></div>
-        <p>Checking authentication...</p>
-      </div>
-    );
-  }
-
-  if (!auth) {
-    return <Navigate to="/admin/login" replace />;
-  }
-  
-  return <DatabaseViewer />;
+  return (
+    <ProtectedRoute adminOnly={true}>
+      <DatabaseViewer />
+    </ProtectedRoute>
+  );
 };
 
 function App() {
@@ -172,11 +162,21 @@ function App() {
             <Route path="/admin/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             
-            {/* ===== ADMIN PAGES (PROTECTED) ===== */}
+            {/* ===== USER DASHBOARD (For Regular Users) ===== */}
+            <Route 
+              path="/user/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <UserDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* ===== ADMIN PAGES (ADMIN ONLY) ===== */}
             <Route 
               path="/admin" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute adminOnly={true}>
                   <AdminPanel />
                 </ProtectedRoute>
               } 
@@ -184,7 +184,7 @@ function App() {
             <Route 
               path="/admin/dashboard" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute adminOnly={true}>
                   <AdminPanel />
                 </ProtectedRoute>
               } 
@@ -192,16 +192,14 @@ function App() {
             <Route 
               path="/admin/blog" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute adminOnly={true}>
                   <BlogAdmin />
                 </ProtectedRoute>
               } 
             />
             <Route 
               path="/admin/database" 
-              element={
-                <DatabaseViewerRoute />
-              } 
+              element={<DatabaseViewerRoute />} 
             />
             
             {/* ===== RESOURCE PAGES ===== */}

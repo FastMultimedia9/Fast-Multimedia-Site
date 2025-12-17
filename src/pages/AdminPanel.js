@@ -6,6 +6,7 @@ import './AdminPanel.css';
 const AdminPanel = () => {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
+  const [users, setUsers] = useState([]);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -15,43 +16,76 @@ const AdminPanel = () => {
     content: '',
     category: 'design',
     image_url: '',
-    featured: false
+    featured: false,
+    published: true
   });
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    if (!authAPI.isLoggedIn()) {
+    checkAuthAndLoadData();
+  }, [navigate]);
+
+  const checkAuthAndLoadData = async () => {
+    const user = await authAPI.getCurrentUserWithProfile();
+    
+    if (!user) {
       navigate('/admin/login');
       return;
     }
+    
+    setCurrentUser(user);
+    
+    // Check if user is admin
+    if (user.profile?.role !== 'admin') {
+      navigate('/user/dashboard');
+      return;
+    }
+    
     fetchData();
-  }, [navigate]);
+  };
 
   const fetchData = async () => {
     setLoading(true);
     
-    // Fetch posts
-    const { data: postsData } = await supabase
-      .from('posts')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    // Fetch comments
-    const { data: commentsData } = await supabase
-      .from('comments')
-      .select(`
-        *,
-        posts(title)
-      `)
-      .order('created_at', { ascending: false });
-    
-    setPosts(postsData || []);
-    setComments(commentsData || []);
-    setLoading(false);
+    try {
+      // Fetch all posts (admin sees everything)
+      const { data: postsData } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          users:user_id (name, username, email)
+        `)
+        .order('created_at', { ascending: false });
+      
+      // Fetch all users (admin only)
+      const { data: usersData } = await supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      // Fetch all comments
+      const { data: commentsData } = await supabase
+        .from('comments')
+        .select(`
+          *,
+          posts(title),
+          users:author_id (name, email)
+        `)
+        .order('created_at', { ascending: false });
+      
+      setPosts(postsData || []);
+      setUsers(usersData || []);
+      setComments(commentsData || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleLogout = () => {
-    authAPI.logout();
-    navigate('/admin/login');
+  const handleLogout = async () => {
+    await authAPI.logout();
+    navigate('/');
   };
 
   const handleCreatePost = async (e) => {
@@ -67,13 +101,14 @@ const AdminPanel = () => {
           content: '',
           category: 'design',
           image_url: '',
-          featured: false
+          featured: false,
+          published: true
         });
         fetchData();
       }
     } catch (error) {
       console.error('Error creating post:', error);
-      alert('Error creating post');
+      alert('Error creating post: ' + error.message);
     }
   };
 
@@ -87,7 +122,7 @@ const AdminPanel = () => {
         }
       } catch (error) {
         console.error('Error deleting post:', error);
-        alert('Error deleting post');
+        alert('Error deleting post: ' + error.message);
       }
     }
   };
@@ -111,9 +146,34 @@ const AdminPanel = () => {
     }
   };
 
+  const handleUserRoleChange = async (userId, newRole) => {
+    if (window.confirm(`Change user role to ${newRole}?`)) {
+      try {
+        const { error } = await supabase
+          .from('users')
+          .update({ role: newRole })
+          .eq('id', userId);
+        
+        if (error) throw error;
+        
+        alert('User role updated successfully!');
+        fetchData();
+      } catch (error) {
+        console.error('Error updating user role:', error);
+        alert('Error updating user role');
+      }
+    }
+  };
+
   if (loading) {
     return <div className="admin-loading">Loading admin panel...</div>;
   }
+
+  const userStats = {
+    totalUsers: users.length,
+    adminUsers: users.filter(u => u.role === 'admin').length,
+    regularUsers: users.filter(u => u.role === 'user').length
+  };
 
   return (
     <div className="admin-panel">
@@ -121,7 +181,8 @@ const AdminPanel = () => {
       <div className="admin-sidebar">
         <div className="admin-header">
           <h2>Admin Panel</h2>
-          <p>Welcome, {authAPI.getCurrentUser()?.username}</p>
+          <p>Welcome, {currentUser?.profile?.name || 'Admin'}</p>
+          <small className="admin-badge">Administrator</small>
         </div>
         
         <nav className="admin-nav">
@@ -135,7 +196,13 @@ const AdminPanel = () => {
             className={`nav-btn ${activeTab === 'posts' ? 'active' : ''}`}
             onClick={() => setActiveTab('posts')}
           >
-            <i className="fas fa-newspaper"></i> Posts ({posts.length})
+            <i className="fas fa-newspaper"></i> All Posts ({posts.length})
+          </button>
+          <button 
+            className={`nav-btn ${activeTab === 'users' ? 'active' : ''}`}
+            onClick={() => setActiveTab('users')}
+          >
+            <i className="fas fa-users"></i> Users ({users.length})
           </button>
           <button 
             className={`nav-btn ${activeTab === 'comments' ? 'active' : ''}`}
@@ -163,6 +230,10 @@ const AdminPanel = () => {
             <p>Total Posts</p>
           </div>
           <div className="stat-item">
+            <h3>{users.length}</h3>
+            <p>Total Users</p>
+          </div>
+          <div className="stat-item">
             <h3>{comments.length}</h3>
             <p>Total Comments</p>
           </div>
@@ -173,7 +244,9 @@ const AdminPanel = () => {
       <div className="admin-content">
         {activeTab === 'dashboard' && (
           <div className="dashboard">
-            <h1>Dashboard Overview</h1>
+            <h1>Admin Dashboard</h1>
+            <p className="dashboard-subtitle">Full system overview with admin privileges</p>
+            
             <div className="stats-grid">
               <div className="stat-card">
                 <i className="fas fa-eye"></i>
@@ -190,27 +263,29 @@ const AdminPanel = () => {
                 </div>
               </div>
               <div className="stat-card">
+                <i className="fas fa-users"></i>
+                <div>
+                  <h3>{userStats.totalUsers}</h3>
+                  <p>Total Users</p>
+                  <small>{userStats.adminUsers} admin, {userStats.regularUsers} regular</small>
+                </div>
+              </div>
+              <div className="stat-card">
                 <i className="fas fa-star"></i>
                 <div>
                   <h3>{posts.filter(p => p.featured).length}</h3>
                   <p>Featured Posts</p>
                 </div>
               </div>
-              <div className="stat-card">
-                <i className="fas fa-database"></i>
-                <div>
-                  <h3>Supabase</h3>
-                  <p>Database Connected</p>
-                </div>
-              </div>
             </div>
 
             <div className="recent-posts">
-              <h2>Recent Posts</h2>
+              <h2>Recent Posts (All Users)</h2>
               <table>
                 <thead>
                   <tr>
                     <th>Title</th>
+                    <th>Author</th>
                     <th>Category</th>
                     <th>Views</th>
                     <th>Comments</th>
@@ -221,10 +296,51 @@ const AdminPanel = () => {
                   {posts.slice(0, 5).map(post => (
                     <tr key={post.id}>
                       <td>{post.title}</td>
+                      <td>
+                        <div className="author-cell">
+                          <strong>{post.users?.name || 'Unknown'}</strong>
+                          <small>{post.users?.email}</small>
+                        </div>
+                      </td>
                       <td><span className="category-badge">{post.category}</span></td>
                       <td>{post.views}</td>
                       <td>{post.comments}</td>
                       <td>{new Date(post.created_at).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="recent-users">
+              <h2>Recent Users</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Joined</th>
+                    <th>Posts</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.slice(0, 5).map(user => (
+                    <tr key={user.id}>
+                      <td>
+                        <div className="user-cell">
+                          <strong>{user.name}</strong>
+                          <small>{user.username}</small>
+                        </div>
+                      </td>
+                      <td>{user.email}</td>
+                      <td>
+                        <span className={`role-badge ${user.role}`}>
+                          {user.role === 'admin' ? 'Administrator' : 'Regular User'}
+                        </span>
+                      </td>
+                      <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                      <td>{posts.filter(p => p.user_id === user.id).length}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -235,17 +351,32 @@ const AdminPanel = () => {
 
         {activeTab === 'posts' && (
           <div className="posts-management">
-            <h1>Posts Management</h1>
+            <h1>All Posts Management</h1>
+            <p className="section-subtitle">View and manage posts from all users</p>
+            
+            <div className="admin-controls">
+              <div className="search-filter">
+                <input type="text" placeholder="Search posts..." />
+                <select>
+                  <option value="">All Users</option>
+                  {users.map(user => (
+                    <option key={user.id} value={user.id}>{user.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
             <div className="posts-table">
               <table>
                 <thead>
                   <tr>
                     <th>ID</th>
                     <th>Title</th>
+                    <th>Author</th>
                     <th>Category</th>
                     <th>Views</th>
                     <th>Comments</th>
-                    <th>Featured</th>
+                    <th>Status</th>
                     <th>Created</th>
                     <th>Actions</th>
                   </tr>
@@ -258,18 +389,29 @@ const AdminPanel = () => {
                         <strong>{post.title}</strong>
                         <small>{post.excerpt?.substring(0, 50)}...</small>
                       </td>
+                      <td>
+                        <div className="author-cell">
+                          <strong>{post.users?.name || 'Unknown'}</strong>
+                          <small>{post.users?.email}</small>
+                        </div>
+                      </td>
                       <td><span className="category-badge">{post.category}</span></td>
                       <td>{post.views}</td>
                       <td>{post.comments}</td>
                       <td>
-                        <span className={`featured-badge ${post.featured ? 'active' : ''}`}>
-                          {post.featured ? 'Yes' : 'No'}
+                        <span className={`status-badge ${post.published ? 'published' : 'draft'}`}>
+                          {post.published ? 'Published' : 'Draft'}
                         </span>
+                        {post.featured && (
+                          <span className="featured-badge">
+                            <i className="fas fa-star"></i> Featured
+                          </span>
+                        )}
                       </td>
                       <td>{new Date(post.created_at).toLocaleDateString()}</td>
                       <td>
                         <button 
-                          className="btn-edit"
+                          className="btn-view"
                           onClick={() => navigate(`/blog/${post.id}`)}
                         >
                           <i className="fas fa-eye"></i> View
@@ -289,9 +431,78 @@ const AdminPanel = () => {
           </div>
         )}
 
+        {activeTab === 'users' && (
+          <div className="users-management">
+            <h1>User Management</h1>
+            <p className="section-subtitle">Manage all user accounts and permissions</p>
+            
+            <div className="users-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Posts</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map(user => (
+                    <tr key={user.id}>
+                      <td>{user.id.substring(0, 8)}...</td>
+                      <td>
+                        <div className="user-cell">
+                          <strong>{user.name}</strong>
+                          {user.id === currentUser?.id && (
+                            <small className="current-user">You</small>
+                          )}
+                        </div>
+                      </td>
+                      <td>{user.email}</td>
+                      <td>{user.username}</td>
+                      <td>
+                        <div className="role-control">
+                          <select 
+                            value={user.role}
+                            onChange={(e) => handleUserRoleChange(user.id, e.target.value)}
+                            disabled={user.id === currentUser?.id}
+                          >
+                            <option value="user">Regular User</option>
+                            <option value="admin">Administrator</option>
+                          </select>
+                        </div>
+                      </td>
+                      <td>{posts.filter(p => p.user_id === user.id).length}</td>
+                      <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                      <td>
+                        <button 
+                          className="btn-view"
+                          onClick={() => {
+                            const userPosts = posts.filter(p => p.user_id === user.id);
+                            setPosts(userPosts);
+                            setActiveTab('posts');
+                          }}
+                        >
+                          <i className="fas fa-newspaper"></i> View Posts
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'comments' && (
           <div className="comments-management">
             <h1>Comments Management</h1>
+            <p className="section-subtitle">Moderate comments from all users</p>
+            
             <div className="comments-table">
               <table>
                 <thead>
@@ -312,8 +523,8 @@ const AdminPanel = () => {
                       <td>{comment.posts?.title || `Post ${comment.post_id}`}</td>
                       <td>
                         <div className="author-info">
-                          <strong>{comment.author_name}</strong>
-                          <small>{comment.author_email}</small>
+                          <strong>{comment.author_name || comment.users?.name || 'Anonymous'}</strong>
+                          <small>{comment.author_email || comment.users?.email || 'No email'}</small>
                         </div>
                       </td>
                       <td className="comment-content">{comment.content}</td>
@@ -338,6 +549,8 @@ const AdminPanel = () => {
         {activeTab === 'create' && (
           <div className="create-post">
             <h1>Create New Post</h1>
+            <p className="section-subtitle">Create a post as admin (can be attributed to any user)</p>
+            
             <form onSubmit={handleCreatePost} className="post-form">
               <div className="form-group">
                 <label>Title *</label>
@@ -381,11 +594,23 @@ const AdminPanel = () => {
                     <option value="design">Design</option>
                     <option value="development">Development</option>
                     <option value="business">Business</option>
+                    <option value="general">General</option>
                   </select>
                 </div>
                 
                 <div className="form-group">
-                  <label>Featured</label>
+                  <label>User Attribution</label>
+                  <select>
+                    <option value={currentUser?.id}>{currentUser?.profile?.name} (You)</option>
+                    {users.filter(u => u.id !== currentUser?.id).map(user => (
+                      <option key={user.id} value={user.id}>{user.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
                   <div className="checkbox-group">
                     <input
                       type="checkbox"
@@ -393,6 +618,17 @@ const AdminPanel = () => {
                       onChange={(e) => setNewPost({...newPost, featured: e.target.checked})}
                     />
                     <span>Mark as featured</span>
+                  </div>
+                </div>
+                
+                <div className="form-group">
+                  <div className="checkbox-group">
+                    <input
+                      type="checkbox"
+                      checked={newPost.published}
+                      onChange={(e) => setNewPost({...newPost, published: e.target.checked})}
+                    />
+                    <span>Publish immediately</span>
                   </div>
                 </div>
               </div>
