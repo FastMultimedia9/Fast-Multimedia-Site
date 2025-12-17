@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { blogAPI, formatNumber } from '../supabase';
+import { supabase, blogAPI, formatNumber, authAPI } from '../supabase'; // Added supabase import
 import './BlogPage.css';
 
 const BlogPage = () => {
@@ -13,14 +13,17 @@ const BlogPage = () => {
     all: 0,
     design: 0,
     development: 0,
-    business: 0
+    business: 0,
+    general: 0
   });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const navigate = useNavigate();
 
   const authorInfo = {
-    name: "Alex Johnson",
-    bio: "Tech & Design Specialist",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&auto=format&fit=crop",
+    name: "Laurie Pressman",
+    bio: "Vice President, Pantone Color Institute™",
+    avatar: "https://images.ctfassets.net/svmwj4tfnwbc/90gVEDVzZuNfqdwcpN7C8/8f8c0f62087dde525f58ab64eed4771d/headshot-pantone-color-institute-laurie-pressman.webpw=200&auto=format&fit=crop",
     social: {
       twitter: "#",
       linkedin: "#",
@@ -32,7 +35,8 @@ const BlogPage = () => {
     { id: 'all', name: 'All Articles', count: categoryCounts.all },
     { id: 'design', name: 'Design', count: categoryCounts.design },
     { id: 'development', name: 'Development', count: categoryCounts.development },
-    { id: 'business', name: 'Business', count: categoryCounts.business }
+    { id: 'business', name: 'Business', count: categoryCounts.business },
+    { id: 'general', name: 'General', count: categoryCounts.general }
   ];
 
   const calculateCategoryCounts = (posts) => {
@@ -40,7 +44,8 @@ const BlogPage = () => {
       all: posts.length,
       design: posts.filter(p => p.category === 'design').length,
       development: posts.filter(p => p.category === 'development').length,
-      business: posts.filter(p => p.category === 'business').length
+      business: posts.filter(p => p.category === 'business').length,
+      general: posts.filter(p => p.category === 'general').length
     };
     setCategoryCounts(counts);
     
@@ -55,16 +60,45 @@ const BlogPage = () => {
       setIsLoading(true);
       
       try {
-        // Get posts from Supabase
-        const posts = await blogAPI.getPosts();
-        console.log('Posts loaded from Supabase:', posts);
+        // Get current user and role
+        const user = await authAPI.getCurrentUserWithProfile();
+        setCurrentUser(user);
+        setUserRole(user?.profile?.role || null);
+        
+        // Get posts based on user role
+        let posts;
+        if (user?.profile?.role === 'admin') {
+          // Admin sees all posts
+          posts = await blogAPI.getPosts();
+        } else if (user) {
+          // Regular user sees published posts + their own posts
+          posts = await blogAPI.getUserPosts(user.id);
+        } else {
+          // Guest only sees published posts
+          const { data } = await supabase
+            .from('posts')
+            .select('*')
+            .eq('published', true)
+            .order('created_at', { ascending: false });
+          posts = data || []; // Fixed: should be data not posts
+        }
+        
+        console.log('Posts loaded:', posts);
         
         if (posts && posts.length > 0) {
           setBlogPosts(posts);
           calculateCategoryCounts(posts);
           
-          // Get popular posts
-          const popular = await blogAPI.getPopularPosts(5);
+          // Get popular posts (only published for non-admins)
+          let popular;
+          if (user?.profile?.role === 'admin') {
+            popular = await blogAPI.getPopularPosts(5);
+          } else {
+            const publishedPosts = posts.filter(p => p.published);
+            popular = [...publishedPosts]
+              .sort((a, b) => (b.views || 0) - (a.views || 0))
+              .slice(0, 5);
+          }
           setPopularPosts(popular);
         } else {
           console.log('No posts found in database');
@@ -126,7 +160,22 @@ const BlogPage = () => {
     } else {
       // Reload posts
       const reloadPosts = async () => {
-        const posts = await blogAPI.getPosts();
+        const user = await authAPI.getCurrentUserWithProfile();
+        let posts;
+        
+        if (user?.profile?.role === 'admin') {
+          posts = await blogAPI.getPosts();
+        } else if (user) {
+          posts = await blogAPI.getUserPosts(user.id);
+        } else {
+          const { data } = await supabase
+            .from('posts')
+            .select('*')
+            .eq('published', true)
+            .order('created_at', { ascending: false });
+          posts = data || []; // Fixed: should be data not posts
+        }
+        
         setBlogPosts(posts);
         calculateCategoryCounts(posts);
       };
@@ -137,7 +186,21 @@ const BlogPage = () => {
   const handleCategoryClick = async (categoryId) => {
     setActiveCategory(categoryId);
     
-    const allPosts = await blogAPI.getPosts();
+    const user = await authAPI.getCurrentUserWithProfile();
+    let allPosts;
+    
+    if (user?.profile?.role === 'admin') {
+      allPosts = await blogAPI.getPosts();
+    } else if (user) {
+      allPosts = await blogAPI.getUserPosts(user.id);
+    } else {
+      const { data } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false });
+      allPosts = data || []; // Fixed: should be data not posts
+    }
     
     if (categoryId === 'all') {
       setBlogPosts(allPosts);
@@ -167,7 +230,8 @@ const BlogPage = () => {
     ? blogPosts 
     : blogPosts.filter(post => post.category === activeCategory);
 
-  const featuredPost = blogPosts.find(post => post.featured) || (blogPosts.length > 0 ? blogPosts[0] : null);
+  const featuredPost = blogPosts.find(post => post.featured && (post.published || userRole === 'admin')) || 
+                      (blogPosts.length > 0 ? blogPosts[0] : null);
 
   // Function to get category display name
   const getCategoryDisplayName = (category) => {
@@ -193,6 +257,31 @@ const BlogPage = () => {
           <p className="blog-subtitle">
             Latest trends, tips, and insights about design, development, and digital strategy.
           </p>
+          
+          {/* User Role Indicator */}
+          {currentUser && (
+            <div className="user-indicator">
+              <span className={`role-badge ${userRole}`}>
+                {userRole === 'admin' ? 'Administrator View' : 'Your Posts View'}
+              </span>
+              {userRole === 'user' && (
+                <button 
+                  className="btn-create-post"
+                  onClick={() => navigate('/user/dashboard?tab=create-post')}
+                >
+                  <i className="fas fa-plus"></i> Create New Post
+                </button>
+              )}
+              {userRole === 'admin' && (
+                <button 
+                  className="btn-admin-dashboard"
+                  onClick={() => navigate('/admin')}
+                >
+                  <i className="fas fa-cog"></i> Admin Dashboard
+                </button>
+              )}
+            </div>
+          )}
           
           {/* Search Bar */}
           <div className="blog-search">
@@ -221,6 +310,9 @@ const BlogPage = () => {
                   <div className="featured-post-image">
                     <img src={featuredPost.image_url} alt={featuredPost.title} />
                     <div className="featured-badge">Featured</div>
+                    {!featuredPost.published && (
+                      <div className="draft-badge">Draft</div>
+                    )}
                   </div>
                   <div className="featured-post-content">
                     <div className="post-meta">
@@ -234,6 +326,9 @@ const BlogPage = () => {
                           day: 'numeric' 
                         })}
                       </span>
+                      {!featuredPost.published && (
+                        <span className="post-status draft">Draft</span>
+                      )}
                     </div>
                     <h2>{featuredPost.title}</h2>
                     <p>{featuredPost.excerpt}</p>
@@ -319,12 +414,15 @@ const BlogPage = () => {
                 <>
                   <div className="blog-grid">
                     {filteredPosts
-                      .filter(post => !post.featured)
+                      .filter(post => !post.featured || post.id !== featuredPost?.id)
                       .map(post => (
                       <div key={post.id} className="blog-card">
                         <div className="blog-card-image">
                           <img src={post.image_url} alt={post.title} />
                           <div className="category-tag">{getCategoryDisplayName(post.category)}</div>
+                          {!post.published && (
+                            <div className="draft-tag">Draft</div>
+                          )}
                         </div>
                         <div className="blog-card-content">
                           <div className="post-meta">
@@ -336,6 +434,9 @@ const BlogPage = () => {
                               })}
                             </span>
                             <span className="post-read-time">{post.readTime || '5 min read'}</span>
+                            {!post.published && (
+                              <span className="post-status">Private</span>
+                            )}
                           </div>
                           <h3>{post.title}</h3>
                           <p>{post.excerpt}</p>
@@ -375,6 +476,11 @@ const BlogPage = () => {
                   <i className="far fa-newspaper"></i>
                   <h3>No articles found</h3>
                   <p>Try a different search or category</p>
+                  {currentUser && userRole === 'user' && (
+                    <p className="create-post-hint">
+                      Or create your first post!
+                    </p>
+                  )}
                   <button 
                     onClick={() => {
                       setSearchQuery('');
@@ -384,6 +490,14 @@ const BlogPage = () => {
                   >
                     Show All Articles
                   </button>
+                  {currentUser && userRole === 'user' && (
+                    <button 
+                      onClick={() => navigate('/user/dashboard?tab=create-post')}
+                      className="create-btn"
+                    >
+                      <i className="fas fa-plus"></i> Create Your First Post
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -412,6 +526,28 @@ const BlogPage = () => {
 
         {/* Sidebar */}
         <aside className="blog-sidebar">
+          {/* User Info */}
+          {currentUser && (
+            <div className="sidebar-widget user-widget">
+              <h3>Your Account</h3>
+              <div className="current-user-info">
+                <div className="user-avatar">
+                  <i className="fas fa-user-circle"></i>
+                </div>
+                <div className="user-details">
+                  <h4>{currentUser.profile?.name || currentUser.email}</h4>
+                  <p className="user-role">{userRole === 'admin' ? 'Administrator' : 'Regular User'}</p>
+                  <button 
+                    className="btn-dashboard"
+                    onClick={() => navigate(userRole === 'admin' ? '/admin' : '/user/dashboard')}
+                  >
+                    <i className="fas fa-columns"></i> Go to Dashboard
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* About Author */}
           <div className="sidebar-widget">
             <h3>About the Author</h3>

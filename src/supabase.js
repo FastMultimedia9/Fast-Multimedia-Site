@@ -41,7 +41,7 @@ export const testConnection = async () => {
   }
 }
 
-// Data transformation functions
+// Data transformation functions that match YOUR schema
 const transformPostData = (post) => {
   if (!post) return null;
   
@@ -57,12 +57,13 @@ const transformPostData = (post) => {
     comments: parseInt(post.comments_count || 0),
     likes: parseInt(post.likes || 0),
     featured: post.featured || false,
-    published: post.published !== false,
+    published: post.published !== false, // Default to true
     created_at: post.created_at || new Date().toISOString(),
     updated_at: post.updated_at || new Date().toISOString(),
-    readTime: post.readTime || '5 min read',
-    author: post.users?.name || post.author_name || 'Alex Johnson',
-    author_id: post.user_id
+    readTime: '5 min read', // Calculated or default
+    author: post.users?.name || 'Author',
+    author_id: post.user_id,
+    user_id: post.user_id // Keep for consistency
   };
 };
 
@@ -71,16 +72,16 @@ const transformPostsData = (posts) => {
   return posts.map(transformPostData).filter(Boolean);
 };
 
-// Blog API functions
+// Blog API functions - UPDATED FOR YOUR SCHEMA
 export const blogAPI = {
-  // Get all posts
+  // Get posts based on user role
   async getPosts() {
     try {
       const { data, error } = await supabase
         .from('posts')
         .select(`
           *,
-          users:user_id (name)
+          users:user_id (name, username, email)
         `)
         .order('created_at', { ascending: false })
       
@@ -90,11 +91,49 @@ export const blogAPI = {
       }
       
       const transformed = transformPostsData(data);
-      console.log('Transformed posts:', transformed);
       return transformed || []
     } catch (error) {
       console.error('Error in getPosts:', error)
       return []
+    }
+  },
+
+  // Get user-specific posts
+  async getUserPosts(userId = null) {
+    try {
+      const user = await authAPI.getCurrentUserWithProfile();
+      const isAdmin = user?.profile?.role === 'admin';
+      
+      let query = supabase
+        .from('posts')
+        .select(`
+          *,
+          users:user_id (name, username, email)
+        `)
+        .order('created_at', { ascending: false });
+      
+      // If not admin, only show user's posts or published posts
+      if (!isAdmin) {
+        if (userId) {
+          query = query.eq('user_id', userId);
+        } else if (user) {
+          query = query.or(`user_id.eq.${user.id},published.eq.true`);
+        } else {
+          query = query.eq('published', true);
+        }
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error('Error getting user posts:', error);
+        return [];
+      }
+      
+      return transformPostsData(data) || [];
+    } catch (error) {
+      console.error('Error in getUserPosts:', error);
+      return [];
     }
   },
 
@@ -105,7 +144,7 @@ export const blogAPI = {
         .from('posts')
         .select(`
           *,
-          users:user_id (name)
+          users:user_id (name, username, email)
         `)
         .eq('id', id)
         .single()
@@ -129,7 +168,7 @@ export const blogAPI = {
         .from('posts')
         .select(`
           *,
-          users:user_id (name)
+          users:user_id (name, username, email)
         `)
         .order('views', { ascending: false })
         .limit(limit)
@@ -182,12 +221,15 @@ export const blogAPI = {
     }
   },
 
-  // Get comments
+  // Get comments for a post
   async getComments(postId) {
     try {
       const { data, error } = await supabase
         .from('comments')
-        .select('*')
+        .select(`
+          *,
+          users:user_id (name, email)
+        `)
         .eq('post_id', postId)
         .order('created_at', { ascending: false })
       
@@ -196,15 +238,17 @@ export const blogAPI = {
         return []
       }
       
-      // Transform comment data if needed
+      // Transform comment data
       const transformedComments = data?.map(comment => ({
         id: comment.id,
-        author_name: comment.author_name || comment.author,
-        content: comment.content || comment.text,
+        author_name: comment.author_name || comment.users?.name || 'Anonymous',
+        author_email: comment.author_email || comment.users?.email,
+        content: comment.content,
         avatar_url: comment.avatar_url || `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
         created_at: comment.created_at,
         likes: parseInt(comment.likes || 0),
-        post_id: comment.post_id
+        post_id: comment.post_id,
+        user_id: comment.user_id
       })) || [];
       
       return transformedComments
@@ -217,19 +261,21 @@ export const blogAPI = {
   // Add comment
   async addComment(postId, commentData) {
     try {
-      console.log('Adding comment with data:', { postId, commentData });
+      const user = await authAPI.getCurrentUser();
+      const commentToInsert = {
+        post_id: parseInt(postId),
+        user_id: user?.id || null,
+        author_name: commentData.user || user?.email?.split('@')[0] || 'Anonymous',
+        author_email: commentData.email || user?.email || 'anonymous@example.com',
+        content: commentData.text,
+        avatar_url: commentData.avatar || `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+        created_at: new Date().toISOString(),
+        likes: 0
+      };
       
       const { data, error } = await supabase
         .from('comments')
-        .insert([{
-          post_id: parseInt(postId),
-          author_name: commentData.user,
-          author_email: commentData.email || 'anonymous@example.com',
-          content: commentData.text,
-          avatar_url: commentData.avatar || `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-          created_at: new Date().toISOString(),
-          likes: 0
-        }])
+        .insert([commentToInsert])
         .select()
       
       if (error) {
@@ -237,18 +283,15 @@ export const blogAPI = {
         throw error;
       }
       
-      console.log('Comment added successfully:', data);
-      
-      // Get current comment count
-      const { data: post, error: postError } = await supabase
+      // Update comment count
+      const { data: post } = await supabase
         .from('posts')
         .select('comments_count')
         .eq('id', postId)
         .single();
       
-      const currentComments = postError ? 0 : parseInt(post?.comments_count || 0);
+      const currentComments = parseInt(post?.comments_count || 0);
       
-      // Update comment count
       await supabase
         .from('posts')
         .update({ comments_count: currentComments + 1 })
@@ -261,38 +304,14 @@ export const blogAPI = {
     }
   },
 
-  // Like comment
-  async likeComment(commentId) {
-    try {
-      const { data: comment, error: fetchError } = await supabase
-        .from('comments')
-        .select('likes')
-        .eq('id', commentId)
-        .single()
-      
-      if (fetchError) throw fetchError
-      
-      const currentLikes = parseInt(comment?.likes || 0)
-      const newLikes = currentLikes + 1
-      
-      const { error: updateError } = await supabase
-        .from('comments')
-        .update({ likes: newLikes })
-        .eq('id', commentId)
-      
-      if (updateError) throw updateError
-      
-      return newLikes
-    } catch (error) {
-      console.error('Error liking comment:', error)
-      return 0
-    }
-  },
-
-  // Create post (for admin)
+  // Create post
   async createPost(postData) {
     try {
-      const user = await authAPI.getCurrentUser();
+      const user = await authAPI.getCurrentUserWithProfile();
+      
+      if (!user) {
+        throw new Error('User must be logged in to create posts');
+      }
       
       const postToInsert = {
         title: postData.title || 'Untitled Post',
@@ -306,7 +325,7 @@ export const blogAPI = {
         likes: 0,
         featured: postData.featured || false,
         published: postData.published !== false,
-        user_id: user?.id || null,
+        user_id: user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -330,6 +349,24 @@ export const blogAPI = {
   // Update post
   async updatePost(id, postData) {
     try {
+      const user = await authAPI.getCurrentUserWithProfile();
+      const isAdmin = user?.profile?.role === 'admin';
+      
+      // First, check if user owns the post or is admin
+      const { data: existingPost } = await supabase
+        .from('posts')
+        .select('user_id')
+        .eq('id', id)
+        .single();
+      
+      if (!existingPost) {
+        throw new Error('Post not found');
+      }
+      
+      if (!isAdmin && existingPost.user_id !== user.id) {
+        throw new Error('You do not have permission to update this post');
+      }
+      
       const { data, error } = await supabase
         .from('posts')
         .update({
@@ -360,6 +397,24 @@ export const blogAPI = {
   // Delete post
   async deletePost(id) {
     try {
+      const user = await authAPI.getCurrentUserWithProfile();
+      const isAdmin = user?.profile?.role === 'admin';
+      
+      // First, check if user owns the post or is admin
+      const { data: existingPost } = await supabase
+        .from('posts')
+        .select('user_id')
+        .eq('id', id)
+        .single();
+      
+      if (!existingPost) {
+        throw new Error('Post not found');
+      }
+      
+      if (!isAdmin && existingPost.user_id !== user.id) {
+        throw new Error('You do not have permission to delete this post');
+      }
+      
       const { error } = await supabase
         .from('posts')
         .delete()
@@ -423,13 +478,13 @@ export const blogAPI = {
   }
 };
 
-// Authentication API - FIXED VERSION
+// Authentication API - UPDATED FOR YOUR SCHEMA
 export const authAPI = {
   async register(email, password, name, username, role = 'user') {
     try {
       console.log('Starting registration for:', { email, name, username, role });
       
-      // First, create the auth user WITHOUT email confirmation requirement
+      // Create the auth user
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -438,15 +493,11 @@ export const authAPI = {
             name: name,
             username: username,
             role: role
-          },
-          emailRedirectTo: `${window.location.origin}/admin/login` // Optional: where to redirect after confirmation
+          }
         }
       });
 
-      console.log('Supabase auth response:', { data, error });
-
       if (error) {
-        console.error('Supabase auth error:', error);
         return { 
           success: false, 
           error: error.message || 'Authentication failed' 
@@ -454,72 +505,12 @@ export const authAPI = {
       }
 
       if (data.user) {
-        console.log('User created in auth, now creating profile...');
-        
-        // Wait a moment to ensure auth user is fully created
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Try to create user profile in public.users table
-        try {
-          const { data: profileData, error: profileError } = await supabase
-            .from('users')
-            .upsert({
-              id: data.user.id,
-              email: data.user.email,
-              username: username || data.user.email.split('@')[0],
-              name: name || 'User',
-              role: role,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }, {
-              onConflict: 'id'
-            })
-            .select()
-            .single();
-
-          console.log('Profile creation response:', { profileData, profileError });
-
-          if (profileError) {
-            console.warn('Profile creation error:', profileError);
-            
-            // Try simpler insert without .single() and .select()
-            const { error: simpleError } = await supabase
-              .from('users')
-              .insert({
-                id: data.user.id,
-                email: data.user.email,
-                username: username || data.user.email.split('@')[0],
-                name: name || 'User',
-                role: role,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              });
-
-            if (simpleError) {
-              console.warn('Simple insert also failed:', simpleError);
-            }
-          }
-
-          // Return success message based on email confirmation status
-          const message = data.user.confirmed_at || data.user.email_confirmed_at
-            ? 'Registration successful! You can now log in.'
-            : 'Registration successful! Please check your email to confirm your account before logging in.';
-
-          return {
-            success: true,
-            user: data.user,
-            profile: profileData,
-            message: message,
-            emailConfirmed: !!(data.user.confirmed_at || data.user.email_confirmed_at)
-          };
-        } catch (profileError) {
-          console.warn('Profile creation exception:', profileError);
-          return {
-            success: true,
-            user: data.user,
-            message: 'Account created! You can now log in.'
-          };
-        }
+        // The trigger will automatically create the user profile
+        return {
+          success: true,
+          user: data.user,
+          message: 'Registration successful! You can now log in.'
+        };
       }
 
       return { 
@@ -536,35 +527,23 @@ export const authAPI = {
   },
 
   async registerAdmin(email, password, name, username) {
-    console.log('Registering admin user:', { email, name, username });
     return this.register(email, password, name, username, 'admin');
   },
 
   async adminLogin(email, password) {
     try {
-      console.log('Attempting login for:', email);
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password
       });
 
-      console.log('Login response:', { data, error });
-
       if (error) {
-        console.error('Login error details:', error);
-        
-        // Provide more specific error messages
         let errorMessage = 'Invalid email or password';
         
         if (error.message.includes('Invalid login credentials')) {
           errorMessage = 'Invalid email or password. Please check your credentials.';
         } else if (error.message.includes('Email not confirmed')) {
           errorMessage = 'Please check your email to confirm your account before logging in.';
-        } else if (error.message.includes('Email rate limit exceeded')) {
-          errorMessage = 'Too many attempts. Please try again later.';
-        } else if (error.message.includes('User already registered')) {
-          errorMessage = 'An account with this email already exists. Please log in instead.';
         }
         
         return { 
@@ -574,82 +553,24 @@ export const authAPI = {
       }
 
       if (data.user) {
-        console.log('Login successful for user:', data.user.email);
-        
-        // Check if email is confirmed
-        if (!data.user.email_confirmed_at && !data.user.confirmed_at) {
-          console.warn('User email not confirmed:', data.user.email);
-          
-          // You can choose to allow login anyway or require confirmation
-          // For now, we'll allow login but show a warning
-          console.log('Allowing login even though email is not confirmed (for testing)');
-        }
-        
-        // Try to get or create user profile
-        try {
-          const { data: userProfile, error: profileError } = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', data.user.id)
-            .single();
+        // Get user profile
+        const { data: profile } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
 
-          if (profileError || !userProfile) {
-            console.log('Creating user profile on login...');
-            
-            const name = data.user.user_metadata?.name || 
-                        data.user.email.split('@')[0] || 
-                        'User';
-            
-            const { error: upsertError } = await supabase
-              .from('users')
-              .upsert({
-                id: data.user.id,
-                email: data.user.email,
-                username: data.user.user_metadata?.username || data.user.email.split('@')[0],
-                name: name,
-                role: data.user.user_metadata?.role || 'user',
-                updated_at: new Date().toISOString()
-              }, {
-                onConflict: 'id'
-              });
+        // Store in localStorage for backward compatibility
+        localStorage.setItem('admin_logged_in', 'true');
+        localStorage.setItem('admin_username', data.user.email);
+        localStorage.setItem('admin_session', Date.now().toString());
 
-            if (upsertError) {
-              console.warn('Profile upsert error:', upsertError);
-            } else {
-              // Get the updated profile
-              const { data: updatedProfile } = await supabase
-                .from('users')
-                .select('role')
-                .eq('id', data.user.id)
-                .single();
-              userProfile = updatedProfile;
-            }
-          }
-
-          // Store in localStorage for backward compatibility
-          localStorage.setItem('admin_logged_in', 'true');
-          localStorage.setItem('admin_username', data.user.email);
-          localStorage.setItem('admin_session', Date.now().toString());
-
-          return {
-            success: true,
-            user: data.user,
-            isAdmin: userProfile?.role === 'admin'
-          };
-        } catch (profileError) {
-          console.error('Profile handling error:', profileError);
-          
-          // Even if profile fails, still allow login
-          localStorage.setItem('admin_logged_in', 'true');
-          localStorage.setItem('admin_username', data.user.email);
-          localStorage.setItem('admin_session', Date.now().toString());
-          
-          return {
-            success: true,
-            user: data.user,
-            isAdmin: false
-          };
-        }
+        return {
+          success: true,
+          user: data.user,
+          profile: profile,
+          isAdmin: profile?.role === 'admin'
+        };
       }
 
       return { success: false, error: 'Login failed' };
@@ -662,9 +583,62 @@ export const authAPI = {
     }
   },
 
+  async getCurrentUserWithProfile() {
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      
+      if (!authData.user) return null;
+      
+      // Get user profile with role
+      const { data: profile, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return authData.user;
+      }
+      
+      return {
+        ...authData.user,
+        profile: profile
+      };
+    } catch (error) {
+      console.error('Get current user with profile error:', error);
+      return null;
+    }
+  },
+
+  async getCurrentUser() {
+    try {
+      const { data } = await supabase.auth.getUser();
+      return data.user;
+    } catch (error) {
+      console.error('Get current user error:', error);
+      return null;
+    }
+  },
+
+  async getUserRole() {
+    try {
+      const user = await this.getCurrentUserWithProfile();
+      return user?.profile?.role || 'user';
+    } catch (error) {
+      console.error('Get user role error:', error);
+      return 'user';
+    }
+  },
+
+  async isAdmin() {
+    const role = await this.getUserRole();
+    return role === 'admin';
+  },
+
   async isLoggedIn() {
     try {
-      // Check Supabase auth first
+      // Check Supabase auth
       const { data } = await supabase.auth.getSession();
       const hasSession = !!data.session;
       
@@ -684,16 +658,6 @@ export const authAPI = {
     } catch (error) {
       console.error('Auth check error:', error);
       return false;
-    }
-  },
-
-  async getCurrentUser() {
-    try {
-      const { data } = await supabase.auth.getUser();
-      return data.user;
-    } catch (error) {
-      console.error('Get current user error:', error);
-      return null;
     }
   },
 
