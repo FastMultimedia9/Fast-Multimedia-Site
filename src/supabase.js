@@ -4,15 +4,26 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = 'https://ymqlxvvschytbkkjexvd.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltcWx4dnZzY2h5dGJra2pleHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MjI2NjUsImV4cCI6MjA4MTQ5ODY2NX0.oZr6o8cg_WuJ83maXa-d8a3TfVAtQaGp3EXftUidjzo'
 
-// Create Supabase client
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    storage: localStorage
+// SINGLETON PATTERN - Only create client once
+let supabaseInstance = null;
+
+const getSupabase = () => {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: localStorage,
+        storageKey: 'sb-ymqlxvvschytbkkjexvd-auth-token'
+      }
+    });
   }
-})
+  return supabaseInstance;
+};
+
+// Export a single instance
+export const supabase = getSupabase();
 
 // Test connection
 export const testConnection = async () => {
@@ -34,23 +45,25 @@ export const testConnection = async () => {
 const transformPostData = (post) => {
   if (!post) return null;
   
-  // Check if data uses different field names (backend vs frontend)
-  const transformed = {
-    id: post.id || post.ID,
-    title: post.title || post.Title || 'Untitled Post',
-    category: (post.category || post.Category || 'general').toLowerCase(),
-    views: parseInt(post.views || post.Views || 0),
-    comments: parseInt(post.comments || post.Comments || 0),
-    created_at: post.created_at || post.Date || post.createdAt || new Date().toISOString(),
-    image_url: post.image_url || post.imageUrl || `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000)}?w=800&auto=format&fit=crop`,
-    excerpt: post.excerpt || post.Excerpt || post.content?.substring(0, 150) + '...' || 'Read more about this topic...',
-    content: post.content || post.Content || `<p>${post.title || 'This is a sample article content.'}</p>`,
+  return {
+    id: post.id,
+    title: post.title || 'Untitled Post',
+    excerpt: post.excerpt || (post.content ? post.content.substring(0, 150) + '...' : 'Read more...'),
+    content: post.content || '',
+    category: (post.category || 'general').toLowerCase(),
+    image_url: post.image_url || `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000)}?w=800&auto=format&fit=crop`,
+    theme: post.theme || 'default',
+    views: parseInt(post.views || 0),
+    comments: parseInt(post.comments_count || 0),
+    likes: parseInt(post.likes || 0),
+    featured: post.featured || false,
+    published: post.published !== false,
+    created_at: post.created_at || new Date().toISOString(),
+    updated_at: post.updated_at || new Date().toISOString(),
     readTime: post.readTime || '5 min read',
-    author: post.author || post.Author || 'Alex Johnson',
-    featured: post.featured || false
+    author: post.users?.name || post.author_name || 'Alex Johnson',
+    author_id: post.user_id
   };
-  
-  return transformed;
 };
 
 const transformPostsData = (posts) => {
@@ -65,7 +78,10 @@ export const blogAPI = {
     try {
       const { data, error } = await supabase
         .from('posts')
-        .select('*')
+        .select(`
+          *,
+          users:user_id (name)
+        `)
         .order('created_at', { ascending: false })
       
       if (error) {
@@ -87,7 +103,10 @@ export const blogAPI = {
     try {
       const { data, error } = await supabase
         .from('posts')
-        .select('*')
+        .select(`
+          *,
+          users:user_id (name)
+        `)
         .eq('id', id)
         .single()
       
@@ -108,7 +127,10 @@ export const blogAPI = {
     try {
       const { data, error } = await supabase
         .from('posts')
-        .select('*')
+        .select(`
+          *,
+          users:user_id (name)
+        `)
         .order('views', { ascending: false })
         .limit(limit)
       
@@ -139,7 +161,7 @@ export const blogAPI = {
         return 0
       }
       
-      const currentViews = parseInt(post?.views || post?.Views || 0)
+      const currentViews = parseInt(post?.views || 0)
       const newViews = currentViews + 1
       
       // Update views
@@ -218,13 +240,18 @@ export const blogAPI = {
       console.log('Comment added successfully:', data);
       
       // Get current comment count
-      const post = await this.getPost(postId);
-      const currentComments = parseInt(post?.comments || 0);
+      const { data: post, error: postError } = await supabase
+        .from('posts')
+        .select('comments_count')
+        .eq('id', postId)
+        .single();
+      
+      const currentComments = postError ? 0 : parseInt(post?.comments_count || 0);
       
       // Update comment count
       await supabase
         .from('posts')
-        .update({ comments: currentComments + 1 })
+        .update({ comments_count: currentComments + 1 })
         .eq('id', postId);
       
       return data[0];
@@ -265,17 +292,28 @@ export const blogAPI = {
   // Create post (for admin)
   async createPost(postData) {
     try {
-      const transformedData = transformPostData(postData);
+      const user = await authAPI.getCurrentUser();
+      
+      const postToInsert = {
+        title: postData.title || 'Untitled Post',
+        excerpt: postData.excerpt || (postData.content ? postData.content.substring(0, 150) + '...' : 'Read more...'),
+        content: postData.content || '',
+        category: (postData.category || 'general').toLowerCase(),
+        image_url: postData.image_url || `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000)}?w=800&auto=format&fit=crop`,
+        theme: postData.theme || 'default',
+        views: 0,
+        comments_count: 0,
+        likes: 0,
+        featured: postData.featured || false,
+        published: postData.published !== false,
+        user_id: user?.id || null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
       
       const { data, error } = await supabase
         .from('posts')
-        .insert([{
-          ...transformedData,
-          created_at: new Date().toISOString(),
-          views: 0,
-          comments: 0,
-          published: true
-        }])
+        .insert([postToInsert])
         .select()
       
       if (error) {
@@ -292,11 +330,19 @@ export const blogAPI = {
   // Update post
   async updatePost(id, postData) {
     try {
-      const transformedData = transformPostData(postData);
-      
       const { data, error } = await supabase
         .from('posts')
-        .update(transformedData)
+        .update({
+          title: postData.title,
+          excerpt: postData.excerpt,
+          content: postData.content,
+          category: postData.category,
+          image_url: postData.image_url,
+          theme: postData.theme,
+          featured: postData.featured,
+          published: postData.published,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', id)
         .select()
       
@@ -374,113 +420,336 @@ export const blogAPI = {
     return () => {
       supabase.removeChannel(channel)
     }
-  },
-
-  // Sync backend data - ensure all posts have required fields
-  async syncPostsData() {
-    try {
-      console.log('Syncing posts data...');
-      
-      // Get all posts
-      const { data: posts, error } = await supabase
-        .from('posts')
-        .select('*');
-      
-      if (error) {
-        console.error('Error fetching posts for sync:', error);
-        return false;
-      }
-      
-      if (!posts || posts.length === 0) {
-        console.log('No posts to sync');
-        return false;
-      }
-      
-      // Check and update each post if needed
-      let updatedCount = 0;
-      
-      for (const post of posts) {
-        const needsUpdate = 
-          !post.image_url || 
-          !post.excerpt || 
-          !post.readTime ||
-          !post.author;
-        
-        if (needsUpdate) {
-          const updateData = {
-            image_url: post.image_url || `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000)}?w=800&auto=format&fit=crop`,
-            excerpt: post.excerpt || post.content?.substring(0, 150) + '...' || `Read more about ${post.title || 'this topic'}...`,
-            readTime: post.readTime || '5 min read',
-            author: post.author || 'Alex Johnson',
-            featured: post.featured || false
-          };
-          
-          const { error: updateError } = await supabase
-            .from('posts')
-            .update(updateData)
-            .eq('id', post.id);
-          
-          if (!updateError) {
-            updatedCount++;
-          }
-        }
-      }
-      
-      console.log(`Synced ${updatedCount} posts`);
-      return updatedCount > 0;
-    } catch (error) {
-      console.error('Error syncing posts:', error);
-      return false;
-    }
   }
 };
 
-// Authentication API (simplified for now)
+// Authentication API - FIXED VERSION
 export const authAPI = {
-  async adminLogin(username, password) {
-    // Simple validation
-    if (username === 'admin' && password === 'admin123') {
-      localStorage.setItem('admin_logged_in', 'true');
-      localStorage.setItem('admin_username', username);
-      localStorage.setItem('admin_session', Date.now().toString());
+  async register(email, password, name, username, role = 'user') {
+    try {
+      console.log('Starting registration for:', { email, name, username, role });
       
-      return {
-        success: true,
-        user: { username: 'admin', isAdmin: true }
+      // First, create the auth user WITHOUT email confirmation requirement
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            name: name,
+            username: username,
+            role: role
+          },
+          emailRedirectTo: `${window.location.origin}/admin/login` // Optional: where to redirect after confirmation
+        }
+      });
+
+      console.log('Supabase auth response:', { data, error });
+
+      if (error) {
+        console.error('Supabase auth error:', error);
+        return { 
+          success: false, 
+          error: error.message || 'Authentication failed' 
+        };
+      }
+
+      if (data.user) {
+        console.log('User created in auth, now creating profile...');
+        
+        // Wait a moment to ensure auth user is fully created
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Try to create user profile in public.users table
+        try {
+          const { data: profileData, error: profileError } = await supabase
+            .from('users')
+            .upsert({
+              id: data.user.id,
+              email: data.user.email,
+              username: username || data.user.email.split('@')[0],
+              name: name || 'User',
+              role: role,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'id'
+            })
+            .select()
+            .single();
+
+          console.log('Profile creation response:', { profileData, profileError });
+
+          if (profileError) {
+            console.warn('Profile creation error:', profileError);
+            
+            // Try simpler insert without .single() and .select()
+            const { error: simpleError } = await supabase
+              .from('users')
+              .insert({
+                id: data.user.id,
+                email: data.user.email,
+                username: username || data.user.email.split('@')[0],
+                name: name || 'User',
+                role: role,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              });
+
+            if (simpleError) {
+              console.warn('Simple insert also failed:', simpleError);
+            }
+          }
+
+          // Return success message based on email confirmation status
+          const message = data.user.confirmed_at || data.user.email_confirmed_at
+            ? 'Registration successful! You can now log in.'
+            : 'Registration successful! Please check your email to confirm your account before logging in.';
+
+          return {
+            success: true,
+            user: data.user,
+            profile: profileData,
+            message: message,
+            emailConfirmed: !!(data.user.confirmed_at || data.user.email_confirmed_at)
+          };
+        } catch (profileError) {
+          console.warn('Profile creation exception:', profileError);
+          return {
+            success: true,
+            user: data.user,
+            message: 'Account created! You can now log in.'
+          };
+        }
+      }
+
+      return { 
+        success: false, 
+        error: 'Registration failed - no user returned from server' 
+      };
+    } catch (error) {
+      console.error('Registration exception:', error);
+      return { 
+        success: false, 
+        error: error.message || 'Registration failed. Please try again.' 
       };
     }
-    
-    return { success: false, error: 'Invalid credentials' };
   },
 
-  isLoggedIn() {
+  async registerAdmin(email, password, name, username) {
+    console.log('Registering admin user:', { email, name, username });
+    return this.register(email, password, name, username, 'admin');
+  },
+
+  async adminLogin(email, password) {
+    try {
+      console.log('Attempting login for:', email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      console.log('Login response:', { data, error });
+
+      if (error) {
+        console.error('Login error details:', error);
+        
+        // Provide more specific error messages
+        let errorMessage = 'Invalid email or password';
+        
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'Invalid email or password. Please check your credentials.';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'Please check your email to confirm your account before logging in.';
+        } else if (error.message.includes('Email rate limit exceeded')) {
+          errorMessage = 'Too many attempts. Please try again later.';
+        } else if (error.message.includes('User already registered')) {
+          errorMessage = 'An account with this email already exists. Please log in instead.';
+        }
+        
+        return { 
+          success: false, 
+          error: errorMessage 
+        };
+      }
+
+      if (data.user) {
+        console.log('Login successful for user:', data.user.email);
+        
+        // Check if email is confirmed
+        if (!data.user.email_confirmed_at && !data.user.confirmed_at) {
+          console.warn('User email not confirmed:', data.user.email);
+          
+          // You can choose to allow login anyway or require confirmation
+          // For now, we'll allow login but show a warning
+          console.log('Allowing login even though email is not confirmed (for testing)');
+        }
+        
+        // Try to get or create user profile
+        try {
+          const { data: userProfile, error: profileError } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', data.user.id)
+            .single();
+
+          if (profileError || !userProfile) {
+            console.log('Creating user profile on login...');
+            
+            const name = data.user.user_metadata?.name || 
+                        data.user.email.split('@')[0] || 
+                        'User';
+            
+            const { error: upsertError } = await supabase
+              .from('users')
+              .upsert({
+                id: data.user.id,
+                email: data.user.email,
+                username: data.user.user_metadata?.username || data.user.email.split('@')[0],
+                name: name,
+                role: data.user.user_metadata?.role || 'user',
+                updated_at: new Date().toISOString()
+              }, {
+                onConflict: 'id'
+              });
+
+            if (upsertError) {
+              console.warn('Profile upsert error:', upsertError);
+            } else {
+              // Get the updated profile
+              const { data: updatedProfile } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', data.user.id)
+                .single();
+              userProfile = updatedProfile;
+            }
+          }
+
+          // Store in localStorage for backward compatibility
+          localStorage.setItem('admin_logged_in', 'true');
+          localStorage.setItem('admin_username', data.user.email);
+          localStorage.setItem('admin_session', Date.now().toString());
+
+          return {
+            success: true,
+            user: data.user,
+            isAdmin: userProfile?.role === 'admin'
+          };
+        } catch (profileError) {
+          console.error('Profile handling error:', profileError);
+          
+          // Even if profile fails, still allow login
+          localStorage.setItem('admin_logged_in', 'true');
+          localStorage.setItem('admin_username', data.user.email);
+          localStorage.setItem('admin_session', Date.now().toString());
+          
+          return {
+            success: true,
+            user: data.user,
+            isAdmin: false
+          };
+        }
+      }
+
+      return { success: false, error: 'Login failed' };
+    } catch (error) {
+      console.error('Login exception:', error);
+      return { 
+        success: false, 
+        error: 'Login failed. Please check your connection and try again.' 
+      };
+    }
+  },
+
+  async isLoggedIn() {
+    try {
+      // Check Supabase auth first
+      const { data } = await supabase.auth.getSession();
+      const hasSession = !!data.session;
+      
+      // Also check localStorage for backward compatibility
+      const localStorageAuth = localStorage.getItem('admin_logged_in') === 'true';
+      const sessionTime = parseInt(localStorage.getItem('admin_session') || '0');
+      const currentTime = Date.now();
+      
+      if (localStorageAuth && (currentTime - sessionTime) > 24 * 60 * 60 * 1000) {
+        localStorage.removeItem('admin_logged_in');
+        localStorage.removeItem('admin_username');
+        localStorage.removeItem('admin_session');
+        return false;
+      }
+      
+      return hasSession || localStorageAuth;
+    } catch (error) {
+      console.error('Auth check error:', error);
+      return false;
+    }
+  },
+
+  async getCurrentUser() {
+    try {
+      const { data } = await supabase.auth.getUser();
+      return data.user;
+    } catch (error) {
+      console.error('Get current user error:', error);
+      return null;
+    }
+  },
+
+  async logout() {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      // Clear localStorage
+      localStorage.removeItem('admin_logged_in');
+      localStorage.removeItem('admin_username');
+      localStorage.removeItem('admin_session');
+      
+      if (error) {
+        console.error('Logout error:', error);
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error('Logout exception:', error);
+      return false;
+    }
+  },
+
+  async resetPassword(email) {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return {
+        success: true,
+        message: 'Password reset instructions sent to your email.'
+      };
+    } catch (error) {
+      return { success: false, error: 'Password reset failed. Please try again.' };
+    }
+  },
+
+  // Helper function for backward compatibility
+  checkLocalStorageAuth() {
     const loggedIn = localStorage.getItem('admin_logged_in') === 'true';
     const sessionTime = parseInt(localStorage.getItem('admin_session') || '0');
     const currentTime = Date.now();
     
     if (loggedIn && (currentTime - sessionTime) > 24 * 60 * 60 * 1000) {
-      this.logout();
+      localStorage.removeItem('admin_logged_in');
+      localStorage.removeItem('admin_username');
+      localStorage.removeItem('admin_session');
       return false;
     }
     
     return loggedIn;
-  },
-
-  getCurrentUser() {
-    if (this.isLoggedIn()) {
-      return {
-        username: localStorage.getItem('admin_username'),
-        isAdmin: true
-      };
-    }
-    return null;
-  },
-
-  logout() {
-    localStorage.removeItem('admin_logged_in');
-    localStorage.removeItem('admin_username');
-    localStorage.removeItem('admin_session');
-    return true;
   }
 };
 
@@ -524,17 +793,9 @@ export const formatTimeAgo = (timestamp) => {
 
 // Test the connection and sync data
 console.log('🔧 Testing Supabase connection...');
-testConnection().then(async success => {
+testConnection().then(success => {
   if (success) {
     console.log('🎉 Supabase is ready to use!');
-    
-    // Sync data on startup
-    try {
-      await blogAPI.syncPostsData();
-      console.log('✅ Data sync complete');
-    } catch (error) {
-      console.warn('⚠️ Data sync failed, but continuing...');
-    }
   } else {
     console.warn('⚠️ Supabase connection failed. Check your credentials and tables.');
   }

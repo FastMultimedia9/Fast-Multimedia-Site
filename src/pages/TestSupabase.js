@@ -1,272 +1,247 @@
 import React, { useState, useEffect } from 'react';
-import { supabase, testConnection, blogAPI } from '../supabase';
+import { supabase } from '../supabase'; // Make sure you're importing supabase
+import './TestSupabase.css';
 
 const TestSupabase = () => {
   const [connectionStatus, setConnectionStatus] = useState('Testing...');
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    posts: 0,
-    comments: 0,
-    views: 0
-  });
+  const [tables, setTables] = useState([]);
+  const [sampleData, setSampleData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const runTests = async () => {
-      setLoading(true);
-      
-      // Test 1: Basic connection
-      const connected = await testConnection();
-      setConnectionStatus(connected ? '✅ Connected' : '❌ Failed');
-      
-      if (connected) {
-        // Test 2: Get posts
-        const postsData = await blogAPI.getPosts();
-        setPosts(postsData);
+    const testConnection = async () => {
+      try {
+        setIsLoading(true);
         
-        // Test 3: Get comments
-        const allPosts = postsData || [];
-        const commentsCount = allPosts.reduce((sum, post) => sum + (post.comments || 0), 0);
-        const viewsCount = allPosts.reduce((sum, post) => sum + (post.views || 0), 0);
+        // Test posts table
+        const { data: postsData, error: postsError } = await supabase
+          .from('posts')
+          .select('*')
+          .limit(3);
         
-        setStats({
-          posts: allPosts.length,
-          comments: commentsCount,
-          views: viewsCount
-        });
+        // Test users table
+        const { data: usersData, error: usersError } = await supabase
+          .from('users')
+          .select('*')
+          .limit(3);
+        
+        // Test comments table
+        const { data: commentsData, error: commentsError } = await supabase
+          .from('comments')
+          .select('*')
+          .limit(3);
+
+        if (postsError && usersError && commentsError) {
+          setConnectionStatus('❌ Failed to connect to any tables');
+        } else {
+          setConnectionStatus('✅ Connected to Supabase!');
+          
+          // Get available tables
+          const availableTables = [];
+          if (!postsError) availableTables.push({ name: 'posts', count: postsData?.length || 0 });
+          if (!usersError) availableTables.push({ name: 'users', count: usersData?.length || 0 });
+          if (!commentsError) availableTables.push({ name: 'comments', count: commentsData?.length || 0 });
+          
+          setTables(availableTables);
+          
+          // Show sample data
+          if (postsData && postsData.length > 0) {
+            setSampleData({
+              table: 'posts',
+              data: postsData
+            });
+          } else if (usersData && usersData.length > 0) {
+            setSampleData({
+              table: 'users',
+              data: usersData
+            });
+          } else if (commentsData && commentsData.length > 0) {
+            setSampleData({
+              table: 'comments',
+              data: commentsData
+            });
+          }
+        }
+      } catch (error) {
+        setConnectionStatus(`❌ Error: ${error.message}`);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setLoading(false);
     };
-    
-    runTests();
+
+    testConnection();
   }, []);
 
-  const createTestPost = async () => {
+  const handleInsertTestData = async () => {
     try {
-      const newPost = {
-        title: 'Test Post - ' + new Date().toLocaleString(),
-        excerpt: 'This is a test post created from the admin panel.',
-        content: '<h2>Test Content</h2><p>This post was created to test the Supabase connection.</p>',
-        category: 'development',
-        image_url: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&auto=format&fit=crop',
-        featured: false
-      };
-      
-      const post = await blogAPI.createPost(newPost);
-      if (post) {
-        alert('Test post created successfully!');
-        // Refresh posts
-        const postsData = await blogAPI.getPosts();
-        setPosts(postsData);
-        setStats(prev => ({ ...prev, posts: postsData.length }));
+      // Insert a test post
+      const { data, error } = await supabase
+        .from('posts')
+        .insert([
+          {
+            title: 'Test Post',
+            content: 'This is a test post to verify database connection.',
+            excerpt: 'Testing Supabase connection...',
+            category: 'development',
+            image_url: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop',
+            views: 0,
+            comments_count: 0,
+            likes: 0,
+            featured: false,
+            published: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ])
+        .select();
+
+      if (error) {
+        alert(`Error inserting test data: ${error.message}`);
+      } else {
+        alert('✅ Test data inserted successfully!');
+        // Refresh the page to show new data
+        window.location.reload();
       }
     } catch (error) {
-      console.error('Error creating test post:', error);
-      alert('Error creating test post');
+      alert(`Error: ${error.message}`);
+    }
+  };
+
+  const handleCreateTables = async () => {
+    try {
+      alert('Note: Tables should be created via SQL in the Supabase dashboard. \n\nCheck the console for SQL commands.');
+      console.log('Run these SQL commands in Supabase SQL Editor:');
+      console.log(`
+        -- Create users table
+        CREATE TABLE IF NOT EXISTS public.users (
+          id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+          username VARCHAR(50) UNIQUE NOT NULL,
+          email VARCHAR(255) UNIQUE NOT NULL,
+          name VARCHAR(100),
+          avatar_url TEXT,
+          role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        );
+
+        -- Create posts table
+        CREATE TABLE IF NOT EXISTS public.posts (
+          id BIGSERIAL PRIMARY KEY,
+          title VARCHAR(255) NOT NULL,
+          excerpt TEXT,
+          content TEXT NOT NULL,
+          category VARCHAR(100),
+          image_url TEXT,
+          theme VARCHAR(50),
+          views INTEGER DEFAULT 0,
+          comments_count INTEGER DEFAULT 0,
+          likes INTEGER DEFAULT 0,
+          featured BOOLEAN DEFAULT false,
+          published BOOLEAN DEFAULT true,
+          user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        );
+
+        -- Create comments table
+        CREATE TABLE IF NOT EXISTS public.comments (
+          id BIGSERIAL PRIMARY KEY,
+          post_id BIGINT REFERENCES public.posts(id) ON DELETE CASCADE,
+          user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
+          author_name VARCHAR(100) NOT NULL,
+          author_email VARCHAR(255),
+          content TEXT NOT NULL,
+          avatar_url TEXT,
+          likes INTEGER DEFAULT 0,
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        );
+      `);
+    } catch (error) {
+      alert(`Error: ${error.message}`);
     }
   };
 
   return (
-    <div className="test-page">
+    <div className="test-supabase-page">
       <div className="container">
         <h1>Supabase Connection Test</h1>
         
-        <div className="connection-status">
-          <h2>Connection Status: <span className={connectionStatus.includes('✅') ? 'success' : 'error'}>
-            {connectionStatus}
-          </span></h2>
-          <p>Project: ymqlxvvschytbkkjexvd.supabase.co</p>
-        </div>
-        
-        <div className="stats-grid">
-          <div className="stat-card">
-            <h3>{stats.posts}</h3>
-            <p>Total Posts</p>
+        <div className="status-card">
+          <div className="status-header">
+            <h2>Connection Status</h2>
+            <span className={`status-badge ${connectionStatus.includes('✅') ? 'success' : 'error'}`}>
+              {isLoading ? '🔄 Testing...' : connectionStatus}
+            </span>
           </div>
-          <div className="stat-card">
-            <h3>{stats.comments}</h3>
-            <p>Total Comments</p>
-          </div>
-          <div className="stat-card">
-            <h3>{stats.views}</h3>
-            <p>Total Views</p>
-          </div>
-        </div>
-        
-        <div className="test-actions">
-          <button onClick={createTestPost} className="test-btn">
-            Create Test Post
-          </button>
-          <button onClick={() => window.location.reload()} className="test-btn">
-            Refresh Data
-          </button>
-        </div>
-        
-        {loading ? (
-          <div className="loading">Loading data...</div>
-        ) : posts.length > 0 ? (
-          <div className="posts-table">
-            <h2>Posts from Database</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Title</th>
-                  <th>Category</th>
-                  <th>Views</th>
-                  <th>Comments</th>
-                  <th>Created</th>
-                </tr>
-              </thead>
-              <tbody>
-                {posts.map(post => (
-                  <tr key={post.id}>
-                    <td>{post.id}</td>
-                    <td>{post.title}</td>
-                    <td><span className="category-badge">{post.category}</span></td>
-                    <td>{post.views}</td>
-                    <td>{post.comments}</td>
-                    <td>{new Date(post.created_at).toLocaleDateString()}</td>
-                  </tr>
+          
+          <div className="status-details">
+            <h3>Available Tables:</h3>
+            {tables.length > 0 ? (
+              <div className="tables-list">
+                {tables.map((table, index) => (
+                  <div key={index} className="table-item">
+                    <span className="table-name">{table.name}</span>
+                    <span className="table-count">{table.count} records</span>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            ) : (
+              <p>No tables found. You may need to create them.</p>
+            )}
           </div>
-        ) : (
-          <div className="no-data">
-            <p>No posts found in database.</p>
-            <button onClick={createTestPost} className="test-btn">
-              Create Sample Data
-            </button>
+        </div>
+
+        {sampleData && (
+          <div className="sample-data-card">
+            <h2>Sample Data from {sampleData.table}</h2>
+            <pre className="sample-data">
+              {JSON.stringify(sampleData.data, null, 2)}
+            </pre>
           </div>
         )}
+
+        <div className="actions-card">
+          <h2>Actions</h2>
+          <div className="action-buttons">
+            <button 
+              onClick={handleInsertTestData}
+              className="action-btn primary"
+              disabled={isLoading}
+            >
+              Insert Test Data
+            </button>
+            <button 
+              onClick={handleCreateTables}
+              className="action-btn secondary"
+            >
+              View SQL for Creating Tables
+            </button>
+            <button 
+              onClick={() => window.location.href = '/admin/login'}
+              className="action-btn"
+            >
+              Go to Admin Login
+            </button>
+            <button 
+              onClick={() => window.location.href = '/blog'}
+              className="action-btn"
+            >
+              View Blog
+            </button>
+          </div>
+        </div>
+
+        <div className="instructions-card">
+          <h2>Setup Instructions</h2>
+          <ol>
+            <li>Make sure you have created the tables in Supabase (use SQL from above)</li>
+            <li>Enable RLS (Row Level Security) on your tables</li>
+            <li>Configure authentication in Supabase dashboard</li>
+            <li>Test the connection using the buttons above</li>
+            <li>If tables are empty, insert test data</li>
+          </ol>
+        </div>
       </div>
-      
-      <style jsx>{`
-        .test-page {
-          padding: 40px 20px;
-          min-height: 100vh;
-          background: #f8fafc;
-        }
-        
-        .container {
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-        
-        h1 {
-          color: #2d3748;
-          margin-bottom: 30px;
-        }
-        
-        .connection-status {
-          background: white;
-          padding: 25px;
-          border-radius: 15px;
-          margin-bottom: 30px;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        }
-        
-        .success {
-          color: #38a169;
-        }
-        
-        .error {
-          color: #e53e3e;
-        }
-        
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 20px;
-          margin-bottom: 30px;
-        }
-        
-        .stat-card {
-          background: white;
-          padding: 25px;
-          border-radius: 15px;
-          text-align: center;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        }
-        
-        .stat-card h3 {
-          font-size: 32px;
-          color: #667eea;
-          margin: 0 0 10px;
-        }
-        
-        .stat-card p {
-          color: #718096;
-          margin: 0;
-        }
-        
-        .test-actions {
-          display: flex;
-          gap: 15px;
-          margin-bottom: 30px;
-        }
-        
-        .test-btn {
-          padding: 12px 25px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          border: none;
-          border-radius: 10px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-        
-        .test-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-        }
-        
-        .posts-table {
-          background: white;
-          padding: 25px;
-          border-radius: 15px;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        }
-        
-        table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-        
-        th, td {
-          padding: 15px;
-          text-align: left;
-          border-bottom: 1px solid #e2e8f0;
-        }
-        
-        th {
-          background: #f7fafc;
-          font-weight: 600;
-          color: #2d3748;
-        }
-        
-        .category-badge {
-          background: #e0e7ff;
-          color: #3730a3;
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: 600;
-        }
-        
-        .loading, .no-data {
-          text-align: center;
-          padding: 40px;
-          background: white;
-          border-radius: 15px;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-          color: #718096;
-        }
-      `}</style>
     </div>
   );
 };
