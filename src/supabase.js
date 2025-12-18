@@ -16,7 +16,6 @@ const getSupabase = () => {
         detectSessionInUrl: true,
         storage: localStorage,
         storageKey: 'sb-auth-token',
-        // Disable email confirmation for development
         autoConfirmEmail: true
       },
       global: {
@@ -85,36 +84,66 @@ const transformPostsData = (posts) => {
   return posts.map(transformPostData).filter(Boolean);
 };
 
-// Blog API functions
+// Simple helper function to check if user is admin (without circular dependency)
+const getCurrentUserRole = async () => {
+  try {
+    const { data } = await supabase.auth.getUser();
+    if (!data?.user) return { user: null, isAdmin: false };
+    
+    // Check users table for role
+    const { data: profileData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', data.user.id)
+      .maybeSingle();
+    
+    const isAdmin = profileData?.role === 'admin';
+    
+    return {
+      user: data.user,
+      profile: profileData || { role: 'user', name: data.user.email?.split('@')[0] || 'User' },
+      isAdmin
+    };
+  } catch (error) {
+    console.error('Error getting user role:', error);
+    return { user: null, isAdmin: false };
+  }
+};
+
+// Blog API functions - SIMPLIFIED VERSION
 export const blogAPI = {
   // Get posts based on user role
   async getPosts() {
     try {
+      console.log('Starting getPosts query...');
+      
       const { data, error } = await supabase
         .from('posts')
         .select(`
           *,
           users:user_id (name, username, email)
         `)
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false });
       
       if (error) {
-        console.error('Error getting posts:', error)
-        return []
+        console.error('Supabase error getting posts:', error);
+        return [];
       }
       
-      return transformPostsData(data) || []
+      console.log('Raw data received:', data?.length || 0, 'posts');
+      return transformPostsData(data) || [];
     } catch (error) {
-      console.error('Error in getPosts:', error)
-      return []
+      console.error('Exception in getPosts:', error);
+      return [];
     }
   },
 
-  // Get user-specific posts
+  // Get user-specific posts - FIXED VERSION
   async getUserPosts(userId = null) {
     try {
-      const user = await authAPI.getCurrentUserWithProfile();
-      const isAdmin = user?.profile?.role === 'admin';
+      console.log('Getting user posts for user:', userId);
+      
+      const { user, isAdmin } = await getCurrentUserRole();
       
       let query = supabase
         .from('posts')
@@ -124,7 +153,7 @@ export const blogAPI = {
         `)
         .order('created_at', { ascending: false });
       
-      // If not admin, filter client-side
+      // Execute query
       const { data, error } = await query;
       
       if (error) {
@@ -134,20 +163,27 @@ export const blogAPI = {
       
       const transformed = transformPostsData(data) || [];
       
-      // Client-side filtering
-      if (!isAdmin) {
-        if (userId && user) {
+      // Client-side filtering based on role
+      if (isAdmin) {
+        // Admin sees all posts
+        return transformed;
+      }
+      
+      // Non-admin users
+      if (user) {
+        if (userId && user.id === userId) {
+          // Specific user's posts
           return transformed.filter(post => post.user_id === userId);
-        } else if (user) {
+        } else {
+          // Current user sees their own posts + published posts
           return transformed.filter(post => 
             post.user_id === user.id || post.published === true
           );
-        } else {
-          return transformed.filter(post => post.published === true);
         }
+      } else {
+        // Anonymous users see only published posts
+        return transformed.filter(post => post.published === true);
       }
-      
-      return transformed;
     } catch (error) {
       console.error('Error in getUserPosts:', error);
       return [];
@@ -278,7 +314,7 @@ export const blogAPI = {
   // Add comment
   async addComment(postId, commentData) {
     try {
-      const user = await authAPI.getCurrentUser();
+      const { user } = await getCurrentUserRole();
       const commentToInsert = {
         post_id: parseInt(postId),
         user_id: user?.id || null,
@@ -324,7 +360,7 @@ export const blogAPI = {
   // Create post
   async createPost(postData) {
     try {
-      const user = await authAPI.getCurrentUserWithProfile();
+      const { user } = await getCurrentUserRole();
       
       if (!user) {
         throw new Error('User must be logged in to create posts');
@@ -366,8 +402,7 @@ export const blogAPI = {
   // Update post
   async updatePost(id, postData) {
     try {
-      const user = await authAPI.getCurrentUserWithProfile();
-      const isAdmin = user?.profile?.role === 'admin';
+      const { user, isAdmin } = await getCurrentUserRole();
       
       // First, check if user owns the post or is admin
       const { data: existingPost } = await supabase
@@ -380,7 +415,7 @@ export const blogAPI = {
         throw new Error('Post not found');
       }
       
-      if (!isAdmin && existingPost.user_id !== user.id) {
+      if (!isAdmin && existingPost.user_id !== user?.id) {
         throw new Error('You do not have permission to update this post');
       }
       
@@ -414,8 +449,7 @@ export const blogAPI = {
   // Delete post
   async deletePost(id) {
     try {
-      const user = await authAPI.getCurrentUserWithProfile();
-      const isAdmin = user?.profile?.role === 'admin';
+      const { user, isAdmin } = await getCurrentUserRole();
       
       // First, check if user owns the post or is admin
       const { data: existingPost } = await supabase
@@ -428,7 +462,7 @@ export const blogAPI = {
         throw new Error('Post not found');
       }
       
-      if (!isAdmin && existingPost.user_id !== user.id) {
+      if (!isAdmin && existingPost.user_id !== user?.id) {
         throw new Error('You do not have permission to delete this post');
       }
       
@@ -495,13 +529,12 @@ export const blogAPI = {
   }
 };
 
-// Authentication API - SIMPLIFIED VERSION
+// Authentication API - UPDATED VERSION
 export const authAPI = {
   async register(email, password, name, username, role = 'user') {
     try {
       console.log('Starting registration for:', { email, name, username, role });
       
-      // Disable email confirmation for immediate login
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -511,7 +544,6 @@ export const authAPI = {
             username: username,
             role: role
           },
-          // Disable email confirmation
           emailRedirectTo: `${window.location.origin}/login`
         }
       });
@@ -527,35 +559,22 @@ export const authAPI = {
       if (data.user) {
         console.log('Auth user created:', data.user.id);
         
-        // Try to manually create user profile with retry
-        let retryCount = 0;
-        const maxRetries = 3;
-        
-        while (retryCount < maxRetries) {
-          try {
-            const { error: profileError } = await supabase
-              .from('users')
-              .insert({
-                id: data.user.id,
-                email: email,
-                username: username,
-                name: name,
-                role: role
-              })
-              .select();
-            
-            if (!profileError) break;
-            
-            console.warn(`Profile creation attempt ${retryCount + 1} failed:`, profileError);
-            retryCount++;
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
-          } catch (profileErr) {
-            console.error('Profile creation exception:', profileErr);
-            retryCount++;
-          }
+        // Create user profile
+        try {
+          await supabase
+            .from('users')
+            .insert({
+              id: data.user.id,
+              email: email,
+              username: username,
+              name: name,
+              role: role
+            });
+        } catch (profileErr) {
+          console.warn('Profile creation error (non-critical):', profileErr);
         }
         
-        // Auto-login after registration
+        // Auto-login
         const loginResult = await this.adminLogin(email, password);
         
         if (loginResult.success) {
@@ -570,13 +589,13 @@ export const authAPI = {
         return {
           success: true,
           user: data.user,
-          message: 'Registration successful! You can now log in.'
+          message: 'Registration successful!'
         };
       }
 
       return { 
         success: false, 
-        error: 'Registration failed - no user returned from server' 
+        error: 'Registration failed' 
       };
     } catch (error) {
       console.error('Registration exception:', error);
@@ -603,9 +622,9 @@ export const authAPI = {
         let errorMessage = 'Invalid email or password';
         
         if (error.message.includes('Invalid login credentials')) {
-          errorMessage = 'Invalid email or password. Please check your credentials.';
+          errorMessage = 'Invalid email or password.';
         } else if (error.message.includes('Email not confirmed')) {
-          errorMessage = 'Please check your email to confirm your account before logging in.';
+          errorMessage = 'Please confirm your email before logging in.';
         } else {
           errorMessage = error.message;
         }
@@ -617,20 +636,18 @@ export const authAPI = {
       }
 
       if (data.user) {
-        // Try to get user profile, but don't fail if it doesn't exist
+        // Get user profile
         let profile = { role: 'user', name: data.user.email?.split('@')[0] || 'User' };
         
         try {
-          const { data: profileData, error: profileError } = await supabase
+          const { data: profileData } = await supabase
             .from('users')
             .select('*')
             .eq('id', data.user.id)
-            .maybeSingle(); // Use maybeSingle to avoid throwing error if no profile
+            .maybeSingle();
           
-          if (!profileError && profileData) {
+          if (profileData) {
             profile = profileData;
-          } else if (profileError && !profileError.message.includes('No rows found')) {
-            console.warn('Profile fetch error (non-critical):', profileError);
           }
         } catch (profileErr) {
           console.warn('Profile fetch exception:', profileErr);
@@ -664,14 +681,12 @@ export const authAPI = {
 
   async getCurrentUserWithProfile() {
     try {
-      // Get auth session first
       const { data: sessionData } = await supabase.auth.getSession();
       
       if (!sessionData?.session) {
         return null;
       }
       
-      // Get user from session
       const { data: authData, error: authError } = await supabase.auth.getUser();
       
       if (authError || !authData?.user) {
@@ -679,7 +694,7 @@ export const authAPI = {
         return null;
       }
       
-      // Try to get profile
+      // Get profile
       let profile = { role: 'user', name: authData.user.email?.split('@')[0] || 'User' };
       
       try {
@@ -693,7 +708,7 @@ export const authAPI = {
           profile = profileData;
         }
       } catch (profileErr) {
-        console.warn('Profile fetch in getCurrentUserWithProfile:', profileErr);
+        console.warn('Profile fetch error:', profileErr);
       }
       
       return {
@@ -727,23 +742,19 @@ export const authAPI = {
   },
 
   async isAdmin() {
-    // Check localStorage first (for backward compatibility)
     if (localStorage.getItem('admin_role') === 'admin') {
       return true;
     }
     
-    // Then check from profile
     const role = await this.getUserRole();
     return role === 'admin';
   },
 
   async isLoggedIn() {
     try {
-      // Check Supabase auth session
       const { data } = await supabase.auth.getSession();
       const hasSession = !!data?.session;
       
-      // Also check localStorage for backward compatibility
       const localStorageAuth = localStorage.getItem('admin_logged_in') === 'true';
       const sessionTime = parseInt(localStorage.getItem('admin_session') || '0');
       const currentTime = Date.now();
@@ -767,7 +778,6 @@ export const authAPI = {
     try {
       const { error } = await supabase.auth.signOut();
       
-      // Clear localStorage
       localStorage.removeItem('admin_logged_in');
       localStorage.removeItem('admin_username');
       localStorage.removeItem('admin_session');
@@ -805,7 +815,6 @@ export const authAPI = {
     }
   },
 
-  // Helper function for backward compatibility
   checkLocalStorageAuth() {
     const loggedIn = localStorage.getItem('admin_logged_in') === 'true';
     const sessionTime = parseInt(localStorage.getItem('admin_session') || '0');

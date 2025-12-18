@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, blogAPI, formatNumber, authAPI } from '../supabase';
 import './BlogPage.css';
@@ -20,6 +20,7 @@ const BlogPage = () => {
   const [userRole, setUserRole] = useState(null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const isMountedRef = useRef(true);
 
   const authorInfo = {
     name: "Laurie Pressman",
@@ -51,16 +52,25 @@ const BlogPage = () => {
     setCategoryCounts(counts);
   };
 
-  // Function to fetch posts with error handling
+  // Function to fetch posts with error handling and timeout
   const fetchPosts = async () => {
+    if (!isMountedRef.current) return;
+    
     setIsLoading(true);
     setError(null);
     
     try {
       console.log('Fetching posts...');
       
+      // Add timeout
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout after 15 seconds')), 15000);
+      });
+      
       // Get current user and role
       const user = await authAPI.getCurrentUserWithProfile();
+      if (!isMountedRef.current) return;
+      
       setCurrentUser(user);
       const role = user?.profile?.role || null;
       setUserRole(role);
@@ -68,10 +78,13 @@ const BlogPage = () => {
       
       let posts = [];
       
-      // Use blogAPI.getUserPosts which handles permissions correctly
-      posts = await blogAPI.getUserPosts(user?.id);
+      // Fetch posts with timeout
+      const postsPromise = blogAPI.getUserPosts(user?.id);
+      posts = await Promise.race([postsPromise, timeoutPromise]);
       
-      console.log('Posts fetched:', posts);
+      if (!isMountedRef.current) return;
+      
+      console.log('Posts fetched:', posts?.length || 0);
       
       if (posts && posts.length > 0) {
         setBlogPosts(posts);
@@ -97,33 +110,51 @@ const BlogPage = () => {
         setPopularPosts([]);
       }
     } catch (err) {
+      if (!isMountedRef.current) return;
+      
       console.error('Error fetching posts:', err);
-      setError(err.message || 'Failed to load posts');
+      setError(err.message || 'Failed to load posts. Please check your connection.');
       setBlogPosts([]);
       calculateCategoryCounts([]);
       setPopularPosts([]);
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
   useEffect(() => {
+    isMountedRef.current = true;
+    
     fetchPosts();
     
-    // Subscribe to real-time updates
-    const channel = supabase
-      .channel('posts-channel')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'posts' }, 
-        () => {
-          console.log('Posts updated, refetching...');
-          fetchPosts();
-        }
-      )
-      .subscribe();
+    // Subscribe to real-time updates with error handling
+    let channel;
+    try {
+      channel = supabase
+        .channel('posts-channel')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'posts' }, 
+          () => {
+            console.log('Posts updated, refetching...');
+            if (isMountedRef.current) {
+              fetchPosts();
+            }
+          }
+        )
+        .subscribe((status) => {
+          console.log('Subscription status:', status);
+        });
+    } catch (subscribeError) {
+      console.warn('Could not subscribe to real-time updates:', subscribeError);
+    }
     
     return () => {
-      supabase.removeChannel(channel);
+      isMountedRef.current = false;
+      if (channel) {
+        supabase.removeChannel(channel).catch(console.warn);
+      }
     };
   }, []);
 
@@ -227,7 +258,9 @@ const BlogPage = () => {
             <i className="fas fa-redo"></i> Try Again
           </button>
           <p className="error-hint">
-            Make sure your database tables are set up correctly in Supabase.
+            {error.includes('timeout') 
+              ? 'The request is taking too long. Check your internet connection and try again.'
+              : 'Make sure your database tables are set up correctly in Supabase.'}
           </p>
         </div>
       </div>
