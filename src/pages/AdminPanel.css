@@ -59,7 +59,7 @@
 
 /* Reset & Base Styles */
 .admin-panel * {
-  margin: 0;
+  margin-top: 40px;
   padding: 0;
   box-sizing: border-box;
 }
