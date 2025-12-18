@@ -20,6 +20,7 @@ const AdminPanel = () => {
     published: true
   });
   const [currentUser, setCurrentUser] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // New state for mobile sidebar
 
   useEffect(() => {
     checkAuthAndLoadData();
@@ -165,6 +166,14 @@ const AdminPanel = () => {
     }
   };
 
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    // Close sidebar on mobile when a tab is clicked
+    if (window.innerWidth <= 1024) {
+      setSidebarOpen(false);
+    }
+  };
+
   if (loading) {
     return <div className="admin-loading">Loading admin panel...</div>;
   }
@@ -178,7 +187,7 @@ const AdminPanel = () => {
   return (
     <div className="admin-panel">
       {/* Sidebar */}
-      <div className="admin-sidebar">
+      <div className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="admin-header">
           <h2>Admin Panel</h2>
           <p>Welcome, {currentUser?.profile?.name || 'Admin'}</p>
@@ -188,31 +197,31 @@ const AdminPanel = () => {
         <nav className="admin-nav">
           <button 
             className={`nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dashboard')}
+            onClick={() => handleTabChange('dashboard')}
           >
             <i className="fas fa-tachometer-alt"></i> Dashboard
           </button>
           <button 
             className={`nav-btn ${activeTab === 'posts' ? 'active' : ''}`}
-            onClick={() => setActiveTab('posts')}
+            onClick={() => handleTabChange('posts')}
           >
             <i className="fas fa-newspaper"></i> All Posts ({posts.length})
           </button>
           <button 
             className={`nav-btn ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveTab('users')}
+            onClick={() => handleTabChange('users')}
           >
             <i className="fas fa-users"></i> Users ({users.length})
           </button>
           <button 
             className={`nav-btn ${activeTab === 'comments' ? 'active' : ''}`}
-            onClick={() => setActiveTab('comments')}
+            onClick={() => handleTabChange('comments')}
           >
             <i className="fas fa-comments"></i> Comments ({comments.length})
           </button>
           <button 
             className={`nav-btn ${activeTab === 'create' ? 'active' : ''}`}
-            onClick={() => setActiveTab('create')}
+            onClick={() => handleTabChange('create')}
           >
             <i className="fas fa-plus-circle"></i> Create Post
           </button>
@@ -240,11 +249,44 @@ const AdminPanel = () => {
         </div>
       </div>
 
+      {/* Mobile Hamburger Button */}
+      <button 
+        className="mobile-menu-toggle"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label="Toggle menu"
+      >
+        <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-bars'}`}></i>
+      </button>
+
+      {/* Overlay for mobile sidebar */}
+      {sidebarOpen && (
+        <div 
+          className="sidebar-overlay"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Main Content */}
       <div className="admin-content">
+        {/* Mobile Header */}
+        <div className="mobile-header">
+          <div className="mobile-header-content">
+            <button 
+              className="mobile-menu-btn"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              <i className="fas fa-bars"></i>
+            </button>
+            <div className="mobile-header-info">
+              <h1>Admin Panel</h1>
+              <p>{currentUser?.profile?.name || 'Admin'}</p>
+            </div>
+          </div>
+        </div>
+
         {activeTab === 'dashboard' && (
           <div className="dashboard">
-            <h1>Admin Dashboard</h1>
+            <h1 className="desktop-title">Admin Dashboard</h1>
             <p className="dashboard-subtitle">Full system overview with admin privileges</p>
             
             <div className="stats-grid">
@@ -351,7 +393,7 @@ const AdminPanel = () => {
 
         {activeTab === 'posts' && (
           <div className="posts-management">
-            <h1>All Posts Management</h1>
+            <h1 className="desktop-title">All Posts Management</h1>
             <p className="section-subtitle">View and manage posts from all users</p>
             
             <div className="admin-controls">
@@ -433,7 +475,7 @@ const AdminPanel = () => {
 
         {activeTab === 'users' && (
           <div className="users-management">
-            <h1>User Management</h1>
+            <h1 className="desktop-title">User Management</h1>
             <p className="section-subtitle">Manage all user accounts and permissions</p>
             
             <div className="users-table">
@@ -500,7 +542,7 @@ const AdminPanel = () => {
 
         {activeTab === 'comments' && (
           <div className="comments-management">
-            <h1>Comments Management</h1>
+            <h1 className="desktop-title">Comments Management</h1>
             <p className="section-subtitle">Moderate comments from all users</p>
             
             <div className="comments-table">
@@ -548,7 +590,7 @@ const AdminPanel = () => {
 
         {activeTab === 'create' && (
           <div className="create-post">
-            <h1>Create New Post</h1>
+            <h1 className="desktop-title">Create New Post</h1>
             <p className="section-subtitle">Create a post as admin (can be attributed to any user)</p>
             
             <form onSubmit={handleCreatePost} className="post-form">
