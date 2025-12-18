@@ -259,7 +259,12 @@ const AdminPanel = () => {
       </button>
 
       {/* Overlay for mobile sidebar */}
-     
+      {sidebarOpen && (
+        <div 
+          className="sidebar-overlay"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Main Content */}
       <div className="admin-content">
