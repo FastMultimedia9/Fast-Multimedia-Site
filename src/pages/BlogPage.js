@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { blogAPI, authAPI } from '../supabase';
+import { blogAPI, authAPI, formatNumber } from '../supabase';
 import './BlogPage.css';
 
 const BlogPage = () => {
@@ -10,58 +10,6 @@ const BlogPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   const navigate = useNavigate();
-
-  // Demo posts as fallback
-  const demoPosts = [
-    {
-      id: 1,
-      title: "Welcome to Our Blog",
-      excerpt: "This is a sample post. Create your own posts to see them here!",
-      content: "Welcome to your new blog! This is a sample post to show you how your articles will look.",
-      category: "general",
-      image_url: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&auto=format&fit=crop",
-      views: 0,
-      comments: 0,
-      likes: 0,
-      featured: true,
-      published: true,
-      created_at: new Date().toISOString(),
-      readTime: '2 min read',
-      author: 'Admin'
-    },
-    {
-      id: 2,
-      title: "How to Create Your First Post",
-      excerpt: "Learn how to create and publish your first blog post on our platform.",
-      content: "Creating posts is easy! Here's how to get started.",
-      category: "development",
-      image_url: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop",
-      views: 0,
-      comments: 0,
-      likes: 0,
-      featured: false,
-      published: true,
-      created_at: new Date().toISOString(),
-      readTime: '3 min read',
-      author: 'Admin'
-    },
-    {
-      id: 3,
-      title: "Best Practices for Blogging",
-      excerpt: "Tips and tricks for writing engaging blog content.",
-      content: "Here are some best practices for creating great blog content.",
-      category: "business",
-      image_url: "https://images.unsplash.com/photo-1545239351-ef35f43d514b?w=800&auto=format&fit=crop",
-      views: 0,
-      comments: 0,
-      likes: 0,
-      featured: false,
-      published: true,
-      created_at: new Date().toISOString(),
-      readTime: '4 min read',
-      author: 'Admin'
-    }
-  ];
 
   // Fetch data - SIMPLIFIED
   useEffect(() => {
@@ -73,19 +21,39 @@ const BlogPage = () => {
         const user = await authAPI.getCurrentUser();
         setCurrentUser(user);
         
-        // Fetch posts
+        // Fetch posts with comments count
         const posts = await blogAPI.getPosts();
         
         if (posts && posts.length > 0) {
           console.log(`✅ Loaded ${posts.length} real posts from database`);
-          setBlogPosts(posts);
+          
+          // For each post, fetch comments count
+          const postsWithComments = await Promise.all(
+            posts.map(async (post) => {
+              try {
+                const comments = await blogAPI.getComments(post.id);
+                return {
+                  ...post,
+                  comments_count: comments.length || 0
+                };
+              } catch (error) {
+                console.log(`Error fetching comments for post ${post.id}:`, error.message);
+                return {
+                  ...post,
+                  comments_count: 0
+                };
+              }
+            })
+          );
+          
+          setBlogPosts(postsWithComments);
         } else {
-          console.log('📭 No posts in database, showing demo posts');
-          setBlogPosts(demoPosts);
+          console.log('📭 No posts in database, showing empty state');
+          setBlogPosts([]);
         }
       } catch (error) {
-        console.log('❌ Error loading data, showing demo posts:', error.message);
-        setBlogPosts(demoPosts);
+        console.log('❌ Error loading data:', error.message);
+        setBlogPosts([]);
       } finally {
         setIsLoading(false);
       }
@@ -130,13 +98,34 @@ const BlogPage = () => {
     ? blogPosts 
     : blogPosts.filter(post => post.category === activeCategory);
 
+  // Get unique categories from posts
+  const getUniqueCategories = () => {
+    const categories = ['all', 'general', 'design', 'development', 'business'];
+    const postCategories = blogPosts.map(post => post.category).filter(Boolean);
+    const uniqueCategories = [...new Set([...categories, ...postCategories])];
+    
+    // Count posts per category
+    const categoryCounts = {};
+    uniqueCategories.forEach(category => {
+      if (category === 'all') {
+        categoryCounts[category] = blogPosts.length;
+      } else {
+        categoryCounts[category] = blogPosts.filter(post => post.category === category).length;
+      }
+    });
+    
+    return { uniqueCategories, categoryCounts };
+  };
+
+  const { uniqueCategories, categoryCounts } = getUniqueCategories();
+
   // Loading screen
   if (isLoading) {
     return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
-        <p style={styles.loadingText}>Loading blog posts...</p>
-        <small style={styles.loadingSubtext}>Connecting to database</small>
+      <div className="blog-loading-container">
+        <div className="blog-spinner"></div>
+        <p className="blog-loading-text">Loading blog posts...</p>
+        <small className="blog-loading-subtext">Fetching latest articles</small>
       </div>
     );
   }
@@ -146,192 +135,216 @@ const BlogPage = () => {
     <div className="blog-page">
       {/* Hero Section */}
       <div className="blog-hero">
-        <div className="container">
-          <h1 className="blog-title">Blog</h1>
-          <p className="blog-subtitle">Latest articles and insights</p>
+        <div className="blog-container">
+          <h1 className="blog-title">Blog Insights</h1>
+          <p className="blog-subtitle">Discover the latest articles, trends, and expert insights</p>
           
           {/* User status */}
           {currentUser && (
-            <div className="user-status">
-              <span className="user-badge">
-                👤 {currentUser.email?.split('@')[0] || 'User'}
+            <div className="blog-user-status">
+              <span className="blog-user-badge">
+                <i className="fas fa-user-circle"></i> 
+                {currentUser.email?.split('@')[0] || 'User'}
               </span>
               <button 
-                className="create-post-btn"
+                className="blog-create-post-btn"
                 onClick={() => navigate('/login')}
               >
-                + Create Post
+                <i className="fas fa-plus"></i> Create Post
               </button>
             </div>
           )}
           
+          {/* Stats Summary */}
+          <div className="blog-stats-summary">
+            <div className="blog-stat-item">
+              <i className="fas fa-newspaper"></i>
+              <span className="blog-stat-count">{blogPosts.length}</span>
+              <span className="blog-stat-label">Total Articles</span>
+            </div>
+            <div className="blog-stat-item">
+              <i className="fas fa-eye"></i>
+              <span className="blog-stat-count">
+                {formatNumber(blogPosts.reduce((sum, post) => sum + (post.views || 0), 0))}
+              </span>
+              <span className="blog-stat-label">Total Views</span>
+            </div>
+            <div className="blog-stat-item">
+              <i className="fas fa-comments"></i>
+              <span className="blog-stat-count">
+                {formatNumber(blogPosts.reduce((sum, post) => sum + (post.comments_count || 0), 0))}
+              </span>
+              <span className="blog-stat-label">Total Comments</span>
+            </div>
+          </div>
+          
           {/* Search */}
-          <form onSubmit={handleSearch} className="search-form">
-            <input
-              type="text"
-              placeholder="Search articles..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
-            />
-            <button type="submit" className="search-button">
-              Search
-            </button>
-            {searchQuery && (
-              <button 
-                type="button" 
-                onClick={resetFilters}
-                className="clear-button"
-              >
-                Clear
+          <form onSubmit={handleSearch} className="blog-search-form">
+            <div className="blog-search-wrapper">
+              <i className="fas fa-search blog-search-icon"></i>
+              <input
+                type="text"
+                placeholder="Search articles, topics, or keywords..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="blog-search-input"
+              />
+              <button type="submit" className="blog-search-button">
+                Search
               </button>
-            )}
+              {searchQuery && (
+                <button 
+                  type="button" 
+                  onClick={resetFilters}
+                  className="blog-clear-button"
+                >
+                  <i className="fas fa-times"></i>
+                </button>
+              )}
+            </div>
           </form>
         </div>
       </div>
       
       {/* Categories */}
-      <div className="categories-nav">
-        <div className="container">
-          <button 
-            className={`category-btn ${activeCategory === 'all' ? 'active' : ''}`}
-            onClick={() => handleCategoryClick('all')}
-          >
-            All Posts
-          </button>
-          <button 
-            className={`category-btn ${activeCategory === 'design' ? 'active' : ''}`}
-            onClick={() => handleCategoryClick('design')}
-          >
-            Design
-          </button>
-          <button 
-            className={`category-btn ${activeCategory === 'development' ? 'active' : ''}`}
-            onClick={() => handleCategoryClick('development')}
-          >
-            Development
-          </button>
-          <button 
-            className={`category-btn ${activeCategory === 'business' ? 'active' : ''}`}
-            onClick={() => handleCategoryClick('business')}
-          >
-            Business
-          </button>
-          <button 
-            className={`category-btn ${activeCategory === 'general' ? 'active' : ''}`}
-            onClick={() => handleCategoryClick('general')}
-          >
-            General
-          </button>
+      <div className="blog-categories-nav">
+        <div className="blog-container">
+          <div className="blog-categories-scroll">
+            {uniqueCategories.map(category => (
+              <button 
+                key={category}
+                className={`blog-category-btn ${activeCategory === category ? 'active' : ''}`}
+                onClick={() => handleCategoryClick(category)}
+              >
+                <span className="blog-category-name">
+                  {category === 'all' ? 'All Posts' : category.charAt(0).toUpperCase() + category.slice(1)}
+                </span>
+                <span className="blog-category-count">({categoryCounts[category] || 0})</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
       
       {/* Blog Posts */}
-      <div className="container">
-        <div className="blog-grid">
-          {filteredPosts.length > 0 ? (
-            filteredPosts.map(post => (
-              <div key={post.id} className="blog-card">
-                <div className="blog-card-image">
-                  <img 
-                    src={post.image_url} 
-                    alt={post.title}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = `https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&auto=format&fit=crop`;
-                    }}
-                  />
-                  <div className="category-badge">
-                    {post.category || 'General'}
+      <div className="blog-container">
+        {filteredPosts.length > 0 ? (
+          <>
+            <div className="blog-grid">
+              {filteredPosts.map(post => (
+                <div key={post.id} className="blog-card">
+                  <div className="blog-card-image">
+                    <img 
+                      src={post.image_url} 
+                      alt={post.title}
+                      className="blog-card-img"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&auto=format&fit=crop`;
+                      }}
+                    />
+                    <div className="blog-card-badges">
+                      <div className="blog-category-badge">
+                        {post.category ? post.category.charAt(0).toUpperCase() + post.category.slice(1) : 'General'}
+                      </div>
+                      {post.featured && (
+                        <div className="blog-featured-badge">
+                          <i className="fas fa-star"></i> Featured
+                        </div>
+                      )}
+                    </div>
+                    <div className="blog-card-stats-overlay">
+                      <div className="blog-card-stat">
+                        <i className="fas fa-eye"></i>
+                        <span>{formatNumber(post.views || 0)}</span>
+                      </div>
+                      <div className="blog-card-stat">
+                        <i className="fas fa-comment"></i>
+                        <span>{formatNumber(post.comments_count || 0)}</span>
+                      </div>
+                    </div>
                   </div>
-                  {post.featured && (
-                    <div className="featured-badge">Featured</div>
-                  )}
-                </div>
-                <div className="blog-card-content">
-                  <h3 className="blog-card-title">{post.title}</h3>
-                  <p className="blog-card-excerpt">{post.excerpt}</p>
-                  <div className="blog-card-meta">
-                    <span className="post-date">
-                      {new Date(post.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </span>
-                    <span className="post-read-time">{post.readTime}</span>
+                  <div className="blog-card-content">
+                    <div className="blog-card-meta">
+                      <span className="blog-card-date">
+                        <i className="far fa-calendar"></i>
+                        {new Date(post.created_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
+                      <span className="blog-card-read-time">
+                        <i className="far fa-clock"></i>
+                        {post.readTime || '5 min read'}
+                      </span>
+                    </div>
+                    <h3 className="blog-card-title">{post.title}</h3>
+                    <p className="blog-card-excerpt">{post.excerpt}</p>
+                    <div className="blog-card-author">
+                      <i className="fas fa-user-edit"></i>
+                      <span>{post.author || 'Author'}</span>
+                    </div>
+                    <button 
+                      className="blog-read-more-button"
+                      onClick={() => navigate(`/blog/${post.id}`)}
+                    >
+                      <span>Read Article</span>
+                      <i className="fas fa-arrow-right"></i>
+                    </button>
                   </div>
-                  <button 
-                    className="read-more-button"
-                    onClick={() => navigate(`/blog/${post.id}`)}
-                  >
-                    Read More →
-                  </button>
                 </div>
+              ))}
+            </div>
+            
+            {/* Status info */}
+            <div className="blog-status-info">
+              <div className="blog-status-content">
+                <i className="fas fa-info-circle"></i>
+                <p>
+                  Showing <strong>{filteredPosts.length}</strong> of <strong>{blogPosts.length}</strong> articles • 
+                  <span className="blog-database-status">
+                    {blogPosts.length > 0 ? ' Live Database' : ' No Articles Yet'}
+                  </span>
+                  {currentUser ? ' • Logged In' : ' • Guest Mode'}
+                </p>
               </div>
-            ))
-          ) : (
-            <div className="no-posts">
-              <h3>No posts found</h3>
-              <p>Try a different search or category</p>
-              <button onClick={resetFilters} className="reset-button">
-                Show All Posts
+              {blogPosts.length === 0 && (
+                <button 
+                  onClick={() => navigate('/login')}
+                  className="blog-create-first-btn"
+                >
+                  <i className="fas fa-plus-circle"></i> Create Your First Post
+                </button>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="blog-no-posts">
+            <div className="blog-no-posts-icon">
+              <i className="far fa-newspaper"></i>
+            </div>
+            <h3 className="blog-no-posts-title">No articles found</h3>
+            <p className="blog-no-posts-message">
+              {searchQuery || activeCategory !== 'all' 
+                ? 'Try a different search or category filter'
+                : 'Be the first to create a blog post!'}
+            </p>
+            <div className="blog-no-posts-actions">
+              {(searchQuery || activeCategory !== 'all') && (
+                <button onClick={resetFilters} className="blog-reset-filters-btn">
+                  <i className="fas fa-redo"></i> Reset Filters
+                </button>
+              )}
+              <button onClick={() => navigate('/login')} className="blog-create-post-action-btn">
+                <i className="fas fa-pen-fancy"></i> Start Writing
               </button>
             </div>
-          )}
-        </div>
-        
-        {/* Status info */}
-        <div className="status-info">
-          <p>
-            Showing {filteredPosts.length} of {blogPosts.length} posts • 
-            {blogPosts[0]?.id === 1 ? ' Demo Mode' : ' Live Database'}
-            {currentUser ? ' • Logged In' : ' • Guest'}
-          </p>
-        </div>
+          </div>
+        )}
       </div>
-      
-      {/* Add CSS styles */}
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
-};
-
-// Inline styles for loading screen
-const styles = {
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100vh',
-    textAlign: 'center',
-    backgroundColor: '#f9f9f9'
-  },
-  spinner: {
-    width: '50px',
-    height: '50px',
-    border: '5px solid #f3f3f3',
-    borderTop: '5px solid #3498db',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-    marginBottom: '20px'
-  },
-  loadingText: {
-    fontSize: '20px',
-    color: '#333',
-    marginBottom: '10px',
-    fontWeight: '500'
-  },
-  loadingSubtext: {
-    color: '#666',
-    fontSize: '14px'
-  }
 };
 
 export default BlogPage;
