@@ -26,9 +26,23 @@ const getSupabaseClient = () => {
 // Export the single instance
 export const supabase = getSupabaseClient();
 
+// Helper function to calculate read time
+const calculateReadTime = (content) => {
+  if (!content) return '5 min read';
+  
+  const words = content.split(/\s+/).length;
+  const minutes = Math.ceil(words / 200); // Average reading speed: 200 words per minute
+  
+  if (minutes < 1) return '1 min read';
+  return `${minutes} min read`;
+};
+
 // Simple data transformation
 const transformPostData = (post) => {
   if (!post) return null;
+  
+  // Get user info from the joined data
+  const user = post.users || {};
   
   return {
     id: post.id,
@@ -43,9 +57,11 @@ const transformPostData = (post) => {
     featured: post.featured || false,
     published: post.published !== false,
     created_at: post.created_at || new Date().toISOString(),
-    readTime: '5 min read',
-    author: 'Author',
-    user_id: post.user_id
+    readTime: calculateReadTime(post.content) || '5 min read',
+    author: user.name || user.username || user.email?.split('@')[0] || 'Author',
+    author_avatar: user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.username || 'Author')}&background=6c63ff&color=fff`,
+    user_id: post.user_id,
+    user_role: user.role || 'user'
   };
 };
 
@@ -100,12 +116,21 @@ export const blogAPI = {
       
       const { data, error } = await supabase
         .from('posts')
-        .select('*')
+        .select(`
+          *,
+          users:user_id (
+            id,
+            name,
+            username,
+            email,
+            avatar_url,
+            role
+          )
+        `)
         .order('created_at', { ascending: false });
       
       if (error) {
         console.log('⚠️ Error fetching posts:', error.message);
-        // Return empty array for any error
         return [];
       }
       
@@ -122,7 +147,17 @@ export const blogAPI = {
       // Just get all published posts for simplicity
       const { data, error } = await supabase
         .from('posts')
-        .select('*')
+        .select(`
+          *,
+          users:user_id (
+            id,
+            name,
+            username,
+            email,
+            avatar_url,
+            role
+          )
+        `)
         .eq('published', true)
         .order('created_at', { ascending: false });
       
@@ -142,7 +177,17 @@ export const blogAPI = {
     try {
       const { data, error } = await supabase
         .from('posts')
-        .select('*')
+        .select(`
+          *,
+          users:user_id (
+            id,
+            name,
+            username,
+            email,
+            avatar_url,
+            role
+          )
+        `)
         .eq('id', id)
         .maybeSingle();
       
