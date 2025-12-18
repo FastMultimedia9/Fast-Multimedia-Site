@@ -4,68 +4,10 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = 'https://ymqlxvvschytbkkjexvd.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltcWx4dnZzY2h5dGJra2pleHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MjI2NjUsImV4cCI6MjA4MTQ5ODY2NX0.oZr6o8cg_WuJ83maXa-d8a3TfVAtQaGp3EXftUidjzo'
 
-// SINGLETON PATTERN - Only create client once
-let supabaseInstance = null;
+// Create client - SIMPLIFIED
+export const supabase = createClient(supabaseUrl, supabaseKey)
 
-const getSupabase = () => {
-  if (!supabaseInstance) {
-    supabaseInstance = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        storage: localStorage,
-        storageKey: 'sb-auth-token',
-        autoConfirmEmail: true
-      },
-      global: {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      },
-      db: {
-        schema: 'public'
-      }
-    });
-  }
-  return supabaseInstance;
-};
-
-// Export a single instance
-export const supabase = getSupabase();
-
-// Test connection - SIMPLIFIED
-export const testConnection = async () => {
-  try {
-    console.log('🔧 Testing Supabase connection...');
-    
-    // Test 1: Simple health check
-    const { data: health, error: healthError } = await supabase.rpc('say_hello');
-    
-    if (!healthError) {
-      console.log('✅ Supabase connection test 1 passed');
-    }
-    
-    // Test 2: Try to query posts directly (no joins)
-    const { data: postsData, error: postsError } = await supabase
-      .from('posts')
-      .select('id, title')
-      .limit(1);
-    
-    if (postsError) {
-      console.error('❌ Posts query failed:', postsError.message);
-      return false;
-    }
-    
-    console.log('✅ Posts query test passed, found:', postsData?.length || 0, 'posts');
-    return true;
-  } catch (error) {
-    console.error('❌ Connection error:', error);
-    return false;
-  }
-}
-
-// Simple data transformation - NO DEPENDENCIES
+// Simple data transformation
 const transformPostData = (post) => {
   if (!post) return null;
   
@@ -76,17 +18,14 @@ const transformPostData = (post) => {
     content: post.content || '',
     category: (post.category || 'general').toLowerCase(),
     image_url: post.image_url || `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000)}?w=800&auto=format&fit=crop`,
-    theme: post.theme || 'default',
     views: parseInt(post.views || 0),
     comments: parseInt(post.comments_count || 0),
     likes: parseInt(post.likes || 0),
     featured: post.featured || false,
     published: post.published !== false,
     created_at: post.created_at || new Date().toISOString(),
-    updated_at: post.updated_at || new Date().toISOString(),
     readTime: '5 min read',
-    author: post.users?.name || post.users?.username || 'Author',
-    author_id: post.user_id,
+    author: 'Author',
     user_id: post.user_id
   };
 };
@@ -96,12 +35,49 @@ const transformPostsData = (posts) => {
   return posts.map(transformPostData).filter(Boolean);
 };
 
-// SIMPLE BLOG API - NO COMPLEX JOINS INITIALLY
+// Utility functions - ADDED THESE
+export const formatNumber = (num) => {
+  if (!num && num !== 0) return '0';
+  
+  const number = parseInt(num);
+  
+  if (isNaN(number)) return '0';
+  
+  if (number >= 1000000) return (number / 1000000).toFixed(1) + 'M';
+  if (number >= 1000) return (number / 1000).toFixed(1) + 'K';
+  return number.toString();
+};
+
+export const formatTimeAgo = (timestamp) => {
+  if (!timestamp) return 'Just now';
+  
+  const date = new Date(timestamp);
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+  
+  let interval = Math.floor(seconds / 31536000);
+  if (interval >= 1) return interval + ' year' + (interval > 1 ? 's' : '') + ' ago';
+  
+  interval = Math.floor(seconds / 2592000);
+  if (interval >= 1) return interval + ' month' + (interval > 1 ? 's' : '') + ' ago';
+  
+  interval = Math.floor(seconds / 86400);
+  if (interval >= 1) return interval + ' day' + (interval > 1 ? 's' : '') + ' ago';
+  
+  interval = Math.floor(seconds / 3600);
+  if (interval >= 1) return interval + ' hour' + (interval > 1 ? 's' : '') + ' ago';
+  
+  interval = Math.floor(seconds / 60);
+  if (interval >= 1) return interval + ' minute' + (interval > 1 ? 's' : '') + ' ago';
+  
+  return 'Just now';
+};
+
+// SIMPLE BLOG API
 export const blogAPI = {
-  // Get posts WITHOUT user joins first
-  async getPostsSimple() {
+  async getPosts() {
     try {
-      console.log('🔄 Getting simple posts (no joins)...');
+      console.log('📡 Fetching posts from Supabase...');
       
       const { data, error } = await supabase
         .from('posts')
@@ -109,197 +85,112 @@ export const blogAPI = {
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.error('❌ Simple posts error:', error.message);
-        
-        // Try even simpler query
-        const { data: simpleData, error: simpleError } = await supabase
-          .from('posts')
-          .select('id, title, published')
-          .limit(10);
-          
-        if (simpleError) {
-          throw simpleError;
-        }
-        return simpleData || [];
-      }
-      
-      console.log('✅ Simple posts fetched:', data?.length || 0);
-      return data || [];
-    } catch (error) {
-      console.error('❌ Exception in getPostsSimple:', error.message);
-      
-      // If table might not exist, return empty array
-      if (error.message.includes('does not exist') || error.message.includes('relation')) {
-        console.warn('⚠️ Posts table might not exist yet');
+        console.log('⚠️ Error fetching posts:', error.message);
+        // Return empty array for any error
         return [];
       }
+      
+      console.log(`✅ Found ${data?.length || 0} posts`);
+      return data || [];
+    } catch (error) {
+      console.log('❌ Exception in getPosts:', error.message);
       return [];
     }
   },
 
-  // Get posts with user joins - SAFE VERSION
-  async getPosts() {
+  async getUserPosts() {
     try {
-      console.log('🔄 Getting posts with user info...');
-      
+      // Just get all published posts for simplicity
       const { data, error } = await supabase
         .from('posts')
-        .select(`
-          *,
-          users:user_id (name, username, email)
-        `)
+        .select('*')
+        .eq('published', true)
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.warn('⚠️ Failed to get posts with joins:', error.message);
-        
-        // Fallback to simple posts
-        console.log('🔄 Falling back to simple posts...');
-        const simplePosts = await this.getPostsSimple();
-        
-        // Add default author info
-        return simplePosts.map(post => ({
-          ...post,
-          author: 'Author',
-          users: { name: 'Author', username: 'author', email: '' }
-        }));
+        console.log('⚠️ Error in getUserPosts:', error.message);
+        return transformPostsData([]);
       }
       
-      console.log('✅ Posts with user info fetched:', data?.length || 0);
-      return data || [];
+      return transformPostsData(data || []);
     } catch (error) {
-      console.error('❌ Exception in getPosts:', error);
-      return [];
+      console.log('❌ Exception in getUserPosts:', error.message);
+      return transformPostsData([]);
     }
   },
 
-  // Get user-specific posts - ULTRA SIMPLE
-  async getUserPosts(userId = null) {
-    try {
-      console.log('🔄 Getting user posts...');
-      
-      // First, just get all posts without filtering
-      const allPosts = await this.getPosts();
-      
-      console.log('📊 Total posts found:', allPosts.length);
-      
-      // If no user is logged in, return only published posts
-      const { data: session } = await supabase.auth.getSession();
-      const currentUser = session?.session?.user;
-      
-      if (!currentUser) {
-        console.log('👤 No user logged in, showing only published posts');
-        const publishedPosts = allPosts.filter(post => post.published === true);
-        console.log('📄 Published posts:', publishedPosts.length);
-        return transformPostsData(publishedPosts);
-      }
-      
-      // Get user role
-      let isAdmin = false;
-      try {
-        const { data: userData } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', currentUser.id)
-          .maybeSingle();
-          
-        isAdmin = userData?.role === 'admin';
-        console.log('👑 User is admin?', isAdmin);
-      } catch (roleError) {
-        console.warn('⚠️ Could not check user role:', roleError.message);
-      }
-      
-      // Filter posts based on user role
-      let filteredPosts;
-      if (isAdmin) {
-        // Admin sees all posts
-        filteredPosts = allPosts;
-        console.log('👑 Admin view: All posts');
-      } else {
-        // Regular user sees their own posts + published posts
-        filteredPosts = allPosts.filter(post => 
-          post.user_id === currentUser.id || post.published === true
-        );
-        console.log('👤 User view: Own + published posts');
-      }
-      
-      console.log('✅ Final filtered posts:', filteredPosts.length);
-      return transformPostsData(filteredPosts);
-    } catch (error) {
-      console.error('❌ Error in getUserPosts:', error);
-      return [];
-    }
-  },
-
-  // Get single post
   async getPost(id) {
     try {
       const { data, error } = await supabase
         .from('posts')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
+      if (!data) return null;
       
       return transformPostData(data);
     } catch (error) {
-      console.error('Error in getPost:', error);
+      console.log('❌ Error in getPost:', error.message);
       return null;
     }
   },
 
-  // Get popular posts
-  async getPopularPosts(limit = 5) {
-    try {
-      const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .order('views', { ascending: false })
-        .limit(limit);
-      
-      if (error) throw error;
-      
-      return transformPostsData(data);
-    } catch (error) {
-      console.error('Error in getPopularPosts:', error);
-      return [];
-    }
-  },
-
-  // Track view count
   async trackView(postId) {
     try {
-      // Get current views
-      const { data: post, error: fetchError } = await supabase
+      const { data: post } = await supabase
         .from('posts')
         .select('views')
         .eq('id', postId)
         .single();
       
-      if (fetchError) {
-        console.error('Error fetching post for view tracking:', fetchError);
-        return 0;
-      }
-      
       const currentViews = parseInt(post?.views || 0);
       const newViews = currentViews + 1;
       
-      // Update views
-      const { error: updateError } = await supabase
+      await supabase
         .from('posts')
         .update({ views: newViews })
         .eq('id', postId);
       
-      if (updateError) {
-        console.error('Error updating view count:', updateError);
-        return currentViews;
-      }
-      
       return newViews;
     } catch (error) {
-      console.error('Error in trackView:', error);
+      console.log('⚠️ Error tracking view:', error.message);
       return 0;
+    }
+  },
+
+  // Get comments for a post
+  async getComments(postId) {
+    try {
+      const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('post_id', postId)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.log('Error getting comments:', error.message);
+        return [];
+      }
+      
+      // Transform comment data
+      const transformedComments = data?.map(comment => ({
+        id: comment.id,
+        author_name: comment.author_name || 'Anonymous',
+        author_email: comment.author_email,
+        content: comment.content,
+        avatar_url: comment.avatar_url || `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+        created_at: comment.created_at,
+        likes: parseInt(comment.likes || 0),
+        post_id: comment.post_id,
+        user_id: comment.user_id
+      })) || [];
+      
+      return transformedComments;
+    } catch (error) {
+      console.log('Error in getComments:', error.message);
+      return [];
     }
   },
 
@@ -328,7 +219,37 @@ export const blogAPI = {
       
       return data[0];
     } catch (error) {
-      console.error('Error adding comment:', error);
+      console.log('Error adding comment:', error.message);
+      return null;
+    }
+  },
+
+  // Like comment
+  async likeComment(commentId) {
+    try {
+      // Get current likes
+      const { data: comment, error: fetchError } = await supabase
+        .from('comments')
+        .select('likes')
+        .eq('id', commentId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      const currentLikes = parseInt(comment?.likes || 0);
+      const newLikes = currentLikes + 1;
+      
+      // Update likes
+      const { error: updateError } = await supabase
+        .from('comments')
+        .update({ likes: newLikes })
+        .eq('id', commentId);
+      
+      if (updateError) throw updateError;
+      
+      return newLikes;
+    } catch (error) {
+      console.log('Error in likeComment:', error.message);
       return null;
     }
   },
@@ -348,7 +269,6 @@ export const blogAPI = {
         content: postData.content || '',
         category: (postData.category || 'general').toLowerCase(),
         image_url: postData.image_url || `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000)}?w=800&auto=format&fit=crop`,
-        theme: postData.theme || 'default',
         views: 0,
         comments_count: 0,
         likes: 0,
@@ -368,14 +288,49 @@ export const blogAPI = {
       
       return transformPostData(data[0]);
     } catch (error) {
-      console.error('Error in createPost:', error);
+      console.log('Error in createPost:', error.message);
       return null;
     }
+  },
+
+  // Real-time subscriptions (optional, commented out for simplicity)
+  /*
+  onCommentsUpdate(postId, callback) {
+    const channel = supabase
+      .channel(`comments:${postId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'comments',
+          filter: `post_id=eq.${postId}`
+        },
+        async () => {
+          const comments = await this.getComments(postId);
+          callback(comments);
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }
+  */
 };
 
 // SIMPLE AUTH API
 export const authAPI = {
+  async getCurrentUser() {
+    try {
+      const { data } = await supabase.auth.getSession();
+      return data?.session?.user || null;
+    } catch {
+      return null;
+    }
+  },
+
   async getCurrentUserWithProfile() {
     try {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -386,104 +341,21 @@ export const authAPI = {
       
       const user = sessionData.session.user;
       
-      // Try to get profile
-      let profile = { role: 'user', name: user.email?.split('@')[0] || 'User' };
-      
-      try {
-        const { data: profileData } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle();
-        
-        if (profileData) {
-          profile = profileData;
-        }
-      } catch (profileErr) {
-        console.warn('Profile fetch error:', profileErr.message);
-      }
+      // Simple profile - can be extended if you have a users table
+      const profile = { 
+        role: 'user', 
+        name: user.email?.split('@')[0] || 'User' 
+      };
       
       return {
         ...user,
         profile: profile
       };
     } catch (error) {
-      console.error('Get current user error:', error);
+      console.log('Get current user error:', error.message);
       return null;
     }
-  },
-
-  async adminLogin(email, password) {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-
-      if (error) {
-        console.error('Login error:', error);
-        return { 
-          success: false, 
-          error: error.message || 'Invalid email or password' 
-        };
-      }
-
-      if (data.user) {
-        localStorage.setItem('admin_logged_in', 'true');
-        localStorage.setItem('admin_username', data.user.email);
-        localStorage.setItem('admin_session', Date.now().toString());
-        
-        return {
-          success: true,
-          user: data.user,
-          message: 'Login successful!'
-        };
-      }
-
-      return { success: false, error: 'Login failed' };
-    } catch (error) {
-      console.error('Login exception:', error);
-      return { 
-        success: false, 
-        error: 'Login failed. Please check your connection.' 
-      };
-    }
-  },
-
-  async logout() {
-    try {
-      await supabase.auth.signOut();
-      localStorage.removeItem('admin_logged_in');
-      localStorage.removeItem('admin_username');
-      localStorage.removeItem('admin_session');
-      localStorage.removeItem('admin_role');
-      return true;
-    } catch (error) {
-      console.error('Logout error:', error);
-      return false;
-    }
   }
 };
 
-// Utility functions
-export const formatNumber = (num) => {
-  if (!num && num !== 0) return '0';
-  
-  const number = parseInt(num);
-  
-  if (isNaN(number)) return '0';
-  
-  if (number >= 1000000) return (number / 1000000).toFixed(1) + 'M';
-  if (number >= 1000) return (number / 1000).toFixed(1) + 'K';
-  return number.toString();
-};
-
-// Initialize and test
-console.log('🚀 Initializing Supabase...');
-testConnection().then(success => {
-  if (success) {
-    console.log('🎉 Supabase initialized successfully!');
-  } else {
-    console.warn('⚠️ Supabase initialization had issues.');
-  }
-});
+console.log('✅ Supabase initialized successfully');
