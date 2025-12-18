@@ -1,8 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import TimeAgo from 'react-timeago';
-import { blogAPI, formatNumber } from '../supabase';
+import { blogAPI } from '../supabase';
 import './ArticlePage.css';
+
+// Utility functions
+const formatNumber = (num) => {
+  if (!num && num !== 0) return '0';
+  
+  const number = parseInt(num);
+  
+  if (isNaN(number)) return '0';
+  
+  if (number >= 1000000) return (number / 1000000).toFixed(1) + 'M';
+  if (number >= 1000) return (number / 1000).toFixed(1) + 'K';
+  return number.toString();
+};
+
+const formatTimeAgo = (timestamp) => {
+  if (!timestamp) return 'Just now';
+  
+  const date = new Date(timestamp);
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+  
+  let interval = Math.floor(seconds / 31536000);
+  if (interval >= 1) return interval + ' year' + (interval > 1 ? 's' : '') + ' ago';
+  
+  interval = Math.floor(seconds / 2592000);
+  if (interval >= 1) return interval + ' month' + (interval > 1 ? 's' : '') + ' ago';
+  
+  interval = Math.floor(seconds / 86400);
+  if (interval >= 1) return interval + ' day' + (interval > 1 ? 's' : '') + ' ago';
+  
+  interval = Math.floor(seconds / 3600);
+  if (interval >= 1) return interval + ' hour' + (interval > 1 ? 's' : '') + ' ago';
+  
+  interval = Math.floor(seconds / 60);
+  if (interval >= 1) return interval + ' minute' + (interval > 1 ? 's' : '') + ' ago';
+  
+  return 'Just now';
+};
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -51,11 +89,11 @@ const ArticlePage = () => {
           console.log('Comments loaded:', postComments);
           setComments(postComments || []);
           
-          // Set up real-time listener for comments
-          const unsubscribe = blogAPI.onCommentsUpdate(id, (comments) => {
-            console.log('Real-time comments update:', comments);
-            setComments(comments || []);
-          });
+          // Note: Real-time comments removed for simplicity
+          // const unsubscribe = blogAPI.onCommentsUpdate(id, (comments) => {
+          //   console.log('Real-time comments update:', comments);
+          //   setComments(comments || []);
+          // });
           
           // Get related posts
           const allPosts = await blogAPI.getPosts();
@@ -74,7 +112,7 @@ const ArticlePage = () => {
           const saved = JSON.parse(localStorage.getItem('blog_saved') || '[]');
           setIsSaved(saved.includes(id.toString()));
           
-          return () => unsubscribe();
+          // return () => unsubscribe();
         } else {
           throw new Error('Post not found');
         }
@@ -540,26 +578,30 @@ const ArticlePage = () => {
           {/* Related Articles */}
           <div className="sidebar-widget related-articles">
             <h3>Related Articles</h3>
-            {relatedPosts.map(relatedPost => (
-              <div 
-                key={relatedPost.id} 
-                className="related-article" 
-                onClick={() => {
-                  navigate(`/blog/${relatedPost.id}`);
-                  window.scrollTo(0, 0);
-                }}
-              >
-                <img src={relatedPost.image_url} alt={relatedPost.title} />
-                <div>
-                  <h4>{relatedPost.title}</h4>
-                  <div className="related-meta">
-                    <span>{new Date(relatedPost.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                    <span>•</span>
-                    <span>{relatedPost.readTime || '5 min read'}</span>
+            {relatedPosts.length > 0 ? (
+              relatedPosts.map(relatedPost => (
+                <div 
+                  key={relatedPost.id} 
+                  className="related-article" 
+                  onClick={() => {
+                    navigate(`/blog/${relatedPost.id}`);
+                    window.scrollTo(0, 0);
+                  }}
+                >
+                  <img src={relatedPost.image_url} alt={relatedPost.title} />
+                  <div>
+                    <h4>{relatedPost.title}</h4>
+                    <div className="related-meta">
+                      <span>{new Date(relatedPost.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      <span>•</span>
+                      <span>{relatedPost.readTime || '5 min read'}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="no-related">No related articles found.</p>
+            )}
           </div>
 
           {/* Newsletter Widget */}
@@ -609,39 +651,38 @@ const ArticlePage = () => {
       {/* Next/Previous Navigation */}
       <div className="article-navigation">
         <div className="container">
-          {post.id > 1 && (
-            <button 
-              className="nav-btn prev" 
-              onClick={() => {
-                navigate(`/blog/${parseInt(post.id) - 1}`);
-                window.scrollTo(0, 0);
-              }}
-            >
-              <i className="fas fa-arrow-left"></i>
-              <div>
-                <span>Previous</span>
-                <h4>Previous Article</h4>
-              </div>
-            </button>
-          )}
-          
           <button 
-            className="nav-btn next" 
-            onClick={async () => {
-              const allPosts = await blogAPI.getPosts();
-              const currentIndex = allPosts.findIndex(p => p.id === post.id);
-              if (currentIndex < allPosts.length - 1) {
-                navigate(`/blog/${allPosts[currentIndex + 1].id}`);
-                window.scrollTo(0, 0);
-              }
+            className="nav-btn prev" 
+            onClick={() => {
+              navigate('/blog');
             }}
           >
+            <i className="fas fa-arrow-left"></i>
             <div>
-              <span>Next</span>
-              <h4>Next Article</h4>
+              <span>Back to Blog</span>
+              <h4>All Articles</h4>
             </div>
-            <i className="fas fa-arrow-right"></i>
           </button>
+          
+          {post.id < 10 && (
+            <button 
+              className="nav-btn next" 
+              onClick={async () => {
+                const allPosts = await blogAPI.getPosts();
+                const currentIndex = allPosts.findIndex(p => p.id === post.id);
+                if (currentIndex < allPosts.length - 1) {
+                  navigate(`/blog/${allPosts[currentIndex + 1].id}`);
+                  window.scrollTo(0, 0);
+                }
+              }}
+            >
+              <div>
+                <span>Next Article</span>
+                <h4>Read Next</h4>
+              </div>
+              <i className="fas fa-arrow-right"></i>
+            </button>
+          )}
         </div>
       </div>
     </div>
