@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../supabase';
+import { supabase, authAPI } from '../supabase';
 import './RegisterPage.css';
 
 const RegisterPage = () => {
@@ -10,6 +10,7 @@ const RegisterPage = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    avatar_url: '',
     role: 'user',
     adminPassword: '',
     agreedToTerms: false
@@ -18,9 +19,10 @@ const RegisterPage = () => {
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showAdminPassword, setShowAdminPassword] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState('');
   const navigate = useNavigate();
 
-  // Secret admin password - CHANGE THIS IN PRODUCTION!
+  // Secret admin password
   const ADMIN_SECRET_PASSWORD = 'yahooamaps';
 
   // Check if user is already logged in
@@ -62,6 +64,17 @@ const RegisterPage = () => {
     // If role changes to admin, show admin password field
     if (name === 'role' && value === 'admin') {
       setShowAdminPassword(true);
+    }
+    
+    // If avatar URL changes, update preview
+    if (name === 'avatar_url') {
+      if (value.trim()) {
+        setAvatarPreview(value);
+      } else {
+        // Generate default avatar based on name or username
+        const nameForAvatar = newFormData.name || newFormData.username || 'User';
+        setAvatarPreview(`https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&background=6c63ff&color=fff&size=128`);
+      }
     }
     
     setFormData(newFormData);
@@ -118,52 +131,69 @@ const RegisterPage = () => {
     setIsLoading(true);
 
     try {
-      let result;
-      
-      if (formData.role === 'admin') {
-        result = await authAPI.registerAdmin(
-          formData.email,
-          formData.password,
-          formData.name,
-          formData.username
-        );
-      } else {
-        result = await authAPI.register(
-          formData.email,
-          formData.password,
-          formData.name,
-          formData.username
-        );
+      // Register with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email.trim(),
+        password: formData.password.trim(),
+        options: {
+          data: {
+            name: formData.name,
+            username: formData.username
+          }
+        }
+      });
+
+      if (authError) {
+        throw new Error(authError.message || 'Registration failed');
       }
 
-      if (result.success) {
-        setSuccess(result.message || 'Registration successful! You are now logged in.');
+      if (authData.user) {
+        // Create user profile in users table
+        const { error: profileError } = await supabase
+          .from('users')
+          .insert([
+            {
+              id: authData.user.id,
+              email: formData.email.trim(),
+              username: formData.username.trim(),
+              name: formData.name.trim(),
+              avatar_url: formData.avatar_url.trim() || `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name.trim())}&background=6c63ff&color=fff`,
+              role: formData.role,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }
+          ]);
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          // Still show success but log the error
+        }
+
+        setSuccess('Registration successful! You can now login with your credentials.');
         setFormData({
           name: '',
           username: '',
           email: '',
           password: '',
           confirmPassword: '',
+          avatar_url: '',
           role: 'user',
           adminPassword: '',
           agreedToTerms: false
         });
         setShowAdminPassword(false);
+        setAvatarPreview('');
         
-        // Redirect after successful registration
+        // Redirect to login page
         setTimeout(() => {
-          if (result.isAdmin) {
-            navigate('/admin');
-          } else {
-            navigate('/blog');
-          }
+          navigate('/login');
         }, 2000);
       } else {
-        setError(result.error || 'Registration failed');
+        setError('Registration failed. Please try again.');
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setError('Registration failed. Please try again.');
+      setError(error.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -207,6 +237,7 @@ const RegisterPage = () => {
                   onChange={handleChange}
                   placeholder="John Doe"
                   disabled={isLoading}
+                  required
                 />
               </div>
 
@@ -220,6 +251,7 @@ const RegisterPage = () => {
                   onChange={handleChange}
                   placeholder="johndoe"
                   disabled={isLoading}
+                  required
                 />
               </div>
             </div>
@@ -234,7 +266,33 @@ const RegisterPage = () => {
                 onChange={handleChange}
                 placeholder="you@example.com"
                 disabled={isLoading}
+                required
               />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="avatar_url">Profile Picture URL (Optional)</label>
+              <input
+                type="url"
+                id="avatar_url"
+                name="avatar_url"
+                value={formData.avatar_url}
+                onChange={handleChange}
+                placeholder="https://example.com/your-photo.jpg"
+                disabled={isLoading}
+              />
+              <small>Leave blank to use a generated avatar</small>
+              
+              {avatarPreview && (
+                <div className="avatar-preview">
+                  <img src={avatarPreview} alt="Avatar preview" onError={(e) => {
+                    e.target.onerror = null;
+                    const nameForAvatar = formData.name || formData.username || 'User';
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&background=6c63ff&color=fff&size=128`;
+                  }} />
+                  <p>Preview of how your avatar will appear</p>
+                </div>
+              )}
             </div>
 
             <div className="form-row">
@@ -248,6 +306,8 @@ const RegisterPage = () => {
                   onChange={handleChange}
                   placeholder="At least 6 characters"
                   disabled={isLoading}
+                  required
+                  minLength="6"
                 />
               </div>
 
@@ -261,6 +321,7 @@ const RegisterPage = () => {
                   onChange={handleChange}
                   placeholder="Confirm your password"
                   disabled={isLoading}
+                  required
                 />
               </div>
             </div>
@@ -300,6 +361,7 @@ const RegisterPage = () => {
                   placeholder="Enter admin authorization password"
                   disabled={isLoading}
                   className={formData.adminPassword ? 'has-value' : ''}
+                  required
                 />
                 <small className="admin-password-hint">
                   <i className="fas fa-info-circle"></i> This password is required to register as an administrator.
@@ -317,10 +379,11 @@ const RegisterPage = () => {
                   checked={formData.agreedToTerms}
                   onChange={handleChange}
                   disabled={isLoading}
+                  required
                 />
                 <label htmlFor="terms" className="checkbox-label">
                   <span className="checkmark"></span>
-                  I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy-policy">Privacy Policy</a>
+                  I agree to the <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a> and <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
                 </label>
               </div>
             </div>

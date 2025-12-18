@@ -57,17 +57,6 @@ const ArticlePage = () => {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
 
-  const authorInfo = {
-    name: "Alex Johnson",
-    bio: "Tech & Design Specialist",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&auto=format&fit=crop",
-    social: {
-      twitter: "#",
-      linkedin: "#",
-      dribbble: "#"
-    }
-  };
-
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
@@ -89,12 +78,6 @@ const ArticlePage = () => {
           console.log('Comments loaded:', postComments);
           setComments(postComments || []);
           
-          // Note: Real-time comments removed for simplicity
-          // const unsubscribe = blogAPI.onCommentsUpdate(id, (comments) => {
-          //   console.log('Real-time comments update:', comments);
-          //   setComments(comments || []);
-          // });
-          
           // Get related posts
           const allPosts = await blogAPI.getPosts();
           const related = allPosts
@@ -112,7 +95,6 @@ const ArticlePage = () => {
           const saved = JSON.parse(localStorage.getItem('blog_saved') || '[]');
           setIsSaved(saved.includes(id.toString()));
           
-          // return () => unsubscribe();
         } else {
           throw new Error('Post not found');
         }
@@ -316,16 +298,16 @@ const ArticlePage = () => {
             
             <div className="article-meta">
               <div className="author-info">
-                <img src={authorInfo.avatar} alt={post.author || authorInfo.name} className="author-avatar" />
+                <img src={post.author_avatar} alt={post.author} className="author-avatar" />
                 <div>
-                  <h4>{post.author || authorInfo.name}</h4>
-                  <p>{authorInfo.bio}</p>
+                  <h4>{post.author}</h4>
+                  <p>{post.user_role === 'admin' ? 'Administrator' : 'Regular User'}</p>
                 </div>
               </div>
               
               <div className="meta-details">
                 <span><i className="far fa-calendar"></i> {new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                <span><i className="far fa-clock"></i> {post.readTime || '5 min read'}</span>
+                <span><i className="far fa-clock"></i> {post.readTime}</span>
                 <span><i className="far fa-eye"></i> {formatNumber(viewCount)} views</span>
                 <span><i className="far fa-comment"></i> {post.comments || 0} comments</span>
               </div>
@@ -359,7 +341,7 @@ const ArticlePage = () => {
               </button>
             </div>
             <div className="read-time">
-              <i className="far fa-clock"></i> Reading time: {post.readTime || '5 min read'}
+              <i className="far fa-clock"></i> Reading time: {post.readTime}
             </div>
           </div>
 
@@ -412,21 +394,20 @@ const ArticlePage = () => {
           {/* Author Bio */}
           <div className="author-bio">
             <div className="author-header">
-              <img src={authorInfo.avatar} alt={post.author || authorInfo.name} />
+              <img src={post.author_avatar} alt={post.author} />
               <div>
-                <h3>About {post.author || authorInfo.name}</h3>
-                <p>{authorInfo.bio}</p>
+                <h3>About {post.author}</h3>
+                <p>{post.user_role === 'admin' ? 'Administrator' : 'Regular User'}</p>
               </div>
             </div>
             <div className="author-social">
-              <a href={authorInfo.social.twitter}><i className="fab fa-twitter"></i></a>
-              <a href={authorInfo.social.linkedin}><i className="fab fa-linkedin"></i></a>
-              <a href={authorInfo.social.dribbble}><i className="fab fa-dribbble"></i></a>
+              <a href="#" title="Twitter"><i className="fab fa-twitter"></i></a>
+              <a href="#" title="LinkedIn"><i className="fab fa-linkedin"></i></a>
+              <a href="#" title="Website"><i className="fas fa-globe"></i></a>
             </div>
             <p className="author-description">
-              With over 8 years of experience in tech and design, {post.author || authorInfo.name} specializes in creating 
-              user-centric digital experiences. He has worked with startups and Fortune 500 
-              companies alike, focusing on blending aesthetics with functionality.
+              {post.author} is a {post.user_role === 'admin' ? 'site administrator' : 'contributor'} who has shared this post. 
+              {post.user_role === 'admin' ? ' As an administrator, they help manage content and ensure the best experience for all readers.' : ' They enjoy sharing knowledge and insights with the community.'}
             </p>
           </div>
 
@@ -594,7 +575,7 @@ const ArticlePage = () => {
                     <div className="related-meta">
                       <span>{new Date(relatedPost.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                       <span>•</span>
-                      <span>{relatedPost.readTime || '5 min read'}</span>
+                      <span>{relatedPost.readTime}</span>
                     </div>
                   </div>
                 </div>
