@@ -12,17 +12,17 @@ const LoginPage = () => {
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetSuccess, setResetSuccess] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // New state for password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  // Check if already logged in
+  // Check if already logged in - FIXED VERSION
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const isLoggedIn = await authAPI.isLoggedIn();
-        if (isLoggedIn) {
-          const user = await authAPI.getCurrentUserWithProfile();
-          if (user?.profile?.role === 'admin') {
+        const user = await authAPI.getCurrentUser();
+        if (user) {
+          const userWithProfile = await authAPI.getCurrentUserWithProfile();
+          if (userWithProfile?.profile?.role === 'admin') {
             navigate('/admin');
           } else {
             navigate('/blog');

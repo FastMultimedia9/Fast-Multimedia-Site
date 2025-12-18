@@ -4,8 +4,27 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = 'https://ymqlxvvschytbkkjexvd.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltcWx4dnZzY2h5dGJra2pleHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MjI2NjUsImV4cCI6MjA4MTQ5ODY2NX0.oZr6o8cg_WuJ83maXa-d8a3TfVAtQaGp3EXftUidjzo'
 
-// Create client - SIMPLIFIED
-export const supabase = createClient(supabaseUrl, supabaseKey)
+// SINGLETON PATTERN: Create client only once
+let supabaseInstance = null;
+
+const getSupabaseClient = () => {
+  if (!supabaseInstance) {
+    console.log('🔄 Creating Supabase client instance...');
+    supabaseInstance = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false,
+        storage: localStorage,
+        storageKey: 'sb-auth-token'
+      }
+    });
+  }
+  return supabaseInstance;
+};
+
+// Export the single instance
+export const supabase = getSupabaseClient();
 
 // Simple data transformation
 const transformPostData = (post) => {
@@ -35,7 +54,7 @@ const transformPostsData = (posts) => {
   return posts.map(transformPostData).filter(Boolean);
 };
 
-// Utility functions - ADDED THESE
+// Utility functions
 export const formatNumber = (num) => {
   if (!num && num !== 0) return '0';
   
@@ -291,37 +310,195 @@ export const blogAPI = {
       console.log('Error in createPost:', error.message);
       return null;
     }
-  },
-
-  // Real-time subscriptions (optional, commented out for simplicity)
-  /*
-  onCommentsUpdate(postId, callback) {
-    const channel = supabase
-      .channel(`comments:${postId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'comments',
-          filter: `post_id=eq.${postId}`
-        },
-        async () => {
-          const comments = await this.getComments(postId);
-          callback(comments);
-        }
-      )
-      .subscribe();
-    
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }
-  */
 };
 
-// SIMPLE AUTH API
+// COMPLETE AUTH API
 export const authAPI = {
+  // Check if user is logged in
+  async isLoggedIn() {
+    try {
+      const { data } = await supabase.auth.getSession();
+      return !!data?.session?.user;
+    } catch {
+      return false;
+    }
+  },
+
+  // Login user
+  async adminLogin(email, password) {
+    try {
+      console.log('🔐 Attempting login for:', email);
+      
+      // Sign in with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim()
+      });
+      
+      if (error) {
+        console.log('Login error:', error.message);
+        return { 
+          success: false, 
+          error: error.message || 'Invalid email or password' 
+        };
+      }
+      
+      if (data?.user) {
+        console.log('✅ Login successful for user:', data.user.email);
+        
+        // Check if user is admin (you can customize this logic)
+        let isAdmin = false;
+        try {
+          // Check if user exists in users table with admin role
+          const { data: userData } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', data.user.id)
+            .maybeSingle();
+          
+          isAdmin = userData?.role === 'admin';
+        } catch (err) {
+          console.log('Could not check admin status:', err.message);
+          // Default to false if can't check
+          isAdmin = false;
+        }
+        
+        return { 
+          success: true, 
+          user: data.user,
+          isAdmin: isAdmin
+        };
+      }
+      
+      return { 
+        success: false, 
+        error: 'Login failed. Please try again.' 
+      };
+    } catch (error) {
+      console.error('Login exception:', error);
+      return { 
+        success: false, 
+        error: 'Login failed. Please try again.' 
+      };
+    }
+  },
+
+  // Reset password
+  async resetPassword(email) {
+    try {
+      console.log('🔑 Resetting password for:', email);
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email.trim(),
+        {
+          redirectTo: `${window.location.origin}/reset-password`,
+        }
+      );
+      
+      if (error) {
+        console.log('Reset password error:', error.message);
+        return { 
+          success: false, 
+          error: error.message || 'Failed to send reset email' 
+        };
+      }
+      
+      return { 
+        success: true, 
+        message: 'Password reset instructions sent to your email!' 
+      };
+    } catch (error) {
+      console.error('Reset password exception:', error);
+      return { 
+        success: false, 
+        error: 'Password reset failed. Please try again.' 
+      };
+    }
+  },
+
+  // Register new user
+  async register(email, password, name) {
+    try {
+      console.log('📝 Registering new user:', email);
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password.trim(),
+        options: {
+          data: {
+            name: name || email.split('@')[0]
+          }
+        }
+      });
+      
+      if (error) {
+        console.log('Registration error:', error.message);
+        return { 
+          success: false, 
+          error: error.message || 'Registration failed' 
+        };
+      }
+      
+      if (data?.user) {
+        console.log('✅ Registration successful for:', data.user.email);
+        
+        // Create user profile in users table (optional)
+        try {
+          await supabase
+            .from('users')
+            .insert([
+              {
+                id: data.user.id,
+                email: data.user.email,
+                name: name || email.split('@')[0],
+                role: 'user',
+                created_at: new Date().toISOString()
+              }
+            ]);
+        } catch (profileErr) {
+          console.log('Profile creation error (optional):', profileErr.message);
+        }
+        
+        return { 
+          success: true, 
+          user: data.user,
+          message: 'Registration successful! You can now login.'
+        };
+      }
+      
+      return { 
+        success: false, 
+        error: 'Registration failed. Please try again.' 
+      };
+    } catch (error) {
+      console.error('Registration exception:', error);
+      return { 
+        success: false, 
+        error: 'Registration failed. Please try again.' 
+      };
+    }
+  },
+
+  // Logout
+  async logout() {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.log('Logout error:', error.message);
+        return false;
+      }
+      
+      console.log('✅ Logout successful');
+      return true;
+    } catch (error) {
+      console.error('Logout exception:', error);
+      return false;
+    }
+  },
+
+  // Get current user
   async getCurrentUser() {
     try {
       const { data } = await supabase.auth.getSession();
@@ -331,6 +508,7 @@ export const authAPI = {
     }
   },
 
+  // Get current user with profile
   async getCurrentUserWithProfile() {
     try {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -341,11 +519,25 @@ export const authAPI = {
       
       const user = sessionData.session.user;
       
-      // Simple profile - can be extended if you have a users table
-      const profile = { 
+      // Try to get user profile from users table
+      let profile = { 
         role: 'user', 
         name: user.email?.split('@')[0] || 'User' 
       };
+      
+      try {
+        const { data: profileData } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+        
+        if (profileData) {
+          profile = profileData;
+        }
+      } catch (profileErr) {
+        console.log('Profile fetch error:', profileErr.message);
+      }
       
       return {
         ...user,
@@ -358,4 +550,7 @@ export const authAPI = {
   }
 };
 
-console.log('✅ Supabase initialized successfully');
+// Initialize only once
+if (typeof window !== 'undefined') {
+  console.log('🚀 Initializing Supabase (singleton)...');
+}
