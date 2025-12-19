@@ -1,11 +1,13 @@
-/* Services.css */
+/* Services.css - SCOPED TO SERVICES PAGE ONLY */
+/* All selectors are prefixed with .services-page to avoid conflicts */
+
 .services-page {
   padding-top: 0;
   margin-top: 0;
 }
 
 /* Hero Section */
-.services-hero {
+.services-page .services-hero {
   background: linear-gradient(135deg, rgba(108, 99, 255, 0.9), rgba(78, 205, 196, 0.9)),
               url('https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
   background-size: cover;
@@ -17,7 +19,7 @@
   margin-top: 0;
 }
 
-.services-hero::before {
+.services-page .services-hero::before {
   content: '';
   position: absolute;
   top: 0;
@@ -28,7 +30,7 @@
   z-index: 0;
 }
 
-.services-hero-content {
+.services-page .services-hero-content {
   position: relative;
   z-index: 1;
   max-width: 1000px;
@@ -36,7 +38,7 @@
   text-align: center;
 }
 
-.hero-badge {
+.services-page .hero-badge {
   display: inline-flex;
   align-items: center;
   background-color: rgba(255, 255, 255, 0.15);
@@ -46,22 +48,27 @@
   backdrop-filter: blur(10px);
 }
 
-.badge-text {
+.services-page .badge-text {
   font-size: 16px;
   font-weight: 600;
   color: white;
   margin-right: 10px;
 }
 
-.badge-dot {
+.services-page .badge-dot {
   width: 10px;
   height: 10px;
   background-color: var(--accent-color);
   border-radius: 50%;
-  animation: pulse 2s infinite;
+  animation: services-pulse 2s infinite;
 }
 
-.hero-title {
+@keyframes services-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.services-page .hero-title {
   font-size: 3.8rem;
   font-weight: 800;
   line-height: 1.2;
@@ -69,12 +76,12 @@
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
-.hero-title .highlight {
+.services-page .hero-title .highlight {
   color: #ffd166;
   position: relative;
 }
 
-.hero-subtitle {
+.services-page .hero-subtitle {
   font-size: 1.3rem;
   opacity: 0.95;
   margin-bottom: 40px;
@@ -84,7 +91,7 @@
   margin-right: auto;
 }
 
-.hero-stats {
+.services-page .hero-stats {
   display: flex;
   justify-content: center;
   gap: 60px;
@@ -92,11 +99,11 @@
   flex-wrap: wrap;
 }
 
-.stat-item {
+.services-page .stat-item {
   text-align: center;
 }
 
-.stat-number {
+.services-page .stat-number {
   font-size: 3rem;
   font-weight: 800;
   color: white;
@@ -105,7 +112,7 @@
   text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
 
-.stat-label {
+.services-page .stat-label {
   font-size: 14px;
   opacity: 0.9;
   text-transform: uppercase;
@@ -113,28 +120,28 @@
 }
 
 /* Services Sections */
-.section {
+.services-page .section {
   padding: 100px 5%;
 }
 
-.container {
+.services-page .container {
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.section-header {
+.services-page .section-header {
   text-align: center;
   margin-bottom: 60px;
 }
 
-.section-title {
+.services-page .section-title {
   font-size: 3rem;
   font-weight: 800;
   color: var(--dark-color);
   margin-bottom: 15px;
 }
 
-.section-subtitle {
+.services-page .section-subtitle {
   font-size: 1.2rem;
   color: #666;
   max-width: 700px;
@@ -143,23 +150,23 @@
 }
 
 /* Design Services */
-.design-services {
+.services-page .design-services {
   background-color: var(--light-color);
 }
 
 /* Tech Services */
-.tech-services {
+.services-page .tech-services {
   background-color: white;
 }
 
 /* Services Grid */
-.services-grid {
+.services-page .services-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 40px;
 }
 
-.service-card {
+.services-page .service-card {
   background-color: white;
   border-radius: var(--border-radius);
   padding: 40px 30px;
@@ -171,7 +178,7 @@
   overflow: hidden;
 }
 
-.service-card::before {
+.services-page .service-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -183,16 +190,16 @@
   transition: opacity 0.3s ease;
 }
 
-.service-card:hover::before {
+.services-page .service-card:hover::before {
   opacity: 1;
 }
 
-.service-card:hover {
+.services-page .service-card:hover {
   transform: translateY(-10px);
   box-shadow: var(--shadow-heavy);
 }
 
-.service-icon {
+.services-page .service-icon {
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -206,38 +213,38 @@
   transition: var(--transition);
 }
 
-.service-card:hover .service-icon {
+.services-page .service-card:hover .service-icon {
   transform: scale(1.1) rotate(5deg);
 }
 
-.service-title {
+.services-page .service-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--dark-color);
   margin-bottom: 15px;
 }
 
-.service-description {
+.services-page .service-description {
   color: #666;
   margin-bottom: 25px;
   line-height: 1.6;
 }
 
-.service-features {
+.services-page .service-features {
   list-style: none;
   padding: 0;
   margin: 0 0 30px 0;
   text-align: left;
 }
 
-.service-features li {
+.services-page .service-features li {
   padding: 8px 0;
   color: #666;
   position: relative;
   padding-left: 30px;
 }
 
-.service-features li i {
+.services-page .service-features li i {
   position: absolute;
   left: 0;
   top: 8px;
@@ -245,19 +252,70 @@
   font-size: 16px;
 }
 
-.service-card .btn-outline {
-  padding: 12px 30px;
+/* UPDATED: Professional Service Buttons - DESIGN SERVICES */
+.services-page .btn-service {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 28px;
+  border-radius: 50px;
   font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.services-page .btn-service-design {
+  background: linear-gradient(135deg, #6c63ff, #4ecdc4);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.services-page .btn-service-design:hover {
+  background: linear-gradient(135deg, #5a52e0, #3ab8b0);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(108, 99, 255, 0.3);
+}
+
+.services-page .btn-service-design i:first-child {
+  font-size: 18px;
+}
+
+.services-page .btn-service-design i:last-child {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-left: auto;
+}
+
+/* UPDATED: Professional Service Buttons - TECH SERVICES */
+.services-page .btn-service-tech {
+  background: linear-gradient(135deg, #7209b7, #4361ee);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.services-page .btn-service-tech:hover {
+  background: linear-gradient(135deg, #61089e, #2f51d1);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(114, 9, 183, 0.3);
 }
 
 /* Process Section */
-.process-section {
+.services-page .process-section {
   background-color: #f8f9ff;
   position: relative;
   overflow: hidden;
 }
 
-.process-section::before {
+.services-page .process-section::before {
   content: '';
   position: absolute;
   top: 0;
@@ -267,14 +325,14 @@
   background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
 }
 
-.process-timeline {
+.services-page .process-timeline {
   position: relative;
   max-width: 800px;
   margin: 0 auto;
   padding: 40px 0;
 }
 
-.process-timeline::before {
+.services-page .process-timeline::before {
   content: '';
   position: absolute;
   left: 50%;
@@ -286,28 +344,28 @@
   border-radius: 2px;
 }
 
-.process-step {
+.services-page .process-step {
   display: flex;
   align-items: center;
   margin-bottom: 60px;
   position: relative;
 }
 
-.process-step:last-child {
+.services-page .process-step:last-child {
   margin-bottom: 0;
 }
 
-.process-step.left {
+.services-page .process-step.left {
   justify-content: flex-start;
   text-align: right;
 }
 
-.process-step.right {
+.services-page .process-step.right {
   justify-content: flex-end;
   text-align: left;
 }
 
-.step-number {
+.services-page .step-number {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -325,7 +383,7 @@
   box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
 }
 
-.step-content {
+.services-page .step-content {
   width: 45%;
   background-color: white;
   padding: 30px;
@@ -334,7 +392,7 @@
   position: relative;
 }
 
-.step-icon {
+.services-page .step-icon {
   width: 60px;
   height: 60px;
   background-color: rgba(108, 99, 255, 0.1);
@@ -347,31 +405,31 @@
   margin-bottom: 20px;
 }
 
-.step-title {
+.services-page .step-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--dark-color);
   margin-bottom: 10px;
 }
 
-.step-description {
+.services-page .step-description {
   color: #666;
   line-height: 1.6;
 }
 
 /* UPDATED: Pricing Section with transparent pricing */
-.pricing-section {
+.services-page .pricing-section {
   background-color: white;
 }
 
-.pricing-grid {
+.services-page .pricing-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 30px;
   margin-bottom: 60px;
 }
 
-.pricing-card {
+.services-page .pricing-card {
   background-color: white;
   border-radius: var(--border-radius);
   padding: 40px;
@@ -382,17 +440,17 @@
   text-align: center;
 }
 
-.pricing-card:hover {
+.services-page .pricing-card:hover {
   transform: translateY(-10px);
   box-shadow: var(--shadow-heavy);
 }
 
-.pricing-card.popular {
+.services-page .pricing-card.popular {
   border-color: var(--primary-color);
   transform: translateY(-10px);
 }
 
-.popular-badge {
+.services-page .popular-badge {
   position: absolute;
   top: -12px;
   left: 50%;
@@ -407,7 +465,7 @@
   z-index: 2;
 }
 
-.savings-badge {
+.services-page .savings-badge {
   position: absolute;
   top: 20px;
   right: -10px;
@@ -421,64 +479,64 @@
   z-index: 1;
 }
 
-.pricing-header {
+.services-page .pricing-header {
   margin-bottom: 30px;
 }
 
-.plan-name {
+.services-page .plan-name {
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--dark-color);
   margin-bottom: 20px;
 }
 
-.price-comparison {
+.services-page .price-comparison {
   margin-bottom: 20px;
 }
 
-.original-price {
+.services-page .original-price {
   text-decoration: line-through;
   color: #999;
   font-size: 1.2rem;
   margin-bottom: 5px;
 }
 
-.plan-price {
+.services-page .plan-price {
   margin-bottom: 10px;
 }
 
-.price {
+.services-page .price {
   font-size: 3.5rem;
   font-weight: 800;
   color: var(--primary-color);
   line-height: 1;
 }
 
-.period {
+.services-page .period {
   display: block;
   color: #666;
   font-size: 14px;
   margin-top: 5px;
 }
 
-.total-value {
+.services-page .total-value {
   color: #666;
   font-size: 14px;
   margin-top: 10px;
 }
 
-.total-value strong {
+.services-page .total-value strong {
   color: var(--dark-color);
 }
 
-.plan-description {
+.services-page .plan-description {
   color: #666;
   font-size: 15px;
   line-height: 1.6;
   margin-bottom: 20px;
 }
 
-.included-note {
+.services-page .included-note {
   background-color: rgba(108, 99, 255, 0.05);
   padding: 12px 15px;
   border-radius: 8px;
@@ -487,26 +545,26 @@
   margin-bottom: 20px;
 }
 
-.included-note i {
+.services-page .included-note i {
   color: var(--accent-color);
   margin-right: 10px;
   font-size: 18px;
 }
 
-.included-note span {
+.services-page .included-note span {
   color: #666;
   font-size: 14px;
   font-weight: 500;
 }
 
-.plan-features {
+.services-page .plan-features {
   list-style: none;
   padding: 0;
   margin: 0 0 30px 0;
   text-align: left;
 }
 
-.plan-features li {
+.services-page .plan-features li {
   padding: 12px 0;
   color: #666;
   position: relative;
@@ -514,11 +572,11 @@
   border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
-.plan-features li:last-child {
+.services-page .plan-features li:last-child {
   border-bottom: none;
 }
 
-.plan-features li i {
+.services-page .plan-features li i {
   position: absolute;
   left: 0;
   top: 12px;
@@ -526,7 +584,7 @@
   font-size: 16px;
 }
 
-.plan-note {
+.services-page .plan-note {
   background-color: rgba(255, 193, 7, 0.1);
   padding: 12px 15px;
   border-radius: 8px;
@@ -535,7 +593,7 @@
   text-align: left;
 }
 
-.plan-note p {
+.services-page .plan-note p {
   color: #856404;
   margin: 0;
   font-size: 14px;
@@ -544,21 +602,39 @@
   gap: 10px;
 }
 
-.plan-note i {
+.services-page .plan-note i {
   color: #856404;
   font-size: 16px;
   margin-top: 2px;
 }
 
-.pricing-card .btn-primary {
-  width: 100%;
-  padding: 16px;
+/* UPDATED: Professional Package Buttons */
+.services-page .btn-service-package {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
   font-size: 16px;
-  font-weight: 600;
+  padding: 16px 32px;
+}
+
+.services-page .btn-service-package:hover {
+  background: linear-gradient(135deg, #a94442, #c9302c);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(196, 30, 58, 0.3);
+}
+
+.services-page .btn-service-package i:first-child {
+  font-size: 20px;
+}
+
+.services-page .btn-service-package i:last-child {
+  font-size: 16px;
+  opacity: 0.8;
+  margin-left: auto;
 }
 
 /* Individual Services Pricing */
-.individual-services {
+.services-page .individual-services {
   background-color: var(--light-color);
   padding: 40px;
   border-radius: var(--border-radius);
@@ -566,7 +642,7 @@
   border: 1px solid rgba(0,0,0,0.05);
 }
 
-.services-title {
+.services-page .services-title {
   font-size: 2rem;
   font-weight: 700;
   color: var(--dark-color);
@@ -574,20 +650,20 @@
   text-align: center;
 }
 
-.services-subtitle {
+.services-page .services-subtitle {
   color: #666;
   text-align: center;
   margin-bottom: 30px;
   font-size: 1.1rem;
 }
 
-.services-pricing-grid {
+.services-page .services-pricing-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 25px;
 }
 
-.service-pricing-card {
+.services-page .service-pricing-card {
   background-color: white;
   border-radius: var(--border-radius);
   padding: 25px;
@@ -597,40 +673,40 @@
   transition: var(--transition);
 }
 
-.service-pricing-card:hover {
+.services-page .service-pricing-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow);
 }
 
-.service-name {
+.services-page .service-name {
   font-size: 1.3rem;
   font-weight: 600;
   color: var(--dark-color);
   margin-bottom: 10px;
 }
 
-.service-price {
+.services-page .service-price {
   font-size: 2rem;
   font-weight: 700;
   color: var(--primary-color);
   margin-bottom: 15px;
 }
 
-.service-desc {
+.services-page .service-desc {
   color: #666;
   font-size: 14px;
   margin-bottom: 20px;
   line-height: 1.5;
 }
 
-.service-features-list {
+.services-page .service-features-list {
   list-style: none;
   padding: 0;
   margin: 0 0 20px 0;
   text-align: left;
 }
 
-.service-features-list li {
+.services-page .service-features-list li {
   padding: 6px 0;
   color: #666;
   font-size: 14px;
@@ -638,7 +714,7 @@
   padding-left: 20px;
 }
 
-.service-features-list li:before {
+.services-page .service-features-list li:before {
   content: '•';
   color: var(--accent-color);
   position: absolute;
@@ -646,33 +722,31 @@
   font-weight: bold;
 }
 
-.btn-outline-small {
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  border: 2px solid var(--primary-color);
-  color: var(--primary-color);
-  background-color: transparent;
-  border-radius: 50px;
-  text-decoration: none;
-  display: inline-block;
-  transition: var(--transition);
-}
-
-.btn-outline-small:hover {
-  background-color: var(--primary-color);
+/* UPDATED: Professional Individual Service Buttons */
+.services-page .btn-service-individual {
+  background: linear-gradient(135deg, #06d6a0, #118ab2);
   color: white;
-  text-decoration: none;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 12px 24px;
+  font-size: 14px;
+  width: auto;
+  min-width: 180px;
 }
 
-.pricing-note {
+.services-page .btn-service-individual:hover {
+  background: linear-gradient(135deg, #05c28f, #0f7a9f);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(6, 214, 160, 0.3);
+}
+
+.services-page .pricing-note {
   background-color: rgba(108, 99, 255, 0.05);
   padding: 25px;
   border-radius: var(--border-radius);
   border-left: 4px solid var(--primary-color);
 }
 
-.pricing-note p {
+.services-page .pricing-note p {
   color: #666;
   margin: 0;
   display: flex;
@@ -681,30 +755,30 @@
   line-height: 1.6;
 }
 
-.pricing-note i {
+.services-page .pricing-note i {
   color: var(--primary-color);
   font-size: 20px;
   margin-top: 2px;
 }
 
-.highlight-text {
+.services-page .highlight-text {
   color: var(--primary-color);
   font-weight: 600;
   display: inline;
 }
 
 /* Why Choose Us */
-.why-choose-section {
+.services-page .why-choose-section {
   background-color: var(--light-color);
 }
 
-.features-grid {
+.services-page .features-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 30px;
 }
 
-.feature-card {
+.services-page .feature-card {
   background-color: white;
   border-radius: var(--border-radius);
   padding: 40px 30px;
@@ -713,12 +787,12 @@
   transition: var(--transition);
 }
 
-.feature-card:hover {
+.services-page .feature-card:hover {
   transform: translateY(-10px);
   box-shadow: var(--shadow-heavy);
 }
 
-.feature-icon {
+.services-page .feature-icon {
   width: 70px;
   height: 70px;
   background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
@@ -731,203 +805,245 @@
   font-size: 28px;
 }
 
-.feature-title {
+.services-page .feature-title {
   font-size: 1.4rem;
   font-weight: 700;
   color: var(--dark-color);
   margin-bottom: 15px;
 }
 
-.feature-description {
+.services-page .feature-description {
   color: #666;
   line-height: 1.6;
 }
 
-/* CTA Section */
-.services-cta {
+/* UPDATED: CTA Section with Professional Buttons */
+.services-page .services-cta {
   background: linear-gradient(135deg, var(--dark-color), #3a3e5c);
   color: white;
 }
 
-.cta-content {
+.services-page .cta-content {
   max-width: 800px;
   margin: 0 auto;
   text-align: center;
 }
 
-.cta-title {
+.services-page .cta-title {
   font-size: 3rem;
   font-weight: 800;
   margin-bottom: 20px;
 }
 
-.cta-description {
+.services-page .cta-description {
   font-size: 1.2rem;
   margin-bottom: 40px;
   opacity: 0.9;
   line-height: 1.6;
 }
 
-.cta-buttons {
+.services-page .cta-buttons {
   display: flex;
   gap: 20px;
   justify-content: center;
   flex-wrap: wrap;
 }
 
-.services-cta .btn {
-  padding: 16px 32px;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.services-cta .btn-outline {
-  background-color: transparent;
-  color: white;
-  border: 2px solid white;
-}
-
-.services-cta .btn-outline:hover {
-  background-color: white;
+/* UPDATED: Professional CTA Buttons */
+.services-page .btn-service-cta {
+  background: linear-gradient(135deg, #ffd166, #06d6a0);
   color: var(--dark-color);
+  font-weight: 700;
+  padding: 18px 40px;
+  font-size: 17px;
+  border: none;
+  min-width: 280px;
+}
+
+.services-page .btn-service-cta:hover {
+  background: linear-gradient(135deg, #ffc745, #05c28f);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(255, 209, 102, 0.4);
+  color: var(--dark-color);
+}
+
+.services-page .btn-service-secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  padding: 18px 40px;
+  font-size: 17px;
+  min-width: 280px;
+}
+
+.services-page .btn-service-secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Button Animation Effects */
+.services-page .btn-service::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+}
+
+.services-page .btn-service:hover::before {
+  left: 100%;
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-  .services-grid,
-  .pricing-grid,
-  .features-grid {
+  .services-page .services-grid,
+  .services-page .pricing-grid,
+  .services-page .features-grid {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 }
 
 @media (max-width: 992px) {
-  .hero-title {
+  .services-page .hero-title {
     font-size: 3rem;
   }
   
-  .section-title {
+  .services-page .section-title {
     font-size: 2.5rem;
   }
   
-  .process-timeline::before {
+  .services-page .process-timeline::before {
     left: 30px;
   }
   
-  .process-step {
+  .services-page .process-step {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 40px;
   }
   
-  .process-step.left,
-  .process-step.right {
+  .services-page .process-step.left,
+  .services-page .process-step.right {
     justify-content: flex-start;
     text-align: left;
   }
   
-  .step-number {
+  .services-page .step-number {
     left: 30px;
     transform: none;
   }
   
-  .step-content {
+  .services-page .step-content {
     width: 100%;
     margin-left: 80px;
   }
 }
 
 @media (max-width: 768px) {
-  .services-hero {
+  .services-page .services-hero {
     padding: 120px 5% 80px;
   }
   
-  .hero-title {
+  .services-page .hero-title {
     font-size: 2.5rem;
   }
   
-  .hero-subtitle {
+  .services-page .hero-subtitle {
     font-size: 1.1rem;
   }
   
-  .hero-stats {
+  .services-page .hero-stats {
     gap: 30px;
   }
   
-  .stat-number {
+  .services-page .stat-number {
     font-size: 2.5rem;
   }
   
-  .section {
+  .services-page .section {
     padding: 80px 5%;
   }
   
-  .section-title {
+  .services-page .section-title {
     font-size: 2.2rem;
   }
   
-  .services-grid,
-  .pricing-grid,
-  .features-grid {
+  .services-page .services-grid,
+  .services-page .pricing-grid,
+  .services-page .features-grid {
     grid-template-columns: 1fr;
     gap: 30px;
   }
   
-  .services-pricing-grid {
+  .services-page .services-pricing-grid {
     grid-template-columns: 1fr;
   }
   
-  .individual-services {
+  .services-page .individual-services {
     padding: 30px 20px;
   }
   
-  .pricing-card {
+  .services-page .pricing-card {
     padding: 30px 20px;
   }
   
-  .savings-badge {
+  .services-page .savings-badge {
     top: 15px;
     right: -5px;
     padding: 6px 12px;
     font-size: 13px;
   }
   
-  .cta-buttons {
+  .services-page .cta-buttons {
     flex-direction: column;
     align-items: center;
+    gap: 15px;
   }
   
-  .services-cta .btn {
+  .services-page .btn-service-cta,
+  .services-page .btn-service-secondary {
     width: 100%;
     max-width: 300px;
+    min-width: auto;
   }
   
-  .pricing-note p {
+  .services-page .pricing-note p {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
   
-  .pricing-note i {
+  .services-page .pricing-note i {
     margin-top: 0;
+  }
+  
+  .services-page .btn-service {
+    font-size: 14px;
+    padding: 12px 24px;
   }
 }
 
 @media (max-width: 576px) {
-  .services-hero {
+  .services-page .services-hero {
     padding: 100px 5% 60px;
   }
   
-  .hero-title {
+  .services-page .hero-title {
     font-size: 2.2rem;
   }
   
-  .hero-stats {
+  .services-page .hero-stats {
     flex-direction: column;
     gap: 20px;
   }
   
-  .stat-item {
+  .services-page .stat-item {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -935,52 +1051,60 @@
     gap: 15px;
   }
   
-  .stat-number {
+  .services-page .stat-number {
     margin-bottom: 0;
     font-size: 2rem;
   }
   
-  .stat-label {
+  .services-page .stat-label {
     font-size: 13px;
   }
   
-  .step-content {
+  .services-page .step-content {
     margin-left: 60px;
     padding: 20px;
   }
   
-  .step-number {
+  .services-page .step-number {
     width: 50px;
     height: 50px;
     font-size: 1.2rem;
   }
   
-  .cta-title {
+  .services-page .cta-title {
     font-size: 2.2rem;
   }
   
-  .price {
+  .services-page .price {
     font-size: 2.8rem;
   }
   
-  .original-price {
+  .services-page .original-price {
     font-size: 1rem;
+  }
+  
+  .services-page .btn-service {
+    padding: 10px 20px;
+    gap: 8px;
+  }
+  
+  .services-page .btn-service i {
+    font-size: 16px;
+  }
+  
+  .services-page .btn-service span {
+    font-size: 14px;
   }
 }
 
-/* Animation Classes */
-.animate-on-scroll {
+/* Animation Classes - Scoped to Services Page */
+.services-page .animate-on-scroll {
   opacity: 0;
   transform: translateY(30px);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.animate-on-scroll.animated {
+.services-page .animate-on-scroll.animated {
   opacity: 1;
   transform: translateY(0);
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
 }
