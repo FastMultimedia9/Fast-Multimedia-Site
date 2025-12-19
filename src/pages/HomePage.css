@@ -1,7 +1,18 @@
-/* HomePage.css - COMPLETE & PROFESSIONAL VERSION */
+/* HomePage.css - SCOPED TO HOMEPAGE ONLY */
+/* All selectors are prefixed with .homepage to avoid conflicts */
 
-/* Christmas Variables */
-:root {
+.homepage {
+  position: relative;
+  margin-top: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%);
+  overflow-x: hidden;
+}
+
+/* Christmas Variables - Scoped to homepage */
+.homepage {
   --christmas-red: #C41E3A;
   --christmas-green: #0B6623;
   --christmas-gold: #FFD700;
@@ -20,29 +31,15 @@
   --christmas-glow: 0 0 20px rgba(255, 215, 0, 0.5);
 }
 
-/* Reset & Base Styles */
-* {
+/* Reset within homepage */
+.homepage * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.6;
-  color: #333;
-  background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%);
-  position: relative;
-  overflow-x: hidden;
-}
-
-.homepage {
-  position: relative;
-  margin-top: 0;
-}
-
 /* Snowfall Effect */
-.snowfall {
+.homepage .snowfall {
   position: fixed;
   top: 0;
   left: 0;
@@ -52,15 +49,15 @@ body {
   z-index: 9999;
 }
 
-.snowflake {
+.homepage .snowflake {
   position: absolute;
   background-color: var(--snow-white);
   border-radius: 50%;
-  animation: snowfall linear infinite;
+  animation: homepage-snowfall linear infinite;
   pointer-events: none;
 }
 
-@keyframes snowfall {
+@keyframes homepage-snowfall {
   0% {
     transform: translateY(-100px) rotate(0deg);
     opacity: 1;
@@ -72,7 +69,7 @@ body {
 }
 
 /* Christmas Garlands */
-.christmas-garland {
+.homepage .christmas-garland {
   position: fixed;
   left: 0;
   width: 100%;
@@ -83,34 +80,34 @@ body {
   pointer-events: none;
 }
 
-.top-garland {
+.homepage .top-garland {
   top: 0;
   background: linear-gradient(90deg, var(--christmas-green), var(--christmas-red));
   opacity: 0.8;
 }
 
-.bottom-garland {
+.homepage .bottom-garland {
   bottom: 0;
   background: linear-gradient(90deg, var(--christmas-red), var(--christmas-green));
   opacity: 0.8;
 }
 
-.garland-light {
+.homepage .garland-light {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   background: var(--christmas-gold);
-  animation: twinkle 1.5s infinite alternate;
+  animation: homepage-twinkle 1.5s infinite alternate;
   box-shadow: var(--christmas-glow);
 }
 
-@keyframes twinkle {
+@keyframes homepage-twinkle {
   0% { opacity: 0.3; transform: scale(0.8); }
   100% { opacity: 1; transform: scale(1.2); }
 }
 
 /* Christmas Ornaments */
-.christmas-ornaments {
+.homepage .christmas-ornaments {
   position: fixed;
   right: 20px;
   top: 50%;
@@ -122,25 +119,25 @@ body {
   pointer-events: none;
 }
 
-.ornament {
+.homepage .ornament {
   font-size: 24px;
-  animation: floatOrnament 4s ease-in-out infinite;
+  animation: homepage-floatOrnament 4s ease-in-out infinite;
   filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
 }
 
-.ornament-1 { animation-delay: 0s; }
-.ornament-2 { animation-delay: 0.8s; }
-.ornament-3 { animation-delay: 1.6s; }
-.ornament-4 { animation-delay: 2.4s; }
-.ornament-5 { animation-delay: 3.2s; }
+.homepage .ornament-1 { animation-delay: 0s; }
+.homepage .ornament-2 { animation-delay: 0.8s; }
+.homepage .ornament-3 { animation-delay: 1.6s; }
+.homepage .ornament-4 { animation-delay: 2.4s; }
+.homepage .ornament-5 { animation-delay: 3.2s; }
 
-@keyframes floatOrnament {
+@keyframes homepage-floatOrnament {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-20px) rotate(10deg); }
 }
 
 /* Christmas Banner */
-.christmas-banner {
+.homepage .christmas-banner {
   position: absolute;
   top: 20px;
   right: 20px;
@@ -152,13 +149,13 @@ body {
   font-size: 16px;
   z-index: 10;
   box-shadow: var(--shadow-heavy);
-  animation: bannerPulse 2s infinite;
+  animation: homepage-bannerPulse 2s infinite;
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.banner-text {
+.homepage .banner-text {
   background: rgba(255, 255, 255, 0.2);
   padding: 4px 12px;
   border-radius: 20px;
@@ -166,31 +163,31 @@ body {
   white-space: nowrap;
 }
 
-.banner-lights {
+.homepage .banner-lights {
   display: flex;
   gap: 4px;
 }
 
-.banner-light {
+.homepage .banner-light {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--christmas-gold);
-  animation: lightFlash 1s infinite alternate;
+  animation: homepage-lightFlash 1s infinite alternate;
 }
 
-@keyframes bannerPulse {
+@keyframes homepage-bannerPulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
 }
 
-@keyframes lightFlash {
+@keyframes homepage-lightFlash {
   0% { opacity: 0.3; }
   100% { opacity: 1; }
 }
 
 /* Hero Section */
-.hero-section {
+.homepage .hero-section {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -200,7 +197,7 @@ body {
   overflow: hidden;
 }
 
-.hero-section::before {
+.homepage .hero-section::before {
   content: '';
   position: absolute;
   top: 0;
@@ -212,7 +209,7 @@ body {
   z-index: 0;
 }
 
-.hero-content {
+.homepage .hero-content {
   flex: 1;
   max-width: 600px;
   position: relative;
@@ -221,19 +218,19 @@ body {
 }
 
 @media (max-width: 900px) {
-  .hero-section {
+  .homepage .hero-section {
     flex-direction: column;
     text-align: center;
     padding: 100px 5% 60px;
   }
   
-  .hero-content {
+  .homepage .hero-content {
     margin-right: 0;
     margin-bottom: 50px;
   }
 }
 
-.hero-badge {
+.homepage .hero-badge {
   display: inline-flex;
   align-items: center;
   background-color: rgba(196, 30, 58, 0.1);
@@ -242,32 +239,32 @@ body {
   margin-bottom: 25px;
 }
 
-.badge-text {
+.homepage .badge-text {
   font-size: 14px;
   font-weight: 600;
   color: var(--primary-color);
   margin-right: 10px;
 }
 
-.badge-dot {
+.homepage .badge-dot {
   width: 8px;
   height: 8px;
   background-color: var(--accent-color);
   border-radius: 50%;
-  animation: pulse 2s infinite;
+  animation: homepage-pulse 2s infinite;
 }
 
-.christmas-badge {
+.homepage .christmas-badge {
   background: linear-gradient(45deg, var(--christmas-red), var(--christmas-green)) !important;
   color: white !important;
 }
 
-.christmas-dot {
+.homepage .christmas-dot {
   background-color: var(--christmas-gold) !important;
-  animation: christmasPulse 1s infinite;
+  animation: homepage-christmasPulse 1s infinite;
 }
 
-@keyframes pulse {
+@keyframes homepage-pulse {
   0%, 100% { 
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(196, 30, 58, 0.7);
@@ -278,7 +275,7 @@ body {
   }
 }
 
-@keyframes christmasPulse {
+@keyframes homepage-christmasPulse {
   0%, 100% { 
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
@@ -289,7 +286,7 @@ body {
   }
 }
 
-.hero-title {
+.homepage .hero-title {
   font-size: 3.5rem;
   font-weight: 800;
   line-height: 1.2;
@@ -297,12 +294,12 @@ body {
   margin-bottom: 20px;
 }
 
-.hero-title .highlight {
+.homepage .hero-title .highlight {
   color: var(--primary-color);
   position: relative;
 }
 
-.hero-title .highlight::after {
+.homepage .hero-title .highlight::after {
   content: '';
   position: absolute;
   bottom: 5px;
@@ -313,18 +310,18 @@ body {
   z-index: -1;
 }
 
-.hero-title .christmas-highlight {
+.homepage .hero-title .christmas-highlight {
   color: var(--christmas-green);
   position: relative;
 }
 
-.hero-title .christmas-highlight::after {
+.homepage .hero-title .christmas-highlight::after {
   background: linear-gradient(90deg, transparent, rgba(11, 102, 35, 0.2), transparent);
   height: 12px;
   bottom: 0;
 }
 
-.hero-subtitle {
+.homepage .hero-subtitle {
   font-size: 1.2rem;
   color: #666;
   margin-bottom: 35px;
@@ -332,14 +329,14 @@ body {
   max-width: 500px;
 }
 
-.hero-buttons {
+.homepage .hero-buttons {
   display: flex;
   gap: 20px;
   margin-bottom: 50px;
   flex-wrap: wrap;
 }
 
-.btn {
+.homepage .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -356,35 +353,35 @@ body {
   overflow: hidden;
 }
 
-.btn-primary {
+.homepage .btn-primary {
   background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
   color: white;
   box-shadow: var(--shadow);
 }
 
-.btn-primary:hover {
+.homepage .btn-primary:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-heavy);
 }
 
-.btn-secondary {
+.homepage .btn-secondary {
   background-color: white;
   color: var(--dark-color);
   border: 2px solid var(--primary-color);
 }
 
-.btn-secondary:hover {
+.homepage .btn-secondary:hover {
   background-color: var(--primary-color);
   color: white;
 }
 
-.christmas-btn {
+.homepage .christmas-btn {
   background: linear-gradient(45deg, var(--christmas-red), var(--christmas-green)) !important;
   position: relative;
   overflow: hidden;
 }
 
-.christmas-btn::before {
+.homepage .christmas-btn::before {
   content: '';
   position: absolute;
   top: 0;
@@ -395,96 +392,96 @@ body {
   transition: 0.5s;
 }
 
-.christmas-btn:hover::before {
+.homepage .christmas-btn:hover::before {
   left: 100%;
 }
 
-.hero-stats {
+.homepage .hero-stats {
   display: flex;
   gap: 40px;
   flex-wrap: wrap;
 }
 
-.christmas-stats .stat-number {
+.homepage .christmas-stats .stat-number {
   font-size: 3rem;
 }
 
-.stat-item {
+.homepage .stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
 }
 
-.stat-number {
+.homepage .stat-number {
   font-size: 2.5rem;
   font-weight: 800;
   color: var(--primary-color);
   line-height: 1;
 }
 
-.stat-label {
+.homepage .stat-label {
   font-size: 16px;
   color: #666;
   margin-top: 5px;
 }
 
-.hero-visual {
+.homepage .hero-visual {
   flex: 1;
   position: relative;
   z-index: 1;
   min-width: 400px;
 }
 
-.floating-shapes {
+.homepage .floating-shapes {
   position: absolute;
   width: 100%;
   height: 100%;
   z-index: -1;
 }
 
-.shape {
+.homepage .shape {
   position: absolute;
   border-radius: 50%;
   background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
   opacity: 0.1;
 }
 
-.shape-1 {
+.homepage .shape-1 {
   width: 200px;
   height: 200px;
   top: 10%;
   right: 10%;
-  animation: float 6s ease-in-out infinite;
+  animation: homepage-float 6s ease-in-out infinite;
 }
 
-.shape-2 {
+.homepage .shape-2 {
   width: 150px;
   height: 150px;
   bottom: 20%;
   right: 20%;
-  animation: float 8s ease-in-out infinite reverse;
+  animation: homepage-float 8s ease-in-out infinite reverse;
 }
 
-.shape-3 {
+.homepage .shape-3 {
   width: 100px;
   height: 100px;
   top: 40%;
   right: 30%;
-  animation: float 10s ease-in-out infinite;
+  animation: homepage-float 10s ease-in-out infinite;
 }
 
-.christmas-shape {
+.homepage .christmas-shape {
   background: linear-gradient(45deg, var(--christmas-red), var(--christmas-gold)) !important;
   opacity: 0.2;
 }
 
-@keyframes float {
+@keyframes homepage-float {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-20px) rotate(10deg); }
 }
 
-.hero-image-container {
+.homepage .hero-image-container {
   position: relative;
   border-radius: var(--border-radius);
   overflow: hidden;
@@ -493,54 +490,54 @@ body {
   transition: transform 0.5s ease;
 }
 
-.hero-image-container:hover {
+.homepage .hero-image-container:hover {
   transform: perspective(1000px) rotateY(0deg);
 }
 
-.christmas-frame {
+.homepage .christmas-frame {
   border: 5px solid var(--christmas-green);
   position: relative;
 }
 
-.christmas-frame::before {
+.homepage .christmas-frame::before {
   content: '🎄';
   position: absolute;
   top: -25px;
   left: -25px;
   font-size: 30px;
   z-index: 10;
-  animation: swing 3s infinite alternate;
+  animation: homepage-swing 3s infinite alternate;
   filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
 }
 
-.christmas-frame::after {
+.homepage .christmas-frame::after {
   content: '🌟';
   position: absolute;
   bottom: -25px;
   right: -25px;
   font-size: 30px;
   z-index: 10;
-  animation: twinkle 2s infinite alternate;
+  animation: homepage-twinkle 2s infinite alternate;
 }
 
-@keyframes swing {
+@keyframes homepage-swing {
   0%, 100% { transform: rotate(-15deg); }
   50% { transform: rotate(15deg); }
 }
 
-@keyframes twinkle {
+@keyframes homepage-twinkle {
   0%, 100% { opacity: 0.5; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.2); }
 }
 
-.hero-image-carousel {
+.homepage .hero-image-carousel {
   position: relative;
   height: 400px;
   width: 100%;
   overflow: hidden;
 }
 
-.hero-image-slide {
+.homepage .hero-image-slide {
   position: absolute;
   top: 0;
   left: 0;
@@ -550,36 +547,36 @@ body {
   transition: opacity 1s ease-in-out;
 }
 
-.hero-image-slide.active {
+.homepage .hero-image-slide.active {
   opacity: 1;
 }
 
-.hero-image-slide img {
+.homepage .hero-image-slide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
 }
 
-.christmas-overlay {
+.homepage .christmas-overlay {
   position: absolute;
   top: 10px;
   right: 10px;
   z-index: 2;
 }
 
-.santa-hat {
+.homepage .santa-hat {
   font-size: 40px;
-  animation: hatBob 2s infinite alternate;
+  animation: homepage-hatBob 2s infinite alternate;
   filter: drop-shadow(0 5px 15px rgba(196, 30, 58, 0.3));
 }
 
-@keyframes hatBob {
+@keyframes homepage-hatBob {
   0% { transform: translateY(0); }
   100% { transform: translateY(-10px); }
 }
 
-.carousel-dots {
+.homepage .carousel-dots {
   position: absolute;
   bottom: 20px;
   left: 0;
@@ -590,7 +587,7 @@ body {
   z-index: 2;
 }
 
-.carousel-dot {
+.homepage .carousel-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -601,18 +598,18 @@ body {
   padding: 0;
 }
 
-.carousel-dot:hover {
+.homepage .carousel-dot:hover {
   background-color: rgba(255, 255, 255, 0.8);
   transform: scale(1.2);
 }
 
-.carousel-dot.active {
+.homepage .carousel-dot.active {
   background-color: white;
   transform: scale(1.2);
 }
 
 /* Christmas Countdown */
-.christmas-countdown {
+.homepage .christmas-countdown {
   background: linear-gradient(45deg, var(--christmas-red), var(--christmas-green));
   color: white;
   padding: 50px 30px;
@@ -626,7 +623,7 @@ body {
   z-index: 5;
 }
 
-.christmas-countdown::before {
+.homepage .christmas-countdown::before {
   content: '';
   position: absolute;
   top: 0;
@@ -637,7 +634,7 @@ body {
   z-index: 1;
 }
 
-.countdown-title {
+.homepage .countdown-title {
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 25px;
@@ -646,7 +643,7 @@ body {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.countdown-timer {
+.homepage .countdown-timer {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -657,7 +654,7 @@ body {
   flex-wrap: wrap;
 }
 
-.countdown-item {
+.homepage .countdown-item {
   background: rgba(255, 255, 255, 0.2);
   padding: 25px 30px;
   border-radius: 15px;
@@ -667,12 +664,12 @@ body {
   transition: all 0.3s ease;
 }
 
-.countdown-item:hover {
+.homepage .countdown-item:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
-.countdown-number {
+.homepage .countdown-number {
   font-size: 48px;
   font-weight: 800;
   display: block;
@@ -681,7 +678,7 @@ body {
   margin-bottom: 5px;
 }
 
-.countdown-label {
+.homepage .countdown-label {
   font-size: 16px;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -690,20 +687,20 @@ body {
   color: rgba(255, 255, 255, 0.9);
 }
 
-.countdown-separator {
+.homepage .countdown-separator {
   font-size: 36px;
   color: var(--christmas-gold);
   font-weight: 700;
-  animation: blink 1s infinite;
+  animation: homepage-blink 1s infinite;
   margin: 0 5px;
 }
 
-@keyframes blink {
+@keyframes homepage-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
 }
 
-.countdown-message {
+.homepage .countdown-message {
   font-size: 18px;
   margin-top: 25px;
   color: var(--christmas-gold);
@@ -714,12 +711,12 @@ body {
 }
 
 /* Services Section */
-.section {
+.homepage .section {
   padding: 100px 5%;
   position: relative;
 }
 
-.christmas-header {
+.homepage .christmas-header {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -728,7 +725,7 @@ body {
   flex-wrap: wrap;
 }
 
-.christmas-section-title {
+.homepage .christmas-section-title {
   font-size: 3rem;
   font-weight: 800;
   color: var(--christmas-dark);
@@ -739,22 +736,23 @@ body {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.christmas-tree-icon, .christmas-star-icon {
+.homepage .christmas-tree-icon,
+.homepage .christmas-star-icon {
   font-size: 40px;
-  animation: spin 4s linear infinite;
+  animation: homepage-spin 4s linear infinite;
 }
 
-@keyframes spin {
+@keyframes homepage-spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-.section-header {
+.homepage .section-header {
   text-align: center;
   margin-bottom: 60px;
 }
 
-.section-subtitle {
+.homepage .section-subtitle {
   font-size: 1.2rem;
   color: #666;
   max-width: 600px;
@@ -763,7 +761,7 @@ body {
 }
 
 /* Services Grid */
-.services-grid {
+.homepage .services-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 60px;
@@ -771,7 +769,7 @@ body {
   margin-top: 60px !important;
 }
 
-.service-card {
+.homepage .service-card {
   background-color: var(--light-color);
   border-radius: var(--border-radius);
   padding: 50px 30px 40px 30px !important;
@@ -786,25 +784,25 @@ body {
   width: 80%;
 }
 
-.christmas-card {
+.homepage .christmas-card {
   border: 2px solid transparent;
   background: linear-gradient(white, white) padding-box,
               linear-gradient(45deg, var(--christmas-red), var(--christmas-green)) border-box;
 }
 
-.christmas-card:hover {
+.homepage .christmas-card:hover {
   transform: translateY(-15px) scale(1.02);
   box-shadow: var(--shadow-heavy), 0 0 40px rgba(255, 215, 0, 0.4);
 }
 
-.service-header {
+.homepage .service-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 20px;
 }
 
-.service-icon {
+.homepage .service-icon {
   width: 70px;
   height: 70px;
   background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
@@ -817,25 +815,25 @@ body {
   flex-shrink: 0;
 }
 
-.christmas-icon {
+.homepage .christmas-icon {
   background: linear-gradient(45deg, var(--christmas-red), var(--christmas-green)) !important;
   box-shadow: 0 5px 15px rgba(196, 30, 58, 0.3);
 }
 
-.service-profile {
+.homepage .service-profile {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }
 
-.profile-icons {
+.homepage .profile-icons {
   display: flex;
   gap: 10px;
   margin-top: 10px;
   flex-wrap: wrap;
 }
 
-.profile-icons i {
+.homepage .profile-icons i {
   width: 30px;
   height: 30px;
   background: rgba(108, 99, 255, 0.1);
@@ -848,40 +846,40 @@ body {
   transition: var(--transition);
 }
 
-.profile-icons i:hover {
+.homepage .profile-icons i:hover {
   background: var(--primary-color);
   color: white;
   transform: translateY(-2px);
 }
 
-.service-title {
+.homepage .service-title {
   font-size: 1.6rem;
   font-weight: 700;
   color: var(--dark-color);
   margin-bottom: 15px;
 }
 
-.service-description {
+.homepage .service-description {
   color: #666;
   margin-bottom: 20px;
   line-height: 1.6;
   flex-grow: 1;
 }
 
-.service-features {
+.homepage .service-features {
   list-style: none;
   padding: 0;
   margin: 0 0 20px 0;
 }
 
-.service-features li {
+.homepage .service-features li {
   padding: 8px 0;
   color: #666;
   position: relative;
   padding-left: 20px;
 }
 
-.service-features li::before {
+.homepage .service-features li::before {
   content: '✓';
   position: absolute;
   left: 0;
@@ -890,7 +888,7 @@ body {
 }
 
 /* Christmas Tags - Fixed Positioning */
-.christmas-tag {
+.homepage .christmas-tag {
   position: absolute !important;
   top: -20px !important;
   left: 50% !important;
@@ -902,7 +900,7 @@ body {
   font-size: 16px !important;
   font-weight: 800 !important;
   box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4) !important;
-  animation: tagBounce 2s ease-in-out infinite !important;
+  animation: homepage-tagBounce 2s ease-in-out infinite !important;
   z-index: 100 !important;
   white-space: nowrap !important;
   text-align: center !important;
@@ -913,7 +911,7 @@ body {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
 }
 
-@keyframes tagBounce {
+@keyframes homepage-tagBounce {
   0%, 100% { 
     transform: translateX(-50%) translateY(0); 
   }
@@ -922,46 +920,46 @@ body {
   }
 }
 
-.section-cta {
+.homepage .section-cta {
   text-align: center;
   margin-top: 40px;
 }
 
-.btn-outline {
+.homepage .btn-outline {
   background-color: transparent;
   color: var(--primary-color);
   border: 2px solid var(--primary-color);
 }
 
-.btn-outline:hover {
+.homepage .btn-outline:hover {
   background-color: var(--primary-color);
   color: white;
 }
 
-.christmas-cta-btn {
+.homepage .christmas-cta-btn {
   border-color: var(--christmas-green) !important;
   color: var(--christmas-green) !important;
 }
 
-.christmas-cta-btn:hover {
+.homepage .christmas-cta-btn:hover {
   background: linear-gradient(45deg, var(--christmas-green), var(--christmas-red)) !important;
   color: white !important;
   border-color: transparent !important;
 }
 
 /* Portfolio Preview */
-.portfolio-preview {
+.homepage .portfolio-preview {
   background-color: var(--light-color);
 }
 
-.portfolio-grid {
+.homepage .portfolio-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 40px;
   margin-bottom: 50px;
 }
 
-.portfolio-item {
+.homepage .portfolio-item {
   border-radius: var(--border-radius);
   overflow: hidden;
   height: 100%;
@@ -972,30 +970,30 @@ body {
   width: 90%;
 }
 
-.portfolio-item:hover {
+.homepage .portfolio-item:hover {
   transform: translateY(-10px);
   box-shadow: var(--shadow-heavy);
 }
 
-.portfolio-image {
+.homepage .portfolio-image {
   position: relative;
   height: 300px;
   overflow: hidden;
   border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
 
-.portfolio-image img {
+.homepage .portfolio-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
 }
 
-.portfolio-item:hover .portfolio-image img {
+.homepage .portfolio-item:hover .portfolio-image img {
   transform: scale(1.05);
 }
 
-.portfolio-overlay {
+.homepage .portfolio-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -1009,38 +1007,38 @@ body {
   padding: 30px;
 }
 
-.christmas-overlay-portfolio {
+.homepage .christmas-overlay-portfolio {
   background: linear-gradient(to top, rgba(26, 71, 42, 0.95), rgba(196, 30, 58, 0.7)) !important;
 }
 
-.portfolio-item:hover .portfolio-overlay {
+.homepage .portfolio-item:hover .portfolio-overlay {
   opacity: 1;
 }
 
-.overlay-content h4 {
+.homepage .overlay-content h4 {
   color: white;
   font-size: 1.5rem;
   margin-bottom: 10px;
 }
 
-.overlay-content p {
+.homepage .overlay-content p {
   color: rgba(255, 255, 255, 0.8);
   margin-bottom: 20px;
 }
 
-.portfolio-actions {
+.homepage .portfolio-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
 
-.christmas-portfolio-btn {
+.homepage .christmas-portfolio-btn {
   background: linear-gradient(45deg, var(--christmas-red), var(--christmas-gold)) !important;
   color: white !important;
   border: none !important;
 }
 
-.btn-small {
+.homepage .btn-small {
   padding: 10px 20px;
   font-size: 14px;
   border-radius: 50px;
@@ -1055,29 +1053,29 @@ body {
   font-weight: 600;
 }
 
-.btn-outline-light {
+.homepage .btn-outline-light {
   background-color: transparent;
   color: white;
   border: 2px solid white;
 }
 
-.btn-outline-light:hover {
+.homepage .btn-outline-light:hover {
   background-color: white;
   color: var(--dark-color);
 }
 
-.portfolio-info {
+.homepage .portfolio-info {
   padding: 25px;
 }
 
-.portfolio-title {
+.homepage .portfolio-title {
   font-size: 1.4rem;
   font-weight: 700;
   color: var(--dark-color);
   margin-bottom: 8px;
 }
 
-.portfolio-category {
+.homepage .portfolio-category {
   color: var(--christmas-red);
   font-size: 14px;
   font-weight: 600;
@@ -1086,13 +1084,13 @@ body {
   letter-spacing: 1px;
 }
 
-.portfolio-tags {
+.homepage .portfolio-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.portfolio-tag {
+.homepage .portfolio-tag {
   background: rgba(196, 30, 58, 0.1);
   color: var(--christmas-red);
   padding: 6px 15px;
@@ -1102,7 +1100,7 @@ body {
 }
 
 /* Quick View Modal */
-.portfolio-quickview-modal {
+.homepage .portfolio-quickview-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -1115,7 +1113,7 @@ body {
   padding: 20px;
 }
 
-.quickview-overlay {
+.homepage .quickview-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -1125,7 +1123,7 @@ body {
   backdrop-filter: blur(5px);
 }
 
-.quickview-content {
+.homepage .quickview-content {
   position: relative;
   background: white;
   border-radius: var(--border-radius);
@@ -1135,10 +1133,10 @@ body {
   overflow-y: auto;
   z-index: 10001;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-  animation: modalSlideIn 0.3s ease;
+  animation: homepage-modalSlideIn 0.3s ease;
 }
 
-@keyframes modalSlideIn {
+@keyframes homepage-modalSlideIn {
   from {
     opacity: 0;
     transform: translateY(50px);
@@ -1149,7 +1147,7 @@ body {
   }
 }
 
-.quickview-close {
+.homepage .quickview-close {
   position: absolute;
   top: 20px;
   right: 20px;
@@ -1168,45 +1166,45 @@ body {
   transition: all 0.3s ease;
 }
 
-.quickview-close:hover {
+.homepage .quickview-close:hover {
   background: var(--christmas-green);
   transform: rotate(90deg);
 }
 
-.quickview-project {
+.homepage .quickview-project {
   display: flex;
   flex-direction: column;
 }
 
-.quickview-image {
+.homepage .quickview-image {
   height: 400px;
   overflow: hidden;
 }
 
-.quickview-image img {
+.homepage .quickview-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.quickview-info {
+.homepage .quickview-info {
   padding: 40px;
 }
 
-.quickview-info h3 {
+.homepage .quickview-info h3 {
   font-size: 2rem;
   color: var(--dark-color);
   margin-bottom: 15px;
 }
 
-.quickview-meta {
+.homepage .quickview-meta {
   display: flex;
   gap: 20px;
   margin-bottom: 25px;
   flex-wrap: wrap;
 }
 
-.quickview-category {
+.homepage .quickview-category {
   background: var(--christmas-red);
   color: white;
   padding: 8px 20px;
@@ -1215,7 +1213,7 @@ body {
   font-weight: 600;
 }
 
-.quickview-date {
+.homepage .quickview-date {
   color: #666;
   font-size: 14px;
   display: flex;
@@ -1223,36 +1221,36 @@ body {
   gap: 5px;
 }
 
-.quickview-description {
+.homepage .quickview-description {
   font-size: 1.1rem;
   line-height: 1.6;
   color: #555;
   margin-bottom: 30px;
 }
 
-.quickview-features {
+.homepage .quickview-features {
   margin-bottom: 30px;
 }
 
-.quickview-features h4 {
+.homepage .quickview-features h4 {
   font-size: 1.3rem;
   color: var(--dark-color);
   margin-bottom: 15px;
 }
 
-.quickview-features ul {
+.homepage .quickview-features ul {
   list-style: none;
   padding-left: 0;
 }
 
-.quickview-features li {
+.homepage .quickview-features li {
   padding: 8px 0;
   color: #555;
   position: relative;
   padding-left: 25px;
 }
 
-.quickview-features li::before {
+.homepage .quickview-features li::before {
   content: '✓';
   position: absolute;
   left: 0;
@@ -1261,54 +1259,54 @@ body {
   font-size: 16px;
 }
 
-.quickview-actions {
+.homepage .quickview-actions {
   display: flex;
   gap: 15px;
   flex-wrap: wrap;
 }
 
 /* CTA Section */
-.cta-section {
+.homepage .cta-section {
   padding: 100px 5%;
   background: linear-gradient(135deg, var(--dark-color) 0%, #3a3e5c 100%);
   color: white;
 }
 
-.christmas-cta {
+.homepage .christmas-cta {
   background: linear-gradient(135deg, var(--christmas-dark) 0%, var(--christmas-green) 100%) !important;
   position: relative;
   overflow: hidden;
 }
 
-.christmas-cta::before {
+.homepage .christmas-cta::before {
   content: '❄️❄️❄️';
   position: absolute;
   top: 20px;
   left: 20px;
   font-size: 24px;
   opacity: 0.5;
-  animation: snowDrift 20s linear infinite;
+  animation: homepage-snowDrift 20s linear infinite;
 }
 
-.christmas-cta-decoration {
+.homepage .christmas-cta-decoration {
   position: absolute;
   top: 20px;
   right: 20px;
   font-size: 30px;
-  animation: decorationFloat 6s ease-in-out infinite;
+  animation: homepage-decorationFloat 6s ease-in-out infinite;
 }
 
-@keyframes snowDrift {
+@keyframes homepage-snowDrift {
   0% { transform: translateX(-100px); }
   100% { transform: translateX(calc(100vw + 100px)); }
 }
 
-@keyframes decorationFloat {
+@keyframes homepage-decorationFloat {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-20px) rotate(10deg); }
 }
 
-.cta-container {
+.homepage .cta-container {
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
@@ -1320,183 +1318,181 @@ body {
   border: 1px solid rgba(233, 228, 228, 0.1);
 }
 
-.cta-content {
+.homepage .cta-content {
   flex: 2;
   padding-right: 40px;
-  
 }
 
-.cta-title {
+.homepage .cta-title {
   font-size: 2.5rem;
   font-weight: 800;
   margin-bottom: 20px;
   color: white;
-  
 }
 
-.cta-text {
+.homepage .cta-text {
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.8);
   margin-bottom: 30px;
   max-width: 500px;
 }
 
-.cta-buttons {
+.homepage .cta-buttons {
   display: flex;
   gap: 15px;
   flex-wrap: wrap;
 }
 
-.btn-light {
+.homepage .btn-light {
   background-color: white;
   color: var(--dark-color);
 }
 
-.christmas-cta-btn {
+.homepage .christmas-cta-btn {
   background: linear-gradient(45deg, var(--christmas-gold), var(--christmas-silver)) !important;
   color: var(--christmas-dark) !important;
   font-weight: 700;
 }
 
-.cta-visual {
+.homepage .cta-visual {
   flex: 1;
   display: flex;
   justify-content: center;
 }
 
-.cta-image {
+.homepage .cta-image {
   width: 200px;
   height: 200px;
   border-radius: 50%;
   overflow: hidden;
   border: 4px solid rgba(255, 255, 255, 0.2);
-  animation: pulse 2s infinite;
+  animation: homepage-pulse 2s infinite;
 }
 
-.christmas-cta-image {
+.homepage .christmas-cta-image {
   border: 5px solid var(--christmas-gold) !important;
   box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
   position: relative;
 }
 
-.santa-hat-cta {
+.homepage .santa-hat-cta {
   position: absolute;
   top: -30px;
   right: -30px;
   font-size: 50px;
-  animation: hatSpin 4s linear infinite;
+  animation: homepage-hatSpin 4s linear infinite;
   filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.7));
 }
 
-@keyframes hatSpin {
+@keyframes homepage-hatSpin {
   0% { transform: rotate(0deg) scale(1); }
   50% { transform: rotate(180deg) scale(1.2); }
   100% { transform: rotate(360deg) scale(1); }
 }
 
 /* Animation Classes */
-.animate-on-scroll {
+.homepage .animate-on-scroll {
   opacity: 0;
   transform: translateY(30px);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.animate-on-scroll.animated {
+.homepage .animate-on-scroll.animated {
   opacity: 1;
   transform: translateY(0);
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-  .hero-title {
+  .homepage .hero-title {
     font-size: 3rem;
   }
   
-  .christmas-section-title {
+  .homepage .christmas-section-title {
     font-size: 2.4rem;
   }
   
-  .quickview-content {
+  .homepage .quickview-content {
     max-width: 90%;
   }
 }
 
 @media (max-width: 1024px) {
-  .hero-title {
+  .homepage .hero-title {
     font-size: 2.8rem;
   }
   
-  .services-grid,
-  .portfolio-grid {
+  .homepage .services-grid,
+  .homepage .portfolio-grid {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
   
-  .service-header {
+  .homepage .service-header {
     flex-direction: column;
   }
   
-  .service-profile {
+  .homepage .service-profile {
     align-items: flex-start;
     margin-top: 15px;
   }
   
-  .christmas-section-title {
+  .homepage .christmas-section-title {
     font-size: 2.2rem;
   }
   
-  .countdown-timer {
+  .homepage .countdown-timer {
     gap: 15px;
   }
   
-  .countdown-item {
+  .homepage .countdown-item {
     min-width: 100px;
     padding: 20px 25px;
   }
   
-  .countdown-number {
+  .homepage .countdown-number {
     font-size: 36px;
   }
   
-  .cta-container {
+  .homepage .cta-container {
     padding: 50px 40px;
   }
   
-  .quickview-project {
+  .homepage .quickview-project {
     flex-direction: column;
   }
   
-  .quickview-image {
+  .homepage .quickview-image {
     height: 300px;
   }
 }
 
 @media (max-width: 900px) {
-  .hero-section {
+  .homepage .hero-section {
     flex-direction: column;
     text-align: center;
     padding-top: 100px;
   }
   
-  .hero-content {
+  .homepage .hero-content {
     margin-bottom: 50px;
     margin-right: 0;
     max-width: 100%;
   }
   
-  .hero-visual {
+  .homepage .hero-visual {
     width: 100%;
     min-width: auto;
   }
   
-  .hero-stats {
+  .homepage .hero-stats {
     justify-content: center;
   }
   
-  .hero-buttons {
+  .homepage .hero-buttons {
     justify-content: center;
   }
   
-  .christmas-banner {
+  .homepage .christmas-banner {
     position: relative;
     top: 0;
     right: 0;
@@ -1505,202 +1501,202 @@ body {
     justify-content: center;
   }
   
-  .cta-container {
+  .homepage .cta-container {
     flex-direction: column;
     text-align: center;
     padding: 40px 30px;
   }
   
-  .cta-content {
+  .homepage .cta-content {
     padding-right: 0;
     margin-bottom: 40px;
   }
   
-  .cta-buttons {
+  .homepage .cta-buttons {
     justify-content: center;
   }
 }
 
 @media (max-width: 768px) {
-  .hero-title {
+  .homepage .hero-title {
     font-size: 2.5rem;
   }
   
-  .hero-subtitle {
+  .homepage .hero-subtitle {
     font-size: 1.1rem;
   }
   
-  .hero-buttons {
+  .homepage .hero-buttons {
     flex-direction: column;
     align-items: center;
   }
   
-  .btn {
+  .homepage .btn {
     width: 100%;
     max-width: 300px;
   }
   
-  .countdown-timer {
+  .homepage .countdown-timer {
     gap: 10px;
   }
   
-  .countdown-item {
+  .homepage .countdown-item {
     min-width: 80px;
     padding: 15px;
   }
   
-  .countdown-number {
+  .homepage .countdown-number {
     font-size: 32px;
   }
   
-  .countdown-separator {
+  .homepage .countdown-separator {
     font-size: 28px;
   }
   
-  .christmas-ornaments {
+  .homepage .christmas-ornaments {
     display: none;
   }
   
-  .christmas-header {
+  .homepage .christmas-header {
     gap: 15px;
   }
   
-  .christmas-section-title {
+  .homepage .christmas-section-title {
     font-size: 2rem;
   }
   
-  .christmas-tree-icon,
-  .christmas-star-icon {
+  .homepage .christmas-tree-icon,
+  .homepage .christmas-star-icon {
     font-size: 32px;
   }
   
-  .quickview-info {
+  .homepage .quickview-info {
     padding: 30px 25px;
   }
   
-  .quickview-info h3 {
+  .homepage .quickview-info h3 {
     font-size: 1.8rem;
   }
 }
 
 @media (max-width: 600px) {
-  .services-grid,
-  .portfolio-grid {
+  .homepage .services-grid,
+  .homepage .portfolio-grid {
     grid-template-columns: 1fr;
   }
   
-  .countdown-timer {
+  .homepage .countdown-timer {
     flex-wrap: wrap;
     justify-content: center;
   }
   
-  .countdown-separator {
+  .homepage .countdown-separator {
     display: none;
   }
   
-  .countdown-item {
+  .homepage .countdown-item {
     min-width: 70px;
     padding: 12px;
   }
   
-  .countdown-number {
+  .homepage .countdown-number {
     font-size: 28px;
   }
   
-  .countdown-label {
+  .homepage .countdown-label {
     font-size: 12px;
   }
   
-  .countdown-title {
+  .homepage .countdown-title {
     font-size: 24px;
   }
   
-  .christmas-section-title {
+  .homepage .christmas-section-title {
     font-size: 1.8rem;
   }
   
-  .section {
+  .homepage .section {
     padding: 80px 5%;
   }
   
-  .section-title {
+  .homepage .section-title {
     font-size: 2rem;
   }
   
-  .quickview-actions {
+  .homepage .quickview-actions {
     flex-direction: column;
   }
   
-  .quickview-actions .btn {
+  .homepage .quickview-actions .btn {
     width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .hero-title {
+  .homepage .hero-title {
     font-size: 2.2rem;
   }
   
-  .hero-stats {
+  .homepage .hero-stats {
     gap: 25px;
   }
   
-  .stat-number {
+  .homepage .stat-number {
     font-size: 2rem;
   }
   
-  .christmas-section-title {
+  .homepage .christmas-section-title {
     font-size: 1.6rem;
   }
   
-  .christmas-header {
+  .homepage .christmas-header {
     gap: 10px;
   }
   
-  .christmas-tree-icon,
-  .christmas-star-icon {
+  .homepage .christmas-tree-icon,
+  .homepage .christmas-star-icon {
     font-size: 24px;
   }
   
-  .countdown-item {
+  .homepage .countdown-item {
     min-width: 60px;
     padding: 10px;
   }
   
-  .countdown-number {
+  .homepage .countdown-number {
     font-size: 24px;
   }
   
-  .countdown-label {
+  .homepage .countdown-label {
     font-size: 10px;
     letter-spacing: 1px;
   }
   
-  .profile-icons {
+  .homepage .profile-icons {
     justify-content: center;
   }
   
-  .portfolio-actions {
+  .homepage .portfolio-actions {
     flex-direction: column;
   }
   
-  .portfolio-actions .btn {
+  .homepage .portfolio-actions .btn {
     width: 100%;
   }
 }
 
 /* Fix for button gaps in hero section */
-.hero-content > .btn {
+.homepage .hero-content > .btn {
   margin-bottom: 15px;
 }
 
 /* Ensure proper spacing */
-.section-header {
+.homepage .section-header {
   margin-bottom: 60px;
 }
 
 /* Ensure images don't overflow */
-img {
+.homepage img {
   max-width: 100%;
   height: auto;
   display: block;
@@ -1712,18 +1708,376 @@ body.modal-open {
 }
 
 /* Ensure proper z-index stacking */
-.christmas-tag {
+.homepage .christmas-tag {
   z-index: 100 !important;
 }
 
 /* Fix for quick view modal on mobile */
 @media (max-width: 768px) {
-  .quickview-content {
+  .homepage .quickview-content {
     max-height: 85vh;
   }
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
+/* Holiday Package Modal */
+.homepage .holiday-package-modal,
+.homepage .christmas-portfolio-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.homepage .modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.homepage .modal-content {
+  position: relative;
+  background: white;
+  border-radius: var(--border-radius);
+  max-width: 1200px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 10001;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  animation: homepage-modalSlideIn 0.3s ease;
+}
+
+.homepage .package-modal {
+  background: linear-gradient(135deg, #f0f8ff 0%, #fff 100%);
+}
+
+.homepage .portfolio-modal {
+  background: var(--light-color);
+}
+
+.homepage .modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--christmas-red);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10002;
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.homepage .modal-close:hover {
+  background: var(--christmas-green);
+  transform: rotate(90deg);
+}
+
+.homepage .modal-header {
+  padding: 40px 40px 20px;
+  text-align: center;
+  background: linear-gradient(45deg, var(--christmas-red), var(--christmas-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.homepage .modal-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.homepage .modal-subtitle {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* Packages Grid */
+.homepage .packages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  padding: 30px;
+}
+
+.homepage .package-card {
+  background: white;
+  border: 2px solid rgba(196, 30, 58, 0.1);
+  border-radius: var(--border-radius);
+  padding: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.homepage .package-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-heavy);
+  border-color: var(--christmas-red);
+}
+
+.homepage .package-card.selected {
+  border-color: var(--christmas-green);
+  background: linear-gradient(135deg, rgba(11, 102, 35, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+  box-shadow: 0 10px 30px rgba(11, 102, 35, 0.2);
+}
+
+.homepage .package-badge {
+  position: absolute;
+  top: -15px;
+  right: 20px;
+  background: linear-gradient(45deg, var(--christmas-red), var(--christmas-gold));
+  color: white;
+  padding: 8px 20px;
+  border-radius: 25px;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.homepage .package-header {
+  margin-bottom: 20px;
+}
+
+.homepage .package-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--dark-color);
+  margin-bottom: 10px;
+}
+
+.homepage .package-price {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.homepage .current-price {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--christmas-green);
+}
+
+.homepage .original-price {
+  font-size: 1.2rem;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.homepage .package-description {
+  color: #666;
+  margin-bottom: 25px;
+  line-height: 1.6;
+  flex-grow: 1;
+}
+
+.homepage .package-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 25px 0;
+}
+
+.homepage .package-features li {
+  padding: 8px 0;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.homepage .package-features li i {
+  color: var(--christmas-green);
+}
+
+.homepage .modal-footer {
+  padding: 30px 40px;
+  text-align: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(240, 248, 255, 0.5);
+}
+
+.homepage .modal-note {
+  color: #666;
+  font-size: 14px;
+  margin-top: 15px;
+  font-style: italic;
+}
+
+/* Portfolio Gallery Modal */
+.homepage .portfolio-gallery {
+  padding: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.homepage .gallery-item {
+  background: white;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+}
+
+.homepage .gallery-item:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-heavy);
+}
+
+.homepage .gallery-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.homepage .gallery-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.homepage .gallery-item:hover .gallery-image img {
+  transform: scale(1.05);
+}
+
+.homepage .gallery-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(26, 71, 42, 0.9), rgba(196, 30, 58, 0.7));
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  padding: 20px;
+}
+
+.homepage .gallery-item:hover .gallery-overlay {
+  opacity: 1;
+}
+
+.homepage .gallery-overlay .overlay-content h4 {
+  color: white;
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+}
+
+.homepage .gallery-overlay .overlay-content p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+}
+
+.homepage .gallery-info {
+  padding: 20px;
+}
+
+.homepage .gallery-info h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--dark-color);
+  margin-bottom: 8px;
+}
+
+.homepage .gallery-category {
+  color: var(--christmas-red);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.homepage .gallery-description {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 15px;
+}
+
+.homepage .gallery-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.homepage .gallery-tag {
+  background: rgba(196, 30, 58, 0.1);
+  color: var(--christmas-red);
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Responsive Design for Modals */
+@media (max-width: 768px) {
+  .homepage .modal-content {
+    max-width: 95%;
+    max-height: 85vh;
+  }
+  
+  .homepage .packages-grid {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+  
+  .homepage .modal-header {
+    padding: 30px 20px 15px;
+  }
+  
+  .homepage .modal-title {
+    font-size: 2rem;
+  }
+  
+  .homepage .portfolio-gallery {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+  
+  .homepage .modal-footer {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .homepage .modal-title {
+    font-size: 1.6rem;
+  }
+  
+  .homepage .package-card {
+    padding: 20px;
+  }
+  
+  .homepage .package-name {
+    font-size: 1.5rem;
+  }
+  
+  .homepage .current-price {
+    font-size: 2rem;
+  }
 }

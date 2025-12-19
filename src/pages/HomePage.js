@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import './HomePage.css';
 
 const HomePage = () => {
@@ -8,14 +7,16 @@ const HomePage = () => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [showQuickView, setShowQuickView] = useState(false);
   const [quickViewProject, setQuickViewProject] = useState(null);
-  const [currentGreeting, setCurrentGreeting] = useState(0);
+  const [showPackageModal, setShowPackageModal] = useState(false);
+  const [showPortfolioModal, setShowPortfolioModal] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState('basic');
   
   // Christmas-themed hero images
   const heroImages = [
-    "https://images.unsplash.com/photo-1543470371-128f2246eb72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1482517967863-00e15c9b44be?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1573014089155-d1df965a1aaa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1573339882949-8c35cfa6b8a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+    "https://images.unsplash.com/photo-1547887537-6158d64c35b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1484723091739-30a097e8f929?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1512389142860-9c449e58a543?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80"
   ];
 
   // Christmas greeting messages
@@ -101,14 +102,6 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, [heroImages.length]);
 
-  useEffect(() => {
-    const greetingInterval = setInterval(() => {
-      setCurrentGreeting((prev) => (prev + 1) % christmasGreetings.length);
-    }, 3000);
-    
-    return () => clearInterval(greetingInterval);
-  }, []);
-
   const goToImage = (index) => {
     setCurrentImageIndex(index);
   };
@@ -124,6 +117,154 @@ const HomePage = () => {
     setQuickViewProject(null);
     document.body.style.overflow = 'auto';
   };
+
+  const openPackageModal = () => {
+    setShowPackageModal(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closePackageModal = () => {
+    setShowPackageModal(false);
+    document.body.style.overflow = 'auto';
+  };
+
+  const openPortfolioModal = () => {
+    setShowPortfolioModal(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closePortfolioModal = () => {
+    setShowPortfolioModal(false);
+    document.body.style.overflow = 'auto';
+  };
+
+  const handlePackageSelect = (packageType) => {
+    setSelectedPackage(packageType);
+  };
+
+  const handlePackageOrder = () => {
+    alert(`Thank you for selecting the ${selectedPackage} package! We'll contact you shortly.`);
+    closePackageModal();
+  };
+
+  // Holiday Design Packages
+  const holidayPackages = [
+    {
+      id: 'basic',
+      name: 'Festive Starter',
+      price: '$499',
+      discount: '25% OFF',
+      originalPrice: '$665',
+      features: [
+        'Christmas Logo Design',
+        'Holiday Color Palette',
+        '3 Social Media Templates',
+        'Email Newsletter Design',
+        '1 Revisions'
+      ],
+      description: 'Perfect for small businesses starting their holiday marketing'
+    },
+    {
+      id: 'pro',
+      name: 'Merry Marketing',
+      price: '$899',
+      discount: '30% OFF',
+      originalPrice: '$1285',
+      features: [
+        'Everything in Festive Starter',
+        'Complete Social Media Kit (15 templates)',
+        'Website Holiday Banner',
+        'Email Campaign Design',
+        'Product Packaging Mockup',
+        '3 Revisions',
+        'Priority Support'
+      ],
+      description: 'Ideal for established businesses running holiday campaigns'
+    },
+    {
+      id: 'premium',
+      name: 'Santa\'s Workshop',
+      price: '$1499',
+      discount: '35% OFF',
+      originalPrice: '$2307',
+      features: [
+        'Everything in Merry Marketing',
+        'Complete Brand Guidelines',
+        'Print Materials (Flyers, Posters)',
+        'Animated Social Media Posts',
+        'Gift Card & Voucher Design',
+        'Unlimited Revisions',
+        'Dedicated Designer',
+        'Free Stock Photos',
+        '48-hour Rush Delivery Option'
+      ],
+      description: 'Complete holiday branding solution for major campaigns'
+    }
+  ];
+
+  // Portfolio Projects for Modal
+  const portfolioProjects = [
+    {
+      id: 'project1',
+      title: "Santa's Workshop Branding",
+      category: "Christmas Branding & Identity",
+      description: "Complete Christmas branding for holiday retail store including festive logo, color palette, and brand guidelines.",
+      image: "https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+      tags: ["Logo Design", "Brand Guide", "Packaging"],
+      details: [
+        "Festive logo with Santa hat integration",
+        "Christmas-themed color palette",
+        "Holiday typography system",
+        "Seasonal brand guidelines",
+        "Social media templates"
+      ]
+    },
+    {
+      id: 'project2',
+      title: "North Pole Packaging",
+      category: "Holiday Packaging Design",
+      description: "Festive packaging designs for Christmas product line including custom gift boxes and seasonal wrapping paper.",
+      image: "https://images.unsplash.com/photo-1512386233331-f023884a92e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+      tags: ["Gift Boxes", "Labels", "Wrapping"],
+      details: [
+        "Custom gift box designs",
+        "Festive product labels",
+        "Christmas wrapping paper",
+        "Gift tag designs",
+        "Seasonal packaging system"
+      ]
+    },
+    {
+      id: 'project3',
+      title: "Reindeer Games Campaign",
+      category: "Christmas Marketing",
+      description: "Christmas marketing campaign for gaming company with social media graphics and holiday ad designs.",
+      image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+      tags: ["Social Media", "Email Campaign", "Digital Ads"],
+      details: [
+        "Social media graphics series",
+        "Christmas email campaign",
+        "Digital banner ads",
+        "Animated reindeer characters",
+        "Holiday campaign strategy"
+      ]
+    },
+    {
+      id: 'project4',
+      title: "Winter Wonderland Website",
+      category: "Holiday Web Design",
+      description: "Christmas-themed website redesign with interactive snow effects and festive animations.",
+      image: "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+      tags: ["Web Design", "Animation", "Interactive"],
+      details: [
+        "Animated snow effects",
+        "Interactive Advent calendar",
+        "Festive navigation",
+        "Mobile-responsive design",
+        "Performance optimization"
+      ]
+    }
+  ];
 
   return (
     <div className="homepage">
@@ -170,15 +311,6 @@ const HomePage = () => {
 
       {/* Hero Section */}
       <section id="home" className="hero-section">
-        <div className="christmas-banner">
-          <span className="banner-text">{christmasGreetings[currentGreeting]}</span>
-          <div className="banner-lights">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="banner-light"></div>
-            ))}
-          </div>
-        </div>
-
         <div className="hero-content animate-on-scroll">
           <div className="hero-badge christmas-badge">
             <span className="badge-text">🎁 Christmas Special Offer!</span>
@@ -190,16 +322,16 @@ const HomePage = () => {
           </h1>
           <p className="hero-subtitle">
             This holiday season, let us help you create stunning designs that capture the Christmas spirit.
-            Special holiday rates available!
+            Special holiday rates available until December 25th!
           </p>
           
           <div className="hero-buttons">
-            <Link to="/contact?project=christmas" className="btn btn-primary christmas-btn">
+            <button className="btn btn-primary christmas-btn" onClick={openPackageModal}>
               <i className="fas fa-gift"></i> Get Holiday Design Package
-            </Link>
-            <Link to="/portfolio" className="btn btn-secondary">
+            </button>
+            <button className="btn btn-secondary" onClick={openPortfolioModal}>
               <i className="fas fa-tree"></i> View Christmas Portfolio
-            </Link>
+            </button>
           </div>
           
           <div className="hero-stats christmas-stats">
@@ -208,7 +340,7 @@ const HomePage = () => {
               <p className="stat-label">Christmas Projects</p>
             </div>
             <div className="stat-item">
-              <h3 className="stat-number">25%</h3>
+              <h3 className="stat-number">25-35%</h3>
               <p className="stat-label">Holiday Discount</p>
             </div>
             <div className="stat-item">
@@ -280,7 +412,7 @@ const HomePage = () => {
             <span className="countdown-label">Seconds</span>
           </div>
         </div>
-        <div className="countdown-message">Book before Christmas for special holiday rates!</div>
+        <div className="countdown-message">Book before Christmas for special holiday rates! Offer ends December 25th.</div>
       </div>
 
       {/* Services Section */}
@@ -381,9 +513,9 @@ const HomePage = () => {
         </div>
         
         <div className="section-cta">
-          <Link to="/contact?type=quote" className="btn btn-outline christmas-cta-btn">
+          <button className="btn btn-outline christmas-cta-btn" onClick={openPackageModal}>
             <i className="fas fa-snowman"></i> Get Christmas Quote
-          </Link>
+          </button>
         </div>
       </section>
 
@@ -403,113 +535,43 @@ const HomePage = () => {
         </div>
         
         <div className="portfolio-grid">
-          {/* Project 1 */}
-          <div className="portfolio-item animate-on-scroll">
-            <div className="portfolio-image">
-              <img 
-                src="https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Santa's Workshop Branding Project"
-              />
-              <div className="portfolio-overlay christmas-overlay-portfolio">
-                <div className="overlay-content">
-                  <h4>Santa's Workshop Branding</h4>
-                  <p>Complete Christmas branding for holiday retail store</p>
-                  <div className="portfolio-actions">
-                    <button className="btn btn-small christmas-portfolio-btn quick-view-btn" 
-                      onClick={() => openQuickView('project1')}>
-                      <i className="fas fa-eye"></i> Quick View
-                    </button>
-                    <Link to="/portfolio/santas-workshop" className="btn btn-small btn-outline-light">
-                      <i className="fas fa-external-link-alt"></i> Full Case Study
-                    </Link>
+          {portfolioProjects.slice(0, 3).map((project) => (
+            <div key={project.id} className="portfolio-item animate-on-scroll">
+              <div className="portfolio-image">
+                <img src={project.image} alt={project.title} />
+                <div className="portfolio-overlay christmas-overlay-portfolio">
+                  <div className="overlay-content">
+                    <h4>{project.title}</h4>
+                    <p>{project.description.substring(0, 80)}...</p>
+                    <div className="portfolio-actions">
+                      <button className="btn btn-small christmas-portfolio-btn quick-view-btn" 
+                        onClick={() => openQuickView(project.id)}>
+                        <i className="fas fa-eye"></i> Quick View
+                      </button>
+                      <button className="btn btn-small btn-outline-light" onClick={openPortfolioModal}>
+                        <i className="fas fa-external-link-alt"></i> Full Case Study
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="portfolio-info">
-              <h3 className="portfolio-title">Santa's Workshop Branding</h3>
-              <p className="portfolio-category">Christmas Branding & Identity</p>
-              <div className="portfolio-tags">
-                <span className="portfolio-tag">Logo Design</span>
-                <span className="portfolio-tag">Brand Guide</span>
-                <span className="portfolio-tag">Packaging</span>
-              </div>
-            </div>
-          </div>
-          
-          {/* Project 2 */}
-          <div className="portfolio-item animate-on-scroll">
-            <div className="portfolio-image">
-              <img 
-                src="https://images.unsplash.com/photo-1512386233331-f023884a92e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="North Pole Packaging Design"
-              />
-              <div className="portfolio-overlay christmas-overlay-portfolio">
-                <div className="overlay-content">
-                  <h4>North Pole Packaging</h4>
-                  <p>Festive packaging designs for Christmas product line</p>
-                  <div className="portfolio-actions">
-                    <button className="btn btn-small christmas-portfolio-btn quick-view-btn"
-                      onClick={() => openQuickView('project2')}>
-                      <i className="fas fa-eye"></i> Quick View
-                    </button>
-                    <Link to="/portfolio/north-pole-packaging" className="btn btn-small btn-outline-light">
-                      <i className="fas fa-external-link-alt"></i> Full Case Study
-                    </Link>
-                  </div>
+              <div className="portfolio-info">
+                <h3 className="portfolio-title">{project.title}</h3>
+                <p className="portfolio-category">{project.category}</p>
+                <div className="portfolio-tags">
+                  {project.tags.map((tag, index) => (
+                    <span key={index} className="portfolio-tag">{tag}</span>
+                  ))}
                 </div>
               </div>
             </div>
-            <div className="portfolio-info">
-              <h3 className="portfolio-title">North Pole Packaging</h3>
-              <p className="portfolio-category">Holiday Packaging Design</p>
-              <div className="portfolio-tags">
-                <span className="portfolio-tag">Gift Boxes</span>
-                <span className="portfolio-tag">Labels</span>
-                <span className="portfolio-tag">Wrapping</span>
-              </div>
-            </div>
-          </div>
-          
-          {/* Project 3 */}
-          <div className="portfolio-item animate-on-scroll">
-            <div className="portfolio-image">
-              <img 
-                src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Reindeer Games Marketing Campaign"
-              />
-              <div className="portfolio-overlay christmas-overlay-portfolio">
-                <div className="overlay-content">
-                  <h4>Reindeer Games Campaign</h4>
-                  <p>Christmas marketing campaign for gaming company</p>
-                  <div className="portfolio-actions">
-                    <button className="btn btn-small christmas-portfolio-btn quick-view-btn"
-                      onClick={() => openQuickView('project3')}>
-                      <i className="fas fa-eye"></i> Quick View
-                    </button>
-                    <Link to="/portfolio/reindeer-games" className="btn btn-small btn-outline-light">
-                      <i className="fas fa-external-link-alt"></i> Full Case Study
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="portfolio-info">
-              <h3 className="portfolio-title">Reindeer Games Campaign</h3>
-              <p className="portfolio-category">Christmas Marketing</p>
-              <div className="portfolio-tags">
-                <span className="portfolio-tag">Social Media</span>
-                <span className="portfolio-tag">Email Campaign</span>
-                <span className="portfolio-tag">Digital Ads</span>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
         
         <div className="section-cta animate-on-scroll">
-          <Link to="/portfolio" className="btn btn-primary christmas-btn">
+          <button className="btn btn-primary christmas-btn" onClick={openPortfolioModal}>
             <i className="fas fa-images"></i> View All Christmas Projects
-          </Link>
+          </button>
         </div>
       </section>
 
@@ -524,12 +586,12 @@ const HomePage = () => {
               free festive social media pack. Let's create something magical together!
             </p>
             <div className="cta-buttons">
-              <Link to="/contact?project=christmas" className="btn btn-light christmas-cta-btn">
+              <button className="btn btn-light christmas-cta-btn" onClick={openPackageModal}>
                 <i className="fas fa-santa"></i> Book Christmas Call
-              </Link>
-              <Link to="/download-guide" className="btn btn-outline-light">
-                <i className="fas fa-download"></i> Get Holiday Guide
-              </Link>
+              </button>
+              <button className="btn btn-outline-light" onClick={openPortfolioModal}>
+                <i className="fas fa-images"></i> View Portfolio
+              </button>
             </div>
           </div>
           <div className="cta-visual">
@@ -544,6 +606,119 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Holiday Design Package Modal */}
+      {showPackageModal && (
+        <div className="holiday-package-modal">
+          <div className="modal-overlay" onClick={closePackageModal}></div>
+          <div className="modal-content package-modal">
+            <button className="modal-close" onClick={closePackageModal}>
+              <i className="fas fa-times"></i>
+            </button>
+            
+            <div className="modal-header">
+              <h2 className="modal-title">🎁 Christmas Design Packages</h2>
+              <p className="modal-subtitle">Special holiday rates valid until December 25th</p>
+            </div>
+            
+            <div className="packages-grid">
+              {holidayPackages.map((pkg) => (
+                <div 
+                  key={pkg.id} 
+                  className={`package-card ${selectedPackage === pkg.id ? 'selected' : ''}`}
+                  onClick={() => handlePackageSelect(pkg.id)}
+                >
+                  <div className="package-badge">{pkg.discount}</div>
+                  <div className="package-header">
+                    <h3 className="package-name">{pkg.name}</h3>
+                    <div className="package-price">
+                      <span className="current-price">{pkg.price}</span>
+                      <span className="original-price">{pkg.originalPrice}</span>
+                    </div>
+                  </div>
+                  <p className="package-description">{pkg.description}</p>
+                  <ul className="package-features">
+                    {pkg.features.map((feature, index) => (
+                      <li key={index}><i className="fas fa-check"></i> {feature}</li>
+                    ))}
+                  </ul>
+                  <button 
+                    className={`btn ${selectedPackage === pkg.id ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => handlePackageSelect(pkg.id)}
+                  >
+                    {selectedPackage === pkg.id ? '✓ Selected' : 'Select Package'}
+                  </button>
+                </div>
+              ))}
+            </div>
+            
+            <div className="modal-footer">
+              <button className="btn btn-primary christmas-btn" onClick={handlePackageOrder}>
+                <i className="fas fa-shopping-cart"></i> Order Selected Package
+              </button>
+              <p className="modal-note">* All packages include free consultation and 1 free social media post design</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Christmas Portfolio Modal */}
+      {showPortfolioModal && (
+        <div className="christmas-portfolio-modal">
+          <div className="modal-overlay" onClick={closePortfolioModal}></div>
+          <div className="modal-content portfolio-modal">
+            <button className="modal-close" onClick={closePortfolioModal}>
+              <i className="fas fa-times"></i>
+            </button>
+            
+            <div className="modal-header">
+              <h2 className="modal-title">🎄 Christmas Portfolio Gallery</h2>
+              <p className="modal-subtitle">Our festive design projects from previous holiday seasons</p>
+            </div>
+            
+            <div className="portfolio-gallery">
+              {portfolioProjects.map((project) => (
+                <div key={project.id} className="gallery-item">
+                  <div className="gallery-image">
+                    <img src={project.image} alt={project.title} />
+                    <div className="gallery-overlay">
+                      <div className="overlay-content">
+                        <h4>{project.title}</h4>
+                        <p>{project.category}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="gallery-info">
+                    <h3>{project.title}</h3>
+                    <p className="gallery-category">{project.category}</p>
+                    <p className="gallery-description">{project.description}</p>
+                    <div className="gallery-tags">
+                      {project.tags.map((tag, index) => (
+                        <span key={index} className="gallery-tag">{tag}</span>
+                      ))}
+                    </div>
+                    <button 
+                      className="btn btn-small christmas-portfolio-btn"
+                      onClick={() => {
+                        closePortfolioModal();
+                        openQuickView(project.id);
+                      }}
+                    >
+                      <i className="fas fa-eye"></i> View Details
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="modal-footer">
+              <button className="btn btn-primary christmas-btn" onClick={openPackageModal}>
+                <i className="fas fa-gift"></i> Get Your Own Christmas Design
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Quick View Modal */}
       {showQuickView && (
         <div className="portfolio-quickview-modal">
@@ -553,122 +728,39 @@ const HomePage = () => {
               <i className="fas fa-times"></i>
             </button>
             
-            {quickViewProject === 'project1' && (
-              <div className="quickview-project">
-                <div className="quickview-image">
-                  <img src="https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
-                       alt="Santa's Workshop Branding" />
-                </div>
-                <div className="quickview-info">
-                  <h3>Santa's Workshop Branding</h3>
-                  <div className="quickview-meta">
-                    <span className="quickview-category">Christmas Branding</span>
-                    <span className="quickview-date">December 2023</span>
+            {portfolioProjects.map((project) => (
+              quickViewProject === project.id && (
+                <div key={project.id} className="quickview-project">
+                  <div className="quickview-image">
+                    <img src={project.image} alt={project.title} />
                   </div>
-                  <p className="quickview-description">
-                    Complete Christmas branding package for a holiday retail store. 
-                    Created a festive logo, color palette, typography system, and 
-                    comprehensive brand guidelines for seasonal marketing.
-                  </p>
-                  <div className="quickview-features">
-                    <h4>Project Highlights:</h4>
-                    <ul>
-                      <li>Festive logo with Santa hat integration</li>
-                      <li>Christmas-themed color palette</li>
-                      <li>Holiday typography system</li>
-                      <li>Seasonal brand guidelines</li>
-                      <li>Social media templates</li>
-                    </ul>
-                  </div>
-                  <div className="quickview-actions">
-                    <Link to="/portfolio/santas-workshop" className="btn btn-primary" onClick={closeQuickView}>
-                      <i className="fas fa-file-alt"></i> View Full Case Study
-                    </Link>
-                    <Link to="/contact" className="btn btn-outline" onClick={closeQuickView}>
-                      <i className="fas fa-gift"></i> Get Similar Project
-                    </Link>
+                  <div className="quickview-info">
+                    <h3>{project.title}</h3>
+                    <div className="quickview-meta">
+                      <span className="quickview-category">{project.category}</span>
+                      <span className="quickview-date">Christmas 2023</span>
+                    </div>
+                    <p className="quickview-description">{project.description}</p>
+                    <div className="quickview-features">
+                      <h4>Project Highlights:</h4>
+                      <ul>
+                        {project.details.map((detail, index) => (
+                          <li key={index}>{detail}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="quickview-actions">
+                      <button className="btn btn-primary" onClick={openPackageModal}>
+                        <i className="fas fa-gift"></i> Get Similar Project
+                      </button>
+                      <button className="btn btn-outline" onClick={closeQuickView}>
+                        <i className="fas fa-times"></i> Close
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {quickViewProject === 'project2' && (
-              <div className="quickview-project">
-                <div className="quickview-image">
-                  <img src="https://images.unsplash.com/photo-1512386233331-f023884a92e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
-                       alt="North Pole Packaging" />
-                </div>
-                <div className="quickview-info">
-                  <h3>North Pole Packaging</h3>
-                  <div className="quickview-meta">
-                    <span className="quickview-category">Holiday Packaging</span>
-                    <span className="quickview-date">November 2023</span>
-                  </div>
-                  <p className="quickview-description">
-                    Festive packaging designs for a Christmas product line. 
-                    Created custom gift boxes, labels, and wrapping paper that 
-                    capture the magic of the North Pole and delight customers.
-                  </p>
-                  <div className="quickview-features">
-                    <h4>Project Highlights:</h4>
-                    <ul>
-                      <li>Custom gift box designs</li>
-                      <li>Festive product labels</li>
-                      <li>Christmas wrapping paper</li>
-                      <li>Gift tag designs</li>
-                      <li>Seasonal packaging system</li>
-                    </ul>
-                  </div>
-                  <div className="quickview-actions">
-                    <Link to="/portfolio/north-pole-packaging" className="btn btn-primary" onClick={closeQuickView}>
-                      <i className="fas fa-file-alt"></i> View Full Case Study
-                    </Link>
-                    <Link to="/contact" className="btn btn-outline" onClick={closeQuickView}>
-                      <i className="fas fa-gift"></i> Get Similar Project
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {quickViewProject === 'project3' && (
-              <div className="quickview-project">
-                <div className="quickview-image">
-                  <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
-                       alt="Reindeer Games Campaign" />
-                </div>
-                <div className="quickview-info">
-                  <h3>Reindeer Games Campaign</h3>
-                  <div className="quickview-meta">
-                    <span className="quickview-category">Christmas Marketing</span>
-                    <span className="quickview-date">October 2023</span>
-                  </div>
-                  <p className="quickview-description">
-                    Christmas marketing campaign for a gaming company. 
-                    Developed a complete holiday campaign including social media 
-                    graphics, email templates, and digital ads with a fun reindeer theme.
-                  </p>
-                  <div className="quickview-features">
-                    <h4>Project Highlights:</h4>
-                    <ul>
-                      <li>Social media graphics series</li>
-                      <li>Christmas email campaign</li>
-                      <li>Digital banner ads</li>
-                      <li>Animated reindeer characters</li>
-                      <li>Holiday campaign strategy</li>
-                    </ul>
-                  </div>
-                  <div className="quickview-actions">
-                    <Link to="/portfolio/reindeer-games" className="btn btn-primary" onClick={closeQuickView}>
-                      <i className="fas fa-file-alt"></i> View Full Case Study
-                    </Link>
-                    <Link to="/contact" className="btn btn-outline" onClick={closeQuickView}>
-                      <i className="fas fa-gift"></i> Get Similar Project
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            )}
+              )
+            ))}
           </div>
         </div>
       )}
