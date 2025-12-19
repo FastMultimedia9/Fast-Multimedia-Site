@@ -342,8 +342,15 @@ const ServicesPage = () => {
                     </li>
                   ))}
                 </ul>
-                <Link to="/contact" className="btn btn-outline">
-                  Get This Service
+                {/* UPDATED: Professional Service Button */}
+                <Link 
+                  to="/contact" 
+                  className="btn-service btn-service-design"
+                  data-service={service.title}
+                >
+                  <i className="fas fa-clipboard-check"></i>
+                  <span>Request {service.title}</span>
+                  <i className="fas fa-arrow-right"></i>
                 </Link>
               </div>
             ))}
@@ -384,8 +391,15 @@ const ServicesPage = () => {
                     </li>
                   ))}
                 </ul>
-                <Link to="/contact" className="btn btn-outline">
-                  Get This Service
+                {/* UPDATED: Professional Service Button */}
+                <Link 
+                  to="/contact" 
+                  className="btn-service btn-service-tech"
+                  data-service={service.title}
+                >
+                  <i className="fas fa-tools"></i>
+                  <span>Schedule {service.title}</span>
+                  <i className="fas fa-arrow-right"></i>
                 </Link>
               </div>
             ))}
@@ -487,8 +501,15 @@ const ServicesPage = () => {
                   </div>
                 )}
                 
-                <Link to="/contact" className="btn btn-primary">
-                  Get This Package
+                {/* UPDATED: Professional Package Button */}
+                <Link 
+                  to="/contact" 
+                  className="btn-service btn-service-package"
+                  data-package={plan.name}
+                >
+                  <i className="fas fa-shopping-cart"></i>
+                  <span>Purchase {plan.name}</span>
+                  <i className="fas fa-arrow-right"></i>
                 </Link>
               </div>
             ))}
@@ -510,8 +531,14 @@ const ServicesPage = () => {
                       <li key={idx}>{feature}</li>
                     ))}
                   </ul>
-                  <Link to="/contact" className="btn btn-outline-small">
-                    Book This Service
+                  {/* UPDATED: Professional Individual Service Button */}
+                  <Link 
+                    to="/contact" 
+                    className="btn-service btn-service-individual"
+                    data-service={service.service}
+                  >
+                    <i className="fas fa-calendar-check"></i>
+                    <span>Book {service.service}</span>
                   </Link>
                 </div>
               ))}
@@ -616,11 +643,15 @@ const ServicesPage = () => {
               </p>
             </div>
             <div className="cta-buttons">
-              <Link to="/contact" className="btn btn-primary">
-                <i className="fas fa-paper-plane"></i> Get Free Quote
+              {/* UPDATED: Professional CTA Buttons */}
+              <Link to="/contact" className="btn-service btn-service-cta">
+                <i className="fas fa-paper-plane"></i>
+                <span>Get Free Consultation</span>
+                <i className="fas fa-external-link-alt"></i>
               </Link>
-              <Link to="/contact" className="btn btn-outline">
-                <i className="fas fa-phone-alt"></i> Call Now: +233 505-159-131
+              <Link to="/contact" className="btn-service btn-service-secondary">
+                <i className="fas fa-phone-alt"></i>
+                <span>Call: +233 505-159-131</span>
               </Link>
             </div>
           </div>
