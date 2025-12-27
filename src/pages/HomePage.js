@@ -435,11 +435,7 @@ const HomePage = () => {
           </div>
         </div>
         
-        <div className="section-cta">
-          <button className="btn btn-outline" onClick={openPackageModal}>
-            <i className="fas fa-comment"></i> Get Custom Quote
-          </button>
-        </div>
+       
       </section>
 
       {/* Portfolio Preview */}
