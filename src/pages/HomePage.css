@@ -7,28 +7,21 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.6;
   color: #333;
-  background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%);
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   overflow-x: hidden;
 }
 
-/* Christmas Variables - Scoped to homepage */
+/* Professional Color Variables */
 .homepage {
-  --christmas-red: #C41E3A;
-  --christmas-green: #0B6623;
-  --christmas-gold: #FFD700;
-  --christmas-silver: #C0C0C0;
-  --christmas-dark: #1a472a;
-  --christmas-light: #f0f8ff;
-  --snow-white: #fffafa;
-  --primary-color: #C41E3A;
-  --accent-color: #0B6623;
-  --dark-color: #1a472a;
-  --light-color: #f0f8ff;
-  --border-radius: 20px;
-  --shadow: 0 10px 30px rgba(196, 30, 58, 0.1);
-  --shadow-heavy: 0 20px 60px rgba(11, 102, 35, 0.15);
-  --transition: all 0.3s ease;
-  --christmas-glow: 0 0 20px rgba(255, 215, 0, 0.5);
+  --primary-color: #2563eb;
+  --primary-dark: #1d4ed8;
+  --accent-color: #7c3aed;
+  --dark-color: #1e293b;
+  --light-color: #f8fafc;
+  --border-radius: 12px;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-heavy: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Reset within homepage */
@@ -38,161 +31,13 @@
   box-sizing: border-box;
 }
 
-/* Snowfall Effect */
-.homepage .snowfall {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9999;
-}
-
-.homepage .snowflake {
-  position: absolute;
-  background-color: var(--snow-white);
-  border-radius: 50%;
-  animation: homepage-snowfall linear infinite;
-  pointer-events: none;
-}
-
-@keyframes homepage-snowfall {
-  0% {
-    transform: translateY(-100px) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-/* Christmas Garlands */
-.homepage .christmas-garland {
-  position: fixed;
-  left: 0;
-  width: 100%;
-  height: 20px;
-  z-index: 9998;
-  display: flex;
-  justify-content: space-around;
-  pointer-events: none;
-}
-
-.homepage .top-garland {
-  top: 0;
-  background: linear-gradient(90deg, var(--christmas-green), var(--christmas-red));
-  opacity: 0.8;
-}
-
-.homepage .bottom-garland {
-  bottom: 0;
-  background: linear-gradient(90deg, var(--christmas-red), var(--christmas-green));
-  opacity: 0.8;
-}
-
-.homepage .garland-light {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--christmas-gold);
-  animation: homepage-twinkle 1.5s infinite alternate;
-  box-shadow: var(--christmas-glow);
-}
-
-@keyframes homepage-twinkle {
-  0% { opacity: 0.3; transform: scale(0.8); }
-  100% { opacity: 1; transform: scale(1.2); }
-}
-
-/* Christmas Ornaments */
-.homepage .christmas-ornaments {
-  position: fixed;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 9997;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  pointer-events: none;
-}
-
-.homepage .ornament {
-  font-size: 24px;
-  animation: homepage-floatOrnament 4s ease-in-out infinite;
-  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
-}
-
-.homepage .ornament-1 { animation-delay: 0s; }
-.homepage .ornament-2 { animation-delay: 0.8s; }
-.homepage .ornament-3 { animation-delay: 1.6s; }
-.homepage .ornament-4 { animation-delay: 2.4s; }
-.homepage .ornament-5 { animation-delay: 3.2s; }
-
-@keyframes homepage-floatOrnament {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(10deg); }
-}
-
-/* Christmas Banner */
-.homepage .christmas-banner {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: linear-gradient(45deg, var(--christmas-red), var(--christmas-green));
-  color: white;
-  padding: 12px 20px;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 16px;
-  z-index: 10;
-  box-shadow: var(--shadow-heavy);
-  animation: homepage-bannerPulse 2s infinite;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.homepage .banner-text {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 4px 12px;
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  white-space: nowrap;
-}
-
-.homepage .banner-lights {
-  display: flex;
-  gap: 4px;
-}
-
-.homepage .banner-light {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--christmas-gold);
-  animation: homepage-lightFlash 1s infinite alternate;
-}
-
-@keyframes homepage-bannerPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-@keyframes homepage-lightFlash {
-  0% { opacity: 0.3; }
-  100% { opacity: 1; }
-}
-
 /* Hero Section */
 .homepage .hero-section {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  padding: 120px 5% 80px;
-  background: linear-gradient(135deg, #f0f8ff 0%, #e6f7f0 100%);
+  padding: 100px 5% 80px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   position: relative;
   overflow: hidden;
 }
@@ -204,7 +49,7 @@
   right: 0;
   width: 60%;
   height: 100%;
-  background: linear-gradient(45deg, rgba(196, 30, 58, 0.05) 0%, rgba(11, 102, 35, 0.05) 100%);
+  background: linear-gradient(45deg, rgba(37, 99, 235, 0.05) 0%, rgba(124, 58, 237, 0.05) 100%);
   clip-path: polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%);
   z-index: 0;
 }
@@ -233,8 +78,8 @@
 .homepage .hero-badge {
   display: inline-flex;
   align-items: center;
-  background-color: rgba(196, 30, 58, 0.1);
-  padding: 12px 24px;
+  background-color: rgba(37, 99, 235, 0.1);
+  padding: 10px 20px;
   border-radius: 50px;
   margin-bottom: 25px;
 }
@@ -254,35 +99,14 @@
   animation: homepage-pulse 2s infinite;
 }
 
-.homepage .christmas-badge {
-  background: linear-gradient(45deg, var(--christmas-red), var(--christmas-green)) !important;
-  color: white !important;
-}
-
-.homepage .christmas-dot {
-  background-color: var(--christmas-gold) !important;
-  animation: homepage-christmasPulse 1s infinite;
-}
-
 @keyframes homepage-pulse {
   0%, 100% { 
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(196, 30, 58, 0.7);
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
   }
   50% { 
     transform: scale(1.2);
-    box-shadow: 0 0 0 10px rgba(196, 30, 58, 0);
-  }
-}
-
-@keyframes homepage-christmasPulse {
-  0%, 100% { 
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
-  }
-  50% { 
-    transform: scale(1.2);
-    box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+    box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
   }
 }
 
@@ -306,24 +130,13 @@
   left: 0;
   width: 100%;
   height: 8px;
-  background-color: rgba(196, 30, 58, 0.2);
+  background-color: rgba(37, 99, 235, 0.2);
   z-index: -1;
-}
-
-.homepage .hero-title .christmas-highlight {
-  color: var(--christmas-green);
-  position: relative;
-}
-
-.homepage .hero-title .christmas-highlight::after {
-  background: linear-gradient(90deg, transparent, rgba(11, 102, 35, 0.2), transparent);
-  height: 12px;
-  bottom: 0;
 }
 
 .homepage .hero-subtitle {
   font-size: 1.2rem;
-  color: #666;
+  color: #64748b;
   margin-bottom: 35px;
   line-height: 1.6;
   max-width: 500px;
@@ -341,8 +154,8 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 16px 32px;
-  border-radius: 50px;
+  padding: 14px 28px;
+  border-radius: 8px;
   font-weight: 600;
   text-decoration: none;
   transition: var(--transition);
@@ -354,13 +167,13 @@
 }
 
 .homepage .btn-primary {
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
   color: white;
   box-shadow: var(--shadow);
 }
 
 .homepage .btn-primary:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-heavy);
 }
 
@@ -375,42 +188,17 @@
   color: white;
 }
 
-.homepage .christmas-btn {
-  background: linear-gradient(45deg, var(--christmas-red), var(--christmas-green)) !important;
-  position: relative;
-  overflow: hidden;
-}
-
-.homepage .christmas-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: 0.5s;
-}
-
-.homepage .christmas-btn:hover::before {
-  left: 100%;
-}
-
 .homepage .hero-stats {
   display: flex;
   gap: 40px;
   flex-wrap: wrap;
 }
 
-.homepage .christmas-stats .stat-number {
-  font-size: 3rem;
-}
-
 .homepage .stat-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .homepage .stat-number {
@@ -422,7 +210,7 @@
 
 .homepage .stat-label {
   font-size: 16px;
-  color: #666;
+  color: #64748b;
   margin-top: 5px;
 }
 
@@ -471,11 +259,6 @@
   animation: homepage-float 10s ease-in-out infinite;
 }
 
-.homepage .christmas-shape {
-  background: linear-gradient(45deg, var(--christmas-red), var(--christmas-gold)) !important;
-  opacity: 0.2;
-}
-
 @keyframes homepage-float {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-20px) rotate(10deg); }
@@ -492,42 +275,6 @@
 
 .homepage .hero-image-container:hover {
   transform: perspective(1000px) rotateY(0deg);
-}
-
-.homepage .christmas-frame {
-  border: 5px solid var(--christmas-green);
-  position: relative;
-}
-
-.homepage .christmas-frame::before {
-  content: '🎄';
-  position: absolute;
-  top: -25px;
-  left: -25px;
-  font-size: 30px;
-  z-index: 10;
-  animation: homepage-swing 3s infinite alternate;
-  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
-}
-
-.homepage .christmas-frame::after {
-  content: '🌟';
-  position: absolute;
-  bottom: -25px;
-  right: -25px;
-  font-size: 30px;
-  z-index: 10;
-  animation: homepage-twinkle 2s infinite alternate;
-}
-
-@keyframes homepage-swing {
-  0%, 100% { transform: rotate(-15deg); }
-  50% { transform: rotate(15deg); }
-}
-
-@keyframes homepage-twinkle {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.2); }
 }
 
 .homepage .hero-image-carousel {
@@ -556,24 +303,6 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
-}
-
-.homepage .christmas-overlay {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 2;
-}
-
-.homepage .santa-hat {
-  font-size: 40px;
-  animation: homepage-hatBob 2s infinite alternate;
-  filter: drop-shadow(0 5px 15px rgba(196, 30, 58, 0.3));
-}
-
-@keyframes homepage-hatBob {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-10px); }
 }
 
 .homepage .carousel-dots {
@@ -608,143 +337,10 @@
   transform: scale(1.2);
 }
 
-/* Christmas Countdown */
-.homepage .christmas-countdown {
-  background: linear-gradient(45deg, var(--christmas-red), var(--christmas-green));
-  color: white;
-  padding: 50px 30px;
-  border-radius: var(--border-radius);
-  text-align: center;
-  margin: 60px auto;
-  max-width: 1000px;
-  box-shadow: var(--shadow-heavy);
-  position: relative;
-  overflow: hidden;
-  z-index: 5;
-}
-
-.homepage .christmas-countdown::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="50" font-size="10" fill="white" opacity="0.1" text-anchor="middle" dominant-baseline="central">🎄</text></svg>');
-  z-index: 1;
-}
-
-.homepage .countdown-title {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 25px;
-  position: relative;
-  z-index: 2;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.homepage .countdown-timer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  margin: 25px 0;
-  position: relative;
-  z-index: 2;
-  flex-wrap: wrap;
-}
-
-.homepage .countdown-item {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 25px 30px;
-  border-radius: 15px;
-  min-width: 120px;
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease;
-}
-
-.homepage .countdown-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-.homepage .countdown-number {
-  font-size: 48px;
-  font-weight: 800;
-  display: block;
-  color: var(--christmas-gold);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  margin-bottom: 5px;
-}
-
-.homepage .countdown-label {
-  font-size: 16px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  display: block;
-  margin-top: 5px;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.homepage .countdown-separator {
-  font-size: 36px;
-  color: var(--christmas-gold);
-  font-weight: 700;
-  animation: homepage-blink 1s infinite;
-  margin: 0 5px;
-}
-
-@keyframes homepage-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-.homepage .countdown-message {
-  font-size: 18px;
-  margin-top: 25px;
-  color: var(--christmas-gold);
-  font-weight: 600;
-  position: relative;
-  z-index: 2;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-}
-
 /* Services Section */
 .homepage .section {
   padding: 100px 5%;
   position: relative;
-}
-
-.homepage .christmas-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 40px;
-  flex-wrap: wrap;
-}
-
-.homepage .christmas-section-title {
-  font-size: 3rem;
-  font-weight: 800;
-  color: var(--christmas-dark);
-  text-align: center;
-  background: linear-gradient(45deg, var(--christmas-red), var(--christmas-green));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.homepage .christmas-tree-icon,
-.homepage .christmas-star-icon {
-  font-size: 40px;
-  animation: homepage-spin 4s linear infinite;
-}
-
-@keyframes homepage-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
 
 .homepage .section-header {
@@ -752,9 +348,16 @@
   margin-bottom: 60px;
 }
 
+.homepage .section-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--dark-color);
+  margin-bottom: 15px;
+}
+
 .homepage .section-subtitle {
   font-size: 1.2rem;
-  color: #666;
+  color: #64748b;
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;
@@ -764,35 +367,25 @@
 .homepage .services-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 60px;
+  gap: 30px;
   margin-bottom: 50px;
-  margin-top: 60px !important;
 }
 
 .homepage .service-card {
-  background-color: var(--light-color);
+  background-color: white;
   border-radius: var(--border-radius);
-  padding: 50px 30px 40px 30px !important;
+  padding: 40px 30px;
   transition: var(--transition);
   position: relative;
-  height: 90%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: visible !important;
-  margin-top: 30px !important;
-  margin-left: 40px;
-  width: 80%;
+  box-shadow: var(--shadow);
 }
 
-.homepage .christmas-card {
-  border: 2px solid transparent;
-  background: linear-gradient(white, white) padding-box,
-              linear-gradient(45deg, var(--christmas-red), var(--christmas-green)) border-box;
-}
-
-.homepage .christmas-card:hover {
-  transform: translateY(-15px) scale(1.02);
-  box-shadow: var(--shadow-heavy), 0 0 40px rgba(255, 215, 0, 0.4);
+.homepage .service-card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-heavy);
 }
 
 .homepage .service-header {
@@ -803,21 +396,16 @@
 }
 
 .homepage .service-icon {
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-  border-radius: 50%;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 28px;
+  font-size: 24px;
   flex-shrink: 0;
-}
-
-.homepage .christmas-icon {
-  background: linear-gradient(45deg, var(--christmas-red), var(--christmas-green)) !important;
-  box-shadow: 0 5px 15px rgba(196, 30, 58, 0.3);
 }
 
 .homepage .service-profile {
@@ -836,8 +424,8 @@
 .homepage .profile-icons i {
   width: 30px;
   height: 30px;
-  background: rgba(108, 99, 255, 0.1);
-  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.1);
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -853,14 +441,14 @@
 }
 
 .homepage .service-title {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--dark-color);
   margin-bottom: 15px;
 }
 
 .homepage .service-description {
-  color: #666;
+  color: #64748b;
   margin-bottom: 20px;
   line-height: 1.6;
   flex-grow: 1;
@@ -874,7 +462,7 @@
 
 .homepage .service-features li {
   padding: 8px 0;
-  color: #666;
+  color: #64748b;
   position: relative;
   padding-left: 20px;
 }
@@ -885,39 +473,6 @@
   left: 0;
   color: var(--accent-color);
   font-weight: bold;
-}
-
-/* Christmas Tags - Fixed Positioning */
-.homepage .christmas-tag {
-  position: absolute !important;
-  top: -20px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  background: linear-gradient(135deg, var(--christmas-red), var(--christmas-gold)) !important;
-  color: white !important;
-  padding: 12px 30px !important;
-  border-radius: 25px !important;
-  font-size: 16px !important;
-  font-weight: 800 !important;
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4) !important;
-  animation: homepage-tagBounce 2s ease-in-out infinite !important;
-  z-index: 100 !important;
-  white-space: nowrap !important;
-  text-align: center !important;
-  min-width: 160px !important;
-  border: 2px solid white !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1px !important;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
-}
-
-@keyframes homepage-tagBounce {
-  0%, 100% { 
-    transform: translateX(-50%) translateY(0); 
-  }
-  50% { 
-    transform: translateX(-50%) translateY(-8px); 
-  }
 }
 
 .homepage .section-cta {
@@ -936,17 +491,6 @@
   color: white;
 }
 
-.homepage .christmas-cta-btn {
-  border-color: var(--christmas-green) !important;
-  color: var(--christmas-green) !important;
-}
-
-.homepage .christmas-cta-btn:hover {
-  background: linear-gradient(45deg, var(--christmas-green), var(--christmas-red)) !important;
-  color: white !important;
-  border-color: transparent !important;
-}
-
 /* Portfolio Preview */
 .homepage .portfolio-preview {
   background-color: var(--light-color);
@@ -955,7 +499,7 @@
 .homepage .portfolio-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 40px;
+  gap: 30px;
   margin-bottom: 50px;
 }
 
@@ -966,8 +510,6 @@
   background: white;
   box-shadow: var(--shadow);
   transition: var(--transition);
-  margin-left: 15px;
-  width: 90%;
 }
 
 .homepage .portfolio-item:hover {
@@ -977,7 +519,7 @@
 
 .homepage .portfolio-image {
   position: relative;
-  height: 300px;
+  height: 250px;
   overflow: hidden;
   border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
@@ -999,16 +541,12 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to top, rgba(26, 71, 42, 0.95), rgba(196, 30, 58, 0.7));
+  background: linear-gradient(to top, rgba(30, 41, 59, 0.95), rgba(37, 99, 235, 0.7));
   display: flex;
   align-items: flex-end;
   opacity: 0;
   transition: opacity 0.3s ease;
   padding: 30px;
-}
-
-.homepage .christmas-overlay-portfolio {
-  background: linear-gradient(to top, rgba(26, 71, 42, 0.95), rgba(196, 30, 58, 0.7)) !important;
 }
 
 .homepage .portfolio-item:hover .portfolio-overlay {
@@ -1032,16 +570,10 @@
   flex-wrap: wrap;
 }
 
-.homepage .christmas-portfolio-btn {
-  background: linear-gradient(45deg, var(--christmas-red), var(--christmas-gold)) !important;
-  color: white !important;
-  border: none !important;
-}
-
 .homepage .btn-small {
-  padding: 10px 20px;
+  padding: 8px 16px;
   font-size: 14px;
-  border-radius: 50px;
+  border-radius: 6px;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -1076,7 +608,7 @@
 }
 
 .homepage .portfolio-category {
-  color: var(--christmas-red);
+  color: var(--primary-color);
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 15px;
@@ -1091,9 +623,9 @@
 }
 
 .homepage .portfolio-tag {
-  background: rgba(196, 30, 58, 0.1);
-  color: var(--christmas-red);
-  padding: 6px 15px;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary-color);
+  padding: 4px 12px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
@@ -1151,7 +683,7 @@
   position: absolute;
   top: 20px;
   right: 20px;
-  background: var(--christmas-red);
+  background: var(--primary-color);
   color: white;
   border: none;
   width: 40px;
@@ -1167,7 +699,7 @@
 }
 
 .homepage .quickview-close:hover {
-  background: var(--christmas-green);
+  background: var(--accent-color);
   transform: rotate(90deg);
 }
 
@@ -1205,7 +737,7 @@
 }
 
 .homepage .quickview-category {
-  background: var(--christmas-red);
+  background: var(--primary-color);
   color: white;
   padding: 8px 20px;
   border-radius: 20px;
@@ -1214,7 +746,7 @@
 }
 
 .homepage .quickview-date {
-  color: #666;
+  color: #64748b;
   font-size: 14px;
   display: flex;
   align-items: center;
@@ -1224,7 +756,7 @@
 .homepage .quickview-description {
   font-size: 1.1rem;
   line-height: 1.6;
-  color: #555;
+  color: #475569;
   margin-bottom: 30px;
 }
 
@@ -1245,7 +777,7 @@
 
 .homepage .quickview-features li {
   padding: 8px 0;
-  color: #555;
+  color: #475569;
   position: relative;
   padding-left: 25px;
 }
@@ -1254,7 +786,7 @@
   content: '✓';
   position: absolute;
   left: 0;
-  color: var(--christmas-green);
+  color: var(--accent-color);
   font-weight: bold;
   font-size: 16px;
 }
@@ -1268,42 +800,8 @@
 /* CTA Section */
 .homepage .cta-section {
   padding: 100px 5%;
-  background: linear-gradient(135deg, var(--dark-color) 0%, #3a3e5c 100%);
+  background: linear-gradient(135deg, var(--dark-color) 0%, #334155 100%);
   color: white;
-}
-
-.homepage .christmas-cta {
-  background: linear-gradient(135deg, var(--christmas-dark) 0%, var(--christmas-green) 100%) !important;
-  position: relative;
-  overflow: hidden;
-}
-
-.homepage .christmas-cta::before {
-  content: '❄️❄️❄️';
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  font-size: 24px;
-  opacity: 0.5;
-  animation: homepage-snowDrift 20s linear infinite;
-}
-
-.homepage .christmas-cta-decoration {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  font-size: 30px;
-  animation: homepage-decorationFloat 6s ease-in-out infinite;
-}
-
-@keyframes homepage-snowDrift {
-  0% { transform: translateX(-100px); }
-  100% { transform: translateX(calc(100vw + 100px)); }
-}
-
-@keyframes homepage-decorationFloat {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(10deg); }
 }
 
 .homepage .cta-container {
@@ -1315,7 +813,7 @@
   border-radius: var(--border-radius);
   padding: 60px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(233, 228, 228, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .homepage .cta-content {
@@ -1348,12 +846,6 @@
   color: var(--dark-color);
 }
 
-.homepage .christmas-cta-btn {
-  background: linear-gradient(45deg, var(--christmas-gold), var(--christmas-silver)) !important;
-  color: var(--christmas-dark) !important;
-  font-weight: 700;
-}
-
 .homepage .cta-visual {
   flex: 1;
   display: flex;
@@ -1369,27 +861,6 @@
   animation: homepage-pulse 2s infinite;
 }
 
-.homepage .christmas-cta-image {
-  border: 5px solid var(--christmas-gold) !important;
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-  position: relative;
-}
-
-.homepage .santa-hat-cta {
-  position: absolute;
-  top: -30px;
-  right: -30px;
-  font-size: 50px;
-  animation: homepage-hatSpin 4s linear infinite;
-  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.7));
-}
-
-@keyframes homepage-hatSpin {
-  0% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.2); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-
 /* Animation Classes */
 .homepage .animate-on-scroll {
   opacity: 0;
@@ -1402,326 +873,9 @@
   transform: translateY(0);
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .homepage .hero-title {
-    font-size: 3rem;
-  }
-  
-  .homepage .christmas-section-title {
-    font-size: 2.4rem;
-  }
-  
-  .homepage .quickview-content {
-    max-width: 90%;
-  }
-}
-
-@media (max-width: 1024px) {
-  .homepage .hero-title {
-    font-size: 2.8rem;
-  }
-  
-  .homepage .services-grid,
-  .homepage .portfolio-grid {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  }
-  
-  .homepage .service-header {
-    flex-direction: column;
-  }
-  
-  .homepage .service-profile {
-    align-items: flex-start;
-    margin-top: 15px;
-  }
-  
-  .homepage .christmas-section-title {
-    font-size: 2.2rem;
-  }
-  
-  .homepage .countdown-timer {
-    gap: 15px;
-  }
-  
-  .homepage .countdown-item {
-    min-width: 100px;
-    padding: 20px 25px;
-  }
-  
-  .homepage .countdown-number {
-    font-size: 36px;
-  }
-  
-  .homepage .cta-container {
-    padding: 50px 40px;
-  }
-  
-  .homepage .quickview-project {
-    flex-direction: column;
-  }
-  
-  .homepage .quickview-image {
-    height: 300px;
-  }
-}
-
-@media (max-width: 900px) {
-  .homepage .hero-section {
-    flex-direction: column;
-    text-align: center;
-    padding-top: 100px;
-  }
-  
-  .homepage .hero-content {
-    margin-bottom: 50px;
-    margin-right: 0;
-    max-width: 100%;
-  }
-  
-  .homepage .hero-visual {
-    width: 100%;
-    min-width: auto;
-  }
-  
-  .homepage .hero-stats {
-    justify-content: center;
-  }
-  
-  .homepage .hero-buttons {
-    justify-content: center;
-  }
-  
-  .homepage .christmas-banner {
-    position: relative;
-    top: 0;
-    right: 0;
-    margin: 0 auto 30px;
-    width: fit-content;
-    justify-content: center;
-  }
-  
-  .homepage .cta-container {
-    flex-direction: column;
-    text-align: center;
-    padding: 40px 30px;
-  }
-  
-  .homepage .cta-content {
-    padding-right: 0;
-    margin-bottom: 40px;
-  }
-  
-  .homepage .cta-buttons {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 768px) {
-  .homepage .hero-title {
-    font-size: 2.5rem;
-  }
-  
-  .homepage .hero-subtitle {
-    font-size: 1.1rem;
-  }
-  
-  .homepage .hero-buttons {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .homepage .btn {
-    width: 100%;
-    max-width: 300px;
-  }
-  
-  .homepage .countdown-timer {
-    gap: 10px;
-  }
-  
-  .homepage .countdown-item {
-    min-width: 80px;
-    padding: 15px;
-  }
-  
-  .homepage .countdown-number {
-    font-size: 32px;
-  }
-  
-  .homepage .countdown-separator {
-    font-size: 28px;
-  }
-  
-  .homepage .christmas-ornaments {
-    display: none;
-  }
-  
-  .homepage .christmas-header {
-    gap: 15px;
-  }
-  
-  .homepage .christmas-section-title {
-    font-size: 2rem;
-  }
-  
-  .homepage .christmas-tree-icon,
-  .homepage .christmas-star-icon {
-    font-size: 32px;
-  }
-  
-  .homepage .quickview-info {
-    padding: 30px 25px;
-  }
-  
-  .homepage .quickview-info h3 {
-    font-size: 1.8rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .homepage .services-grid,
-  .homepage .portfolio-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .homepage .countdown-timer {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .homepage .countdown-separator {
-    display: none;
-  }
-  
-  .homepage .countdown-item {
-    min-width: 70px;
-    padding: 12px;
-  }
-  
-  .homepage .countdown-number {
-    font-size: 28px;
-  }
-  
-  .homepage .countdown-label {
-    font-size: 12px;
-  }
-  
-  .homepage .countdown-title {
-    font-size: 24px;
-  }
-  
-  .homepage .christmas-section-title {
-    font-size: 1.8rem;
-  }
-  
-  .homepage .section {
-    padding: 80px 5%;
-  }
-  
-  .homepage .section-title {
-    font-size: 2rem;
-  }
-  
-  .homepage .quickview-actions {
-    flex-direction: column;
-  }
-  
-  .homepage .quickview-actions .btn {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .homepage .hero-title {
-    font-size: 2.2rem;
-  }
-  
-  .homepage .hero-stats {
-    gap: 25px;
-  }
-  
-  .homepage .stat-number {
-    font-size: 2rem;
-  }
-  
-  .homepage .christmas-section-title {
-    font-size: 1.6rem;
-  }
-  
-  .homepage .christmas-header {
-    gap: 10px;
-  }
-  
-  .homepage .christmas-tree-icon,
-  .homepage .christmas-star-icon {
-    font-size: 24px;
-  }
-  
-  .homepage .countdown-item {
-    min-width: 60px;
-    padding: 10px;
-  }
-  
-  .homepage .countdown-number {
-    font-size: 24px;
-  }
-  
-  .homepage .countdown-label {
-    font-size: 10px;
-    letter-spacing: 1px;
-  }
-  
-  .homepage .profile-icons {
-    justify-content: center;
-  }
-  
-  .homepage .portfolio-actions {
-    flex-direction: column;
-  }
-  
-  .homepage .portfolio-actions .btn {
-    width: 100%;
-  }
-}
-
-/* Fix for button gaps in hero section */
-.homepage .hero-content > .btn {
-  margin-bottom: 15px;
-}
-
-/* Ensure proper spacing */
-.homepage .section-header {
-  margin-bottom: 60px;
-}
-
-/* Ensure images don't overflow */
-.homepage img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Fix for modal scroll */
-body.modal-open {
-  overflow: hidden;
-}
-
-/* Ensure proper z-index stacking */
-.homepage .christmas-tag {
-  z-index: 100 !important;
-}
-
-/* Fix for quick view modal on mobile */
-@media (max-width: 768px) {
-  .homepage .quickview-content {
-    max-height: 85vh;
-  }
-}
-
-/* Holiday Package Modal */
-.homepage .holiday-package-modal,
-.homepage .christmas-portfolio-modal {
+/* Design Package Modal */
+.homepage .design-package-modal,
+.homepage .portfolio-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -1758,7 +912,7 @@ body.modal-open {
 }
 
 .homepage .package-modal {
-  background: linear-gradient(135deg, #f0f8ff 0%, #fff 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #fff 100%);
 }
 
 .homepage .portfolio-modal {
@@ -1769,7 +923,7 @@ body.modal-open {
   position: absolute;
   top: 20px;
   right: 20px;
-  background: var(--christmas-red);
+  background: var(--primary-color);
   color: white;
   border: none;
   width: 40px;
@@ -1785,27 +939,24 @@ body.modal-open {
 }
 
 .homepage .modal-close:hover {
-  background: var(--christmas-green);
+  background: var(--accent-color);
   transform: rotate(90deg);
 }
 
 .homepage .modal-header {
   padding: 40px 40px 20px;
   text-align: center;
-  background: linear-gradient(45deg, var(--christmas-red), var(--christmas-green));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .homepage .modal-title {
   font-size: 2.5rem;
   font-weight: 800;
   margin-bottom: 10px;
+  color: var(--dark-color);
 }
 
 .homepage .modal-subtitle {
-  color: #666;
+  color: #64748b;
   font-size: 1.1rem;
 }
 
@@ -1819,7 +970,7 @@ body.modal-open {
 
 .homepage .package-card {
   background: white;
-  border: 2px solid rgba(196, 30, 58, 0.1);
+  border: 2px solid rgba(37, 99, 235, 0.1);
   border-radius: var(--border-radius);
   padding: 30px;
   cursor: pointer;
@@ -1833,26 +984,13 @@ body.modal-open {
 .homepage .package-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-heavy);
-  border-color: var(--christmas-red);
+  border-color: var(--primary-color);
 }
 
 .homepage .package-card.selected {
-  border-color: var(--christmas-green);
-  background: linear-gradient(135deg, rgba(11, 102, 35, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
-  box-shadow: 0 10px 30px rgba(11, 102, 35, 0.2);
-}
-
-.homepage .package-badge {
-  position: absolute;
-  top: -15px;
-  right: 20px;
-  background: linear-gradient(45deg, var(--christmas-red), var(--christmas-gold));
-  color: white;
-  padding: 8px 20px;
-  border-radius: 25px;
-  font-weight: 700;
-  font-size: 14px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  border-color: var(--accent-color);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.2);
 }
 
 .homepage .package-header {
@@ -1875,17 +1013,11 @@ body.modal-open {
 .homepage .current-price {
   font-size: 2.5rem;
   font-weight: 800;
-  color: var(--christmas-green);
-}
-
-.homepage .original-price {
-  font-size: 1.2rem;
-  color: #999;
-  text-decoration: line-through;
+  color: var(--primary-color);
 }
 
 .homepage .package-description {
-  color: #666;
+  color: #64748b;
   margin-bottom: 25px;
   line-height: 1.6;
   flex-grow: 1;
@@ -1899,25 +1031,25 @@ body.modal-open {
 
 .homepage .package-features li {
   padding: 8px 0;
-  color: #555;
+  color: #475569;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .homepage .package-features li i {
-  color: var(--christmas-green);
+  color: var(--accent-color);
 }
 
 .homepage .modal-footer {
   padding: 30px 40px;
   text-align: center;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
-  background: rgba(240, 248, 255, 0.5);
+  background: rgba(248, 250, 252, 0.5);
 }
 
 .homepage .modal-note {
-  color: #666;
+  color: #64748b;
   font-size: 14px;
   margin-top: 15px;
   font-style: italic;
@@ -1969,7 +1101,7 @@ body.modal-open {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to top, rgba(26, 71, 42, 0.9), rgba(196, 30, 58, 0.7));
+  background: linear-gradient(to top, rgba(30, 41, 59, 0.9), rgba(37, 99, 235, 0.7));
   display: flex;
   align-items: flex-end;
   opacity: 0;
@@ -2004,7 +1136,7 @@ body.modal-open {
 }
 
 .homepage .gallery-category {
-  color: var(--christmas-red);
+  color: var(--primary-color);
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 10px;
@@ -2012,7 +1144,7 @@ body.modal-open {
 }
 
 .homepage .gallery-description {
-  color: #666;
+  color: #64748b;
   font-size: 14px;
   line-height: 1.5;
   margin-bottom: 15px;
@@ -2026,16 +1158,138 @@ body.modal-open {
 }
 
 .homepage .gallery-tag {
-  background: rgba(196, 30, 58, 0.1);
-  color: var(--christmas-red);
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary-color);
   padding: 4px 12px;
   border-radius: 15px;
   font-size: 12px;
   font-weight: 500;
 }
 
-/* Responsive Design for Modals */
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .homepage .hero-title {
+    font-size: 3rem;
+  }
+  
+  .homepage .section-title {
+    font-size: 2.4rem;
+  }
+  
+  .homepage .quickview-content {
+    max-width: 90%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .homepage .hero-title {
+    font-size: 2.8rem;
+  }
+  
+  .homepage .services-grid,
+  .homepage .portfolio-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  .homepage .service-header {
+    flex-direction: column;
+  }
+  
+  .homepage .service-profile {
+    align-items: flex-start;
+    margin-top: 15px;
+  }
+  
+  .homepage .section-title {
+    font-size: 2.2rem;
+  }
+  
+  .homepage .cta-container {
+    padding: 50px 40px;
+  }
+  
+  .homepage .quickview-project {
+    flex-direction: column;
+  }
+  
+  .homepage .quickview-image {
+    height: 300px;
+  }
+}
+
+@media (max-width: 900px) {
+  .homepage .hero-section {
+    flex-direction: column;
+    text-align: center;
+    padding-top: 100px;
+  }
+  
+  .homepage .hero-content {
+    margin-bottom: 50px;
+    margin-right: 0;
+    max-width: 100%;
+  }
+  
+  .homepage .hero-visual {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .homepage .hero-stats {
+    justify-content: center;
+  }
+  
+  .homepage .hero-buttons {
+    justify-content: center;
+  }
+  
+  .homepage .cta-container {
+    flex-direction: column;
+    text-align: center;
+    padding: 40px 30px;
+  }
+  
+  .homepage .cta-content {
+    padding-right: 0;
+    margin-bottom: 40px;
+  }
+  
+  .homepage .cta-buttons {
+    justify-content: center;
+  }
+}
+
 @media (max-width: 768px) {
+  .homepage .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .homepage .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .homepage .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .homepage .btn {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .homepage .section-title {
+    font-size: 2rem;
+  }
+  
+  .homepage .quickview-info {
+    padding: 30px 25px;
+  }
+  
+  .homepage .quickview-info h3 {
+    font-size: 1.8rem;
+  }
+  
   .homepage .modal-content {
     max-width: 95%;
     max-height: 85vh;
@@ -2064,7 +1318,58 @@ body.modal-open {
   }
 }
 
+@media (max-width: 600px) {
+  .homepage .services-grid,
+  .homepage .portfolio-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .homepage .section {
+    padding: 80px 5%;
+  }
+  
+  .homepage .section-title {
+    font-size: 1.8rem;
+  }
+  
+  .homepage .quickview-actions {
+    flex-direction: column;
+  }
+  
+  .homepage .quickview-actions .btn {
+    width: 100%;
+  }
+}
+
 @media (max-width: 480px) {
+  .homepage .hero-title {
+    font-size: 2.2rem;
+  }
+  
+  .homepage .hero-stats {
+    gap: 25px;
+  }
+  
+  .homepage .stat-number {
+    font-size: 2rem;
+  }
+  
+  .homepage .section-title {
+    font-size: 1.6rem;
+  }
+  
+  .homepage .profile-icons {
+    justify-content: center;
+  }
+  
+  .homepage .portfolio-actions {
+    flex-direction: column;
+  }
+  
+  .homepage .portfolio-actions .btn {
+    width: 100%;
+  }
+  
   .homepage .modal-title {
     font-size: 1.6rem;
   }
@@ -2082,83 +1387,31 @@ body.modal-open {
   }
 }
 
-/* Top Modal Styles */
-.homepage .holiday-package-modal-top {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 10000;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 20px;
-  animation: homepage-modalSlideDown 0.3s ease;
+/* Fix for button gaps in hero section */
+.homepage .hero-content > .btn {
+  margin-bottom: 15px;
 }
 
-@keyframes homepage-modalSlideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Ensure proper spacing */
+.homepage .section-header {
+  margin-bottom: 60px;
 }
 
-.homepage .package-modal-top {
-  margin-top: 50px;
-  max-height: 85vh;
-  overflow-y: auto;
-  animation: homepage-modalSlideDown 0.3s ease;
+/* Ensure images don't overflow */
+.homepage img {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
-.homepage .package-modal-top .modal-header {
-  background: linear-gradient(45deg, var(--christmas-red), var(--christmas-green));
-  color: white;
-  padding: 30px 40px;
-  border-radius: var(--border-radius) var(--border-radius) 0 0;
+/* Fix for modal scroll */
+body.modal-open {
+  overflow: hidden;
 }
 
-.homepage .package-modal-top .modal-title {
-  color: white;
-  background: none;
-  -webkit-text-fill-color: white;
-}
-
-.homepage .package-modal-top .modal-subtitle {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.homepage .package-modal-top .packages-grid {
-  padding: 40px;
-}
-
-.homepage .package-modal-top .modal-footer {
-  padding: 30px 40px;
-  border-top: 1px solid rgba(196, 30, 58, 0.1);
-  background: linear-gradient(45deg, rgba(196, 30, 58, 0.05), rgba(11, 102, 35, 0.05));
-}
-
-/* Responsive adjustments for top modal */
+/* Fix for quick view modal on mobile */
 @media (max-width: 768px) {
-  .homepage .package-modal-top {
-    margin-top: 20px;
-    max-height: 90vh;
-  }
-  
-  .homepage .package-modal-top .modal-header {
-    padding: 25px 20px;
-  }
-  
-  .homepage .package-modal-top .packages-grid {
-    padding: 20px;
-    grid-template-columns: 1fr;
-  }
-  
-  .homepage .package-modal-top .modal-footer {
-    padding: 20px;
+  .homepage .quickview-content {
+    max-height: 85vh;
   }
 }
