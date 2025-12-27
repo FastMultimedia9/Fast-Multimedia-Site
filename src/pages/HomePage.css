@@ -75,29 +75,11 @@
   }
 }
 
-.homepage .hero-badge {
-  display: inline-flex;
-  align-items: center;
-  background-color: rgba(37, 99, 235, 0.1);
-  padding: 10px 20px;
-  border-radius: 50px;
-  margin-bottom: 25px;
-}
 
-.homepage .badge-text {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--primary-color);
-  margin-right: 10px;
-}
 
-.homepage .badge-dot {
-  width: 8px;
-  height: 8px;
-  background-color: var(--accent-color);
-  border-radius: 50%;
-  animation: homepage-pulse 2s infinite;
-}
+
+
+
 
 @keyframes homepage-pulse {
   0%, 100% { 
