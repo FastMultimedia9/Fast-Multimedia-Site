@@ -276,7 +276,7 @@ const HomePage = () => {
                 <div className="new-year-offer">
                   <span className="offer-badge">Limited Time Offer</span>
                   <h3>Get 20% off on all design packages!</h3>
-                  <p>Use code: <strong>NEWYEAR2024</strong></p>
+                  <p>Use code: <strong>NEWYEAR2026</strong></p>
                 </div>
               </div>
               
