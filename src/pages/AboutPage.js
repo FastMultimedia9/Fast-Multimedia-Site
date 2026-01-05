@@ -33,10 +33,10 @@ const AboutPage = () => {
     },
     {
       id: 2,
-      name: 'Sarah Mensah',
-      role: 'Senior Graphic Designer',
-      bio: 'Specializing in brand identity and print design, Sarah creates stunning visuals that capture brand essence.',
-      image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
+      name: 'Akwetey John',
+      role: 'Tech Specialist',
+      bio: 'Specializing in Hardware and software, John helps with all tech issues from hardware to software problems.',
+      image: '/images/John.jpg'
     },
     {
       id: 3,
@@ -47,7 +47,7 @@ const AboutPage = () => {
     },
     {
       id: 4,
-      name: 'Ama Ofori',
+      name: 'Ama Ofor',
       role: 'UI/UX Designer',
       bio: 'Ama creates intuitive digital experiences that blend beautiful design with exceptional functionality.',
       image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
