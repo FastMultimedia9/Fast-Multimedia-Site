@@ -99,7 +99,7 @@ const HomePage = () => {
     closePackageModal();
   };
 
-  // Single Graphic Design Services
+  // Single Design Services
   const singleDesignServices = [
     {
       id: 'single-logo',
@@ -135,8 +135,8 @@ const HomePage = () => {
     }
   ];
 
-  // Complete Graphic Design Services
-  const designServices = [
+  // Complete Design Services
+  const completeDesignServices = [
     {
       id: 'brand-identity',
       name: 'Brand Identity Design',
@@ -314,13 +314,13 @@ const HomePage = () => {
           className={`category-btn ${activeServiceCategory === 'design' ? 'active' : ''}`}
           onClick={() => setActiveServiceCategory('design')}
         >
-          <i className="fas fa-paint-brush"></i> Graphic Design Services
+          <i className="fas fa-paint-brush"></i> Design Services
         </button>
         <button 
           className={`category-btn ${activeServiceCategory === 'tech' ? 'active' : ''}`}
           onClick={() => setActiveServiceCategory('tech')}
         >
-          <i className="fas fa-tools"></i> Technical Support Services
+          <i className="fas fa-tools"></i> Tech Services
         </button>
       </div>
 
@@ -445,7 +445,7 @@ const HomePage = () => {
       <section id="services" className="services-section section">
         <div className="section-header animate-on-scroll">
           <h2 className="section-title">
-            {activeServiceCategory === 'design' ? 'Design Services' : 'Technical Support Services'}
+            {activeServiceCategory === 'design' ? 'Design Services' : 'Tech Services'}
           </h2>
           <p className="section-subtitle">
             {activeServiceCategory === 'design' 
@@ -460,10 +460,10 @@ const HomePage = () => {
             {/* Single Design Services */}
             <div className="section-subheader animate-on-scroll">
               <h3 className="sub-section-title">Single Services</h3>
-              <p className="sub-section-subtitle">Get individual design services at affordable rates</p>
+              <p className="sub-section-subtitle">Individual design services at affordable rates</p>
             </div>
             
-            <div className="services-grid single-services">
+            <div className="services-grid">
               {singleDesignServices.map((service, index) => (
                 <div 
                   key={service.id} 
@@ -493,11 +493,11 @@ const HomePage = () => {
             {/* Complete Design Services */}
             <div className="section-subheader animate-on-scroll">
               <h3 className="sub-section-title">Complete Design Packages</h3>
-              <p className="sub-section-subtitle">Get comprehensive design solutions for your business</p>
+              <p className="sub-section-subtitle">Comprehensive design solutions for your business</p>
             </div>
             
             <div className="services-grid">
-              {designServices.map((service, index) => (
+              {completeDesignServices.map((service, index) => (
                 <div 
                   key={service.id} 
                   className="service-card animate-on-scroll"
@@ -524,32 +524,143 @@ const HomePage = () => {
             </div>
           </>
         ) : (
-          <div className="services-grid">
-            {techServices.map((service, index) => (
-              <div 
-                key={service.id} 
-                className="service-card animate-on-scroll"
-                onClick={() => navigate(`/contact?service=${service.id}&type=${encodeURIComponent(service.name)}`)}
-              >
+          <>
+            {/* Tech Services */}
+            <div className="services-grid">
+              {techServices.map((service, index) => (
+                <div 
+                  key={service.id} 
+                  className="service-card animate-on-scroll"
+                  onClick={() => navigate(`/contact?service=${service.id}&type=${encodeURIComponent(service.name)}`)}
+                >
+                  <div className="service-header">
+                    <div className="service-icon">
+                      <i className={service.icon}></i>
+                    </div>
+                    <div className="service-price-badge">{service.price}</div>
+                  </div>
+                  <h3 className="service-title">{service.name}</h3>
+                  <p className="service-description">{service.description}</p>
+                  <ul className="service-features">
+                    {service.features.map((feature, idx) => (
+                      <li key={idx}><i className="fas fa-check"></i> {feature}</li>
+                    ))}
+                  </ul>
+                  <button className="btn btn-outline">
+                    <i className="fas fa-wrench"></i> Request Service
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Additional Tech Services */}
+            <div className="section-subheader animate-on-scroll">
+              <h3 className="sub-section-title">Additional Tech Services</h3>
+              <p className="sub-section-subtitle">More IT solutions for your technical needs</p>
+            </div>
+            
+            <div className="services-grid">
+              <div className="service-card animate-on-scroll">
                 <div className="service-header">
                   <div className="service-icon">
-                    <i className={service.icon}></i>
+                    <i className="fas fa-wifi"></i>
                   </div>
-                  <div className="service-price-badge">{service.price}</div>
+                  <div className="service-price-badge">₵250</div>
                 </div>
-                <h3 className="service-title">{service.name}</h3>
-                <p className="service-description">{service.description}</p>
+                <h3 className="service-title">Networking Solutions</h3>
+                <p className="service-description">
+                  Setup and management of wired and wireless networks for businesses and homes.
+                </p>
                 <ul className="service-features">
-                  {service.features.map((feature, idx) => (
-                    <li key={idx}><i className="fas fa-check"></i> {feature}</li>
-                  ))}
+                  <li><i className="fas fa-check"></i> Wi-Fi Setup</li>
+                  <li><i className="fas fa-check"></i> Network Security</li>
+                  <li><i className="fas fa-check"></i> Router Configuration</li>
+                  <li><i className="fas fa-check"></i> Troubleshooting</li>
                 </ul>
-                <button className="btn btn-outline">
-                  <i className="fas fa-wrench"></i> Request Service
+                <button 
+                  className="btn btn-outline"
+                  onClick={() => navigate('/contact?service=networking&type=Networking%20Solutions')}
+                >
+                  <i className="fas fa-wifi"></i> Request Service
                 </button>
               </div>
-            ))}
-          </div>
+              
+              <div className="service-card animate-on-scroll">
+                <div className="service-header">
+                  <div className="service-icon">
+                    <i className="fas fa-server"></i>
+                  </div>
+                  <div className="service-price-badge">₵300/month</div>
+                </div>
+                <h3 className="service-title">Computer System Management</h3>
+                <p className="service-description">
+                  Ongoing maintenance and management of computer systems for optimal performance.
+                </p>
+                <ul className="service-features">
+                  <li><i className="fas fa-check"></i> System Monitoring</li>
+                  <li><i className="fas fa-check"></i> Regular Updates</li>
+                  <li><i className="fas fa-check"></i> Backup Solutions</li>
+                  <li><i className="fas fa-check"></i> Security Management</li>
+                </ul>
+                <button 
+                  className="btn btn-outline"
+                  onClick={() => navigate('/contact?service=system-management&type=Computer%20System%20Management')}
+                >
+                  <i className="fas fa-server"></i> Subscribe Now
+                </button>
+              </div>
+              
+              <div className="service-card animate-on-scroll">
+                <div className="service-header">
+                  <div className="service-icon">
+                    <i className="fas fa-shield-alt"></i>
+                  </div>
+                  <div className="service-price-badge">₵180</div>
+                </div>
+                <h3 className="service-title">Virus & Malware Removal</h3>
+                <p className="service-description">
+                  Complete virus removal and system security enhancement.
+                </p>
+                <ul className="service-features">
+                  <li><i className="fas fa-check"></i> Deep System Scan</li>
+                  <li><i className="fas fa-check"></i> Malware Removal</li>
+                  <li><i className="fas fa-check"></i> Security Software Setup</li>
+                  <li><i className="fas fa-check"></i> Prevention Measures</li>
+                </ul>
+                <button 
+                  className="btn btn-outline"
+                  onClick={() => navigate('/contact?service=virus-removal&type=Virus%20%26%20Malware%20Removal')}
+                >
+                  <i className="fas fa-shield-alt"></i> Get Protected
+                </button>
+              </div>
+              
+              <div className="service-card animate-on-scroll">
+                <div className="service-header">
+                  <div className="service-icon">
+                    <i className="fas fa-database"></i>
+                  </div>
+                  <div className="service-price-badge">₵220</div>
+                </div>
+                <h3 className="service-title">Data Recovery</h3>
+                <p className="service-description">
+                  Professional data recovery services for lost or corrupted files.
+                </p>
+                <ul className="service-features">
+                  <li><i className="fas fa-check"></i> Hard Drive Recovery</li>
+                  <li><i className="fas fa-check"></i> Corrupted File Repair</li>
+                  <li><i className="fas fa-check"></i> Backup Setup</li>
+                  <li><i className="fas fa-check"></i> Data Transfer</li>
+                </ul>
+                <button 
+                  className="btn btn-outline"
+                  onClick={() => navigate('/contact?service=data-recovery&type=Data%20Recovery')}
+                >
+                  <i className="fas fa-database"></i> Recover Data
+                </button>
+              </div>
+            </div>
+          </>
         )}
         
         <div className="section-cta animate-on-scroll">
@@ -676,120 +787,6 @@ const HomePage = () => {
             </div>
           )}
         </>
-      )}
-
-      {/* For Tech category, show additional tech services */}
-      {activeServiceCategory === 'tech' && (
-        <section className="additional-tech-services section">
-          <div className="section-header animate-on-scroll">
-            <h2 className="section-title">Additional Tech Services</h2>
-            <p className="section-subtitle">
-              Comprehensive IT solutions for all your technical needs
-            </p>
-          </div>
-          
-          <div className="services-grid">
-            <div className="service-card animate-on-scroll">
-              <div className="service-header">
-                <div className="service-icon">
-                  <i className="fas fa-wifi"></i>
-                </div>
-                <div className="service-price-badge">₵250</div>
-              </div>
-              <h3 className="service-title">Networking Solutions</h3>
-              <p className="service-description">
-                Setup and management of wired and wireless networks for businesses and homes.
-              </p>
-              <ul className="service-features">
-                <li><i className="fas fa-check"></i> Wi-Fi Setup</li>
-                <li><i className="fas fa-check"></i> Network Security</li>
-                <li><i className="fas fa-check"></i> Router Configuration</li>
-                <li><i className="fas fa-check"></i> Troubleshooting</li>
-              </ul>
-              <button 
-                className="btn btn-outline"
-                onClick={() => navigate('/contact?service=networking&type=Networking%20Solutions')}
-              >
-                <i className="fas fa-wifi"></i> Request Service
-              </button>
-            </div>
-            
-            <div className="service-card animate-on-scroll">
-              <div className="service-header">
-                <div className="service-icon">
-                  <i className="fas fa-server"></i>
-                </div>
-                <div className="service-price-badge">₵300/month</div>
-              </div>
-              <h3 className="service-title">Computer System Management</h3>
-              <p className="service-description">
-                Ongoing maintenance and management of computer systems for optimal performance.
-              </p>
-              <ul className="service-features">
-                <li><i className="fas fa-check"></i> System Monitoring</li>
-                <li><i className="fas fa-check"></i> Regular Updates</li>
-                <li><i className="fas fa-check"></i> Backup Solutions</li>
-                <li><i className="fas fa-check"></i> Security Management</li>
-              </ul>
-              <button 
-                className="btn btn-outline"
-                onClick={() => navigate('/contact?service=system-management&type=Computer%20System%20Management')}
-              >
-                <i className="fas fa-server"></i> Subscribe Now
-              </button>
-            </div>
-            
-            <div className="service-card animate-on-scroll">
-              <div className="service-header">
-                <div className="service-icon">
-                  <i className="fas fa-shield-alt"></i>
-                </div>
-                <div className="service-price-badge">₵180</div>
-              </div>
-              <h3 className="service-title">Virus & Malware Removal</h3>
-              <p className="service-description">
-                Complete virus removal and system security enhancement.
-              </p>
-              <ul className="service-features">
-                <li><i className="fas fa-check"></i> Deep System Scan</li>
-                <li><i className="fas fa-check"></i> Malware Removal</li>
-                <li><i className="fas fa-check"></i> Security Software Setup</li>
-                <li><i className="fas fa-check"></i> Prevention Measures</li>
-              </ul>
-              <button 
-                className="btn btn-outline"
-                onClick={() => navigate('/contact?service=virus-removal&type=Virus%20%26%20Malware%20Removal')}
-              >
-                <i className="fas fa-shield-alt"></i> Get Protected
-              </button>
-            </div>
-            
-            <div className="service-card animate-on-scroll">
-              <div className="service-header">
-                <div className="service-icon">
-                  <i className="fas fa-database"></i>
-                </div>
-                <div className="service-price-badge">₵220</div>
-              </div>
-              <h3 className="service-title">Data Recovery</h3>
-              <p className="service-description">
-                Professional data recovery services for lost or corrupted files.
-              </p>
-              <ul className="service-features">
-                <li><i className="fas fa-check"></i> Hard Drive Recovery</li>
-                <li><i className="fas fa-check"></i> Corrupted File Repair</li>
-                <li><i className="fas fa-check"></i> Backup Setup</li>
-                <li><i className="fas fa-check"></i> Data Transfer</li>
-              </ul>
-              <button 
-                className="btn btn-outline"
-                onClick={() => navigate('/contact?service=data-recovery&type=Data%20Recovery')}
-              >
-                <i className="fas fa-database"></i> Recover Data
-              </button>
-            </div>
-          </div>
-        </section>
       )}
 
       {/* Why Choose Us Section */}
