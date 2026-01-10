@@ -42,7 +42,7 @@ const PortfolioPage = () => {
         tags: ['Web Design', 'Development', 'Booking System', 'Responsive', 'Luxury Brand'],
         image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
         client: 'Golden Nest Hotel',
-        year: '2023',
+        year: '2025',
         duration: '8 weeks',
         role: 'Lead Designer & Developer',
         deliverables: ['Complete Website', 'Booking System', 'Admin Panel', 'Mobile App Design'],
@@ -55,23 +55,23 @@ const PortfolioPage = () => {
           'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
         ]
       },
-      {
-        id: 2,
-        title: 'EcoBrand Identity System',
-        category: 'branding',
-        description: 'Complete brand identity for sustainable products company with packaging and marketing materials',
-        detailedDescription: 'Developed a comprehensive brand identity system for EcoBrand that communicates sustainability and premium quality. The project included logo design, color palette, typography system, packaging design, and brand guidelines.',
-        tags: ['Logo Design', 'Brand Guidelines', 'Packaging', 'Print Design', 'Sustainability'],
-        image: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-        client: 'EcoBrand Sustainable Products',
-        year: '2023',
-        duration: '6 weeks',
-        role: 'Brand Identity Designer',
-        deliverables: ['Brand Guidelines', 'Logo System', 'Packaging Design', 'Marketing Collateral'],
-        results: ['Brand recognition increased by 60%', 'Won design industry award', 'Featured in Design Magazine'],
-        color: '#4CAF50',
-        mockups: []
-      },
+     {
+    id: 2,
+    title: 'St. Martin De Porres Catholic Hospital, Agomanya',
+    category: 'branding',
+    description: 'Award-winning logo for the 80th Anniversary, blending timeless elegance with a forward-looking vision. The "80TH" takes center stage, framed by the proud pillars of "HERITAGE" and "FUTURE".',
+    detailedDescription: 'In celebration of a landmark 80th anniversary, this logo was selected last year as the winning design from an open challenge, chosen for its ability to capture both legacy and forward momentum. The composition is elegantly structured in three distinct tiers, creating a visual statement that is both monumental and meaningful.\n\nAt its heart, the bold and centered "80TH" serves as the focal point—a clear, proud declaration of the milestone itself. This central element is not merely a number, but a symbolic anchor, representing the enduring presence and achievement across eight decades.\n\nDirectly supporting this anniversary statement are the two foundational words: "HERITAGE" above and "FUTURE" below. This intentional framing is the core concept of the design. "HERITAGE" rests atop the number, visually bearing the weight of history, tradition, and accumulated experience. Beneath, "FUTURE" provides a solid base, symbolizing the ongoing path, growth, and aspirations that the legacy enables. Together, they act as conceptual pillars, literally and figuratively upholding the anniversary moment.\n\nThe choice of a clean, sans-serif typeface in a balanced, stacked layout conveys stability, clarity, and a contemporary feel. It avoids nostalgia-heavy styling, instead presenting the anniversary as a dynamic event—one that respects the past while standing firmly in the present and looking ahead. The absence of extra ornamentation focuses attention purely on the power of these three words, making the message immediate and unforgettable.\n\nUltimately, this logo is more than a commemorative mark; it is a visual thesis. It eloquently communicates that the celebrated 80-year journey is not a conclusion, but a vital connection point—where a distinguished past confidently supports a promising future. Its selection as the winning entry affirmed its success in translating this profound narrative into a single, powerful, and enduring image.',
+    tags: ['Logo Design', 'Brand Identity', 'Anniversary', 'Healthcare', 'Institutional Branding'],
+    image: 'https://example.com/path-to-your-logo-image.jpg', // Changed to placeholder - update with actual image
+    client: 'St. Martin De Porres Catholic Hospital',
+    year: '2025',
+    duration: '2 weeks',
+    role: 'Lead Brand Identity Designer',
+    deliverables: ['Anniversary Logo', 'Brand Guidelines', 'Stationery System', 'Merchandise Application'],
+    results: ['Selected as winning design from open competition', 'Successfully launched for 80th anniversary celebrations', 'Adopted across all hospital communications'],
+    color: '#2E5A9C', // Suggested blue tone for healthcare/trust
+    mockups: []
+},
       {
         id: 3,
         title: 'FinTech Mobile Banking App',
