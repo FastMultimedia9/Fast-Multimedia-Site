@@ -10,18 +10,32 @@ const HomePage = () => {
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState('basic');
   const [showNewYearPopup, setShowNewYearPopup] = useState(false);
+  const [activeServiceCategory, setActiveServiceCategory] = useState('design'); // 'design' or 'tech'
   const navigate = useNavigate();
   
   // New Year flyer image from public folder
-  const newYearFlyerUrl = "/new-year.jpg"; // Assuming your image is called new-year.jpg in public folder
+  const newYearFlyerUrl = "/new-year.jpg";
   
   // Professional hero images
   const heroImages = [
-    "https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1565688534245-05d6b5be184a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80"
+    "https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1565688534245-05d6b5be184a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
   ];
+
+  // Tech Support hero images
+  const techHeroImages = [
+    "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+  ];
+
+  // Get active hero images based on category
+  const getActiveHeroImages = () => {
+    return activeServiceCategory === 'design' ? heroImages : techHeroImages;
+  };
 
   useEffect(() => {
     const animateOnScroll = () => {
@@ -46,25 +60,20 @@ const HomePage = () => {
   useEffect(() => {
     // Auto-rotate hero images every 5 seconds
     const interval = setInterval(() => {
+      const activeImages = getActiveHeroImages();
       setCurrentImageIndex((prevIndex) => 
-        prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
+        prevIndex === activeImages.length - 1 ? 0 : prevIndex + 1
       );
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [heroImages.length]);
+  }, [activeServiceCategory]);
 
   useEffect(() => {
     // Check if New Year popup should be shown
     const hasSeenPopup = localStorage.getItem('newYearPopupClosed');
     
-    // Always show popup for testing - you can remove this or conditionally show it
-    // For production, you might want to show it only on New Year's Day
-    // Example: const currentDate = new Date();
-    // if (currentDate.getMonth() === 0 && currentDate.getDate() === 1 && !hasSeenPopup)
-    
     if (!hasSeenPopup) {
-      // Add a small delay so it doesn't pop up immediately
       const timer = setTimeout(() => {
         setShowNewYearPopup(true);
         document.body.style.overflow = 'hidden';
@@ -121,12 +130,8 @@ const HomePage = () => {
   };
 
   const handlePackageOrder = () => {
-    // Get selected package details
     const selectedPackageDetails = designPackages.find(pkg => pkg.id === selectedPackage);
-    
-    // Navigate to contact page with package details in query params
     navigate(`/contact?package=${selectedPackage}&project=Design%20Package&type=${encodeURIComponent(selectedPackageDetails.name)}`);
-    
     closePackageModal();
   };
 
@@ -135,50 +140,96 @@ const HomePage = () => {
     {
       id: 'basic',
       name: 'Starter Package',
-      price: '$499',
+      price: '₵699',
+      originalPrice: '₵848',
+      discount: 'Save ₵149',
       features: [
         'Logo Design',
-        'Brand Color Palette',
-        '3 Social Media Templates',
-        'Email Newsletter Design',
-        '1 Round of Revisions'
+        'Business Cards',
+        'Social Media Profile Kit',
+        'Basic Brand Guidelines'
       ],
-      description: 'Perfect for new businesses starting their brand journey'
+      description: 'Perfect for new businesses needing basic brand identity'
     },
     {
       id: 'pro',
       name: 'Professional Package',
-      price: '$899',
+      price: '₵1,499',
+      originalPrice: '₵1,898',
+      discount: 'Save ₵399',
       features: [
-        'Everything in Starter Package',
-        'Complete Social Media Kit (15 templates)',
-        'Website Banner Design',
-        'Email Campaign Design',
-        'Product Mockups',
-        '3 Rounds of Revisions',
-        'Priority Support'
+        'Logo Design + Variations',
+        'Complete Brand Guidelines',
+        'Business Stationery Set',
+        'Social Media Content Kit',
+        'Email Signature Design'
       ],
-      description: 'Ideal for established businesses building their brand presence'
+      description: 'Complete branding solution for growing businesses'
     },
     {
-      id: 'premium',
-      name: 'Premium Package',
-      price: '$1499',
+      id: 'website',
+      name: 'Website Package',
+      price: '₵1,299',
+      originalPrice: '₵1,548',
+      discount: 'Save ₵249',
       features: [
-        'Everything in Professional Package',
-        'Complete Brand Guidelines',
-        'Print Materials Design',
-        'Animated Social Media Posts',
-        'Marketing Collateral',
-        'Unlimited Revisions',
-        'Dedicated Designer',
-        'Stock Photos Library Access'
+        '5-Page Responsive Website',
+        'Mobile-First Design',
+        'SEO Optimization',
+        'Contact Form Setup',
+        'Social Media Integration'
       ],
-      description: 'Complete branding solution for comprehensive campaigns'
+      description: 'Professional website design and development'
     }
   ];
 
-  // Portfolio Projects for Modal
+  // Tech Support Services
+  const techServices = [
+    {
+      id: 'computer-repair',
+      name: 'Computer Repair & Maintenance',
+      price: '₵50/hour',
+      features: ['Hardware Diagnosis', 'Component Replacement', 'System Cleaning', 'Performance Tuning'],
+      icon: 'fas fa-desktop'
+    },
+    {
+      id: 'windows-setup',
+      name: 'Windows Installation & Setup',
+      price: '₵150',
+      features: ['Windows 10/11 Installation', 'Driver Updates', 'System Optimization', 'Data Migration'],
+      icon: 'fab fa-windows'
+    },
+    {
+      id: 'software-support',
+      name: 'Software Installation & Support',
+      price: '₵100',
+      features: ['Office Suite Setup', 'Creative Software', 'Antivirus Installation', 'Troubleshooting'],
+      icon: 'fas fa-download'
+    },
+    {
+      id: 'new-computer-setup',
+      name: 'New Computer Setup',
+      price: '₵200',
+      features: ['Initial Setup', 'Software Installation', 'Data Transfer', 'System Optimization'],
+      icon: 'fas fa-laptop'
+    },
+    {
+      id: 'networking',
+      name: 'Networking Solutions',
+      price: '₵250',
+      features: ['Wi-Fi Setup', 'Network Security', 'Router Configuration', 'Troubleshooting'],
+      icon: 'fas fa-wifi'
+    },
+    {
+      id: 'system-management',
+      name: 'Computer System Management',
+      price: '₵300/month',
+      features: ['System Monitoring', 'Regular Updates', 'Backup Solutions', 'Security Management'],
+      icon: 'fas fa-server'
+    }
+  ];
+
+  // Portfolio Projects
   const portfolioProjects = [
     {
       id: 'project1',
@@ -223,21 +274,6 @@ const HomePage = () => {
         "Digital banner ads",
         "Marketing strategy",
         "Campaign assets"
-      ]
-    },
-    {
-      id: 'project4',
-      title: "Corporate Website Redesign",
-      category: "Web Design",
-      description: "Complete website redesign with modern UI/UX and responsive design implementation.",
-      image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      tags: ["Web Design", "UI/UX", "Responsive"],
-      details: [
-        "Modern UI design",
-        "User experience optimization",
-        "Mobile-responsive design",
-        "Performance optimization",
-        "Content management"
       ]
     }
   ];
@@ -296,43 +332,95 @@ const HomePage = () => {
         </div>
       )}
 
+      {/* Service Category Selector */}
+      <div className="service-category-selector">
+        <button 
+          className={`category-btn ${activeServiceCategory === 'design' ? 'active' : ''}`}
+          onClick={() => setActiveServiceCategory('design')}
+        >
+          <i className="fas fa-paint-brush"></i> Graphic Design Services
+        </button>
+        <button 
+          className={`category-btn ${activeServiceCategory === 'tech' ? 'active' : ''}`}
+          onClick={() => setActiveServiceCategory('tech')}
+        >
+          <i className="fas fa-tools"></i> Technical Support Services
+        </button>
+      </div>
+
       {/* Hero Section */}
       <section id="home" className="hero-section">
         <div className="hero-content animate-on-scroll">
           <div className="hero-badge">
             <div className="badge-dot"></div>
+            <span className="badge-text">
+              {activeServiceCategory === 'design' ? 'Creative Design' : 'Tech Support'}
+            </span>
           </div>
           <h1 className="hero-title">
-            Create <span className="highlight">Modern</span> & 
-            <span className="highlight"> Impactful</span> Designs
+            {activeServiceCategory === 'design' ? (
+              <>
+                Create <span className="highlight">Modern</span> & 
+                <span className="highlight"> Impactful</span> Designs
+              </>
+            ) : (
+              <>
+                Reliable <span className="highlight">Tech Support</span> & 
+                <span className="highlight"> IT Solutions</span>
+              </>
+            )}
           </h1>
           <p className="hero-subtitle">
-            Professional design services that help your brand stand out. From logos to complete brand systems, 
-            we create designs that communicate your vision effectively.
+            {activeServiceCategory === 'design' 
+              ? "Professional design services that help your brand stand out. From logos to complete brand systems, we create designs that communicate your vision effectively."
+              : "Professional technical support services to keep your systems running smoothly. From computer repair to network solutions, we provide reliable IT support for businesses and individuals."
+            }
           </p>
           
           <div className="hero-buttons">
-            <button className="btn btn-primary" onClick={openPackageModal}>
-              <i className="fas fa-palette"></i> View Design Packages
-            </button>
-            <button className="btn btn-secondary" onClick={openPortfolioModal}>
-              <i className="fas fa-eye"></i> View Portfolio
-            </button>
+            {activeServiceCategory === 'design' ? (
+              <>
+                <button className="btn btn-primary" onClick={openPackageModal}>
+                  <i className="fas fa-palette"></i> View Design Packages
+                </button>
+                <button className="btn btn-secondary" onClick={openPortfolioModal}>
+                  <i className="fas fa-eye"></i> View Portfolio
+                </button>
+              </>
+            ) : (
+              <button className="btn btn-primary" onClick={() => navigate('/services')}>
+                <i className="fas fa-tools"></i> View Tech Services
+              </button>
+            )}
           </div>
           
           <div className="hero-stats">
             <div className="stat-item">
-              <h3 className="stat-number">150+</h3>
-              <p className="stat-label">Projects Completed</p>
+              <h3 className="stat-number">
+                {activeServiceCategory === 'design' ? '150+' : '500+'}
+              </h3>
+              <p className="stat-label">
+                {activeServiceCategory === 'design' ? 'Projects Completed' : 'Projects Completed'}
+              </p>
             </div>
             <div className="stat-item">
               <h3 className="stat-number">98%</h3>
               <p className="stat-label">Client Satisfaction</p>
             </div>
             <div className="stat-item">
-              <h3 className="stat-number">48hr</h3>
-              <p className="stat-label">Average Delivery</p>
+              <h3 className="stat-number">
+                {activeServiceCategory === 'design' ? '48hr' : '24/7'}
+              </h3>
+              <p className="stat-label">
+                {activeServiceCategory === 'design' ? 'Average Delivery' : 'Tech Support'}
+              </p>
             </div>
+            {activeServiceCategory === 'design' && (
+              <div className="stat-item">
+                <h3 className="stat-number">50+</h3>
+                <p className="stat-label">Happy Clients</p>
+              </div>
+            )}
           </div>
         </div>
         
@@ -345,20 +433,23 @@ const HomePage = () => {
           
           <div className="hero-image-container">
             <div className="hero-image-carousel">
-              {heroImages.map((image, index) => (
+              {getActiveHeroImages().map((image, index) => (
                 <div 
                   key={index}
                   className={`hero-image-slide ${index === currentImageIndex ? 'active' : ''}`}
                 >
                   <img 
                     src={image} 
-                    alt={`Professional Design ${index + 1}`}
+                    alt={activeServiceCategory === 'design' 
+                      ? `Professional Design ${index + 1}`
+                      : `Tech Support ${index + 1}`
+                    }
                   />
                 </div>
               ))}
             </div>
             <div className="carousel-dots">
-              {heroImages.map((_, index) => (
+              {getActiveHeroImages().map((_, index) => (
                 <button
                   key={index}
                   className={`carousel-dot ${index === currentImageIndex ? 'active' : ''}`}
@@ -371,233 +462,303 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Design Package Modal */}
-      {showPackageModal && (
-        <div className="design-package-modal">
-          <div className="modal-overlay" onClick={closePackageModal}></div>
-          <div className="modal-content package-modal">
-            <button className="modal-close" onClick={closePackageModal}>
-              <i className="fas fa-times"></i>
-            </button>
-            
-            <div className="modal-header">
-              <h2 className="modal-title">Design Packages</h2>
-              <p className="modal-subtitle">Choose the perfect package for your project</p>
+      {/* Services Section */}
+      <section id="services" className="services-section section">
+        <div className="section-header animate-on-scroll">
+          <h2 className="section-title">
+            {activeServiceCategory === 'design' ? 'Design Services' : 'Technical Support Services'}
+          </h2>
+          <p className="section-subtitle">
+            {activeServiceCategory === 'design' 
+              ? 'Comprehensive design solutions tailored to your business needs'
+              : 'Reliable tech solutions to keep your systems running efficiently'
+            }
+          </p>
+        </div>
+        
+        {activeServiceCategory === 'design' ? (
+          <div className="services-grid">
+            <div className="service-card animate-on-scroll">
+              <div className="service-header">
+                <div className="service-icon">
+                  <i className="fas fa-paint-brush"></i>
+                </div>
+                <div className="service-profile">
+                  <div className="profile-icons">
+                    <i className="fas fa-star"></i>
+                    <i className="fas fa-brush"></i>
+                    <i className="fas fa-font"></i>
+                    <i className="fas fa-palette"></i>
+                  </div>
+                </div>
+              </div>
+              <h3 className="service-title">Brand Identity</h3>
+              <p className="service-description">
+                Create a memorable brand identity that communicates your values and resonates with your audience.
+              </p>
+              <ul className="service-features">
+                <li>Logo Design</li>
+                <li>Color Palette</li>
+                <li>Typography System</li>
+                <li>Brand Guidelines</li>
+              </ul>
             </div>
             
-            <div className="packages-grid">
-              {designPackages.map((pkg) => (
-                <div 
-                  key={pkg.id} 
-                  className={`package-card ${selectedPackage === pkg.id ? 'selected' : ''}`}
-                  onClick={() => handlePackageSelect(pkg.id)}
+            <div className="service-card animate-on-scroll">
+              <div className="service-header">
+                <div className="service-icon">
+                  <i className="fas fa-bullhorn"></i>
+                </div>
+                <div className="service-profile">
+                  <div className="profile-icons">
+                    <i className="fas fa-share-alt"></i>
+                    <i className="fas fa-envelope"></i>
+                    <i className="fas fa-ad"></i>
+                    <i className="fas fa-chart-line"></i>
+                  </div>
+                </div>
+              </div>
+              <h3 className="service-title">Digital Marketing</h3>
+              <p className="service-description">
+                Engaging digital marketing materials that drive results and connect with your target audience.
+              </p>
+              <ul className="service-features">
+                <li>Social Media Graphics</li>
+                <li>Email Campaigns</li>
+                <li>Web Banners</li>
+                <li>Ad Designs</li>
+              </ul>
+            </div>
+            
+            <div className="service-card animate-on-scroll">
+              <div className="service-header">
+                <div className="service-icon">
+                  <i className="fas fa-box"></i>
+                </div>
+                <div className="service-profile">
+                  <div className="profile-icons">
+                    <i className="fas fa-tag"></i>
+                    <i className="fas fa-shipping-fast"></i>
+                    <i className="fas fa-gift"></i>
+                    <i className="fas fa-qrcode"></i>
+                  </div>
+                </div>
+              </div>
+              <h3 className="service-title">Product Packaging</h3>
+              <p className="service-description">
+                Eye-catching product packaging designs that enhance unboxing experience and brand recognition.
+              </p>
+              <ul className="service-features">
+                <li>Box Design</li>
+                <li>Product Labels</li>
+                <li>Packaging System</li>
+                <li>Retail Ready</li>
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <div className="tech-services-grid">
+            {techServices.map((service, index) => (
+              <div key={service.id} className="tech-service-card animate-on-scroll">
+                <div className="tech-service-header">
+                  <div className="tech-service-icon">
+                    <i className={service.icon}></i>
+                  </div>
+                  <div className="tech-service-price">
+                    {service.price}
+                  </div>
+                </div>
+                <h3 className="tech-service-title">{service.name}</h3>
+                <ul className="tech-service-features">
+                  {service.features.map((feature, idx) => (
+                    <li key={idx}><i className="fas fa-check"></i> {feature}</li>
+                  ))}
+                </ul>
+                <button 
+                  className="btn btn-outline"
+                  onClick={() => navigate(`/contact?service=${service.id}&type=${encodeURIComponent(service.name)}`)}
                 >
-                  <div className="package-header">
-                    <h3 className="package-name">{pkg.name}</h3>
-                    <div className="package-price">
-                      <span className="current-price">{pkg.price}</span>
+                  <i className="fas fa-wrench"></i> Request Service
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {activeServiceCategory === 'tech' && (
+          <div className="section-cta animate-on-scroll">
+            <button className="btn btn-primary" onClick={() => navigate('/services')}>
+              <i className="fas fa-list-alt"></i> View All Tech Services
+            </button>
+          </div>
+        )}
+      </section>
+
+      {/* Only show portfolio for design category */}
+      {activeServiceCategory === 'design' && (
+        <>
+          {/* Portfolio Preview */}
+          <section className="portfolio-preview section">
+            <div className="section-header animate-on-scroll">
+              <h2 className="section-title">Featured Work</h2>
+              <p className="section-subtitle">
+                Explore our portfolio of successful design projects across various industries
+              </p>
+            </div>
+            
+            <div className="portfolio-grid">
+              {portfolioProjects.map((project) => (
+                <div key={project.id} className="portfolio-item animate-on-scroll">
+                  <div className="portfolio-image">
+                    <img src={project.image} alt={project.title} />
+                    <div className="portfolio-overlay">
+                      <div className="overlay-content">
+                        <h4>{project.title}</h4>
+                        <p>{project.description.substring(0, 80)}...</p>
+                        <div className="portfolio-actions">
+                          <button className="btn btn-small quick-view-btn" 
+                            onClick={() => openQuickView(project.id)}>
+                            <i className="fas fa-eye"></i> Quick View
+                          </button>
+                          <button className="btn btn-small btn-outline-light" onClick={openPortfolioModal}>
+                            <i className="fas fa-external-link-alt"></i> Case Study
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <p className="package-description">{pkg.description}</p>
-                  <ul className="package-features">
-                    {pkg.features.map((feature, index) => (
-                      <li key={index}><i className="fas fa-check"></i> {feature}</li>
-                    ))}
-                  </ul>
-                  <button 
-                    className={`btn ${selectedPackage === pkg.id ? 'btn-primary' : 'btn-outline'}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePackageSelect(pkg.id);
-                    }}
-                  >
-                    {selectedPackage === pkg.id ? '✓ Selected' : 'Select Package'}
-                  </button>
+                  <div className="portfolio-info">
+                    <h3 className="portfolio-title">{project.title}</h3>
+                    <p className="portfolio-category">{project.category}</p>
+                    <div className="portfolio-tags">
+                      {project.tags.map((tag, index) => (
+                        <span key={index} className="portfolio-tag">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
             
-            <div className="modal-footer">
-              <button className="btn btn-primary" onClick={handlePackageOrder}>
-                <i className="fas fa-shopping-cart"></i> Get Started
+            <div className="section-cta animate-on-scroll">
+              <button className="btn btn-primary" onClick={openPortfolioModal}>
+                <i className="fas fa-images"></i> View Full Portfolio
               </button>
-              <p className="modal-note">All packages include free consultation</p>
             </div>
-          </div>
-        </div>
-      )}
+          </section>
 
-      {/* Services Section */}
-      <section id="services" className="services-section section">
-        <div className="section-header animate-on-scroll">
-          <h2 className="section-title">Design Services</h2>
-          <p className="section-subtitle">
-            Comprehensive design solutions tailored to your business needs
-          </p>
-        </div>
-        
-        <div className="services-grid">
-          <div className="service-card animate-on-scroll">
-            <div className="service-header">
-              <div className="service-icon">
-                <i className="fas fa-paint-brush"></i>
-              </div>
-              <div className="service-profile">
-                <div className="profile-icons">
-                  <i className="fas fa-star"></i>
-                  <i className="fas fa-brush"></i>
-                  <i className="fas fa-font"></i>
-                  <i className="fas fa-palette"></i>
+          {/* Design Package Modal */}
+          {showPackageModal && (
+            <div className="design-package-modal">
+              <div className="modal-overlay" onClick={closePackageModal}></div>
+              <div className="modal-content package-modal">
+                <button className="modal-close" onClick={closePackageModal}>
+                  <i className="fas fa-times"></i>
+                </button>
+                
+                <div className="modal-header">
+                  <h2 className="modal-title">Design Packages</h2>
+                  <p className="modal-subtitle">Get more value with our bundled packages</p>
                 </div>
-              </div>
-            </div>
-            <h3 className="service-title">Brand Identity</h3>
-            <p className="service-description">
-              Create a memorable brand identity that communicates your values and resonates with your audience.
-            </p>
-            <ul className="service-features">
-              <li>Logo Design</li>
-              <li>Color Palette</li>
-              <li>Typography System</li>
-              <li>Brand Guidelines</li>
-            </ul>
-          </div>
-          
-          <div className="service-card animate-on-scroll">
-            <div className="service-header">
-              <div className="service-icon">
-                <i className="fas fa-bullhorn"></i>
-              </div>
-              <div className="service-profile">
-                <div className="profile-icons">
-                  <i className="fas fa-share-alt"></i>
-                  <i className="fas fa-envelope"></i>
-                  <i className="fas fa-ad"></i>
-                  <i className="fas fa-chart-line"></i>
-                </div>
-              </div>
-            </div>
-            <h3 className="service-title">Digital Marketing</h3>
-            <p className="service-description">
-              Engaging digital marketing materials that drive results and connect with your target audience.
-            </p>
-            <ul className="service-features">
-              <li>Social Media Graphics</li>
-              <li>Email Campaigns</li>
-              <li>Web Banners</li>
-              <li>Ad Designs</li>
-            </ul>
-          </div>
-          
-          <div className="service-card animate-on-scroll">
-            <div className="service-header">
-              <div className="service-icon">
-                <i className="fas fa-box"></i>
-              </div>
-              <div className="service-profile">
-                <div className="profile-icons">
-                  <i className="fas fa-tag"></i>
-                  <i className="fas fa-shipping-fast"></i>
-                  <i className="fas fa-gift"></i>
-                  <i className="fas fa-qrcode"></i>
-                </div>
-              </div>
-            </div>
-            <h3 className="service-title">Product Packaging</h3>
-            <p className="service-description">
-              Eye-catching product packaging designs that enhance unboxing experience and brand recognition.
-            </p>
-            <ul className="service-features">
-              <li>Box Design</li>
-              <li>Product Labels</li>
-              <li>Packaging System</li>
-              <li>Retail Ready</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* Portfolio Preview */}
-      <section className="portfolio-preview section">
-        <div className="section-header animate-on-scroll">
-          <h2 className="section-title">Featured Work</h2>
-          <p className="section-subtitle">
-            Explore our portfolio of successful design projects across various industries
-          </p>
-        </div>
-        
-        <div className="portfolio-grid">
-          {portfolioProjects.slice(0, 3).map((project) => (
-            <div key={project.id} className="portfolio-item animate-on-scroll">
-              <div className="portfolio-image">
-                <img src={project.image} alt={project.title} />
-                <div className="portfolio-overlay">
-                  <div className="overlay-content">
-                    <h4>{project.title}</h4>
-                    <p>{project.description.substring(0, 80)}...</p>
-                    <div className="portfolio-actions">
-                      <button className="btn btn-small quick-view-btn" 
-                        onClick={() => openQuickView(project.id)}>
-                        <i className="fas fa-eye"></i> Quick View
-                      </button>
-                      <button className="btn btn-small btn-outline-light" onClick={openPortfolioModal}>
-                        <i className="fas fa-external-link-alt"></i> Case Study
+                
+                <div className="packages-grid">
+                  {designPackages.map((pkg) => (
+                    <div 
+                      key={pkg.id} 
+                      className={`package-card ${selectedPackage === pkg.id ? 'selected' : ''}`}
+                      onClick={() => handlePackageSelect(pkg.id)}
+                    >
+                      {pkg.discount && (
+                        <div className="package-discount">
+                          <span className="discount-badge">{pkg.discount}</span>
+                        </div>
+                      )}
+                      <div className="package-header">
+                        <h3 className="package-name">{pkg.name}</h3>
+                        <div className="package-price">
+                          {pkg.originalPrice && (
+                            <span className="original-price">{pkg.originalPrice}</span>
+                          )}
+                          <span className="current-price">{pkg.price}</span>
+                        </div>
+                      </div>
+                      <p className="package-description">{pkg.description}</p>
+                      <ul className="package-features">
+                        {pkg.features.map((feature, index) => (
+                          <li key={index}><i className="fas fa-check"></i> {feature}</li>
+                        ))}
+                      </ul>
+                      <button 
+                        className={`btn ${selectedPackage === pkg.id ? 'btn-primary' : 'btn-outline'}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePackageSelect(pkg.id);
+                        }}
+                      >
+                        {selectedPackage === pkg.id ? '✓ Selected' : 'Select Package'}
                       </button>
                     </div>
-                  </div>
-                </div>
-              </div>
-              <div className="portfolio-info">
-                <h3 className="portfolio-title">{project.title}</h3>
-                <p className="portfolio-category">{project.category}</p>
-                <div className="portfolio-tags">
-                  {project.tags.map((tag, index) => (
-                    <span key={index} className="portfolio-tag">{tag}</span>
                   ))}
+                </div>
+                
+                <div className="modal-footer">
+                  <button className="btn btn-primary" onClick={handlePackageOrder}>
+                    <i className="fas fa-shopping-cart"></i> Get Started
+                  </button>
+                  <p className="modal-note">Click any package to automatically add it to your contact request</p>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-        
-        <div className="section-cta animate-on-scroll">
-          <button className="btn btn-primary" onClick={openPortfolioModal}>
-            <i className="fas fa-images"></i> View Full Portfolio
-          </button>
-        </div>
-      </section>
+          )}
+        </>
+      )}
 
       {/* CTA Section */}
       <section className="cta-section">
         <div className="cta-container animate-on-scroll">
           <div className="cta-content">
-            <h2 className="cta-title">Ready to Transform Your Brand?</h2>
+            <h2 className="cta-title">
+              {activeServiceCategory === 'design' 
+                ? 'Ready to Transform Your Brand?'
+                : 'Need Professional Tech Support?'
+              }
+            </h2>
             <p className="cta-text">
-              Let's work together to create designs that not only look great but also drive results for your business.
-              Schedule a free consultation to discuss your project.
+              {activeServiceCategory === 'design'
+                ? "Let's work together to create designs that not only look great but also drive results for your business. Schedule a free consultation to discuss your project."
+                : "Get reliable technical support to keep your systems running smoothly. Schedule a service call or get a quote for your IT needs."
+              }
             </p>
             <div className="cta-buttons">
-              <button className="btn btn-light" onClick={openPackageModal}>
-                <i className="fas fa-calendar"></i> Book Consultation
+              <button 
+                className="btn btn-light" 
+                onClick={() => navigate('/contact')}
+              >
+                <i className="fas fa-calendar"></i> {activeServiceCategory === 'design' ? 'Book Consultation' : 'Schedule Service'}
               </button>
-              <button className="btn btn-outline-light" onClick={openPortfolioModal}>
-                <i className="fas fa-images"></i> View Work
-              </button>
+              {activeServiceCategory === 'design' && (
+                <button className="btn btn-outline-light" onClick={openPortfolioModal}>
+                  <i className="fas fa-images"></i> View Work
+                </button>
+              )}
             </div>
           </div>
           <div className="cta-visual">
             <div className="cta-image">
               <img 
-                src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
-                alt="Design Collaboration"
+                src={activeServiceCategory === 'design' 
+                  ? "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                  : "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                } 
+                alt={activeServiceCategory === 'design' ? "Design Collaboration" : "Tech Support"}
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Portfolio Modal */}
-      {showPortfolioModal && (
+      {/* Portfolio Modal (only for design) */}
+      {showPortfolioModal && activeServiceCategory === 'design' && (
         <div className="portfolio-modal-overlay">
           <div className="modal-overlay" onClick={closePortfolioModal}></div>
           <div className="modal-content portfolio-modal">
@@ -654,8 +815,8 @@ const HomePage = () => {
         </div>
       )}
 
-      {/* Quick View Modal */}
-      {showQuickView && (
+      {/* Quick View Modal (only for design) */}
+      {showQuickView && activeServiceCategory === 'design' && (
         <div className="portfolio-quickview-modal">
           <div className="quickview-overlay" onClick={closeQuickView}></div>
           <div className="quickview-content">
