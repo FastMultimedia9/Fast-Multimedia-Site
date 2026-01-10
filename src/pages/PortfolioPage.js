@@ -142,17 +142,17 @@ const PortfolioPage = () => {
       },
       {
     id: 7,
-    title: 'Ani\'s Serabs - Business Identity',
+    title: 'Ani\'s Serabs - Print Design',
     category: 'branding',
-    description: 'Clean, modern business card design for Ani\'s Serabs, featuring balanced typography and essential contact details for a professional first impression.',
-    detailedDescription: 'Designed today, this business card establishes a clear and professional identity for Ani\'s Serabs. The layout prioritizes clarity with a clean, two-line business name ("Ani\'s Serabs") set in a modern, approachable typeface. All essential contact information—including phone number (0249737261) and location (Agomanya Roman Junction)—is presented with clear hierarchy for immediate readability.\n\nThe card efficiently incorporates branding details with a discreet "Design By Fast Multimedia" credit and website, maintaining focus on the client\'s information. The overall design achieves a balance between professionalism and accessibility, ensuring the card is both memorable and functional for networking and customer connections.',
+    description: 'Clean, modern business flyer design for Ani\'s Serabs, featuring balanced typography and essential contact details for a professional first impression.',
+    detailedDescription: 'Designed today, this business flyer establishes a clear and professional identity for Ani\'s Serabs. The layout prioritizes clarity with a clean, two-line business name ("Ani\'s Serabs") set in a modern, approachable typeface. All essential contact information—including phone number (0249737261) and location (Agomanya Roman Junction)—is presented with clear hierarchy for immediate readability.\n\nThe card efficiently incorporates branding details with a discreet "Design By Fast Multimedia" credit and website, maintaining focus on the client\'s information. The overall design achieves a balance between professionalism and accessibility, ensuring the card is both memorable and functional for networking and customer connections.',
     tags: ['Business Card', 'Print Design', 'Brand Identity', 'Typography', 'Stationery'],
     image: 'anis-serabs.jpg', // Assuming image is in public folder
     client: 'Ani\'s Serabs',
-    year: '2024',
+    year: '2026',
     duration: '1 day',
     role: 'Graphic Designer',
-    deliverables: ['Business Card Design', 'Print-Ready Files'],
+    deliverables: ['Flyer Design', 'Print-Ready Files'],
     results: ['Professional identity established', 'Ready for immediate print and distribution', 'Client-approved final design'],
     color: '#1565C0', // A professional blue tone
     mockups: []
