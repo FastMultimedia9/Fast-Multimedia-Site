@@ -173,6 +173,108 @@ const PortfolioPage = () => {
     results: ['Delivered on time for the celebration', 'Client delighted with personalized touch', 'Graphic used across multiple platforms'],
     color: '#FF4081', // A festive pink/celebratory color
     mockups: []
+},
+{
+    id: 9,
+    title: 'Anniversary T-Shirt Design',
+    category: 'print',
+    description: 'Bold, typography-focused t-shirt design featuring a modern stacked graphic for a clean, impactful streetwear look.',
+    detailedDescription: 'A minimalist yet bold t-shirt design centered around the repeated word  in a clean, stacked layout. This print-ready graphic emphasizes strong typography and negative space, creating a contemporary, eye-catching statement piece suitable for casual and streetwear contexts.\n\nThe design uses a straightforward, high-impact approach—repeating and stacking the word to form a visual pattern that is both readable and aesthetically striking. With no additional imagery or complex elements, the focus remains purely on the typographic form, making it versatile for various print applications while ensuring clarity and visual appeal.',
+    tags: ['T-Shirt Design', 'Apparel', 'Typography', 'Streetwear', 'Print Ready'],
+    image: 'top-1.jpg',
+    client: 'St. Martin',
+    year: '2025',
+    duration: '1 day',
+    role: 'Graphic Designer',
+    deliverables: ['T-Shirt Graphic', 'Print-Ready File', 'Color Variations'],
+    results: ['Design approved for print', 'Versatile for multiple apparel products', 'Clean, scalable artwork delivered'],
+    color: '#FF0000', // YouTube brand red
+    mockups: []
+},
+{
+    id: 10,
+    title: 'Mr. Wise Clothing - Brand Identity',
+    category: 'branding',
+    description: 'Sophisticated logo for Mr. Wise Clothing, balancing exclusivity and distinction with the tagline "Exclusively Different" for a premium fashion identity.',
+    detailedDescription: 'Designed last year, this brand identity establishes Mr. Wise Clothing as a sophisticated and distinctive fashion label. The logo centers on the clean, confident typography of "Mr. Wise Clothing," conveying reliability and premium quality.\n\nAccompanied by the tagline "Exclusively Different," the design communicates a clear brand promise: offering unique, carefully curated apparel. The visual language is intentionally refined and modern, avoiding excessive decoration to let the message of exclusivity and differentiation stand strong. This identity was crafted to resonate in competitive fashion markets, appealing to discerning customers who value both style and statement.',
+    tags: ['Logo Design', 'Fashion Branding', 'Brand Identity', 'Typography', 'Luxury'],
+    image: 'mr-wise.jpg',
+    client: 'Mr. Wise Clothing',
+    year: '2025',
+    duration: '2 weeks',
+    role: 'Brand Identity Designer',
+    deliverables: ['Primary Logo', 'Brand Guidelines', 'Stationery Application', 'Mockups'],
+    results: ['Successfully launched brand identity', 'Positions brand in premium fashion segment', 'Received positive client and market feedback'],
+    color: '#111111', // Classic, sophisticated black
+    mockups: []
+},
+{
+    id: 11,
+    title: 'Abidan Royal Mango Ice-Cream Label',
+    category: 'packaging',
+    description: 'Product label design for Abidan Royal Mango Ice-Cream, featuring clear ingredient listing and essential product information for consumer trust and compliance.',
+    detailedDescription: 'A practical and informative packaging label created for Abidan Royal Enterprise’s Mango Ice-Cream. The design prioritizes clarity and regulatory compliance, prominently displaying the product name alongside key details such as manufacturer information, location (Agormanya E/R Ghana), contact number, and production dates.\n\nThe layout includes a comprehensive ingredient list (Mango, Sugar, Water, Salt, Flavour, Milk Powder, Condensed Milk) presented in an easy-to-read format, ensuring transparency with consumers. The label balances functional necessities with subtle branding, using clean typography and organized sections to create a professional and trustworthy appearance suitable for retail and local market distribution.',
+    tags: ['Packaging Design', 'Food Label', 'Product Design', 'Print', 'Compliance'],
+    image: 'mango-label.jpg',
+    client: 'Abidan Royal Enterprise',
+    year: '2024',
+    duration: '3 days',
+    role: 'Packaging & Label Designer',
+    deliverables: ['Print-Ready Label Design', 'Compliance Layout', 'Digital Proof'],
+    results: ['Label meets regulatory requirements', 'Clear and attractive product presentation', 'Supports brand credibility in local market'],
+    color: '#FFB74D', // Mango/orange tone
+    mockups: []
+},
+{
+    id: 12,
+    title: 'Methylated Spirit Label - St. Martin Hospital',
+    category: 'packaging',
+    description: 'Professional pharmaceutical label for methylated spirit, designed with clear safety warnings, usage instructions, and hospital branding for in-house or external distribution.',
+    detailedDescription: 'A functional and compliant label created for St. Martin De Porres Catholic Hospital’s methylated spirit product. The design emphasizes critical safety and usage information with prominent warnings such as “FOR EXTERNAL USE ONLY” and “FLAMMABLE LIQUID,” ensuring clear communication of hazards and proper handling.\n\nThe layout integrates the hospital’s branding and contact details (0547455074 / 0200988669 / 0247085802) alongside essential product specifications (200 ML). Organized typography and strategic spacing guide the reader’s eye from product identification to safety instructions, making the label both legally compliant and user-friendly for medical staff and potential external users.',
+    tags: ['Pharmaceutical Label', 'Packaging', 'Safety Design', 'Hospital Branding', 'Regulatory'],
+    image: 'methylated-spirit.jpg',
+    client: 'St. Martin De Porres Catholic Hospital',
+    year: '2024',
+    duration: '3 days',
+    role: 'Healthcare Packaging Designer',
+    deliverables: ['Compliant Label Design', 'Safety-Focused Layout', 'Print-Ready Artwork'],
+    results: ['Clear communication of safety protocols', 'Meets healthcare packaging standards', 'Strengthens institutional branding'],
+    color: '#D32F2F', // Alert red for safety emphasis
+    mockups: []
+},
+{
+    id: 13,
+    title: 'Mr. Wise Mobile Money Services Flyer',
+    category: 'print',
+    description: 'Informative and vibrant flyer for Mr. Wise Mobile Money Services, detailing available transactions in a clear, customer-friendly format with strong visual appeal.',
+    detailedDescription: 'A comprehensive promotional flyer created to advertise Mr. Wise Mobile Money Services under the reassuring tagline: “WE DEY FOR YOU ALL DAY.” The design organizes a wide range of services—including MTN Mobile Money, cash transactions, credit transfers, NHIS renewal, and more—into a scannable, bulleted list for easy readability.\n\nContact details (0501199002, 0543900295) are prominently displayed to encourage immediate customer action. The layout balances informative density with visual clarity, using typographic hierarchy and structured sections to ensure the flyer is both engaging and practical for point-of-sale display or community distribution.',
+    tags: ['Flyer Design', 'Mobile Money', 'Promotional Print', 'Service Advertisement', 'Typography'],
+    image: 'mr-wise-momo-flyer.jpg',
+    client: 'Mr. Wise Mobile Money Services',
+    year: '2024',
+    duration: '2 days',
+    role: 'Print & Marketing Designer',
+    deliverables: ['Promotional Flyer', 'Print-Ready File', 'Digital Version'],
+    results: ['Clear communication of service offerings', 'Effective for customer education and outreach', 'Strengthens local service visibility'],
+    color: '#FF9900', // MTN/ Mobile Money orange
+    mockups: []
+},
+{
+    id: 14,
+    title: 'Funeral Program - Celebration of Life',
+    category: 'print',
+    description: 'Comprehensive funeral program design honoring a life, detailing ceremonial arrangements, family listings, and event schedule with dignified layout and organized typography.',
+    detailedDescription: 'A respectfully designed funeral program titled "Celebration of Life," created to guide attendees through memorial services for Gladys. The multi-page layout organizes extensive information with clear typographic hierarchy, beginning with ceremonial leadership (Chef Mourners) and proceeding through detailed family listings (Siblings, Nephews, Nieces, In-Laws).\n\nThe design structures the funeral timeline—Wake Keeping, Lying in State, Burial Services, Final Funeral Rites, and Thanksgiving Service—with specific dates, times, and locations (Agomanya Airport, Adelvyee Cemetery, Bethel Revival Ministry). Family names and relationships are presented with care and clarity, ensuring the document serves as both a practical guide and a lasting keepsake. The overall aesthetic balances solemnity with readability, honoring tradition while providing functional clarity.',
+    tags: ['Funeral Program', 'Memorial Design', 'Event Print', 'Typography', 'Keepsake'],
+    image: 'funeral-program.jpg',
+    client: 'Family of Gladys',
+    year: '2024',
+    duration: '4 days',
+    role: 'Memorial Print Designer',
+    deliverables: ['Funeral Program Booklet', 'Print-Ready Files', 'Digital Proof'],
+    results: ['Clear communication of funeral events and participants', 'Dignified tribute to the deceased', 'Provided family with organized memorial materials'],
+    color: '#5D4037', // Subdued, respectful brown
+    mockups: []
 }
     ];
 
