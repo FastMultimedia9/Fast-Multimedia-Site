@@ -50,17 +50,19 @@ const ContactPage = () => {
       features: ['Complete Brand Guidelines', 'Print Materials', 'Animated Social Posts', 'Gift Card Design', 'Unlimited Revisions']
     }
   };
-  
-  // Check URL parameters and localStorage for service selection
+
+  // Check for service selection from URL or localStorage
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const serviceName = queryParams.get('service');
     const category = queryParams.get('category');
     const price = queryParams.get('price');
+    const packageType = queryParams.get('package');
     
-    // Check localStorage for service data
+    // Check localStorage for service data (sent from Homepage or Services page)
     const storedService = localStorage.getItem('selectedService');
     
+    // Process service selection
     if (serviceName || storedService) {
       let serviceData;
       
@@ -68,30 +70,37 @@ const ContactPage = () => {
         // From URL parameters
         serviceData = {
           name: decodeURIComponent(serviceName),
-          category: category,
-          price: price
+          category: category || 'General Service',
+          price: price || '',
+          timestamp: Date.now()
         };
       } else if (storedService) {
         // From localStorage
-        serviceData = JSON.parse(storedService);
-        const dataAge = Date.now() - serviceData.timestamp;
-        
-        // Only use if data is less than 5 minutes old
-        if (dataAge < 5 * 60 * 1000) {
+        try {
+          serviceData = JSON.parse(storedService);
+          
+          // Validate service data structure
+          if (!serviceData.name) {
+            console.error('Invalid service data structure');
+            localStorage.removeItem('selectedService');
+            return;
+          }
+          
           // Clear localStorage after use
           localStorage.removeItem('selectedService');
-        } else {
-          serviceData = null;
+        } catch (error) {
+          console.error('Error parsing stored service:', error);
           localStorage.removeItem('selectedService');
+          return;
         }
       }
       
-      if (serviceData) {
+      if (serviceData && serviceData.name) {
         setSelectedService(serviceData);
         setServiceAdded(true);
         
         // Auto-fill form with service information
-        const serviceMessage = `I'm interested in: ${serviceData.name}\n\nService Details:\n• Category: ${serviceData.category || 'Not specified'}\n• Price: ${serviceData.price || 'To be quoted'}\n\n`;
+        const serviceMessage = `I'm interested in: ${serviceData.name}\n\nService Details:\n• Category: ${serviceData.category || 'Not specified'}\n• Price: ${serviceData.price ? serviceData.price : 'To be quoted'}\n\n`;
         
         setFormData(prev => ({
           ...prev,
@@ -106,8 +115,7 @@ const ContactPage = () => {
       }
     }
     
-    // Existing Christmas mode logic
-    const packageType = queryParams.get('package');
+    // Check for Christmas mode
     const projectType = queryParams.get('project') || '';
     const packageName = queryParams.get('type') || '';
     
@@ -196,7 +204,7 @@ const ContactPage = () => {
     if (selectedService) {
       serviceInfo = `\n🎯 *REQUESTED SERVICE:* ${selectedService.name}\n`;
       serviceInfo += `📊 *Category:* ${selectedService.category || 'Not specified'}\n`;
-      if (selectedService.price) {
+      if (selectedService.price && selectedService.price !== '') {
         serviceInfo += `💰 *Price Info:* ${selectedService.price}\n`;
       }
     }
@@ -237,7 +245,7 @@ ${formData.message}
     const message = formatMessage();
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
   // Send via Email
@@ -245,7 +253,7 @@ ${formData.message}
     const subject = `Project Request - ${selectedService ? selectedService.name : 'Fast Multimedia'}`;
     const body = formatMessage();
     const mailtoUrl = `mailto:${emailAddress}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoUrl;
+    window.open(mailtoUrl, '_self');
   };
 
   const handleSubmit = (e) => {
@@ -308,22 +316,26 @@ ${formData.message}
     'Other'
   ];
 
+  // Fixed Budget Ranges - from lowest to highest
   const budgetRanges = [
-    'Less than ₵5,000',
+    'Not sure yet',
+    'Less than ₵500',
+    '₵500 - ₵1,000',
+    '₵1,000 - ₵2,500',
+    '₵2,500 - ₵5,000',
     '₵5,000 - ₵10,000',
     '₵10,000 - ₵25,000',
     '₵25,000 - ₵50,000',
     '₵50,000 - ₵100,000',
-    '₵100,000+',
-    'Not sure yet'
+    '₵100,000+'
   ];
 
   const timelines = [
+    'Not sure yet',
     'Urgent (1-2 weeks)',
     'Standard (3-4 weeks)',
     'Flexible (1-2 months)',
-    'Long-term project',
-    'Not sure yet'
+    'Long-term project'
   ];
 
   const faqs = [
@@ -361,6 +373,7 @@ ${formData.message}
             <button 
               className="notification-close"
               onClick={() => setServiceAdded(false)}
+              aria-label="Close notification"
             >
               <i className="fas fa-times"></i>
             </button>
@@ -420,12 +433,14 @@ ${formData.message}
                     <button 
                       className="btn-service-remove"
                       onClick={clearSelectedService}
+                      aria-label="Remove service"
                     >
                       <i className="fas fa-times"></i> Remove
                     </button>
                     <button 
                       className="btn-service-add"
                       onClick={addAnotherService}
+                      aria-label="Add another service"
                     >
                       <i className="fas fa-plus"></i> Add Another
                     </button>
@@ -498,6 +513,7 @@ ${formData.message}
                       <button 
                         className="btn-service-browse"
                         onClick={addAnotherService}
+                        type="button"
                       >
                         Browse Services
                       </button>
@@ -517,7 +533,7 @@ ${formData.message}
                   <p className="success-text">
                     {submissionMethod === 'whatsapp' 
                       ? 'Your project request has been prepared! WhatsApp should open with your message ready to send. Please review and send it to us.'
-                      : 'Your project request has been prepared! Your email client should open with your message ready to send. Please review and send it to us.'}
+                      : 'Your project request has been prepared! Your email client will open with your message ready to send. Please review and send it to us.'}
                   </p>
                   
                   {selectedService && (
@@ -539,7 +555,7 @@ ${formData.message}
                     <div className="instructions-text">
                       {submissionMethod === 'whatsapp' 
                         ? `1. Open WhatsApp\n2. Start chat with ${displayWhatsappNumber}\n3. Copy and send the prepared message`
-                        : `1. Open your email\n2. Send to ${emailAddress}\n3. Use subject: "Project Request - ${selectedService ? selectedService.name : 'Fast Multimedia'}"`}
+                        : `1. Open your email client\n2. Send to ${emailAddress}\n3. Use subject: "Project Request - ${selectedService ? selectedService.name : 'Fast Multimedia'}"`}
                     </div>
                   </div>
                   
@@ -547,12 +563,14 @@ ${formData.message}
                     <button 
                       onClick={() => setIsSubmitted(false)}
                       className="btn btn-secondary"
+                      type="button"
                     >
                       <i className="fas fa-edit"></i> Edit Request
                     </button>
                     <button 
                       onClick={addAnotherService}
                       className="btn btn-primary"
+                      type="button"
                     >
                       <i className="fas fa-plus"></i> Add Another Service
                     </button>
@@ -832,6 +850,8 @@ ${formData.message}
                   <a 
                     href={`mailto:${emailAddress}?subject=Project%20Inquiry`}
                     className="btn btn-email"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     <i className="fas fa-envelope"></i> Send Email
                   </a>
@@ -864,6 +884,7 @@ ${formData.message}
                   <button 
                     className="service-category-btn"
                     onClick={() => navigate('/services#design-services')}
+                    type="button"
                   >
                     <i className="fas fa-palette"></i>
                     <span>Graphic Design</span>
@@ -871,6 +892,7 @@ ${formData.message}
                   <button 
                     className="service-category-btn"
                     onClick={() => navigate('/services#tech-services')}
+                    type="button"
                   >
                     <i className="fas fa-tools"></i>
                     <span>Tech Support</span>
@@ -878,6 +900,7 @@ ${formData.message}
                   <button 
                     className="service-category-btn"
                     onClick={() => navigate('/services#pricing-section')}
+                    type="button"
                   >
                     <i className="fas fa-box"></i>
                     <span>Packages</span>
@@ -907,6 +930,9 @@ ${formData.message}
                 key={index} 
                 className={`faq-item animate-on-scroll ${activeFAQ === index ? 'active' : ''}`}
                 onClick={() => toggleFAQ(index)}
+                role="button"
+                tabIndex={0}
+                onKeyPress={(e) => e.key === 'Enter' && toggleFAQ(index)}
               >
                 <div className="faq-question">
                   <h3 className="question-title">
