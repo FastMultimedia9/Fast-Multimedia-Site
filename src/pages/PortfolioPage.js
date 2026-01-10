@@ -7,9 +7,268 @@ const PortfolioPage = () => {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [showProjectModal, setShowProjectModal] = useState(false);
-  const [activeView, setActiveView] = useState('grid'); // 'grid' or 'masonry'
+  const [activeView, setActiveView] = useState('grid');
   const navigate = useNavigate();
 
+  // Enhanced projects data with all your case studies
+  const allProjects = [
+    {
+      id: 1,
+      title: 'Golden Nest Hotel Website',
+      category: 'web',
+      description: 'Complete website design and development for luxury hotel brand with booking system integration',
+      detailedDescription: 'A comprehensive website redesign for Golden Nest Hotel featuring a modern, luxurious design with integrated booking system, room gallery, and customer reviews. The project focused on creating a seamless user experience that reflects the hotel\'s premium brand identity.',
+      tags: ['Web Design', 'Development', 'Booking System', 'Responsive', 'Luxury Brand'],
+      image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      client: 'Golden Nest Hotel',
+      year: '2025',
+      duration: '8 weeks',
+      role: 'Lead Designer & Developer',
+      deliverables: ['Complete Website', 'Booking System', 'Admin Panel', 'Mobile App Design'],
+      results: ['40% increase in online bookings', '25% higher user engagement', '5-star client satisfaction'],
+      color: '#D4AF37',
+      link: 'https://www.goldennesthotelgh.com',
+      mockups: [
+        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+      ]
+    },
+    {
+      id: 2,
+      title: 'St. Martin De Porres Catholic Hospital, Agomanya',
+      category: 'branding',
+      description: 'Award-winning logo for the 80th Anniversary, blending timeless elegance with a forward-looking vision.',
+      detailedDescription: 'In celebration of a landmark 80th anniversary, this logo was selected last year as the winning design from an open challenge, chosen for its ability to capture both legacy and forward momentum.\n\nThe bold, centered "80TH" serves as the focal point, framed by the foundational words "HERITAGE" and "FUTURE". This elegant structure creates a visual statement that is both monumental and meaningful.',
+      tags: ['Logo Design', 'Brand Identity', 'Anniversary', 'Healthcare', 'Institutional Branding'],
+      image: '80th.jpg',
+      client: 'St. Martin De Porres Catholic Hospital',
+      year: '2025',
+      duration: '2 weeks',
+      role: 'Lead Brand Identity Designer',
+      deliverables: ['Anniversary Logo', 'Brand Guidelines', 'Stationery System', 'Merchandise Application'],
+      results: ['Selected as winning design from open competition', 'Successfully launched for 80th anniversary', 'Adopted across all hospital communications'],
+      color: '#2E5A9C',
+      mockups: []
+    },
+    {
+      id: 3,
+      title: 'FinTech Mobile Banking App',
+      category: 'uiux',
+      description: 'UI/UX design for innovative mobile banking application with financial tracking features',
+      detailedDescription: 'Designed a user-friendly mobile banking application that simplifies financial management. The project involved user research, wireframing, prototyping, and creating a design system for consistent user experience.',
+      tags: ['UI Design', 'UX Research', 'Mobile App', 'FinTech', 'Prototyping'],
+      image: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      client: 'FinTech Innovations Inc.',
+      year: '2023',
+      duration: '12 weeks',
+      role: 'UI/UX Designer',
+      deliverables: ['Wireframes', 'High-fidelity Prototypes', 'Design System', 'User Testing Reports'],
+      results: ['User retention increased by 45%', 'App Store rating: 4.8 stars', '1M+ downloads in first month'],
+      color: '#2196F3',
+      mockups: []
+    },
+    {
+      id: 4,
+      title: 'Organic Food Packaging Series',
+      category: 'packaging',
+      description: 'Sustainable packaging design for organic food product line across multiple categories',
+      detailedDescription: 'Created a cohesive packaging system for Organic Foods\' product line that emphasizes natural ingredients and sustainability. The design uses eco-friendly materials and communicates product benefits clearly.',
+      tags: ['Packaging Design', 'Print Production', 'Sustainability', 'Brand Consistency'],
+      image: 'https://images.unsplash.com/photo-1580995170656-f0aa5c5c31dd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      client: 'Organic Foods Ltd.',
+      year: '2023',
+      duration: '4 weeks',
+      role: 'Packaging Designer',
+      deliverables: ['Packaging Designs', 'Production Files', 'Material Specifications', 'Print Samples'],
+      results: ['Sales increased by 35%', 'Packaging award winner', 'Featured on retail design blog'],
+      color: '#8BC34A',
+      mockups: []
+    },
+    {
+      id: 5,
+      title: 'Tech Startup Corporate Website',
+      category: 'web',
+      description: 'Modern corporate website design with investor relations and recruitment sections',
+      detailedDescription: 'Designed and developed a corporate website for TechStart Inc. that showcases their products, company culture, and investment opportunities. The site includes dynamic content management and multilingual support.',
+      tags: ['Corporate Website', 'CMS Integration', 'Multilingual', 'Investor Relations'],
+      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      client: 'TechStart Inc.',
+      year: '2023',
+      duration: '6 weeks',
+      role: 'Web Designer & Developer',
+      deliverables: ['Responsive Website', 'CMS Setup', 'Content Strategy', 'SEO Optimization'],
+      results: ['Traffic increased by 200%', 'Improved SEO ranking', 'Positive investor feedback'],
+      color: '#673AB7',
+      mockups: []
+    },
+    {
+      id: 6,
+      title: 'Fitness App UI/UX Design',
+      category: 'uiux',
+      description: 'Mobile fitness app design with workout tracking and community features',
+      detailedDescription: 'Created an engaging fitness app interface that motivates users through gamification and social features. The design focuses on intuitive workout tracking and progress visualization.',
+      tags: ['Mobile Design', 'Fitness App', 'Gamification', 'User Engagement'],
+      image: 'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      client: 'FitTrack Solutions',
+      year: '2023',
+      duration: '10 weeks',
+      role: 'UI/UX Designer',
+      deliverables: ['App Design', 'User Flows', 'Interactive Prototype', 'Design System'],
+      results: ['User engagement up 55%', '4.9 App Store rating', '100k active users'],
+      color: '#FF5722',
+      mockups: []
+    },
+    {
+      id: 7,
+      title: 'Ani\'s Serabs - Business Identity',
+      category: 'branding',
+      description: 'Clean, modern business card design for Ani\'s Serabs with essential contact details',
+      detailedDescription: 'Designed today, this business card establishes a clear and professional identity for Ani\'s Serabs. The layout prioritizes clarity with a clean, two-line business name set in a modern, approachable typeface.',
+      tags: ['Business Card', 'Print Design', 'Brand Identity', 'Typography', 'Stationery'],
+      image: 'anis-serabs.jpg',
+      client: 'Ani\'s Serabs',
+      year: '2026',
+      duration: '1 day',
+      role: 'Graphic Designer',
+      deliverables: ['Business Card Design', 'Print-Ready Files'],
+      results: ['Professional identity established', 'Ready for immediate print and distribution', 'Client-approved final design'],
+      color: '#1565C0',
+      mockups: []
+    },
+    {
+      id: 8,
+      title: 'Julie\'s Birthday Celebration Design',
+      category: 'event',
+      description: 'Personalized birthday graphic designed for a special celebration',
+      detailedDescription: 'Created a custom birthday design for Julie\'s celebration, blending celebratory elements with personalized flair. The design features a joyful, festive aesthetic that captures the spirit of the occasion.',
+      tags: ['Personal Design', 'Event Graphics', 'Birthday', 'Celebration', 'Digital Art'],
+      image: 'julie-birthday.jpg',
+      client: 'Personal Client',
+      year: '2025',
+      duration: '1 day',
+      role: 'Graphic Designer',
+      deliverables: ['Custom Birthday Graphic', 'Digital Files', 'Social Media Version'],
+      results: ['Delivered on time for the celebration', 'Client delighted with personalized touch', 'Graphic used across multiple platforms'],
+      color: '#FF4081',
+      mockups: []
+    },
+    {
+      id: 9,
+      title: 'YouTube T-Shirt Design',
+      category: 'print',
+      description: 'Bold, typography-focused t-shirt design featuring a modern stacked graphic',
+      detailedDescription: 'A minimalist yet bold t-shirt design centered around a clean, stacked layout. This print-ready graphic emphasizes strong typography and negative space, creating a contemporary, eye-catching statement piece.',
+      tags: ['T-Shirt Design', 'Apparel', 'Typography', 'Streetwear', 'Print Ready'],
+      image: 'top-1.jpg',
+      client: 'Apparel Client',
+      year: '2025',
+      duration: '1 day',
+      role: 'Graphic Designer',
+      deliverables: ['T-Shirt Graphic', 'Print-Ready File', 'Color Variations'],
+      results: ['Design approved for print', 'Versatile for multiple apparel products', 'Clean, scalable artwork delivered'],
+      color: '#FF0000',
+      mockups: []
+    },
+    {
+      id: 10,
+      title: 'Mr. Wise Clothing - Brand Identity',
+      category: 'branding',
+      description: 'Sophisticated logo for Mr. Wise Clothing with tagline "Exclusively Different"',
+      detailedDescription: 'Designed last year, this brand identity establishes Mr. Wise Clothing as a sophisticated and distinctive fashion label. The logo centers on clean, confident typography, conveying reliability and premium quality.',
+      tags: ['Logo Design', 'Fashion Branding', 'Brand Identity', 'Typography', 'Luxury'],
+      image: 'mr-wise.jpg',
+      client: 'Mr. Wise Clothing',
+      year: '2025',
+      duration: '2 weeks',
+      role: 'Brand Identity Designer',
+      deliverables: ['Primary Logo', 'Brand Guidelines', 'Stationery Application', 'Mockups'],
+      results: ['Successfully launched brand identity', 'Positions brand in premium fashion segment', 'Received positive client feedback'],
+      color: '#111111',
+      mockups: []
+    },
+    {
+      id: 11,
+      title: 'Abidan Royal Mango Ice-Cream Label',
+      category: 'packaging',
+      description: 'Product label design for Abidan Royal Mango Ice-Cream with clear ingredient listing',
+      detailedDescription: 'A practical and informative packaging label created for Abidan Royal Enterprise\'s Mango Ice-Cream. The design prioritizes clarity and regulatory compliance, prominently displaying product information.',
+      tags: ['Packaging Design', 'Food Label', 'Product Design', 'Print', 'Compliance'],
+      image: 'mango-label.jpg',
+      client: 'Abidan Royal Enterprise',
+      year: '2024',
+      duration: '3 days',
+      role: 'Packaging & Label Designer',
+      deliverables: ['Print-Ready Label Design', 'Compliance Layout', 'Digital Proof'],
+      results: ['Label meets regulatory requirements', 'Clear and attractive product presentation', 'Supports brand credibility'],
+      color: '#FFB74D',
+      mockups: []
+    },
+    {
+      id: 12,
+      title: 'Methylated Spirit Label - St. Martin Hospital',
+      category: 'packaging',
+      description: 'Professional pharmaceutical label with clear safety warnings and usage instructions',
+      detailedDescription: 'A functional and compliant label created for St. Martin De Porres Catholic Hospital\'s methylated spirit product. The design emphasizes critical safety information and proper handling guidelines.',
+      tags: ['Pharmaceutical Label', 'Packaging', 'Safety Design', 'Hospital Branding', 'Regulatory'],
+      image: 'methylated-spirit.jpg',
+      client: 'St. Martin De Porres Catholic Hospital',
+      year: '2024',
+      duration: '3 days',
+      role: 'Healthcare Packaging Designer',
+      deliverables: ['Compliant Label Design', 'Safety-Focused Layout', 'Print-Ready Artwork'],
+      results: ['Clear communication of safety protocols', 'Meets healthcare packaging standards', 'Strengthens institutional branding'],
+      color: '#D32F2F',
+      mockups: []
+    },
+    {
+      id: 13,
+      title: 'Mr. Wise Mobile Money Services Flyer',
+      category: 'print',
+      description: 'Informative flyer for Mr. Wise Mobile Money Services with service listings',
+      detailedDescription: 'A comprehensive promotional flyer created to advertise Mr. Wise Mobile Money Services. The design organizes services into a scannable, bulleted list for easy readability.',
+      tags: ['Flyer Design', 'Mobile Money', 'Promotional Print', 'Service Advertisement', 'Typography'],
+      image: 'mr-wise-momo-flyer.jpg',
+      client: 'Mr. Wise Mobile Money Services',
+      year: '2024',
+      duration: '2 days',
+      role: 'Print & Marketing Designer',
+      deliverables: ['Promotional Flyer', 'Print-Ready File', 'Digital Version'],
+      results: ['Clear communication of service offerings', 'Effective for customer education', 'Strengthens local service visibility'],
+      color: '#FF9900',
+      mockups: []
+    },
+    {
+      id: 14,
+      title: 'Funeral Program - Celebration of Life',
+      category: 'print',
+      description: 'Comprehensive funeral program design with ceremonial arrangements and family listings',
+      detailedDescription: 'A respectfully designed funeral program titled "Celebration of Life," created to guide attendees through memorial services. The layout organizes extensive information with clear typographic hierarchy.',
+      tags: ['Funeral Program', 'Memorial Design', 'Event Print', 'Typography', 'Keepsake'],
+      image: 'funeral-program.jpg',
+      client: 'Family of Gladys',
+      year: '2024',
+      duration: '4 days',
+      role: 'Memorial Print Designer',
+      deliverables: ['Funeral Program Booklet', 'Print-Ready Files', 'Digital Proof'],
+      results: ['Clear communication of funeral events', 'Dignified tribute to the deceased', 'Provided organized memorial materials'],
+      color: '#5D4037',
+      mockups: []
+    }
+  ];
+
+  // Categories with updated counts
+  const categories = [
+    { id: 'all', name: 'All Projects', icon: 'fas fa-th', count: allProjects.length },
+    { id: 'web', name: 'Web Design', icon: 'fas fa-desktop', count: allProjects.filter(p => p.category === 'web').length },
+    { id: 'uiux', name: 'UI/UX Design', icon: 'fas fa-mobile-alt', count: allProjects.filter(p => p.category === 'uiux').length },
+    { id: 'branding', name: 'Brand Identity', icon: 'fas fa-palette', count: allProjects.filter(p => p.category === 'branding').length },
+    { id: 'packaging', name: 'Packaging', icon: 'fas fa-box-open', count: allProjects.filter(p => p.category === 'packaging').length },
+    { id: 'print', name: 'Print Design', icon: 'fas fa-print', count: allProjects.filter(p => p.category === 'print').length },
+    { id: 'event', name: 'Event Design', icon: 'fas fa-calendar-alt', count: allProjects.filter(p => p.category === 'event').length }
+  ];
+
+  // Scroll animation effect
   useEffect(() => {
     const animateOnScroll = () => {
       const elements = document.querySelectorAll('.animate-on-scroll');
@@ -30,269 +289,14 @@ const PortfolioPage = () => {
     return () => window.removeEventListener('scroll', animateOnScroll);
   }, []);
 
+  // Filter projects based on selected category
   useEffect(() => {
-    // Enhanced projects data with case study details
-    const allProjects = [
-      {
-        id: 1,
-        title: 'Golden Nest Hotel Website',
-        category: 'web',
-        description: 'Complete website design and development for luxury hotel brand with booking system integration',
-        detailedDescription: 'A comprehensive website redesign for Golden Nest Hotel featuring a modern, luxurious design with integrated booking system, room gallery, and customer reviews. The project focused on creating a seamless user experience that reflects the hotel\'s premium brand identity.',
-        tags: ['Web Design', 'Development', 'Booking System', 'Responsive', 'Luxury Brand'],
-        image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-        client: 'Golden Nest Hotel',
-        year: '2025',
-        duration: '8 weeks',
-        role: 'Lead Designer & Developer',
-        deliverables: ['Complete Website', 'Booking System', 'Admin Panel', 'Mobile App Design'],
-        results: ['40% increase in online bookings', '25% higher user engagement', '5-star client satisfaction'],
-        color: '#D4AF37', // Gold color from the hotel theme
-        link: 'https://www.goldennesthotelgh.com',
-        mockups: [
-          'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-          'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-          'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-        ]
-      },
-     {
-    id: 2,
-    title: 'St. Martin De Porres Catholic Hospital, Agomanya',
-    category: 'branding',
-    description: 'Award-winning logo for the 80th Anniversary, blending timeless elegance with a forward-looking vision. The "80TH" takes center stage, framed by the proud pillars of "HERITAGE" and "FUTURE".',
-    detailedDescription: 'In celebration of a landmark 80th anniversary, this logo was selected last year as the winning design from an open challenge, chosen for its ability to capture both legacy and forward momentum. The composition is elegantly structured in three distinct tiers, creating a visual statement that is both monumental and meaningful.\n\nAt its heart, the bold and centered "80TH" serves as the focal point—a clear, proud declaration of the milestone itself. This central element is not merely a number, but a symbolic anchor, representing the enduring presence and achievement across eight decades.\n\nDirectly supporting this anniversary statement are the two foundational words: "HERITAGE" above and "FUTURE" below. This intentional framing is the core concept of the design. "HERITAGE" rests atop the number, visually bearing the weight of history, tradition, and accumulated experience. Beneath, "FUTURE" provides a solid base, symbolizing the ongoing path, growth, and aspirations that the legacy enables. Together, they act as conceptual pillars, literally and figuratively upholding the anniversary moment.\n\nThe choice of a clean, sans-serif typeface in a balanced, stacked layout conveys stability, clarity, and a contemporary feel. It avoids nostalgia-heavy styling, instead presenting the anniversary as a dynamic event—one that respects the past while standing firmly in the present and looking ahead. The absence of extra ornamentation focuses attention purely on the power of these three words, making the message immediate and unforgettable.\n\nUltimately, this logo is more than a commemorative mark; it is a visual thesis. It eloquently communicates that the celebrated 80-year journey is not a conclusion, but a vital connection point—where a distinguished past confidently supports a promising future. Its selection as the winning entry affirmed its success in translating this profound narrative into a single, powerful, and enduring image.',
-    tags: ['Logo Design', 'Brand Identity', 'Anniversary', 'Healthcare', 'Institutional Branding'],
-    image: '80th.jpg', // Changed to placeholder - update with actual image
-    client: 'St. Martin De Porres Catholic Hospital',
-    year: '2025',
-    duration: '2 weeks',
-    role: 'Lead Brand Identity Designer',
-    deliverables: ['Anniversary Logo', 'Brand Guidelines', 'Stationery System', 'Merchandise Application'],
-    results: ['Selected as winning design from open competition', 'Successfully launched for 80th anniversary celebrations', 'Adopted across all hospital communications'],
-    color: '#2E5A9C', // Suggested blue tone for healthcare/trust
-    mockups: []
-},
-      {
-        id: 3,
-        title: 'FinTech Mobile Banking App',
-        category: 'uiux',
-        description: 'UI/UX design for innovative mobile banking application with financial tracking features',
-        detailedDescription: 'Designed a user-friendly mobile banking application that simplifies financial management. The project involved user research, wireframing, prototyping, and creating a design system for consistent user experience.',
-        tags: ['UI Design', 'UX Research', 'Mobile App', 'FinTech', 'Prototyping'],
-        image: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-        client: 'FinTech Innovations Inc.',
-        year: '2023',
-        duration: '12 weeks',
-        role: 'UI/UX Designer',
-        deliverables: ['Wireframes', 'High-fidelity Prototypes', 'Design System', 'User Testing Reports'],
-        results: ['User retention increased by 45%', 'App Store rating: 4.8 stars', '1M+ downloads in first month'],
-        color: '#2196F3',
-        mockups: []
-      },
-      {
-        id: 4,
-        title: 'Organic Food Packaging Series',
-        category: 'packaging',
-        description: 'Sustainable packaging design for organic food product line across multiple categories',
-        detailedDescription: 'Created a cohesive packaging system for Organic Foods\' product line that emphasizes natural ingredients and sustainability. The design uses eco-friendly materials and communicates product benefits clearly.',
-        tags: ['Packaging Design', 'Print Production', 'Sustainability', 'Brand Consistency'],
-        image: 'https://images.unsplash.com/photo-1580995170656-f0aa5c5c31dd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-        client: 'Organic Foods Ltd.',
-        year: '2023',
-        duration: '4 weeks',
-        role: 'Packaging Designer',
-        deliverables: ['Packaging Designs', 'Production Files', 'Material Specifications', 'Print Samples'],
-        results: ['Sales increased by 35%', 'Packaging award winner', 'Featured on retail design blog'],
-        color: '#8BC34A',
-        mockups: []
-      },
-      {
-        id: 5,
-        title: 'Tech Startup Corporate Website',
-        category: 'web',
-        description: 'Modern corporate website design with investor relations and recruitment sections',
-        detailedDescription: 'Designed and developed a corporate website for TechStart Inc. that showcases their products, company culture, and investment opportunities. The site includes dynamic content management and multilingual support.',
-        tags: ['Corporate Website', 'CMS Integration', 'Multilingual', 'Investor Relations'],
-        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-        client: 'TechStart Inc.',
-        year: '2023',
-        duration: '6 weeks',
-        role: 'Web Designer & Developer',
-        deliverables: ['Responsive Website', 'CMS Setup', 'Content Strategy', 'SEO Optimization'],
-        results: ['Traffic increased by 200%', 'Improved SEO ranking', 'Positive investor feedback'],
-        color: '#673AB7',
-        mockups: []
-      },
-      {
-        id: 6,
-        title: 'Fitness App UI/UX Design',
-        category: 'uiux',
-        description: 'Mobile fitness app design with workout tracking and community features',
-        detailedDescription: 'Created an engaging fitness app interface that motivates users through gamification and social features. The design focuses on intuitive workout tracking and progress visualization.',
-        tags: ['Mobile Design', 'Fitness App', 'Gamification', 'User Engagement'],
-        image: 'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-        client: 'FitTrack Solutions',
-        year: '2023',
-        duration: '10 weeks',
-        role: 'UI/UX Designer',
-        deliverables: ['App Design', 'User Flows', 'Interactive Prototype', 'Design System'],
-        results: ['User engagement up 55%', '4.9 App Store rating', '100k active users'],
-        color: '#FF5722',
-        mockups: []
-      },
-      {
-    id: 7,
-    title: 'Ani\'s Serabs - Print Design',
-    category: 'branding',
-    description: 'Clean, modern business flyer design for Ani\'s Serabs, featuring balanced typography and essential contact details for a professional first impression.',
-    detailedDescription: 'Designed today, this business flyer establishes a clear and professional identity for Ani\'s Serabs. The layout prioritizes clarity with a clean, two-line business name ("Ani\'s Serabs") set in a modern, approachable typeface. All essential contact information—including phone number (0249737261) and location (Agomanya Roman Junction)—is presented with clear hierarchy for immediate readability.\n\nThe flyer efficiently incorporates branding details with a discreet "Design By Fast Multimedia" credit and website, maintaining focus on the client\'s information. The overall design achieves a balance between professionalism and accessibility, ensuring the flyer is both memorable and functional for networking and customer connections.',
-    tags: ['Business Card', 'Print Design', 'Brand Identity', 'Typography', 'Stationery'],
-    image: 'anis-serabs.jpg', // Assuming image is in public folder
-    client: 'Ani\'s Serabs',
-    year: '2026',
-    duration: '1 day',
-    role: 'Graphic Designer',
-    deliverables: ['Flyer Design', 'Print-Ready Files'],
-    results: ['Professional identity established', 'Ready for immediate print and distribution', 'Client-approved final design'],
-    color: '#1565C0', // A professional blue tone
-    mockups: []
-},
-      {
-    id: 8,
-    title: 'Julie\'s Birthday Celebration Design',
-    category: 'event',
-    description: 'Personalized birthday graphic designed for a special celebration, creating a festive and memorable visual keepsake.',
-    detailedDescription: 'Created a custom birthday design for Julie\'s celebration, blending celebratory elements with personalized flair. The design features a joyful, festive aesthetic that captures the spirit of the occasion while incorporating the client\'s specific preferences.\n\nThe layout balances decorative elements with clear, welcoming text, ensuring the focus remains on celebration and personal connection. Designed to be versatile, it can be used for digital invitations, social media posts, or printed memorabilia, making it a central visual piece for the birthday festivities.',
-    tags: ['Personal Design', 'Event Graphics', 'Birthday', 'Celebration', 'Digital Art'],
-    image: 'julie-birthday.jpg',
-    client: 'Personal Client',
-    year: '2025',
-    duration: '1 day',
-    role: 'Graphic Designer',
-    deliverables: ['Custom Birthday Graphic', 'Digital Files', 'Social Media Version'],
-    results: ['Delivered on time for the celebration', 'Client delighted with personalized touch', 'Graphic used across multiple platforms'],
-    color: '#FF4081', // A festive pink/celebratory color
-    mockups: []
-},
-{
-    id: 9,
-    title: 'Anniversary T-Shirt Design',
-    category: 'print',
-    description: 'Bold, typography-focused t-shirt design featuring a modern stacked graphic for a clean, impactful streetwear look.',
-    detailedDescription: 'A minimalist yet bold t-shirt design centered around the repeated word  in a clean, stacked layout. This print-ready graphic emphasizes strong typography and negative space, creating a contemporary, eye-catching statement piece suitable for casual and streetwear contexts.\n\nThe design uses a straightforward, high-impact approach—repeating and stacking the word to form a visual pattern that is both readable and aesthetically striking. With no additional imagery or complex elements, the focus remains purely on the typographic form, making it versatile for various print applications while ensuring clarity and visual appeal.',
-    tags: ['T-Shirt Design', 'Apparel', 'Typography', 'Streetwear', 'Print Ready'],
-    image: 'top-1.jpg',
-    client: 'St. Martin',
-    year: '2025',
-    duration: '1 day',
-    role: 'Graphic Designer',
-    deliverables: ['T-Shirt Graphic', 'Print-Ready File', 'Color Variations'],
-    results: ['Design approved for print', 'Versatile for multiple apparel products', 'Clean, scalable artwork delivered'],
-    color: '#FF0000', // YouTube brand red
-    mockups: []
-},
-{
-    id: 10,
-    title: 'Mr. Wise Clothing - Brand Identity',
-    category: 'branding',
-    description: 'Sophisticated logo for Mr. Wise Clothing, balancing exclusivity and distinction with the tagline "Exclusively Different" for a premium fashion identity.',
-    detailedDescription: 'Designed last year, this brand identity establishes Mr. Wise Clothing as a sophisticated and distinctive fashion label. The logo centers on the clean, confident typography of "Mr. Wise Clothing," conveying reliability and premium quality.\n\nAccompanied by the tagline "Exclusively Different," the design communicates a clear brand promise: offering unique, carefully curated apparel. The visual language is intentionally refined and modern, avoiding excessive decoration to let the message of exclusivity and differentiation stand strong. This identity was crafted to resonate in competitive fashion markets, appealing to discerning customers who value both style and statement.',
-    tags: ['Logo Design', 'Fashion Branding', 'Brand Identity', 'Typography', 'Luxury'],
-    image: 'mr-wise.jpg',
-    client: 'Mr. Wise Clothing',
-    year: '2025',
-    duration: '2 weeks',
-    role: 'Brand Identity Designer',
-    deliverables: ['Primary Logo', 'Brand Guidelines', 'Stationery Application', 'Mockups'],
-    results: ['Successfully launched brand identity', 'Positions brand in premium fashion segment', 'Received positive client and market feedback'],
-    color: '#111111', // Classic, sophisticated black
-    mockups: []
-},
-{
-    id: 11,
-    title: 'Abidan Royal Mango Ice-Cream Label',
-    category: 'packaging',
-    description: 'Product label design for Abidan Royal Mango Ice-Cream, featuring clear ingredient listing and essential product information for consumer trust and compliance.',
-    detailedDescription: 'A practical and informative packaging label created for Abidan Royal Enterprise’s Mango Ice-Cream. The design prioritizes clarity and regulatory compliance, prominently displaying the product name alongside key details such as manufacturer information, location (Agormanya E/R Ghana), contact number, and production dates.\n\nThe layout includes a comprehensive ingredient list (Mango, Sugar, Water, Salt, Flavour, Milk Powder, Condensed Milk) presented in an easy-to-read format, ensuring transparency with consumers. The label balances functional necessities with subtle branding, using clean typography and organized sections to create a professional and trustworthy appearance suitable for retail and local market distribution.',
-    tags: ['Packaging Design', 'Food Label', 'Product Design', 'Print', 'Compliance'],
-    image: 'mango-label.jpg',
-    client: 'Abidan Royal Enterprise',
-    year: '2024',
-    duration: '3 days',
-    role: 'Packaging & Label Designer',
-    deliverables: ['Print-Ready Label Design', 'Compliance Layout', 'Digital Proof'],
-    results: ['Label meets regulatory requirements', 'Clear and attractive product presentation', 'Supports brand credibility in local market'],
-    color: '#FFB74D', // Mango/orange tone
-    mockups: []
-},
-{
-    id: 12,
-    title: 'Methylated Spirit Label - St. Martin Hospital',
-    category: 'packaging',
-    description: 'Professional pharmaceutical label for methylated spirit, designed with clear safety warnings, usage instructions, and hospital branding for in-house or external distribution.',
-    detailedDescription: 'A functional and compliant label created for St. Martin De Porres Catholic Hospital’s methylated spirit product. The design emphasizes critical safety and usage information with prominent warnings such as “FOR EXTERNAL USE ONLY” and “FLAMMABLE LIQUID,” ensuring clear communication of hazards and proper handling.\n\nThe layout integrates the hospital’s branding and contact details (0547455074 / 0200988669 / 0247085802) alongside essential product specifications (200 ML). Organized typography and strategic spacing guide the reader’s eye from product identification to safety instructions, making the label both legally compliant and user-friendly for medical staff and potential external users.',
-    tags: ['Pharmaceutical Label', 'Packaging', 'Safety Design', 'Hospital Branding', 'Regulatory'],
-    image: 'methylated-spirit.jpg',
-    client: 'St. Martin De Porres Catholic Hospital',
-    year: '2024',
-    duration: '3 days',
-    role: 'Healthcare Packaging Designer',
-    deliverables: ['Compliant Label Design', 'Safety-Focused Layout', 'Print-Ready Artwork'],
-    results: ['Clear communication of safety protocols', 'Meets healthcare packaging standards', 'Strengthens institutional branding'],
-    color: '#D32F2F', // Alert red for safety emphasis
-    mockups: []
-},
-{
-    id: 13,
-    title: 'Mr. Wise Mobile Money Services Flyer',
-    category: 'print',
-    description: 'Informative and vibrant flyer for Mr. Wise Mobile Money Services, detailing available transactions in a clear, customer-friendly format with strong visual appeal.',
-    detailedDescription: 'A comprehensive promotional flyer created to advertise Mr. Wise Mobile Money Services under the reassuring tagline: “WE DEY FOR YOU ALL DAY.” The design organizes a wide range of services—including MTN Mobile Money, cash transactions, credit transfers, NHIS renewal, and more—into a scannable, bulleted list for easy readability.\n\nContact details (0501199002, 0543900295) are prominently displayed to encourage immediate customer action. The layout balances informative density with visual clarity, using typographic hierarchy and structured sections to ensure the flyer is both engaging and practical for point-of-sale display or community distribution.',
-    tags: ['Flyer Design', 'Mobile Money', 'Promotional Print', 'Service Advertisement', 'Typography'],
-    image: 'mr-wise-momo-flyer.jpg',
-    client: 'Mr. Wise Mobile Money Services',
-    year: '2024',
-    duration: '2 days',
-    role: 'Print & Marketing Designer',
-    deliverables: ['Promotional Flyer', 'Print-Ready File', 'Digital Version'],
-    results: ['Clear communication of service offerings', 'Effective for customer education and outreach', 'Strengthens local service visibility'],
-    color: '#FF9900', // MTN/ Mobile Money orange
-    mockups: []
-},
-{
-    id: 14,
-    title: 'Funeral Program - Celebration of Life',
-    category: 'print',
-    description: 'Comprehensive funeral program design honoring a life, detailing ceremonial arrangements, family listings, and event schedule with dignified layout and organized typography.',
-    detailedDescription: 'A respectfully designed funeral program titled "Celebration of Life," created to guide attendees through memorial services for Gladys. The multi-page layout organizes extensive information with clear typographic hierarchy, beginning with ceremonial leadership (Chef Mourners) and proceeding through detailed family listings (Siblings, Nephews, Nieces, In-Laws).\n\nThe design structures the funeral timeline—Wake Keeping, Lying in State, Burial Services, Final Funeral Rites, and Thanksgiving Service—with specific dates, times, and locations (Agomanya Airport, Adelvyee Cemetery, Bethel Revival Ministry). Family names and relationships are presented with care and clarity, ensuring the document serves as both a practical guide and a lasting keepsake. The overall aesthetic balances solemnity with readability, honoring tradition while providing functional clarity.',
-    tags: ['Funeral Program', 'Memorial Design', 'Event Print', 'Typography', 'Keepsake'],
-    image: 'funeral-program.jpg',
-    client: 'Family of Gladys',
-    year: '2024',
-    duration: '4 days',
-    role: 'Memorial Print Designer',
-    deliverables: ['Funeral Program Booklet', 'Print-Ready Files', 'Digital Proof'],
-    results: ['Clear communication of funeral events and participants', 'Dignified tribute to the deceased', 'Provided family with organized memorial materials'],
-    color: '#5D4037', // Subdued, respectful brown
-    mockups: []
-}
-    ];
-
     if (filter === 'all') {
       setProjects(allProjects);
     } else {
       setProjects(allProjects.filter(project => project.category === filter));
     }
   }, [filter]);
-
-  const categories = [
-    { id: 'all', name: 'All Projects', icon: 'fas fa-th', count: 8 },
-    { id: 'web', name: 'Web Design', icon: 'fas fa-desktop', count: 2 },
-    { id: 'uiux', name: 'UI/UX Design', icon: 'fas fa-mobile-alt', count: 2 },
-    { id: 'branding', name: 'Brand Identity', icon: 'fas fa-palette', count: 2 },
-    { id: 'packaging', name: 'Packaging', icon: 'fas fa-box-open', count: 1 },
-    { id: 'print', name: 'Print Design', icon: 'fas fa-print', count: 1 }
-  ];
 
   const openProjectModal = (project) => {
     setSelectedProject(project);
@@ -308,6 +312,16 @@ const PortfolioPage = () => {
 
   const handleStartProject = () => {
     navigate('/contact');
+  };
+
+  // Helper function to find category icon
+  const getCategoryIcon = (categoryId) => {
+    return categories.find(c => c.id === categoryId)?.icon || 'fas fa-folder';
+  };
+
+  // Helper function to find category name
+  const getCategoryName = (categoryId) => {
+    return categories.find(c => c.id === categoryId)?.name || 'Project';
   };
 
   return (
@@ -339,20 +353,20 @@ const PortfolioPage = () => {
             
             <div className="hero-stats">
               <div className="stat-card">
-                <div className="stat-number">8+</div>
-                <div className="stat-label">Years Experience</div>
+                <div className="stat-number">{allProjects.length}+</div>
+                <div className="stat-label">Projects Completed</div>
               </div>
               <div className="stat-card">
-                <div className="stat-number">150+</div>
-                <div className="stat-label">Projects Delivered</div>
+                <div className="stat-number">{categories.length - 1}</div>
+                <div className="stat-label">Design Categories</div>
               </div>
               <div className="stat-card">
                 <div className="stat-number">98%</div>
                 <div className="stat-label">Client Satisfaction</div>
               </div>
               <div className="stat-card">
-                <div className="stat-number">25+</div>
-                <div className="stat-label">Industry Awards</div>
+                <div className="stat-number">2023-2026</div>
+                <div className="stat-label">Active Years</div>
               </div>
             </div>
           </div>
@@ -433,7 +447,7 @@ const PortfolioPage = () => {
               <div className="featured-actions">
                 <button 
                   className="btn btn-primary"
-                  onClick={() => openProjectModal(projects.find(p => p.id === 1))}
+                  onClick={() => openProjectModal(allProjects[0])}
                 >
                   <i className="fas fa-expand"></i> View Full Case Study
                 </button>
@@ -539,8 +553,8 @@ const PortfolioPage = () => {
                   <div className="project-info">
                     <div className="project-header">
                       <div className="category-badge">
-                        <i className={categories.find(c => c.id === project.category)?.icon}></i>
-                        <span>{categories.find(c => c.id === project.category)?.name}</span>
+                        <i className={getCategoryIcon(project.category)}></i>
+                        <span>{getCategoryName(project.category)}</span>
                       </div>
                       <div className="project-year">{project.year}</div>
                     </div>
@@ -711,8 +725,8 @@ const PortfolioPage = () => {
             
             <div className="modal-header">
               <div className="modal-category">
-                <i className={categories.find(c => c.id === selectedProject.category)?.icon}></i>
-                <span>{categories.find(c => c.id === selectedProject.category)?.name}</span>
+                <i className={getCategoryIcon(selectedProject.category)}></i>
+                <span>{getCategoryName(selectedProject.category)}</span>
               </div>
               <h2 className="modal-title">{selectedProject.title}</h2>
               <div className="modal-subtitle">{selectedProject.client} • {selectedProject.year}</div>
