@@ -133,19 +133,19 @@ const AboutPage = () => {
             </p>
             <div className="hero-stats">
               <div className="stat-item">
-                <h3 className="stat-number">6+</h3>
+                <h3 className="stat-number22">6+</h3>
                 <p className="stat-label">Years of Excellence</p>
               </div>
               <div className="stat-item">
-                <h3 className="stat-number">500+</h3>
+                <h3 className="stat-number22">500+</h3>
                 <p className="stat-label">Projects Completed</p>
               </div>
               <div className="stat-item">
-                <h3 className="stat-number">98%</h3>
+                <h3 className="stat-number22">98%</h3>
                 <p className="stat-label">Client Satisfaction</p>
               </div>
               <div className="stat-item">
-                <h3 className="stat-number">50+</h3>
+                <h3 className="stat-number22">50+</h3>
                 <p className="stat-label">Happy Clients</p>
               </div>
             </div>

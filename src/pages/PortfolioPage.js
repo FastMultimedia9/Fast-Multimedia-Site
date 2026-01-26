@@ -260,12 +260,131 @@ const PortfolioPage = () => {
     // NEW PROJECTS FROM PROVIDED IMAGES (Updated with correct images)
     {
       id: 15,
+      title: 'St. Martin Hospital Ultrasound Unit Flyer',
+      category: 'print',
+      description: 'Promotional flyer for ultrasound services at St. Martin Hospital',
+      detailedDescription: 'Designed an informative promotional flyer for the Ultrasound Unit at St. Martin De Porres Catholic Hospital in Agomanya. The design clearly lists all available ultrasound services and contact information for easy patient access.',
+      tags: ['Healthcare Flyer', 'Medical Services', 'Promotional Material', 'Hospital Marketing', 'Typography'],
+      image: 'Artboard 1.jpg',
+      client: 'St. Martin De Porres Catholic Hospital',
+      year: '2025',
+      duration: '3 days',
+      role: 'Healthcare Marketing Designer',
+      deliverables: ['Service Flyer', 'Digital Version', 'Print-Ready Files'],
+      results: ['Clear service communication', 'Improved patient awareness', 'Professional hospital branding'],
+      color: '#2E5A9C',
+      mockups: []
+    },
+    {
+      id: 16,
+      title: 'St. Martin Hospital CT Scan Services',
+      category: 'print',
+      description: 'CT scan services information design for hospital patients',
+      detailedDescription: 'Created a comprehensive CT scan services information sheet for St. Martin Hospital. The design organizes different CT scan procedures in a clear, easy-to-understand format with contact information for appointments.',
+      tags: ['Medical Services', 'Healthcare Design', 'Information Sheet', 'Hospital Communication', 'Layout'],
+      image: 'CT  SCAN.jpg',
+      client: 'St. Martin De Porres Catholic Hospital',
+      year: '2025',
+      duration: '4 days',
+      role: 'Healthcare Communication Designer',
+      deliverables: ['Services Information Sheet', 'Digital Display Version', 'Print Materials'],
+      results: ['Patient education improved', 'Service awareness increased', 'Professional medical presentation'],
+      color: '#1976D2',
+      mockups: []
+    },
+    {
+      id: 17,
+      title: 'Anchor Grfix Business Services Flyer',
+      category: 'print',
+      description: 'Comprehensive business services promotion for Anchor Grfix',
+      detailedDescription: 'Designed a detailed promotional flyer for Anchor Grfix showcasing their wide range of services including photocopy, printing, graphic design, computer repairs, and more. The layout organizes services clearly with contact information.',
+      tags: ['Business Flyer', 'Service Promotion', 'Print Design', 'Typography', 'Layout'],
+      image: 'desmond.jpg',
+      client: 'Anchor Grfix',
+      year: '2026',
+      duration: '3 days',
+      role: 'Marketing & Print Designer',
+      deliverables: ['Comprehensive Service Flyer', 'Digital Version', 'Print-Ready Files'],
+      results: ['All services clearly presented', 'Contact information prominent', 'Professional business image'],
+      color: '#FF6B35',
+      mockups: []
+    },
+    {
+      id: 18,
+      title: 'Kitchen Business Logo Design',
+      category: 'branding',
+      description: 'Clean and appetizing logo design for kitchen/food business',
+      detailedDescription: 'Created a simple yet effective logo for a kitchen business with a focus on food preparation. The design uses clean typography with a subtle icon element to create a memorable brand identity.',
+      tags: ['Logo Design', 'Food Business', 'Brand Identity', 'Typography', 'Minimalist'],
+      image: 'KITCHEN LOGO.png',
+      client: 'Kitchen Business',
+      year: '2025',
+      duration: '2 days',
+      role: 'Logo Designer',
+      deliverables: ['Primary Logo', 'Brand Guidelines', 'File Formats'],
+      results: ['Clean brand identity established', 'Appetizing design aesthetic', 'Versatile for various applications'],
+      color: '#FF7043',
+      mockups: []
+    },
+    {
+      id: 19,
+      title: 'Valentine\'s Day Event Program Outline',
+      category: 'event',
+      description: 'Detailed event program outline for Valentine\'s Day workplace celebration',
+      detailedDescription: 'Designed a comprehensive event program outline for a Valentine\'s Day workplace celebration with theme "Balancing work-life & Love for a healthier workplace." The layout organizes the entire event schedule with timing and participant information.',
+      tags: ['Event Program', 'Schedule Design', 'Workplace Events', 'Layout', 'Typography'],
+      image: 'outline 2.jpg',
+      client: 'Corporate Client',
+      year: '2025',
+      duration: '3 days',
+      role: 'Event & Print Designer',
+      deliverables: ['Event Program Outline', 'Schedule Design', 'Digital Version'],
+      results: ['Organized event scheduling', 'Clear participant assignments', 'Professional event materials'],
+      color: '#E91E63',
+      mockups: []
+    },
+    {
+      id: 20,
+      title: 'Fast Multimedia Business Promotion',
+      category: 'print',
+      description: 'Business promotion design for Fast Multimedia services',
+      detailedDescription: 'Created a bold promotional design for Fast Multimedia showcasing their graphic design services including poster design, banner design, birthday design, and more with clear contact information.',
+      tags: ['Business Promotion', 'Service Advertisement', 'Graphic Design', 'Contact Information', 'Layout'],
+      image: 'portfolio-details-1.jpg',
+      client: 'Fast Multimedia',
+      year: '2025',
+      duration: '2 days',
+      role: 'Marketing Designer',
+      deliverables: ['Promotional Design', 'Digital Files', 'Print Version'],
+      results: ['Services clearly highlighted', 'Contact information prominent', 'Eye-catching design'],
+      color: '#0047AB',
+      mockups: []
+    },
+    {
+      id: 21,
+      title: 'St. Martin Goes Traditional Event',
+      category: 'event',
+      description: 'Cultural event promotion for hospital traditional day celebration',
+      detailedDescription: 'Designed promotional materials for St. Martin Hospital\'s "Goes Traditional" cultural event. The design features traditional elements with clear event details including date, time, and location.',
+      tags: ['Cultural Event', 'Hospital Events', 'Event Promotion', 'Traditional Design', 'Layout'],
+      image: 'ST MARTIN GOES TRADITIONAL 1.jpg',
+      client: 'St. Martin De Porres Catholic Hospital',
+      year: '2025',
+      duration: '4 days',
+      role: 'Event & Cultural Designer',
+      deliverables: ['Event Poster', 'Digital Promotion', 'Print Materials'],
+      results: ['Cultural celebration promoted', 'Community engagement', 'Hospital cultural initiative'],
+      color: '#795548',
+      mockups: []
+    },
+    {
+      id: 22,
       title: 'Fast Multimedia Promotion Flyer',
       category: 'print',
       description: 'Promotional flyer for Fast Multimedia services with contact information',
       detailedDescription: 'Created a professional promotional flyer for Fast Multimedia to showcase their services and encourage potential clients to contact them. The design features a clean layout with clear call-to-action and contact details.',
       tags: ['Promotional Flyer', 'Marketing Material', 'Service Advertisement', 'Contact Design', 'Typography'],
-      image: 'Contact Fast Multimedia for yours now.jpg', // Updated image reference
+      image: 'Contact Fast Multimedia for yours now.jpg',
       client: 'Fast Multimedia',
       year: '2025',
       duration: '2 days',
@@ -276,13 +395,13 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 16,
+      id: 23,
       title: 'St. Martin Hospital Farmers Day Celebration',
       category: 'event',
       description: 'Farmers Day celebration design for St. Martin De Porres Catholic Hospital',
       detailedDescription: 'Created a celebratory Farmers Day design for St. Martin De Porres Catholic Hospital to honor and appreciate farmers in the community. The design features agricultural elements and a heartfelt message.',
       tags: ['Event Design', 'Celebration', 'Hospital Event', 'Community Engagement', 'Agricultural'],
-      image: 'get.jpg', // Updated image reference
+      image: 'get.jpg',
       client: 'St. Martin De Porres Catholic Hospital',
       year: '2025',
       duration: '3 days',
@@ -293,13 +412,13 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 17,
+      id: 24,
       title: 'Fast Multimedia Birthday Greeting Design',
       category: 'event',
       description: 'Elegant birthday greeting design with typographic focus',
       detailedDescription: 'Created a sophisticated birthday greeting design featuring elegant typography and celebratory elements. The design focuses on conveying heartfelt birthday wishes with a modern, clean aesthetic.',
       tags: ['Birthday Design', 'Greeting Card', 'Typography', 'Celebration', 'Digital Art'],
-      image: 'Happy BirthdayOn your special day, I wish you a year filled with joy, laughter, and unforgettab (1).jpg', // Updated image reference
+      image: 'Happy BirthdayOn your special day, I wish you a year filled with joy, laughter, and unforgettab (1).jpg',
       client: 'Fast Multimedia',
       year: '2025',
       duration: '1 day',
@@ -310,13 +429,13 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 18,
+      id: 25,
       title: 'Fast Multimedia Birthday Celebration',
       category: 'event',
       description: 'Celebratory birthday design with grace, favour, and money theme',
       detailedDescription: 'Designed a birthday celebration graphic with thematic elements of grace, favour, and money. The design creates a joyful and prosperous birthday atmosphere with carefully chosen visual elements.',
       tags: ['Birthday Celebration', 'Event Design', 'Thematic Design', 'Digital Art', 'Celebration'],
-      image: 'Happy BirthdayOn your special day, I wish you a year filled with joy, laughter, and unforgettab.jpg', // Updated image reference
+      image: 'Happy BirthdayOn your special day, I wish you a year filled with joy, laughter, and unforgettab.jpg',
       client: 'Fast Multimedia',
       year: '2025',
       duration: '2 days',
@@ -327,7 +446,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 19,
+      id: 26,
       title: 'Fast Multimedia Corporate Identity',
       category: 'branding',
       description: 'Corporate branding and visual identity system for Fast Multimedia agency',
@@ -343,9 +462,8 @@ const PortfolioPage = () => {
       color: '#0047AB',
       mockups: []
     },
-    // ... (Rest of your projects 20-33 remain the same) ...
     {
-      id: 20,
+      id: 27,
       title: 'Fast Multimedia Birthday Greeting',
       category: 'event',
       description: 'Festive birthday celebration graphic with interactive elements',
@@ -362,7 +480,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 21,
+      id: 28,
       title: 'Soco Wale Restaurant Menu',
       category: 'print',
       description: 'Modern restaurant menu design for Soco Wale food service',
@@ -379,7 +497,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 22,
+      id: 29,
       title: 'Fast Multimedia Event Poster',
       category: 'print',
       description: 'Dynamic event poster for Fast Multimedia promotional activities',
@@ -396,7 +514,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 23,
+      id: 30,
       title: 'HONE7PIT Events Flyer',
       category: 'event',
       description: 'Vibrant event flyer design for HONE7PIT entertainment company',
@@ -413,7 +531,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 24,
+      id: 31,
       title: 'Fun Trip After Work Experience',
       category: 'event',
       description: 'Travel package promotional design for post-work experience trip',
@@ -430,7 +548,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 25,
+      id: 32,
       title: 'VISG PUB New Year\'s Party',
       category: 'event',
       description: 'New Year\'s Eve party promotion design for VISG PUB',
@@ -447,7 +565,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 26,
+      id: 33,
       title: 'Nancy J Closet Business Card',
       category: 'branding',
       description: 'Modern business card design for Nancy J Closet fashion brand',
@@ -464,7 +582,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 27,
+      id: 34,
       title: 'RhaySam\'s IT Solutions Flyer',
       category: 'print',
       description: 'Comprehensive IT services promotional flyer design',
@@ -481,7 +599,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 28,
+      id: 35,
       title: 'KTU Hall Week Launch',
       category: 'event',
       description: 'University hall week launch event design for KTU',
@@ -498,7 +616,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 29,
+      id: 36,
       title: 'Kumvana Hall Week Program',
       category: 'event',
       description: 'Comprehensive hall week program design and schedule',
@@ -515,7 +633,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 30,
+      id: 37,
       title: 'Birthday Celebration Greeting',
       category: 'event',
       description: 'Personalized birthday greeting card design with joyful elements',
@@ -532,7 +650,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 31,
+      id: 38,
       title: 'St. Martin Goes Traditional Event',
       category: 'event',
       description: 'Traditional event promotion design for St. Martin Hospital',
@@ -549,7 +667,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 32,
+      id: 39,
       title: 'Minimalist Birthday Greeting',
       category: 'event',
       description: 'Clean, minimalist birthday greeting design with essential elements',
@@ -566,7 +684,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 33,
+      id: 40,
       title: 'Inspirational Birthday Greeting',
       category: 'event',
       description: 'Motivational birthday greeting with inspirational message',
@@ -583,7 +701,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 34,
+      id: 41,
       title: 'Sewahu Naming Ceremony Invitation',
       category: 'event',
       description: 'Traditional naming ceremony invitation design',
@@ -600,7 +718,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 35,
+      id: 42,
       title: 'St. Martin Hospital Monthly Outline',
       category: 'print',
       description: 'Monthly activity outline design for hospital events and campaigns',
@@ -617,7 +735,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 36,
+      id: 43,
       title: 'Funeral Appreciation Card',
       category: 'print',
       description: 'Appreciation card design for funeral service with spiritual message',
@@ -634,7 +752,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 37,
+      id: 44,
       title: 'Visual Tribute Memorial Design',
       category: 'print',
       description: 'Visual tribute design celebrating a life well-lived',
@@ -652,7 +770,7 @@ const PortfolioPage = () => {
     }
   ];
 
-  // Categories with updated counts (now 37 projects total)
+  // Categories with updated counts (now 44 projects total)
   const categories = [
     { id: 'all', name: 'All Projects', icon: 'fas fa-th', count: allProjects.length },
     { id: 'web', name: 'Web Design', icon: 'fas fa-desktop', count: allProjects.filter(p => p.category === 'web').length },
@@ -748,19 +866,19 @@ const PortfolioPage = () => {
             
             <div className="hero-stats">
               <div className="stat-card">
-                <div className="stat-number">{allProjects.length}+</div>
+                <div className="stat-number1">{allProjects.length}+</div>
                 <div className="stat-label">Projects Completed</div>
               </div>
               <div className="stat-card">
-                <div className="stat-number">{categories.length - 1}</div>
+                <div className="stat-number1">{categories.length - 1}</div>
                 <div className="stat-label">Design Categories</div>
               </div>
               <div className="stat-card">
-                <div className="stat-number">98%</div>
+                <div className="stat-number1">98%</div>
                 <div className="stat-label">Client Satisfaction</div>
               </div>
               <div className="stat-card">
-                <div className="stat-number">2023-2026</div>
+                <div className="stat-number1">2018-2026</div>
                 <div className="stat-label">Active Years</div>
               </div>
             </div>
