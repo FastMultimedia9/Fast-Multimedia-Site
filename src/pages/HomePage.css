@@ -44,7 +44,7 @@ body {
   transform: translateX(-50%);
   z-index: 1000;
   transition: var(--transition);
-  margin-top: 100px;
+  margin-top: 50px;
 }
 
 .service-toggle.scrolled {
