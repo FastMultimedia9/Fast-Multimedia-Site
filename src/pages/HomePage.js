@@ -77,41 +77,6 @@ const HomePage = () => {
     },
   ];
 
-  // Valentine's Day Packages - New Section
-  const valentinesPackages = [
-    {
-      id: 'valentine-express',
-      name: 'Valentine Express',
-      price: '₵199',
-      description: 'Quick social media graphics for last-minute romance',
-      icon: '💝',
-      features: ['Instagram Story Set (5 designs)', 'Heart-themed Templates', 'Custom Text', '24-hr Delivery'],
-      tags: ['Social Media', 'Quick Turnaround'],
-      color: '#FF6B8B'
-    },
-    {
-      id: 'valentine-premium',
-      name: 'Valentine Premium',
-      price: '₵299',
-      description: 'Complete love-themed branding package',
-      icon: '❤️',
-      features: ['Custom Logo with Heart Motif', 'Matching Social Media Kit', 'Digital Invitation Design', 'Color Palette'],
-      tags: ['Branding', 'Complete Package'],
-      color: '#E63946',
-      highlighted: true
-    },
-    {
-      id: 'valentine-luxe',
-      name: 'Valentine Luxe',
-      price: '₵599',
-      description: 'Ultimate romantic experience design',
-      icon: '💖',
-      features: ['Animated Greeting Card', 'Website Banner Set', 'Print-ready Materials', '3D Heart Illustrations'],
-      tags: ['Animation', 'Print+Digital'],
-      color: '#9D174D'
-    }
-  ];
-
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -249,74 +214,9 @@ const HomePage = () => {
     };
     
     localStorage.removeItem('selectedService');
-    localStorage.removeItem('selectedValentinePackage');
     localStorage.setItem('selectedService', JSON.stringify(serviceData));
     navigate('/contact');
   };
-
-  // Add missing handleValentinePackageClick function
-  const handleValentinePackageClick = (pkg) => {
-    const serviceData = {
-      name: pkg.name,
-      category: 'Valentine\'s Day Design',
-      price: pkg.price,
-      features: pkg.features,
-      icon: pkg.icon,
-      color: pkg.color,
-      timestamp: Date.now(),
-      type: 'valentine'
-    };
-    
-    localStorage.removeItem('selectedService');
-    localStorage.removeItem('selectedValentinePackage');
-    localStorage.setItem('selectedValentinePackage', JSON.stringify(serviceData));
-    navigate('/contact');
-  };
-
-  // Valentine's Package Card Component
-  const ValentinePackageCard = ({ pkg }) => (
-    <div 
-      className={`valentine-package-card ${pkg.highlighted ? 'highlighted' : ''}`}
-      onClick={() => handleValentinePackageClick(pkg)}
-      style={{ 
-        '--valentine-color': pkg.color,
-        animationDelay: `${valentinesPackages.indexOf(pkg) * 100}ms`
-      }}
-    >
-      <div className="valentine-package-card-inner">
-        <div className="valentine-package-header">
-          <div className="valentine-package-icon-heart">
-            <span className="heart-icon">{pkg.icon}</span>
-            <div className="heart-pulse"></div>
-          </div>
-          <div className="valentine-package-price">{pkg.price}</div>
-        </div>
-        
-        <h3 className="valentine-package-name">{pkg.name}</h3>
-        <p className="valentine-package-description">{pkg.description}</p>
-        
-        <div className="valentine-package-tags">
-          {pkg.tags.map((tag, idx) => (
-            <span key={idx} className="valentine-package-tag">{tag}</span>
-          ))}
-        </div>
-        
-        <ul className="valentine-package-features">
-          {pkg.features.map((feature, idx) => (
-            <li key={idx}>
-              <span className="valentine-feature-check">❤️</span>
-              <span>{feature}</span>
-            </li>
-          ))}
-        </ul>
-        
-        <button className="valentine-package-cta">
-          <span>Choose This Package</span>
-          <span className="valentine-cta-arrow">💘</span>
-        </button>
-      </div>
-    </div>
-  );
 
   return (
     <div className="homepage">
@@ -425,67 +325,6 @@ const HomePage = () => {
         <div className="hero-scroll-indicator">
           <div className="scroll-line"></div>
           <span>Scroll to explore</span>
-        </div>
-      </section>
-
-      {/* Valentine's Day Section - Added Here */}
-      <section className="valentines-section">
-        <div className="container">
-          <div className="section-header">
-            <div className="valentines-header-decoration">
-              <span className="floating-heart">💖</span>
-              <h2 className="section-title">Valentine's Day Design Packages</h2>
-              <span className="floating-heart">💝</span>
-            </div>
-            <p className="section-subtitle">
-              Perfect designs to express your love — Limited time offer!
-            </p>
-          </div>
-
-          <div className="valentines-grid">
-            {valentinesPackages.map((pkg) => (
-              <ValentinePackageCard key={pkg.id} pkg={pkg} />
-            ))}
-          </div>
-
-          {/* Apple-style Unit Links for Additional Valentine's Services */}
-          <div className="unit-links-section">
-            <h3 className="unit-links-title">More Valentine's Services</h3>
-            <div className="unit-links-grid">
-              <div 
-                className="unit-link"
-                onClick={() => handleValentinePackageClick(valentinesPackages[0])}
-              >
-                <div className="unit-link-content">
-                  <h4 className="unit-link-title">Custom Love Letters</h4>
-                  <p className="unit-link-description">Beautifully designed digital love letters</p>
-                </div>
-                <span className="unit-link-arrow">→</span>
-              </div>
-              
-              <div 
-                className="unit-link"
-                onClick={() => handleValentinePackageClick(valentinesPackages[1])}
-              >
-                <div className="unit-link-content">
-                  <h4 className="unit-link-title">Date Night Invitations</h4>
-                  <p className="unit-link-description">Create memorable invitation designs</p>
-                </div>
-                <span className="unit-link-arrow">→</span>
-              </div>
-              
-              <div 
-                className="unit-link"
-                onClick={() => handleValentinePackageClick(valentinesPackages[2])}
-              >
-                <div className="unit-link-content">
-                  <h4 className="unit-link-title">Couple Photo Editing</h4>
-                  <p className="unit-link-description">Romantic touch-ups for your photos</p>
-                </div>
-                <span className="unit-link-arrow">→</span>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
