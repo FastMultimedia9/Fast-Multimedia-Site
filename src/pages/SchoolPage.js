@@ -777,14 +777,14 @@ const SchoolPage = () => {
                   <div className="info-icon">📞</div>
                   <div>
                     <h3>Call Us</h3>
-                    <p>+233 24 123 4567<br />+233 30 276 5432</p>
+                    <p>+233 50 515 9131<br />+233 24 615 2416</p>
                   </div>
                 </div>
                 <div className="info-item">
                   <div className="info-icon">✉️</div>
                   <div>
                     <h3>Email Us</h3>
-                    <p>enroll@fastmultimedia.com<br />info@fastmultimedia.com</p>
+                    <p>fasttech227@gmail.comm<br />fastmultimedia.site</p>
                   </div>
                 </div>
                 <div className="info-item">
