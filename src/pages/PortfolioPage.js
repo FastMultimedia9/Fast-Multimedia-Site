@@ -10,9 +10,8 @@ const PortfolioPage = () => {
   const [activeView, setActiveView] = useState('grid');
   const navigate = useNavigate();
 
-  // Enhanced projects data with all your case studies INCLUDING NEW IMAGES
+  // Complete projects data with all 48 projects including new images
   const allProjects = [
-    // ... (Previous projects 1-14 remain the same) ...
     {
       id: 1,
       title: 'Golden Nest Hotel Website',
@@ -29,11 +28,7 @@ const PortfolioPage = () => {
       results: ['40% increase in online bookings', '25% higher user engagement', '5-star client satisfaction'],
       color: '#D4AF37',
       link: 'https://www.goldennesthotelgh.com',
-      mockups: [
-        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-      ]
+      mockups: []
     },
     {
       id: 2,
@@ -52,7 +47,6 @@ const PortfolioPage = () => {
       color: '#2E5A9C',
       mockups: []
     },
-    // ... (Projects 3-14 remain the same) ...
     {
       id: 3,
       title: 'FinTech Mobile Banking App',
@@ -257,7 +251,6 @@ const PortfolioPage = () => {
       color: '#5D4037',
       mockups: []
     },
-    // NEW PROJECTS FROM PROVIDED IMAGES (Updated with correct images)
     {
       id: 15,
       title: 'St. Martin Hospital Ultrasound Unit Flyer',
@@ -767,10 +760,78 @@ const PortfolioPage = () => {
       results: ['Beautiful memorial', 'Celebration of life', 'Emotional impact'],
       color: '#37474F',
       mockups: []
+    },
+    {
+      id: 45,
+      title: 'Fast Multimedia Institute School Flyer',
+      category: 'print',
+      description: 'Professional marketing flyer for online certificate courses',
+      detailedDescription: 'Designed a promotional flyer for Fast Multimedia Institute featuring 3-month online courses in Basic ICT, Graphic Design, and Web Development. The design includes course pricing, installment options, start date (1st May 2026), and enrollment CTA.',
+      tags: ['School Flyer', 'Print Design', 'Marketing', 'Course Promotion'],
+      image: 'school-flyer.jpg',
+      client: 'Fast Multimedia Institute',
+      year: '2026',
+      duration: '2 days',
+      role: 'Print Designer',
+      deliverables: ['Marketing Flyer', 'Course Layout', 'Print Files'],
+      results: ['Professional marketing material', 'Clear course presentation', 'Enrollment driven'],
+      color: '#007AFF',
+      mockups: []
+    },
+    {
+      id: 46,
+      title: 'Institute Celebration - Anticipate Event',
+      category: 'event',
+      description: 'Celebration event flyer design for Institute with anticipation theme',
+      detailedDescription: 'Designed an engaging celebration flyer for the Institute featuring the theme "Celebration Anticipate". The design creates excitement and anticipation for the upcoming event with vibrant colors and dynamic typography.',
+      tags: ['Event Flyer', 'Celebration Design', 'Anticipate Theme', 'Promotional Print', 'Typography'],
+      image: 'Artboard 1.jpg',
+      client: 'Institute',
+      year: '2026',
+      duration: '2 days',
+      role: 'Event & Print Designer',
+      deliverables: ['Event Flyer', 'Digital Promotion', 'Print-Ready Files'],
+      results: ['Successful event promotion', 'High attendance rate', 'Positive community response'],
+      color: '#FF6F00',
+      mockups: []
+    },
+    {
+      id: 47,
+      title: 'Clean-Up Exercise with Health Screening',
+      category: 'event',
+      description: 'Community clean-up exercise and health screening event flyer',
+      detailedDescription: 'Created a community-focused flyer promoting a clean-up exercise combined with health screening services. The design emphasizes community health and environmental responsibility with clear event details and call-to-action.',
+      tags: ['Community Event', 'Health Screening', 'Clean-Up Exercise', 'Public Service', 'Flyer Design'],
+      image: 'Artboard 2.jpg',
+      client: 'Community Health Initiative',
+      year: '2026',
+      duration: '2 days',
+      role: 'Public Service Designer',
+      deliverables: ['Event Flyer', 'Community Outreach Material', 'Digital Version'],
+      results: ['Strong community participation', 'Increased health awareness', 'Successful clean-up event'],
+      color: '#2E7D32',
+      mockups: []
+    },
+    {
+      id: 48,
+      title: 'St. Martin Staff Business Expo',
+      category: 'event',
+      description: 'Staff business expo exhibition space booking flyer',
+      detailedDescription: 'Designed a professional business expo flyer for St. Martin De Porres Catholic Hospital staff. The flyer promotes the 2nd edition of "Martin\'s Staff in Business Expo" with clear exhibition space booking information, registration dates, and contact details.',
+      tags: ['Business Expo', 'Staff Event', 'Exhibition Design', 'Corporate Event', 'Flyer'],
+      image: 'BOOK SPACE NOW 2.jpg',
+      client: 'St. Martin De Porres Catholic Hospital',
+      year: '2026',
+      duration: '3 days',
+      role: 'Corporate Event Designer',
+      deliverables: ['Expo Flyer', 'Space Booking Information', 'Promotional Material'],
+      results: ['High exhibition space bookings', 'Successful staff engagement', 'Professional event presentation'],
+      color: '#C62828',
+      mockups: []
     }
   ];
 
-  // Categories with updated counts (now 44 projects total)
+  // Categories with updated counts (48 projects total)
   const categories = [
     { id: 'all', name: 'All Projects', icon: 'fas fa-th', count: allProjects.length },
     { id: 'web', name: 'Web Design', icon: 'fas fa-desktop', count: allProjects.filter(p => p.category === 'web').length },

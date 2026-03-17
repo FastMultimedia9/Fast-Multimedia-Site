@@ -1,0 +1,1511 @@
+/* SchoolPage.css */
+
+.school-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a2a 0%, #1a1a3a 100%);
+}
+
+/* Hero Section */
+.school-hero {
+  position: relative;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 20px 80px;
+  overflow: hidden;
+}
+
+.school-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5));
+  z-index: 1;
+}
+
+.school-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.school-hero-title {
+  font-size: 56px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: white;
+  line-height: 1.2;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.school-hero-subtitle {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 50px;
+  line-height: 1.6;
+}
+
+.school-hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  flex-wrap: wrap;
+}
+
+.hero-stat {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: #00c3ff;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.school-hero-scroll {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  z-index: 2;
+}
+
+.scroll-arrow {
+  animation: bounce 2s infinite;
+  margin-top: 8px;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
+
+/* Tab Navigation */
+.school-tabs {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 80px;
+  z-index: 100;
+}
+
+.school-tabs .container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 15px 20px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  border-radius: 40px;
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 195, 255, 0.3);
+}
+
+.tab-btn:hover:not(.active) {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Category Filter */
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.filter-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px 24px;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  border-color: transparent;
+  color: white;
+}
+
+.filter-count {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+/* Courses Grid */
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 30px;
+}
+
+.course-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.course-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border-color: rgba(0, 195, 255, 0.3);
+}
+
+.course-card-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.course-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.course-card:hover .course-card-image img {
+  transform: scale(1.05);
+}
+
+.course-category {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #00c3ff;
+}
+
+.course-card-content {
+  padding: 20px;
+}
+
+.course-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.course-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.course-description {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+  margin-bottom: 15px;
+}
+
+.course-meta {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.course-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.course-price {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00c3ff;
+}
+
+.view-details-btn {
+  background: transparent;
+  border: 1px solid rgba(0, 195, 255, 0.5);
+  padding: 8px 16px;
+  border-radius: 30px;
+  color: #00c3ff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.view-details-btn:hover {
+  background: rgba(0, 195, 255, 0.2);
+}
+
+/* Course Details */
+.course-details {
+  animation: fadeIn 0.5s ease;
+}
+
+.back-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 40px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 30px;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.details-image {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.details-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.course-badge {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+
+.details-title {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.details-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.stars {
+  color: #ffc107;
+  font-size: 20px;
+}
+
+.rating-value {
+  color: white;
+  font-weight: 600;
+}
+
+.students {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+.details-long-desc {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+.details-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.meta-icon {
+  font-size: 24px;
+}
+
+.meta-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.meta-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+}
+
+.details-sections {
+  margin: 40px 0;
+}
+
+.details-section {
+  margin-bottom: 30px;
+  padding: 25px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+}
+
+.details-section h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.features-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  list-style: none;
+}
+
+.features-list li {
+  color: rgba(255, 255, 255, 0.8);
+  padding: 8px 0;
+}
+
+.schedule-info {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+}
+
+.instructor-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.instructor-avatar {
+  font-size: 60px;
+}
+
+.instructor-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 5px;
+}
+
+.instructor-bio {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+.enquiry-section {
+  text-align: center;
+  padding: 40px;
+  background: linear-gradient(135deg, rgba(0, 195, 255, 0.1), rgba(86, 173, 214, 0.1));
+  border-radius: 20px;
+  margin-top: 40px;
+}
+
+.enquiry-section h2 {
+  font-size: 28px;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.enquiry-section p {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 25px;
+}
+
+.enquire-btn {
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  border: none;
+  padding: 14px 40px;
+  border-radius: 40px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.enquire-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0, 195, 255, 0.4);
+}
+
+.enquiry-form {
+  max-width: 500px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.enquiry-form input,
+.enquiry-form textarea,
+.enquiry-form select {
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+}
+
+.enquiry-form input::placeholder,
+.enquiry-form textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.submit-btn,
+.cancel-btn {
+  padding: 12px;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  border: none;
+  color: white;
+}
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+/* About School Tab */
+.about-school {
+  animation: fadeIn 0.5s ease;
+}
+
+.about-hero {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.about-hero h1 {
+  font-size: 42px;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.about-hero p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.about-card {
+  text-align: center;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.about-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.about-icon {
+  font-size: 50px;
+  margin-bottom: 20px;
+}
+
+.about-card h3 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.about-card p {
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+}
+
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  text-align: center;
+  margin-bottom: 50px;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 20px;
+}
+
+.stat-item .stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: #00c3ff;
+}
+
+.about-features h2 {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.feature {
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
+}
+
+/* Admissions Tab */
+.admissions-page {
+  animation: fadeIn 0.5s ease;
+}
+
+.admissions-page h1 {
+  font-size: 42px;
+  text-align: center;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.admissions-subtitle {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 50px;
+}
+
+.admissions-steps h2,
+.requirements h2,
+.scholarships h2,
+.apply-now h2 {
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.steps-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 50px;
+}
+
+.step {
+  text-align: center;
+  padding: 30px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+}
+
+.step-number {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 auto 20px;
+  color: white;
+}
+
+.step h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.step p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+.requirements {
+  margin-bottom: 40px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+}
+
+.requirements ul {
+  list-style: none;
+}
+
+.requirements li {
+  color: rgba(255, 255, 255, 0.8);
+  padding: 10px 0;
+  padding-left: 25px;
+  position: relative;
+}
+
+.requirements li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #00c3ff;
+}
+
+.scholarships {
+  text-align: center;
+  padding: 40px;
+  background: linear-gradient(135deg, rgba(0, 195, 255, 0.1), rgba(86, 173, 214, 0.1));
+  border-radius: 20px;
+  margin-bottom: 40px;
+}
+
+.scholarship-btn {
+  background: transparent;
+  border: 1px solid #00c3ff;
+  padding: 12px 30px;
+  border-radius: 40px;
+  color: #00c3ff;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: all 0.3s ease;
+}
+
+.scholarship-btn:hover {
+  background: rgba(0, 195, 255, 0.1);
+}
+
+.apply-now {
+  text-align: center;
+  padding: 50px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 20px;
+}
+
+.apply-btn {
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  border: none;
+  padding: 15px 40px;
+  border-radius: 40px;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: all 0.3s ease;
+}
+
+.apply-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0, 195, 255, 0.4);
+}
+
+/* Contact Tab */
+.contact-school {
+  animation: fadeIn 0.5s ease;
+}
+
+.contact-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.contact-header h1 {
+  font-size: 42px;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.contact-header p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.info-item {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+}
+
+.info-icon {
+  font-size: 32px;
+}
+
+.info-item h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.info-item p {
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+}
+
+.contact-form {
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+}
+
+.contact-form h2 {
+  font-size: 24px;
+  margin-bottom: 25px;
+  color: white;
+}
+
+.contact-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contact-form input,
+.contact-form textarea,
+.contact-form select {
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+}
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.send-btn {
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  border: none;
+  padding: 14px;
+  border-radius: 40px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.send-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0, 195, 255, 0.4);
+}
+
+/* Footer CTA */
+.school-footer-cta {
+  text-align: center;
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  margin-top: 60px;
+}
+
+.school-footer-cta h2 {
+  font-size: 36px;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.school-footer-cta p {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 30px;
+}
+
+.cta-button {
+  background: white;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 40px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #00c3ff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .school-hero-title {
+    font-size: 36px;
+  }
+  
+  .school-hero-subtitle {
+    font-size: 16px;
+  }
+  
+  .school-hero-stats {
+    gap: 30px;
+  }
+  
+  .stat-number {
+    font-size: 24px;
+  }
+  
+  .school-tabs .container {
+    flex-wrap: wrap;
+  }
+  
+  .tab-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  
+  .courses-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .details-title {
+    font-size: 28px;
+  }
+  
+  .features-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .about-grid,
+  .steps-container,
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .about-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .school-footer-cta h2 {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .details-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Add these styles to your existing SchoolPage.css */
+
+/* Hero Badges */
+.school-hero-badge {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.hero-badge {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 8px 20px;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+}
+
+/* Course Badge on Cards */
+.course-card-image {
+  position: relative;
+}
+
+.course-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+}
+
+.installment-note {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  display: block;
+}
+
+/* Open To All Section */
+.open-to-all {
+  margin-top: 50px;
+  padding: 30px;
+  background: linear-gradient(135deg, rgba(0, 195, 255, 0.1), rgba(86, 173, 214, 0.1));
+  border-radius: 20px;
+  text-align: center;
+}
+
+.open-to-all-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.open-icon {
+  font-size: 32px;
+}
+
+.open-to-all-content h3 {
+  font-size: 20px;
+  color: white;
+  margin: 0;
+}
+
+.audience-tags {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.audience-tag {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-size: 14px;
+  color: white;
+}
+
+/* Bundle Section */
+.bundle-section {
+  animation: fadeIn 0.5s ease;
+}
+
+.bundle-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.bundle-header h1 {
+  font-size: 42px;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.bundle-header p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px;
+}
+
+.bundle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.bundle-card {
+  text-align: center;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bundle-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(0, 195, 255, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.bundle-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.bundle-card h3 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.bundle-discount {
+  font-size: 28px;
+  font-weight: 700;
+  color: #00c3ff;
+  margin-bottom: 10px;
+}
+
+.bundle-savings {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 25px;
+}
+
+.bundle-btn {
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  border: none;
+  padding: 12px 30px;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.bundle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0, 195, 255, 0.4);
+}
+
+/* Payment Info Section */
+.payment-info {
+  text-align: center;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 20px;
+}
+
+.payment-info h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.payment-info > p {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 30px;
+}
+
+.installment-example {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.installment-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px 25px;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.installment-item strong {
+  color: white;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.installment-item span {
+  color: #00c3ff;
+  font-size: 14px;
+}
+
+/* Payment Selector */
+.payment-selector {
+  margin-bottom: 25px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+}
+
+.payment-selector h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: white;
+}
+
+.payment-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.payment-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 40px;
+  font-size: 14px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.payment-btn.active {
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  border-color: transparent;
+}
+
+.payment-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Duration Badge */
+.duration-badge {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #00c3ff;
+}
+
+/* Format Highlight */
+.format-highlight {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(0, 195, 255, 0.1);
+  border-radius: 12px;
+}
+
+.format-highlight span {
+  color: #00c3ff;
+  font-size: 14px;
+}
+
+/* Audience Badges */
+.audience-badges {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.audience-badges span {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-size: 13px;
+  color: white;
+}
+
+/* Certificate Note */
+.certificate-note {
+  margin-top: 10px;
+  color: #00c3ff;
+  font-size: 14px;
+}
+
+/* Enrollment Dates */
+.enrollment-dates {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding: 15px 25px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50px;
+}
+
+.enrollment-dates span {
+  color: white;
+  font-size: 14px;
+}
+
+/* Payment Note */
+.payment-note {
+  font-size: 12px;
+  color: #00c3ff;
+  margin-top: 5px;
+}
+
+/* Form Note */
+.form-note {
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 15px;
+}
+
+/* Course Info Grid */
+.course-info {
+  margin: 50px 0;
+}
+
+.course-info h2 {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.info-card {
+  text-align: center;
+  padding: 25px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.info-icon {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.info-card h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: white;
+}
+
+.info-card p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+/* Target Audience Section */
+.target-audience {
+  text-align: center;
+  margin-top: 50px;
+  padding: 40px;
+  background: linear-gradient(135deg, rgba(0, 195, 255, 0.1), rgba(86, 173, 214, 0.1));
+  border-radius: 20px;
+}
+
+.target-audience h2 {
+  font-size: 28px;
+  margin-bottom: 25px;
+  color: white;
+}
+
+.audience-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.audience-card {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  font-size: 18px;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.audience-card:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+/* CTA Buttons */
+.cta-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.cta-button.primary {
+  background: linear-gradient(135deg, #00c3ff, #56add6);
+  color: white;
+}
+
+.cta-button.secondary {
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+}
+
+.cta-button.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .bundle-grid,
+  .info-grid,
+  .audience-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .school-hero-badge {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .hero-badge {
+    width: fit-content;
+  }
+  
+  .open-to-all-content {
+    flex-direction: column;
+  }
+  
+  .payment-buttons {
+    flex-direction: column;
+  }
+  
+  .enrollment-dates {
+    flex-direction: column;
+    align-items: center;
+    border-radius: 20px;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .bundle-card {
+    padding: 25px;
+  }
+  
+  .installment-item {
+    width: 100%;
+  }
+  
+  .audience-card {
+    font-size: 14px;
+  }
+}
