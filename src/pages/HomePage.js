@@ -25,6 +25,58 @@ const HomePage = () => {
     "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80",
   ];
 
+  // Updates & Announcements Data - Add your own images to public folder
+  // For school-related updates, use type: 'school' - goes to SchoolPage
+  // For services/flyers/tech updates, use type: 'service' or 'flyer' - goes to ContactPage
+  const updatesData = [
+    {
+      id: 1,
+      title: "New Courses Available",
+      subtitle: "3-Month Online Programs",
+      description: "Enroll now for Basic ICT, Graphic Design & Web Development. Start Date: 1st May 2026",
+      image: "/images/school-update-1.jpg", // Place in public/images/
+      cta: "Learn More",
+      tag: "🎓 New",
+      type: "school", // Goes to SchoolPage
+      category: "Education"
+    },
+    
+    {
+      id: 3,
+      title: "Free Webinar: Web Development",
+      subtitle: "Live Online Session",
+      description: "Join our free webinar on modern web development. Limited seats available!",
+      image: "/images/tech-update-1.jpg", // Place in public/images/
+      cta: "Register Free",
+      tag: "🎥 Free",
+      type: "flyer", // Goes to ContactPage
+      category: "Event"
+    },
+
+    {
+      id: 5,
+      title: "New Computer Repair Service",
+      subtitle: "Fast & Reliable",
+      description: "Professional computer repair services at affordable prices. Free diagnosis!",
+      image: "/images/tech-update-2.jpg", // Place in public/images/
+      cta: "Book Service",
+      tag: "🔧 New Service",
+      type: "service", // Goes to ContactPage
+      category: "Tech"
+    },
+    {
+      id: 6,
+      title: "Portfolio Review Day",
+      subtitle: "Free Consultation",
+      description: "Get your design portfolio reviewed by industry experts. Book your slot today!",
+      image: "/images/service-update-2.jpg", // Place in public/images/
+      cta: "Book Slot",
+      tag: "📅 Event",
+      type: "flyer", // Goes to ContactPage
+      category: "Design"
+    }
+  ];
+
   // Featured Portfolio Projects
   const featuredPortfolioProjects = [
     {
@@ -33,7 +85,7 @@ const HomePage = () => {
       subtitle: '80th Anniversary',
       category: 'Brand Identity',
       description: 'Award-winning logo design celebrating heritage and future vision.',
-      image: '80th.jpg',
+      image: '/80th.jpg',
       tags: ['Logo Design', 'Healthcare'],
       details: [
         'Winning competition design',
@@ -49,7 +101,7 @@ const HomePage = () => {
       subtitle: 'Clothing Brand',
       category: 'Brand Identity',
       description: 'Sophisticated fashion brand with "Exclusively Different" positioning.',
-      image: 'mr-wise.jpg',
+      image: '/mr-wise.jpg',
       tags: ['Fashion', 'Luxury'],
       details: [
         'Complete brand identity',
@@ -65,7 +117,7 @@ const HomePage = () => {
       subtitle: 'Mango Ice-Cream',
       category: 'Packaging',
       description: 'Product label design with clear ingredient listing.',
-      image: 'mango-label.jpg',
+      image: '/mango-label.jpg',
       tags: ['Packaging', 'Food'],
       details: [
         'Regulatory compliance',
@@ -97,6 +149,27 @@ const HomePage = () => {
 
   const getActiveHeroImages = () => {
     return activeServiceCategory === 'design' ? heroImages : techHeroImages;
+  };
+
+  // Handle update card click based on type
+  const handleUpdateClick = (update) => {
+    // Store update info in localStorage
+    const updateData = {
+      name: update.title,
+      category: update.category,
+      details: update.subtitle,
+      description: update.description,
+      timestamp: Date.now(),
+      type: update.type
+    };
+    localStorage.setItem('selectedUpdate', JSON.stringify(updateData));
+    
+    // Route based on type
+    if (update.type === 'school') {
+      navigate('/school');
+    } else {
+      navigate('/contact');
+    }
   };
 
   const services = {
@@ -328,11 +401,91 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Updates & Announcements Section - Dynamic Routing */}
+      <section className="updates-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-titles">
+              <span className="gradient-text">Latest</span> Updates & Announcements
+            </h2>
+            <p className="section-subtitle">
+              Stay informed about our new courses, services, and special offers
+            </p>
+          </div>
+          
+          {/* Moving Marquee Container */}
+          <div className="marquee-container">
+            <div className="marquee-track">
+              {/* First set of updates */}
+              {updatesData.map((update) => (
+                <div 
+                  key={`first-${update.id}`} 
+                  className={`update-card ${update.type}`}
+                  onClick={() => handleUpdateClick(update)}
+                >
+                  <div className="update-image">
+                    <img src={update.image} alt={update.title} />
+                    <div className="update-tag" style={{ 
+                      background: update.type === 'school' 
+                        ? 'linear-gradient(135deg, #007AFF, #5856D6)' 
+                        : 'linear-gradient(135deg, #ff6b6b, #ee5a24)' 
+                    }}>
+                      {update.tag}
+                    </div>
+                    <div className="update-type-badge">
+                      {update.type === 'school' ? '🎓 School' : '📢 Offer'}
+                    </div>
+                  </div>
+                  <div className="update-content">
+                    <h3 className="update-title">{update.title}</h3>
+                    <p className="update-subtitle">{update.subtitle}</p>
+                    <p className="update-description">{update.description}</p>
+                    <button className="update-cta">
+                      {update.cta} <span className="btn-arrow">→</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {/* Duplicate set for seamless looping */}
+              {updatesData.map((update) => (
+                <div 
+                  key={`second-${update.id}`} 
+                  className={`update-card ${update.type}`}
+                  onClick={() => handleUpdateClick(update)}
+                >
+                  <div className="update-image">
+                    <img src={update.image} alt={update.title} />
+                    <div className="update-tag" style={{ 
+                      background: update.type === 'school' 
+                        ? 'linear-gradient(135deg, #007AFF, #5856D6)' 
+                        : 'linear-gradient(135deg, #ff6b6b, #ee5a24)' 
+                    }}>
+                      {update.tag}
+                    </div>
+                    <div className="update-type-badge">
+                      {update.type === 'school' ? '🎓 School' : '📢 Offer'}
+                    </div>
+                  </div>
+                  <div className="update-content">
+                    <h3 className="update-title">{update.title}</h3>
+                    <p className="update-subtitle">{update.subtitle}</p>
+                    <p className="update-description">{update.description}</p>
+                    <button className="update-cta">
+                      {update.cta} <span className="btn-arrow">→</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Services Section */}
       <section className="services-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">
+            <h2 className="section-titles">
               {activeServiceCategory === 'design' ? 'Design Services' : 'Tech Services'}
             </h2>
             <p className="section-subtitle">
@@ -379,7 +532,7 @@ const HomePage = () => {
         <section className="portfolio-section">
           <div className="container">
             <div className="section-header">
-              <h2 className="section-title">Featured Work</h2>
+              <h2 className="section-titles">Featured Work</h2>
               <p className="section-subtitle">
                 Explore our portfolio of successful design projects
               </p>

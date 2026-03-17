@@ -56,7 +56,6 @@
   transform: scale(1.02);
 }
 
-/* Logo Styles */
 .logo-container {
   display: flex;
   align-items: center;
@@ -111,17 +110,6 @@
   letter-spacing: 0.3px;
 }
 
-/* For light/dark mode variations */
-@media (prefers-color-scheme: dark) {
-  .logo-primary {
-    color: #FFFFFF;
-  }
-  
-  .logo-secondary {
-    color: #8E8E93;
-  }
-}
-
 /* Desktop Navigation */
 .nav-links {
   display: flex;
@@ -143,6 +131,12 @@
   font-weight: 500;
   padding: 8px 0;
   transition: color 0.3s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .nav-link:hover {
@@ -174,6 +168,275 @@
 .nav-link:hover .link-indicator {
   width: 20px;
   opacity: 0.5;
+}
+
+.dropdown-chevron {
+  transition: transform 0.3s ease;
+}
+
+.school-trigger[aria-expanded="true"] .dropdown-chevron,
+.school-trigger:hover .dropdown-chevron {
+  transform: rotate(180deg);
+}
+
+/* ============================================ */
+/* SCHOOL DROPDOWN MENU STYLES - DESKTOP */
+/* ============================================ */
+
+.school-dropdown-container {
+  position: relative;
+}
+
+.school-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  width: 750px;
+  max-width: 90vw;
+  background: var(--nav-bg-scrolled);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--nav-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1001;
+}
+
+.school-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.school-dropdown-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--nav-border);
+  text-align: center;
+}
+
+.school-dropdown-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.school-dropdown-header p {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.school-dropdown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 24px;
+}
+
+.school-dropdown-category {
+  min-width: 0;
+}
+
+.category-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--nav-border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.category-icon {
+  font-size: 14px;
+}
+
+.category-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.category-links li {
+  margin-bottom: 6px;
+}
+
+.category-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.category-link:hover {
+  background: rgba(0, 122, 255, 0.08);
+  color: var(--primary);
+  transform: translateX(4px);
+}
+
+.link-icon {
+  font-size: 16px;
+}
+
+.school-dropdown-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--nav-border);
+  text-align: center;
+}
+
+.school-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #007AFF, #5856D6);
+  color: white;
+  text-decoration: none;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.school-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+  gap: 12px;
+}
+
+/* ============================================ */
+/* MOBILE SCHOOL MENU - ACCORDION STYLE */
+/* ============================================ */
+
+.mobile-school-section {
+  margin-top: 8px;
+  border-top: 1px solid var(--nav-border);
+  padding-top: 8px;
+}
+
+.mobile-school-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: background-color 0.3s ease;
+}
+
+.mobile-school-header:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.school-header-icon {
+  font-size: 20px;
+}
+
+.school-header-title {
+  flex: 1;
+  text-align: left;
+  margin-left: 12px;
+}
+
+.mobile-school-chevron {
+  transition: transform 0.3s ease;
+  color: var(--text-secondary);
+}
+
+.mobile-school-header.open .mobile-school-chevron {
+  transform: rotate(180deg);
+}
+
+.mobile-school-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out;
+}
+
+.mobile-school-content.show {
+  max-height: 800px;
+  transition: max-height 0.5s ease-in;
+}
+
+.mobile-school-main-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: var(--primary);
+  font-size: 15px;
+  font-weight: 600;
+  background: rgba(0, 122, 255, 0.05);
+  border-left: 3px solid var(--primary);
+  margin: 8px 16px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.mobile-school-main-link:hover {
+  background: rgba(0, 122, 255, 0.1);
+}
+
+.mobile-school-category {
+  margin: 8px 0;
+}
+
+.mobile-category-title {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(0, 122, 255, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-category-title .category-icon {
+  font-size: 14px;
+}
+
+.mobile-school-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px 12px 44px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.mobile-school-link:hover {
+  background: rgba(0, 122, 255, 0.05);
+  color: var(--primary);
+  border-left-color: var(--primary);
+}
+
+.school-link-icon {
+  font-size: 16px;
 }
 
 /* User Menu */
@@ -465,7 +728,7 @@
   z-index: 1002;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .mobile-toggle {
     display: flex;
   }
@@ -479,8 +742,16 @@
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-.nav-container.scrolled .toggle-line {
-  background: var(--text-primary);
+.mobile-toggle.active .toggle-line:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.mobile-toggle.active .toggle-line:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-toggle.active .toggle-line:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
 }
 
 /* Mobile Overlay */
@@ -665,15 +936,108 @@
   justify-content: center;
 }
 
-/* Animation for mobile toggle */
-.mobile-toggle.active .toggle-line:nth-child(1) {
-  transform: rotate(45deg) translate(6px, 6px);
+/* ============================================ */
+/* RESPONSIVE BREAKPOINTS */
+/* ============================================ */
+
+/* Tablet Landscape (1024px - 900px) */
+@media (min-width: 901px) and (max-width: 1024px) {
+  .nav-links {
+    gap: 20px;
+    margin: 0 16px;
+  }
+  
+  .school-dropdown-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .school-dropdown {
+    width: 600px;
+  }
 }
 
-.mobile-toggle.active .toggle-line:nth-child(2) {
-  opacity: 0;
+/* Tablet Portrait (768px - 900px) */
+@media (min-width: 769px) and (max-width: 900px) {
+  .nav-links {
+    gap: 16px;
+    margin: 0 12px;
+  }
+  
+  .school-dropdown {
+    display: none;
+  }
+  
+  .school-trigger {
+    display: none;
+  }
 }
 
-.mobile-toggle.active .toggle-line:nth-child(3) {
-  transform: rotate(-45deg) translate(6px, -6px);
+/* Mobile (up to 768px) */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+  
+  .school-dropdown {
+    display: none;
+  }
+  
+  .school-trigger {
+    display: none;
+  }
+  
+  .nav-actions .auth-buttons {
+    display: none;
+  }
+  
+  .nav {
+    padding: 0 16px;
+  }
+  
+  .logo-primary {
+    font-size: 16px;
+  }
+  
+  .logo-secondary {
+    font-size: 12px;
+  }
+}
+
+/* Small Mobile (up to 480px) */
+@media (max-width: 480px) {
+  .nav {
+    padding: 0 12px;
+  }
+  
+  .logo-text {
+    display: none;
+  }
+  
+  .mobile-menu {
+    max-width: 100%;
+  }
+  
+  .school-link-icon {
+    font-size: 18px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .school-dropdown {
+    background: rgba(28, 28, 30, 0.95);
+  }
+  
+  .category-link:hover {
+    background: rgba(0, 122, 255, 0.15);
+  }
+  
+  .mobile-school-link:hover {
+    background: rgba(0, 122, 255, 0.1);
+  }
+  
+  .mobile-school-header:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
 }

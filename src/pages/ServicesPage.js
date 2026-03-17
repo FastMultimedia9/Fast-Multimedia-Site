@@ -117,7 +117,7 @@ const ServicesPage = () => {
       features: ['Website Design', 'E-commerce Solutions', 'CMS Integration', 'SEO Optimization'],
       icon: 'fas fa-code',
       color: '#06d6a0',
-      basePrice: '₵1,299'
+      basePrice: '₵1,500 +'
     },
     {
       id: 6,
@@ -126,7 +126,7 @@ const ServicesPage = () => {
       features: ['Animated Logos', 'Explainer Videos', 'Social Media Ads', 'Presentation Graphics'],
       icon: 'fas fa-film',
       color: '#118ab2',
-      basePrice: '₵799'
+      basePrice: '₵799 +'
     }
   ];
 

@@ -52,6 +52,9 @@ import DatabaseViewer from './pages/DatabaseViewer';
 // New Post Page
 import NewPostPage from './pages/NewPostPage';
 
+// School Page
+import SchoolPage from './pages/SchoolPage';
+
 import './App.css';
 
 const ScrollToTop = () => {
@@ -176,6 +179,25 @@ function AppContent() {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/download-guide" element={<DownloadGuide />} />
+          
+          {/* ===== SCHOOL PAGE ===== */}
+          <Route path="/school" element={<SchoolPage />} />
+          <Route path="/school/overview" element={<SchoolPage />} />
+          <Route path="/school/mission" element={<SchoolPage />} />
+          <Route path="/school/history" element={<SchoolPage />} />
+          <Route path="/school/accreditation" element={<SchoolPage />} />
+          <Route path="/school/courses" element={<SchoolPage />} />
+          <Route path="/school/curriculum" element={<SchoolPage />} />
+          <Route path="/school/calendar" element={<SchoolPage />} />
+          <Route path="/school/exams" element={<SchoolPage />} />
+          <Route path="/school/apply" element={<SchoolPage />} />
+          <Route path="/school/requirements" element={<SchoolPage />} />
+          <Route path="/school/scholarships" element={<SchoolPage />} />
+          <Route path="/school/tuition" element={<SchoolPage />} />
+          <Route path="/school/facilities" element={<SchoolPage />} />
+          <Route path="/school/student-life" element={<SchoolPage />} />
+          <Route path="/school/events" element={<SchoolPage />} />
+          <Route path="/school/gallery" element={<SchoolPage />} />
           
           {/* ===== BLOG PAGES (With Lazy Loading) ===== */}
           <Route path="/blog" element={
@@ -330,6 +352,7 @@ function AppContent() {
                   <ul>
                     <li><a href="/">Go to Homepage</a></li>
                     <li><a href="/blog">Browse the Blog</a></li>
+                    <li><a href="/school">Visit School Page</a></li>
                     <li><a href="/test">Test Database Connection</a></li>
                     <li><a href="/login">Login</a></li>
                     <li><a href="/admin/login">Admin Login</a></li>

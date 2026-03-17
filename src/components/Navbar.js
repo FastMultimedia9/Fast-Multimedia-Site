@@ -9,6 +9,7 @@ const Navbar = () => {
   const [userRole, setUserRole] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMobileSchoolOpen, setIsMobileSchoolOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
 
@@ -56,15 +57,21 @@ const Navbar = () => {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
     if (isUserMenuOpen) setIsUserMenuOpen(false);
+    if (isMobileSchoolOpen) setIsMobileSchoolOpen(false);
   };
 
   const toggleUserMenu = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
   };
 
+  const toggleMobileSchoolMenu = () => {
+    setIsMobileSchoolOpen(!isMobileSchoolOpen);
+  };
+
   const handleNavigation = (path) => {
     setIsMenuOpen(false);
     setIsUserMenuOpen(false);
+    setIsMobileSchoolOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(path);
   };
@@ -76,6 +83,54 @@ const Navbar = () => {
     setUserProfile(null);
     setIsUserMenuOpen(false);
     navigate('/');
+  };
+
+  // School menu items for mobile accordion
+  const schoolMenuItems = [
+    { name: 'School Home', path: '/school', icon: '' },
+    { name: 'Our Courses', path: '/school/courses', icon: '' },
+    { name: 'About School', path: '/school/overview', icon: '' },
+    { name: 'Mission & Vision', path: '/school/mission', icon: '' },
+    { name: 'Admissions', path: '/school/apply', icon: '' },
+    { name: 'Requirements', path: '/school/requirements', icon: '' },
+    { name: 'Tuition & Fees', path: '/school/tuition', icon: '' },
+    { name: 'Scholarships', path: '/school/scholarships', icon: '' },
+    { name: 'Academic Calendar', path: '/school/calendar', icon: '' },
+    { name: 'Facilities', path: '/school/facilities', icon: '' },
+    { name: 'Student Life', path: '/school/student-life', icon: '👥' },
+    { name: 'Events', path: '/school/events', icon: '' },
+    { name: 'Gallery', path: '/school/gallery', icon: '' },
+    { name: 'Contact School', path: '/school/contact', icon: '' }
+  ];
+
+  // Group menu items by category for mobile
+  const groupedSchoolItems = {
+    main: {
+      title: 'Main',
+      icon: '',
+      items: schoolMenuItems.filter(item => item.path === '/school')
+    },
+    academics: {
+      title: 'Academics',
+      icon: '',
+      items: schoolMenuItems.filter(item => ['/school/courses', '/school/calendar'].includes(item.path))
+    },
+    about: {
+      title: 'About',
+      icon: '',
+      items: schoolMenuItems.filter(item => ['/school/overview', '/school/mission'].includes(item.path))
+    },
+    admissions: {
+      title: 'Admissions',
+      icon: '',
+      items: schoolMenuItems.filter(item => ['/school/apply', '/school/requirements', '/school/tuition', '/school/scholarships'].includes(item.path))
+    },
+    
+    contact: {
+      title: 'Contact',
+      icon: '',
+      items: schoolMenuItems.filter(item => item.path === '/school/contact')
+    }
   };
 
   const navLinks = [
@@ -132,36 +187,34 @@ const Navbar = () => {
           onClick={() => handleNavigation('/')}
         >
           <div className="logo-container">
-  <div className="logo-icon">
-    {/* Using image from public folder - fallback to SVG if image doesn't load */}
-    <img 
-      src="/logo.png" 
-      alt="Fast Multimedia Logo" 
-      className="logo-image"
-      onError={(e) => {
-        // If image fails to load, show SVG fallback
-        e.target.style.display = 'none';
-        const parent = e.target.parentElement;
-        parent.innerHTML = `
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" class="logo-svg-fallback">
-            <rect width="32" height="32" rx="8" fill="url(#gradient)"/>
-            <path d="M12 10L20 16L12 22V10Z" fill="white"/>
-            <defs>
-              <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#007AFF"/>
-                <stop offset="1" stopColor="#5856D6"/>
-              </linearGradient>
-            </defs>
-          </svg>
-        `;
-      }}
-    />
-  </div>
-  <div className="logo-text">
-    <span className="logo-primary">Fast</span>
-    <span className="logo-secondary">Multimedia</span>
-  </div>
-</div>
+            <div className="logo-icon">
+              <img 
+                src="/logo.png" 
+                alt="Fast Multimedia Logo" 
+                className="logo-image"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  const parent = e.target.parentElement;
+                  parent.innerHTML = `
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" class="logo-svg-fallback">
+                      <rect width="32" height="32" rx="8" fill="url(#gradient)"/>
+                      <path d="M12 10L20 16L12 22V10Z" fill="white"/>
+                      <defs>
+                        <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#007AFF"/>
+                          <stop offset="1" stopColor="#5856D6"/>
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  `;
+                }}
+              />
+            </div>
+            <div className="logo-text">
+              <span className="logo-primary">Fast</span>
+              <span className="logo-secondary">Multimedia</span>
+            </div>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
@@ -180,6 +233,15 @@ const Navbar = () => {
               <span className="link-indicator"></span>
             </NavLink>
           ))}
+
+          {/* School Button - Simple navigation without dropdown */}
+          <button 
+            className="nav-link school-btn"
+            onClick={() => handleNavigation('/school')}
+          >
+            <span className="link-text">School</span>
+            <span className="link-indicator"></span>
+          </button>
         </div>
 
         {/* Desktop Action Buttons */}
@@ -250,36 +312,20 @@ const Navbar = () => {
                 
                 <div className="dropdown-divider"></div>
                 
-                <button 
-                  onClick={handleLogout}
-                  className="dropdown-item logout"
-                >
-                  <svg className="item-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M6 2H3C2.44772 2 2 2.44772 2 3V13C2 13.5523 2.44772 14 3 14H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                    <path d="M10 11L13 8L10 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M13 8H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                  </svg>
-                  <span>Sign Out</span>
-                </button>
+               
               </div>
             </div>
           ) : (
             <div className="auth-buttons">
-              <Link 
-                to="/login" 
-                className="btn btn-login"
-                onClick={() => handleNavigation('/login')}
-              >
-               
-              </Link>
-            
+             
+              
             </div>
           )}
         </div>
 
         {/* Mobile Menu Toggle */}
         <button 
-          className="mobile-toggle"
+          className={`mobile-toggle ${isMenuOpen ? 'active' : ''}`}
           onClick={toggleMenu}
           aria-label="Toggle menu"
           aria-expanded={isMenuOpen}
@@ -345,6 +391,57 @@ const Navbar = () => {
               </svg>
             </Link>
           ))}
+          
+          {/* School Button for Mobile */}
+          <Link
+            to="/school"
+            className="mobile-link school-mobile-link"
+            onClick={() => handleNavigation('/school')}
+          >
+            <span className="mobile-link-text">School</span>
+            <svg className="mobile-link-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M4 8H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M8 4L12 8L8 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </Link>
+          
+          {/* Mobile School Section - Accordion Style (Optional for additional links) */}
+          <div className="mobile-school-section">
+            <button 
+              className={`mobile-school-header ${isMobileSchoolOpen ? 'open' : ''}`}
+              onClick={toggleMobileSchoolMenu}
+            >
+              <span className="school-header-icon"></span>
+              <span className="school-header-title">School Menu</span>
+              <svg className="mobile-school-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            
+            <div className={`mobile-school-content ${isMobileSchoolOpen ? 'show' : ''}`}>
+              {Object.entries(groupedSchoolItems).map(([key, category]) => (
+                category.items.length > 0 && (
+                  <div key={key} className="mobile-school-category">
+                    <div className="mobile-category-title">
+                      <span className="category-icon">{category.icon}</span>
+                      {category.title}
+                    </div>
+                    {category.items.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className="mobile-school-link"
+                        onClick={() => handleNavigation(item.path)}
+                      >
+                        <span className="school-link-icon">{item.icon}</span>
+                        <span>{item.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="mobile-footer">
