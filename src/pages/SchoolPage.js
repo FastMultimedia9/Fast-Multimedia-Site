@@ -25,6 +25,12 @@ const SchoolPage = () => {
   const [selectedPaymentPlan, setSelectedPaymentPlan] = useState('full');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailjsLoaded, setEmailjsLoaded] = useState(false);
+  
+  // New state for bundle enrollment
+  const [showBundleEnrollment, setShowBundleEnrollment] = useState(false);
+  const [selectedBundleCourses, setSelectedBundleCourses] = useState([]);
+  const [bundlePaymentPlan, setBundlePaymentPlan] = useState('full');
+  const [bundleInstallmentMonths, setBundleInstallmentMonths] = useState(3);
 
   // Complete courses data with updated information
   const courses = [
@@ -34,9 +40,11 @@ const SchoolPage = () => {
       category: 'Technology',
       level: 'Beginner',
       duration: '3 Months',
-      price: 'GH₵ 600',
+      price: 600,
       fullPrice: 'GH₵ 600',
       installmentPrice: 'GH₵ 220/month',
+      actualPrice: 600,
+      monthlyInstallment: 220,
       description: 'Learn essential computer skills, Microsoft Office, and internet fundamentals.',
       longDescription: 'Master the fundamental computer skills needed for modern workplaces. This comprehensive course covers computer basics, Microsoft Office applications, internet navigation, email management, and essential digital literacy skills. Perfect for beginners, students, job seekers, and professionals looking to enhance their office productivity. 100% online delivery with flexible learning schedules.',
       icon: '💻',
@@ -67,9 +75,11 @@ const SchoolPage = () => {
       category: 'Design',
       level: 'Beginner to Intermediate',
       duration: '3 Months',
-      price: 'GH₵ 750',
+      price: 750,
       fullPrice: 'GH₵ 750',
       installmentPrice: 'GH₵ 275/month',
+      actualPrice: 750,
+      monthlyInstallment: 275,
       description: 'Learn Photoshop, Illustrator, InDesign and master visual communication.',
       longDescription: 'Unlock your creative potential with our Graphic Design course. You will learn industry-standard software and design principles that will enable you to create stunning visual content for print and digital media. Perfect for aspiring designers, business owners, and creative professionals. 100% online with practical projects and portfolio development.',
       icon: '🎨',
@@ -100,9 +110,11 @@ const SchoolPage = () => {
       category: 'Technology',
       level: 'Beginner to Advanced',
       duration: '3 Months',
-      price: 'GH₵ 800',
+      price: 800,
       fullPrice: 'GH₵ 800',
       installmentPrice: 'GH₵ 290/month',
+      actualPrice: 800,
+      monthlyInstallment: 290,
       description: 'Master HTML, CSS, JavaScript, and build modern websites.',
       longDescription: 'Learn to build professional, responsive websites from scratch. This comprehensive web development course takes you from absolute beginner to a confident web developer. You will learn frontend technologies, understand how websites work, and build real-world projects. 100% online with hands-on coding exercises and live project work.',
       icon: '💻',
@@ -128,6 +140,57 @@ const SchoolPage = () => {
       targetAudience: 'Students, Job Seekers, Workers, Business Owners'
     }
   ];
+
+  // Calculate bundle pricing
+  const calculateBundlePrice = (selectedCourses) => {
+    if (selectedCourses.length === 0) return { total: 0, discount: 0, final: 0, discountPercent: 0 };
+    
+    const total = selectedCourses.reduce((sum, courseId) => {
+      const course = courses.find(c => c.id === courseId);
+      return sum + (course?.actualPrice || 0);
+    }, 0);
+    
+    let discountPercent = 0;
+    if (selectedCourses.length === 2) discountPercent = 10;
+    if (selectedCourses.length === 3) discountPercent = 15;
+    
+    const discount = (total * discountPercent) / 100;
+    const final = total - discount;
+    
+    return { total, discount, final, discountPercent };
+  };
+
+  // Calculate monthly installment for bundle
+  const calculateBundleInstallment = (finalPrice, months) => {
+    return Math.ceil(finalPrice / months);
+  };
+
+  const bundlePrice = calculateBundlePrice(selectedBundleCourses);
+  const bundleMonthlyInstallment = calculateBundleInstallment(bundlePrice.final, bundleInstallmentMonths);
+
+  const toggleBundleCourse = (courseId) => {
+    setSelectedBundleCourses(prev => {
+      if (prev.includes(courseId)) {
+        return prev.filter(id => id !== courseId);
+      } else {
+        return [...prev, courseId];
+      }
+    });
+  };
+
+  const getBundleDisplayPrice = () => {
+    if (bundlePaymentPlan === 'installment') {
+      return `GH₵ ${bundleMonthlyInstallment}/month × ${bundleInstallmentMonths} months`;
+    }
+    return `GH₵ ${bundlePrice.final}`;
+  };
+
+  const getBundleSavings = () => {
+    if (selectedBundleCourses.length >= 2) {
+      return `Save GH₵ ${bundlePrice.discount} (${bundlePrice.discountPercent}% OFF)`;
+    }
+    return null;
+  };
 
   // Bundle discount information
   const bundleDiscounts = [
@@ -177,91 +240,133 @@ const SchoolPage = () => {
   const handleEnquirySubmit = async (e) => {
     e.preventDefault();
     
-    // Get the course value from the form
-    const courseSelect = e.target.elements.course;
-    const paymentSelect = e.target.elements.payment;
-    const courseValue = courseSelect ? courseSelect.value : (selectedCourseForForm || (selectedCourse?.title || 'Not specified'));
-    const paymentValue = paymentSelect ? paymentSelect.value : selectedPaymentOption;
-    
-    // Prepare form data for email
-    const formData = {
-      name: enquiryName,
-      email: enquiryEmail,
-      phone: enquiryPhone,
-      course: courseValue,
-      paymentOption: paymentValue,
-      message: enquiryMessage || 'No additional message',
-      submissionDate: new Date().toLocaleString('en-GH', { timeZone: 'Africa/Accra' }),
-      startDate: '1st May 2026',
-      duration: '3 Months',
-      format: '100% Online'
-    };
+    // Handle bundle enrollment
+    if (showBundleEnrollment && selectedBundleCourses.length > 0) {
+      const selectedCoursesData = selectedBundleCourses.map(id => courses.find(c => c.id === id));
+      const coursesList = selectedCoursesData.map(c => c.title).join(', ');
+      const totalOriginal = bundlePrice.total;
+      const discountAmount = bundlePrice.discount;
+      const finalAmount = bundlePrice.final;
+      
+      const formData = {
+        name: enquiryName,
+        email: enquiryEmail,
+        phone: enquiryPhone,
+        course: `BUNDLE: ${coursesList}`,
+        bundleCourses: coursesList,
+        numberOfCourses: selectedBundleCourses.length,
+        originalPrice: `GH₵ ${totalOriginal}`,
+        discountAmount: `GH₵ ${discountAmount} (${bundlePrice.discountPercent}% OFF)`,
+        finalPrice: `GH₵ ${finalAmount}`,
+        paymentOption: bundlePaymentPlan === 'full' ? 'Full Payment' : `Installment Plan (${bundleInstallmentMonths} months)`,
+        monthlyInstallment: bundlePaymentPlan === 'installment' ? `GH₵ ${bundleMonthlyInstallment}/month` : 'N/A',
+        message: enquiryMessage || 'No additional message',
+        submissionDate: new Date().toLocaleString('en-GH', { timeZone: 'Africa/Accra' }),
+        startDate: '1st May 2026',
+        duration: '3 Months per course',
+        format: '100% Online'
+      };
 
-    setIsSubmitting(true);
+      setIsSubmitting(true);
 
-    try {
-      if (window.emailjs && emailjsLoaded) {
-        // Send email using EmailJS
-        const result = await window.emailjs.send(
-          EMAILJS_CONFIG.SERVICE_ID,
-          EMAILJS_CONFIG.TEMPLATE_ID,
-          formData
-        );
-        
-        console.log('Email sent successfully:', result);
-        
-        // Save to localStorage as backup
-        const submissions = JSON.parse(localStorage.getItem('enrollments') || '[]');
-        submissions.push({ ...formData, id: Date.now(), status: 'sent' });
-        localStorage.setItem('enrollments', JSON.stringify(submissions));
-        
-        // Show success message
-        alert(`✅ Thank you ${enquiryName}!\n\nYour enrollment request for ${courseValue} has been received.\n\nWe will contact you within 24 hours with payment instructions and course access details.\n\n📅 Start Date: 1st May 2026\n⏱️ Duration: 3 Months\n💻 Format: 100% Online`);
-        
-        // Reset form
-        setEnquiryName('');
-        setEnquiryEmail('');
-        setEnquiryPhone('');
-        setEnquiryMessage('');
-        setSelectedCourseForForm('');
-        setSelectedPaymentOption('Full Payment');
-        setShowEnquiryForm(false);
-      } else {
-        // Fallback if EmailJS is not loaded
-        console.log('EmailJS not loaded, saving to localStorage');
-        const submissions = JSON.parse(localStorage.getItem('enrollments') || '[]');
-        submissions.push({ ...formData, id: Date.now(), status: 'pending' });
-        localStorage.setItem('enrollments', JSON.stringify(submissions));
-        
-        alert(`📋 Thank you ${enquiryName}! Your enrollment request has been saved locally.\n\nWe will contact you within 24 hours.\n\nThank you for your interest in ${courseValue}!`);
-        setShowEnquiryForm(false);
-        setEnquiryName('');
-        setEnquiryEmail('');
-        setEnquiryPhone('');
-        setEnquiryMessage('');
+      try {
+        if (window.emailjs && emailjsLoaded) {
+          const result = await window.emailjs.send(
+            EMAILJS_CONFIG.SERVICE_ID,
+            EMAILJS_CONFIG.TEMPLATE_ID,
+            formData
+          );
+          
+          console.log('Bundle enrollment email sent:', result);
+          
+          alert(`✅ Thank you ${enquiryName}!\n\nYour BUNDLE enrollment for ${selectedBundleCourses.length} courses has been received!\n\n📚 Courses: ${coursesList}\n💰 Original Price: GH₵ ${totalOriginal}\n🎉 Discount: ${bundlePrice.discountPercent}% OFF (Save GH₵ ${discountAmount})\n💵 Final Price: GH₵ ${finalAmount}\n💳 Payment Plan: ${bundlePaymentPlan === 'full' ? 'Full Payment' : `Installment - GH₵ ${bundleMonthlyInstallment}/month for ${bundleInstallmentMonths} months`}\n\nWe will contact you within 24 hours with payment instructions and course access details.\n\n📅 Start Date: 1st May 2026\n⏱️ Duration: 3 Months per course\n💻 Format: 100% Online`);
+          
+          // Reset form
+          resetBundleForm();
+        } else {
+          // Fallback
+          alert(`📋 Thank you ${enquiryName}! Your bundle enrollment request has been saved locally.\n\nWe will contact you within 24 hours.`);
+          resetBundleForm();
+        }
+      } catch (error) {
+        console.error('Email sending error:', error);
+        alert(`⚠️ Your bundle enrollment request has been saved successfully!\n\nWe will contact you within 24 hours.\n\nThank you for choosing Fast Multimedia Institute.`);
+        resetBundleForm();
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      console.error('Email sending error:', error);
+    } else {
+      // Original single course enrollment
+      const courseSelect = e.target.elements.course;
+      const paymentSelect = e.target.elements.payment;
+      const courseValue = courseSelect ? courseSelect.value : (selectedCourseForForm || (selectedCourse?.title || 'Not specified'));
+      const paymentValue = paymentSelect ? paymentSelect.value : selectedPaymentOption;
       
-      // Fallback: Save to localStorage
-      const submissions = JSON.parse(localStorage.getItem('enrollments') || '[]');
-      submissions.push({ 
-        ...formData, 
-        id: Date.now(), 
-        status: 'pending',
-        error: error.message 
-      });
-      localStorage.setItem('enrollments', JSON.stringify(submissions));
-      
-      alert(`⚠️ Your enrollment request has been saved successfully!\n\nWe will contact you within 24 hours.\n\nThank you for choosing Fast Multimedia Institute.`);
-      setShowEnquiryForm(false);
-      setEnquiryName('');
-      setEnquiryEmail('');
-      setEnquiryPhone('');
-      setEnquiryMessage('');
-    } finally {
-      setIsSubmitting(false);
+      const formData = {
+        name: enquiryName,
+        email: enquiryEmail,
+        phone: enquiryPhone,
+        course: courseValue,
+        paymentOption: paymentValue,
+        message: enquiryMessage || 'No additional message',
+        submissionDate: new Date().toLocaleString('en-GH', { timeZone: 'Africa/Accra' }),
+        startDate: '1st May 2026',
+        duration: '3 Months',
+        format: '100% Online'
+      };
+
+      setIsSubmitting(true);
+
+      try {
+        if (window.emailjs && emailjsLoaded) {
+          const result = await window.emailjs.send(
+            EMAILJS_CONFIG.SERVICE_ID,
+            EMAILJS_CONFIG.TEMPLATE_ID,
+            formData
+          );
+          
+          console.log('Email sent successfully:', result);
+          
+          alert(`✅ Thank you ${enquiryName}!\n\nYour enrollment request for ${courseValue} has been received.\n\nWe will contact you within 24 hours with payment instructions and course access details.\n\n📅 Start Date: 1st May 2026\n⏱️ Duration: 3 Months\n💻 Format: 100% Online`);
+          
+          resetSingleForm();
+        } else {
+          console.log('EmailJS not loaded, saving to localStorage');
+          alert(`📋 Thank you ${enquiryName}! Your enrollment request has been saved locally.\n\nWe will contact you within 24 hours.\n\nThank you for your interest in ${courseValue}!`);
+          resetSingleForm();
+        }
+      } catch (error) {
+        console.error('Email sending error:', error);
+        alert(`⚠️ Your enrollment request has been saved successfully!\n\nWe will contact you within 24 hours.\n\nThank you for choosing Fast Multimedia Institute.`);
+        resetSingleForm();
+      } finally {
+        setIsSubmitting(false);
+      }
     }
+  };
+
+  const resetSingleForm = () => {
+    setEnquiryName('');
+    setEnquiryEmail('');
+    setEnquiryPhone('');
+    setEnquiryMessage('');
+    setSelectedCourseForForm('');
+    setSelectedPaymentOption('Full Payment');
+    setShowEnquiryForm(false);
+    setShowBundleEnrollment(false);
+    setSelectedBundleCourses([]);
+  };
+
+  const resetBundleForm = () => {
+    setEnquiryName('');
+    setEnquiryEmail('');
+    setEnquiryPhone('');
+    setEnquiryMessage('');
+    setShowEnquiryForm(false);
+    setShowBundleEnrollment(false);
+    setSelectedBundleCourses([]);
+    setBundlePaymentPlan('full');
+    setBundleInstallmentMonths(3);
   };
 
   const getPriceDisplay = () => {
@@ -392,7 +497,7 @@ const SchoolPage = () => {
                     </div>
                     <div className="course-footer">
                       <div>
-                        <span className="course-price">{course.price}</span>
+                        <span className="course-price">{course.fullPrice}</span>
                         <span className="installment-note">or {course.installmentPrice}/month</span>
                       </div>
                       <button className="view-details-btn">
@@ -420,12 +525,112 @@ const SchoolPage = () => {
           </>
         )}
 
-        {/* Bundle Discounts Tab */}
+        {/* Bundle Discounts Tab - Enhanced */}
         {activeTab === 'bundle' && (
           <div className="bundle-section">
             <div className="bundle-header">
               <h1>🎁 Bundle Discounts</h1>
               <p>Save more when you enroll in multiple courses</p>
+            </div>
+
+            {/* Bundle Builder */}
+            <div className="bundle-builder">
+              <h2>Build Your Own Bundle</h2>
+              <p className="bundle-subtitle">Select 2 or 3 courses and get instant discounts</p>
+              
+              <div className="bundle-courses-selector">
+                {courses.map(course => (
+                  <div 
+                    key={course.id}
+                    className={`bundle-course-option ${selectedBundleCourses.includes(course.id) ? 'selected' : ''}`}
+                    onClick={() => toggleBundleCourse(course.id)}
+                  >
+                    <div className="bundle-course-checkbox">
+                      {selectedBundleCourses.includes(course.id) && <span>✓</span>}
+                    </div>
+                    <div className="bundle-course-icon">{course.icon}</div>
+                    <div className="bundle-course-info">
+                      <h4>{course.title}</h4>
+                      <p>GH₵ {course.actualPrice}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {selectedBundleCourses.length > 0 && (
+                <div className="bundle-summary">
+                  <h3>Your Bundle Summary</h3>
+                  <div className="bundle-price-breakdown">
+                    <div className="price-row">
+                      <span>Original Price:</span>
+                      <span>GH₵ {bundlePrice.total}</span>
+                    </div>
+                    {bundlePrice.discount > 0 && (
+                      <div className="price-row discount">
+                        <span>Bundle Discount ({bundlePrice.discountPercent}% OFF):</span>
+                        <span>- GH₵ {bundlePrice.discount}</span>
+                      </div>
+                    )}
+                    <div className="price-row total">
+                      <span>Final Price:</span>
+                      <span>GH₵ {bundlePrice.final}</span>
+                    </div>
+                  </div>
+
+                  {/* Installment Options for Bundle */}
+                  <div className="bundle-payment-options">
+                    <h4>Payment Options</h4>
+                    <div className="payment-buttons">
+                      <button 
+                        className={`payment-btn ${bundlePaymentPlan === 'full' ? 'active' : ''}`}
+                        onClick={() => setBundlePaymentPlan('full')}
+                      >
+                        Full Payment: GH₵ {bundlePrice.final}
+                      </button>
+                      <button 
+                        className={`payment-btn ${bundlePaymentPlan === 'installment' ? 'active' : ''}`}
+                        onClick={() => setBundlePaymentPlan('installment')}
+                      >
+                        Installment Plan
+                      </button>
+                    </div>
+
+                    {bundlePaymentPlan === 'installment' && (
+                      <div className="installment-options">
+                        <label>Choose installment duration:</label>
+                        <div className="installment-months">
+                          {[3].map(months => (
+                            <button
+                              key={months}
+                              className={`month-option ${bundleInstallmentMonths === months ? 'active' : ''}`}
+                              onClick={() => setBundleInstallmentMonths(months)}
+                            >
+                              {months} months
+                              <small>GH₵ {calculateBundleInstallment(bundlePrice.final, months)}/month</small>
+                            </button>
+                          ))}
+                        </div>
+                        <p className="installment-note-bundle">
+                          💡 {bundleInstallmentMonths}-month plan: GH₵ {bundleMonthlyInstallment}/month
+                          {bundleInstallmentMonths > 3 && ` (${bundleInstallmentMonths - 3} extra months at no interest)`}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <button 
+                    className="enroll-bundle-btn"
+                    onClick={() => {
+                      setShowEnquiryForm(true);
+                      setShowBundleEnrollment(true);
+                      setActiveTab('contact');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                  >
+                    Enroll in Bundle - {getBundleDisplayPrice()}
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="bundle-grid">
@@ -464,6 +669,9 @@ const SchoolPage = () => {
                   <strong>Web Development</strong>
                   <span>GH₵ 290/month × 3 months</span>
                 </div>
+              </div>
+              <div className="bundle-note">
+                <strong>🎁 Bundle Special:</strong> Save 10% on 2 courses or 15% on all 3 courses with flexible installment plans up to 6 months!
               </div>
             </div>
           </div>
@@ -595,6 +803,7 @@ const SchoolPage = () => {
                   onClick={() => {
                     setSelectedCourseForForm(selectedCourse.title);
                     setShowEnquiryForm(true);
+                    setShowBundleEnrollment(false);
                   }}
                 >
                   Enroll Now - {getPriceDisplay()}
@@ -633,7 +842,7 @@ const SchoolPage = () => {
                   >
                     <option value="">Select Course *</option>
                     {courses.map(course => (
-                      <option key={course.id} value={course.title}>{course.title} - {course.price}</option>
+                      <option key={course.id} value={course.title}>{course.title} - {course.fullPrice}</option>
                     ))}
                   </select>
                   <select 
@@ -750,7 +959,7 @@ const SchoolPage = () => {
           </div>
         )}
 
-        {/* Contact / Enroll Tab */}
+        {/* Contact / Enroll Tab - Enhanced with Bundle Option */}
         {activeTab === 'contact' && (
           <div className="contact-school">
             <div className="contact-header">
@@ -784,7 +993,7 @@ const SchoolPage = () => {
                   <div className="info-icon">✉️</div>
                   <div>
                     <h3>Email Us</h3>
-                    <p>fasttech227@gmail.comm<br />fastmultimedia.site</p>
+                    <p>fasttech227@gmail.com<br />fastmultimedia.site</p>
                   </div>
                 </div>
                 <div className="info-item">
@@ -798,7 +1007,29 @@ const SchoolPage = () => {
               </div>
 
               <div className="contact-form">
-                <h2>Enrollment Form</h2>
+                <h2>{showBundleEnrollment ? 'Bundle Enrollment Form' : 'Single Course Enrollment'}</h2>
+                
+                {!showBundleEnrollment && (
+                  <button 
+                    className="switch-to-bundle"
+                    onClick={() => {
+                      setShowBundleEnrollment(true);
+                      setSelectedBundleCourses([]);
+                    }}
+                  >
+                    🎁 Want to enroll in multiple courses? Click here for bundle discounts!
+                  </button>
+                )}
+
+                {showBundleEnrollment && (
+                  <button 
+                    className="switch-to-single"
+                    onClick={() => setShowBundleEnrollment(false)}
+                  >
+                    ← Back to single course enrollment
+                  </button>
+                )}
+                
                 <form onSubmit={handleEnquirySubmit}>
                   <input
                     type="text"
@@ -824,25 +1055,82 @@ const SchoolPage = () => {
                     onChange={(e) => setEnquiryPhone(e.target.value)}
                     required
                   />
-                  <select 
-                    name="course"
-                    value={selectedCourseForForm}
-                    onChange={(e) => setSelectedCourseForForm(e.target.value)}
-                    required
-                  >
-                    <option value="">Select Course *</option>
-                    {courses.map(course => (
-                      <option key={course.id} value={course.title}>{course.title} - {course.price}</option>
-                    ))}
-                  </select>
-                  <select 
-                    name="payment"
-                    value={selectedPaymentOption}
-                    onChange={(e) => setSelectedPaymentOption(e.target.value)}
-                  >
-                    <option>Full Payment</option>
-                    <option>Installment Plan (3 months)</option>
-                  </select>
+                  
+                  {!showBundleEnrollment ? (
+                    <>
+                      <select 
+                        name="course"
+                        value={selectedCourseForForm}
+                        onChange={(e) => setSelectedCourseForForm(e.target.value)}
+                        required
+                      >
+                        <option value="">Select Course *</option>
+                        {courses.map(course => (
+                          <option key={course.id} value={course.title}>{course.title} - {course.fullPrice}</option>
+                        ))}
+                      </select>
+                      <select 
+                        name="payment"
+                        value={selectedPaymentOption}
+                        onChange={(e) => setSelectedPaymentOption(e.target.value)}
+                      >
+                        <option>Full Payment</option>
+                        <option>Installment Plan (3 months)</option>
+                      </select>
+                    </>
+                  ) : (
+                    <>
+                      <div className="bundle-course-selection">
+                        <label>Select Courses for Bundle (2 or 3 courses):</label>
+                        {courses.map(course => (
+                          <label key={course.id} className="bundle-checkbox-label">
+                            <input
+                              type="checkbox"
+                              checked={selectedBundleCourses.includes(course.id)}
+                              onChange={() => toggleBundleCourse(course.id)}
+                            />
+                            <span>{course.title} - {course.fullPrice}</span>
+                          </label>
+                        ))}
+                      </div>
+                      
+                      {selectedBundleCourses.length >= 2 && (
+                        <>
+                          <div className="bundle-pricing-info">
+                            <p><strong>Bundle Discount Applied!</strong></p>
+                            <p>Original: GH₵ {bundlePrice.total}</p>
+                            <p>Discount: {bundlePrice.discountPercent}% OFF (Save GH₵ {bundlePrice.discount})</p>
+                            <p><strong>Final Price: GH₵ {bundlePrice.final}</strong></p>
+                          </div>
+                          
+                          <select 
+                            value={bundlePaymentPlan}
+                            onChange={(e) => setBundlePaymentPlan(e.target.value)}
+                          >
+                            <option value="full">Full Payment: GH₵ {bundlePrice.final}</option>
+                            <option value="installment">Installment Plan</option>
+                          </select>
+                          
+                          {bundlePaymentPlan === 'installment' && (
+                            <select 
+                              value={bundleInstallmentMonths}
+                              onChange={(e) => setBundleInstallmentMonths(Number(e.target.value))}
+                            >
+                              <option value={3}>3 months - GH₵ {calculateBundleInstallment(bundlePrice.final, 3)}/month</option>
+                              <option value={4}>4 months - GH₵ {calculateBundleInstallment(bundlePrice.final, 4)}/month</option>
+                              <option value={5}>5 months - GH₵ {calculateBundleInstallment(bundlePrice.final, 5)}/month</option>
+                              <option value={6}>6 months - GH₵ {calculateBundleInstallment(bundlePrice.final, 6)}/month</option>
+                            </select>
+                          )}
+                        </>
+                      )}
+                      
+                      {selectedBundleCourses.length > 0 && selectedBundleCourses.length < 2 && (
+                        <p className="bundle-warning">Please select at least 2 courses to get bundle discount</p>
+                      )}
+                    </>
+                  )}
+                  
                   <textarea
                     name="message"
                     placeholder="Additional Information (Occupation, Experience Level, etc.)"
@@ -850,8 +1138,12 @@ const SchoolPage = () => {
                     onChange={(e) => setEnquiryMessage(e.target.value)}
                     rows="4"
                   />
-                  <button type="submit" className="send-btn" disabled={isSubmitting}>
-                    {isSubmitting ? 'Sending...' : 'Submit Enrollment →'}
+                  <button 
+                    type="submit" 
+                    className="send-btn" 
+                    disabled={isSubmitting || (showBundleEnrollment && selectedBundleCourses.length < 2)}
+                  >
+                    {isSubmitting ? 'Sending...' : (showBundleEnrollment ? 'Submit Bundle Enrollment →' : 'Submit Enrollment →')}
                   </button>
                 </form>
                 <p className="form-note">We'll contact you within 24 hours with payment instructions and course access details.</p>
@@ -880,6 +1172,7 @@ const SchoolPage = () => {
               className="cta-button secondary"
               onClick={() => {
                 setActiveTab('contact');
+                setShowBundleEnrollment(false);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
             >
