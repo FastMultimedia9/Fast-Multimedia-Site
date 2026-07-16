@@ -1,8 +1,8 @@
-// ServiceDetailPage.jsx
+// src/components/ServiceDetailPage.jsx
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowRight, FaCheckCircle, FaUsers, FaClock, FaAward } from 'react-icons/fa';
-import './ServiceDetailPage.css'; // We'll create this next
+import './ServiceDetailPage.css';
 
 const ServiceDetailPage = ({ service }) => {
   const navigate = useNavigate();
