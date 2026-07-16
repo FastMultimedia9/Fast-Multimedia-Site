@@ -5,7 +5,10 @@ import {
   FaTools, FaCogs, FaCloudUploadAlt, FaWifi,
   FaArrowRight, FaStar, FaCheckCircle, FaPlay,
   FaUsers, FaClock, FaHeadset, FaRocket, FaTrello,
-  FaFileAlt, FaSync, FaTimes, FaCheck
+  FaFileAlt, FaSync, FaTimes, FaCheck,
+  FaBehance, FaFacebookF, FaLinkedinIn, FaInstagram, FaYoutube,
+  FaUserTie, FaCreditCard, FaClipboardList, FaUserPlus,
+  FaTasks, FaComments, FaCheckDouble, FaPlusCircle
 } from 'react-icons/fa';
 import './HomePage.css';
 
@@ -18,53 +21,53 @@ const HomePage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
 
-  // Process Steps Data - Duck Design Style
+  // Process Steps Data - With React Icons
   const processSteps = [
     {
       id: 1,
-      icon: '/images/steps-icon-1.svg',
+      icon: FaUserTie,
       title: 'Choose a Plan',
       description: 'Clients select from various plans based on their needs and budget.'
     },
     {
       id: 2,
-      icon: '/images/steps-icon-2.svg',
+      icon: FaCreditCard,
       title: 'Payment',
       description: 'After selecting a plan, clients proceed to payment.'
     },
     {
       id: 3,
-      icon: '/images/steps-icon-3.svg',
+      icon: FaClipboardList,
       title: 'Onboarding and Brief',
       description: 'Upon successful payment, a project manager is assigned to the client for onboarding and task clarification. Clients fill out a brief detailing their business and design needs to help designers understand their requirements.'
     },
     {
       id: 4,
-      icon: '/images/steps-icon-4.svg',
+      icon: FaUserPlus,
       title: 'Designer Assignment',
       description: 'A personal designer is assigned to the client after the brief is completed.'
     },
     {
       id: 5,
-      icon: '/images/steps-icon-5.svg',
+      icon: FaTasks,
       title: 'Task Creation and Submission',
       description: 'Clients create and submit tasks, providing necessary materials (logos, texts, images, etc.)'
     },
     {
       id: 6,
-      icon: '/images/steps-icon-6.svg',
+      icon: FaComments,
       title: 'Feedback and Revisions',
       description: 'The designer submits completed tasks for review. Clients review the work, request revisions if needed, and the designer updates accordingly.'
     },
     {
       id: 7,
-      icon: '/images/steps-icon-7.svg',
+      icon: FaCheckDouble,
       title: 'Task Completion',
       description: 'Once the client is satisfied, the task is marked as complete.'
     },
     {
       id: 8,
-      icon: '/images/steps-icon-8.svg',
+      icon: FaPlusCircle,
       title: 'New Task, New Project',
       description: 'After completing one task, clients can create new tasks and continue the process.'
     }
@@ -75,7 +78,7 @@ const HomePage = () => {
     {
       id: 1,
       title: 'Flexibility and Client-Centered Approach',
-      image: '/images/why-01.webp',
+      image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       points: [
         { head: 'Unlimited Requests', desc: 'Submit as many design tasks as you need — no limits' },
         { head: 'Unlimited Revisions', desc: 'We revise the designs until you\'re completely satisfied' },
@@ -86,7 +89,7 @@ const HomePage = () => {
     {
       id: 2,
       title: 'Speed and Professionalism',
-      image: '/images/why-02.webp',
+      image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       points: [
         { head: 'Professional Designers', desc: 'Your projects are handled by experienced Middle+ and Senior-level designers' },
         { head: 'Art Director Oversight', desc: 'Every project is reviewed by an art director to ensure quality and consistency' },
@@ -96,13 +99,21 @@ const HomePage = () => {
     {
       id: 3,
       title: 'Organization and Full Control',
-      image: '/images/why-03.webp',
+      image: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       points: [
         { head: 'Trello Project Management', desc: 'Manage tasks and monitor progress seamlessly with Trello' },
         { head: 'Unlimited Brand Profiles', desc: 'Create separate brand profiles for multiple projects to keep everything organized' },
         { head: 'Native Source Files', desc: 'Get all the original source files for your designs for complete ownership and flexibility' }
       ]
     }
+  ];
+
+  // Service images - Using Unsplash for demonstration
+  const serviceImages = [
+    'https://images.unsplash.com/photo-1626785774573-4b799315345d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1542744094-3a31f272c490?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
   ];
 
   // Updates & Announcements Data
@@ -112,7 +123,7 @@ const HomePage = () => {
       title: "New Courses Available",
       subtitle: "3-Month Online Programs",
       description: "Enroll now for Basic ICT, Graphic Design & Web Development. Start Date: 1st May 2026",
-      image: "/images/school-update-1.jpg",
+      image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
       cta: "Learn More",
       tag: "🎓 New",
       type: "school",
@@ -123,7 +134,7 @@ const HomePage = () => {
       title: "Free Webinar: Web Development",
       subtitle: "Live Online Session",
       description: "Join our free webinar on modern web development. Limited seats available!",
-      image: "/images/tech-update-1.jpg",
+      image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
       cta: "Register Free",
       tag: "🎥 Free",
       type: "flyer",
@@ -134,7 +145,7 @@ const HomePage = () => {
       title: "New Computer Repair Service",
       subtitle: "Fast & Reliable",
       description: "Professional computer repair services at affordable prices. Free diagnosis!",
-      image: "/images/tech-update-2.jpg",
+      image: "https://images.unsplash.com/photo-1537884944318-390069bb8665?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
       cta: "Book Service",
       tag: "🔧 New Service",
       type: "service",
@@ -145,7 +156,7 @@ const HomePage = () => {
       title: "Portfolio Review Day",
       subtitle: "Free Consultation",
       description: "Get your design portfolio reviewed by industry experts. Book your slot today!",
-      image: "/images/service-update-2.jpg",
+      image: "https://images.unsplash.com/photo-1543269865-cbf427effbad?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
       cta: "Book Slot",
       tag: "📅 Event",
       type: "flyer",
@@ -160,7 +171,7 @@ const HomePage = () => {
       subtitle: '80th Anniversary',
       category: 'Brand Identity',
       description: 'Award-winning logo design celebrating heritage and future vision.',
-      image: '/80th.jpg',
+      image: 'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       tags: ['Logo Design', 'Healthcare'],
       details: ['Winning competition design', 'Heritage meets future concept', 'Clean sans-serif typography'],
       client: 'St. Martin De Porres Hospital',
@@ -172,7 +183,7 @@ const HomePage = () => {
       subtitle: 'Clothing Brand',
       category: 'Brand Identity',
       description: 'Sophisticated fashion brand with "Exclusively Different" positioning.',
-      image: '/mr-wise.jpg',
+      image: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       tags: ['Fashion', 'Luxury'],
       details: ['Complete brand identity', 'Premium positioning', 'Brand guidelines'],
       client: 'Mr. Wise Clothing',
@@ -184,7 +195,7 @@ const HomePage = () => {
       subtitle: 'Mango Ice-Cream',
       category: 'Packaging',
       description: 'Product label design with clear ingredient listing.',
-      image: '/mango-label.jpg',
+      image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       tags: ['Packaging', 'Food'],
       details: ['Regulatory compliance', 'Professional retail appearance', 'Clear ingredient display'],
       client: 'Abidan Royal Enterprise',
@@ -406,19 +417,19 @@ const HomePage = () => {
 
             <div className="hero-social-list">
               <a href="#" className="hero-social-item" aria-label="Behance">
-                <img src="/images/social-behance.svg" alt="Behance" />
+                <FaBehance />
               </a>
               <a href="#" className="hero-social-item" aria-label="Facebook">
-                <img src="/images/social-facebook.svg" alt="Facebook" />
+                <FaFacebookF />
               </a>
               <a href="#" className="hero-social-item" aria-label="LinkedIn">
-                <img src="/images/social-linkedin.svg" alt="LinkedIn" />
+                <FaLinkedinIn />
               </a>
               <a href="#" className="hero-social-item" aria-label="Instagram">
-                <img src="/images/social-instagram.svg" alt="Instagram" />
+                <FaInstagram />
               </a>
               <a href="#" className="hero-social-item" aria-label="YouTube">
-                <img src="/images/social-youtube.svg" alt="YouTube" />
+                <FaYoutube />
               </a>
             </div>
           </div>
@@ -448,6 +459,77 @@ const HomePage = () => {
       </section>
 
       {/* ============================================
+          UPDATES & ANNOUNCEMENTS SECTION
+          ============================================ */}
+      <section className="updates-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">
+              <span className="gradient-text">Latest</span> Updates & Announcements
+            </h2>
+            <p className="section-subtitle">
+              Stay informed about our new courses, services, and special offers
+            </p>
+          </div>
+          
+          <div className="marquee-container">
+            <div className="marquee-track">
+              {updatesData.map((update) => (
+                <div 
+                  key={`first-${update.id}`} 
+                  className={`update-card ${update.type}`}
+                  onClick={() => handleUpdateClick(update)}
+                >
+                  <div className="update-image">
+                    <img src={update.image} alt={update.title} />
+                    <div className="update-tag">
+                      {update.tag}
+                    </div>
+                    <div className="update-type-badge">
+                      {update.type === 'school' ? '🎓 School' : '📢 Offer'}
+                    </div>
+                  </div>
+                  <div className="update-content">
+                    <h3 className="update-title">{update.title}</h3>
+                    <p className="update-subtitle">{update.subtitle}</p>
+                    <p className="update-description">{update.description}</p>
+                    <button className="update-cta">
+                      {update.cta} <FaArrowRight className="btn-arrow" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {updatesData.map((update) => (
+                <div 
+                  key={`second-${update.id}`} 
+                  className={`update-card ${update.type}`}
+                  onClick={() => handleUpdateClick(update)}
+                >
+                  <div className="update-image">
+                    <img src={update.image} alt={update.title} />
+                    <div className="update-tag">
+                      {update.tag}
+                    </div>
+                    <div className="update-type-badge">
+                      {update.type === 'school' ? '🎓 School' : '📢 Offer'}
+                    </div>
+                  </div>
+                  <div className="update-content">
+                    <h3 className="update-title">{update.title}</h3>
+                    <p className="update-subtitle">{update.subtitle}</p>
+                    <p className="update-description">{update.description}</p>
+                    <button className="update-cta">
+                      {update.cta} <FaArrowRight className="btn-arrow" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
           PARTNER SECTION - DUCK DESIGN STYLE
           ============================================ */}
       <section className="partner-section">
@@ -466,11 +548,11 @@ const HomePage = () => {
             </div>
             <div className="partner-section__right">
               <div className="partner-section__list partner-logos-scroll">
-                <div className="partner-section__item"><img src="/images/partner-logo-1.svg" alt="Partner" /></div>
-                <div className="partner-section__item"><img src="/images/partner-logo-2.svg" alt="Partner" /></div>
-                <div className="partner-section__item"><img src="/images/partner-logo-3.svg" alt="Partner" /></div>
-                <div className="partner-section__item"><img src="/images/partner-logo-4.svg" alt="Partner" /></div>
-                <div className="partner-section__item"><img src="/images/partner-logo-5.svg" alt="Partner" /></div>
+                <div className="partner-section__item"><span>Logo 1</span></div>
+                <div className="partner-section__item"><span>Logo 2</span></div>
+                <div className="partner-section__item"><span>Logo 3</span></div>
+                <div className="partner-section__item"><span>Logo 4</span></div>
+                <div className="partner-section__item"><span>Logo 5</span></div>
               </div>
             </div>
             <div className="partner-section__btn mobile-only">
@@ -493,13 +575,13 @@ const HomePage = () => {
           <div className="services-carousel__track">
             {services.design.map((service, index) => (
               <div key={`service-1-${index}`} className="services-carousel__item">
-                <img src={`/images/service-${index + 1}.jpg`} alt={service.name} />
+                <img src={serviceImages[index % serviceImages.length]} alt={service.name} />
                 <span className="services-carousel__head">{service.name}</span>
               </div>
             ))}
             {services.design.map((service, index) => (
               <div key={`service-2-${index}`} className="services-carousel__item">
-                <img src={`/images/service-${index + 1}.jpg`} alt={service.name} />
+                <img src={serviceImages[index % serviceImages.length]} alt={service.name} />
                 <span className="services-carousel__head">{service.name}</span>
               </div>
             ))}
@@ -580,31 +662,37 @@ const HomePage = () => {
           </div>
 
           <div className="steps-grid">
-            {processSteps.slice(0, 4).map((step) => (
-              <div key={step.id} className="step-item">
-                <div className="step-icon">
-                  <img src={step.icon} alt={step.title} />
+            {processSteps.slice(0, 4).map((step) => {
+              const Icon = step.icon;
+              return (
+                <div key={step.id} className="step-item">
+                  <div className="step-icon">
+                    <Icon />
+                  </div>
+                  <div className="step-content">
+                    <h4 className="step-title">{step.title}</h4>
+                    <p className="step-description">{step.description}</p>
+                  </div>
                 </div>
-                <div className="step-content">
-                  <h4 className="step-title">{step.title}</h4>
-                  <p className="step-description">{step.description}</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="steps-grid steps-grid-more" id="moreSteps">
-            {processSteps.slice(4).map((step) => (
-              <div key={step.id} className="step-item">
-                <div className="step-icon">
-                  <img src={step.icon} alt={step.title} />
+            {processSteps.slice(4).map((step) => {
+              const Icon = step.icon;
+              return (
+                <div key={step.id} className="step-item">
+                  <div className="step-icon">
+                    <Icon />
+                  </div>
+                  <div className="step-content">
+                    <h4 className="step-title">{step.title}</h4>
+                    <p className="step-description">{step.description}</p>
+                  </div>
                 </div>
-                <div className="step-content">
-                  <h4 className="step-title">{step.title}</h4>
-                  <p className="step-description">{step.description}</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="steps-show-more">
@@ -671,7 +759,7 @@ const HomePage = () => {
               </div>
             </div>
             <div className="cta-boxbg__img">
-              <img src="/images/cta-img.png" alt="Contact Us" />
+              <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Contact Us" />
             </div>
           </div>
         </div>
