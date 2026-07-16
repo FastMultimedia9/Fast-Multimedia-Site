@@ -949,22 +949,38 @@ const PortfolioPage = () => {
   ]
 },
     {
-      id: 53,
-      title: 'Fashion E-Commerce Website Redesign',
-      category: 'web',
-      description: 'Modern e-commerce website redesign for luxury fashion brand',
-      detailedDescription: 'Led the complete redesign of a luxury fashion brand\'s e-commerce website. The project focused on creating an immersive shopping experience with stunning visuals, intuitive navigation, and seamless checkout process.',
-      tags: ['Web Design', 'E-Commerce', 'Luxury Brand', 'Shopify Development', 'UX Design'],
-      image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-      client: 'Luxe Fashion House',
-      year: '2024',
-      duration: '8 weeks',
-      role: 'Lead Web Designer',
-      deliverables: ['Website Design', 'UX Research', 'Development Handoff', 'Mobile Optimization'],
-      results: ['65% increase in conversions', '40% higher mobile sales', 'Brand perception improved'],
-      color: '#880E4F',
-      mockups: []
-    },
+      
+  id: 53,
+  title: 'Ms. Eunice Ntownanor - Memorial Tribute Design',
+  category: 'print',
+  description: 'Dignified memorial tribute design celebrating the life of Ms. Eunice Ntownanor (Anaesthetist)',
+  detailedDescription: 'Created a respectful and dignified memorial tribute design for Ms. Eunice Ntownanor (1981-2026), a dedicated anaesthetist. The design commemorates her life and professional legacy with elegant typography, subtle visual elements, and a serene color palette. The tribute materials include funeral programs, memorial cards, and remembrance booklets that honor her contribution to healthcare and her impact on colleagues and family.',
+  tags: ['Memorial Design', 'Funeral Program', 'Healthcare Professional', 'Tribute Design', 'Print Design', 'Legacy'],
+  image: 'Eunice 2.jpg',
+  client: 'Family of Ms. Eunice Ntownanor',
+  year: '2026',
+  duration: '3 days',
+  role: 'Lead Memorial & Print Designer',
+  deliverables: [
+    'Memorial Tribute Design', 
+    'Funeral Program', 
+    'Memorial Cards', 
+    'Remembrance Booklet',
+    'Digital Tribute',
+    'Order of Service'
+  ],
+  results: [
+    'Dignified memorial tribute', 
+    'Celebrated professional legacy', 
+    'Provided comfort to family and colleagues',
+    'Honored her contribution to healthcare'
+  ],
+  color: '#5D4037',
+  mockups: [
+    '/images/mockups/memorial-tribute-1.jpg',
+    '/images/mockups/memorial-tribute-2.jpg'
+  ]
+},
     {
       id: 54,
       title: 'Creative Agency Portfolio Website',
