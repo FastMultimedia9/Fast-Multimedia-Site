@@ -1,9 +1,9 @@
-/* ServiceDetailPage.css */
+/* src/components/ServiceDetailPage.css */
 
 /* --- HERO SECTION --- */
 .service-hero {
   padding: 140px 0 80px;
-  background: var(--duck-cream);
+  background: var(--duck-cream, #f8f5f0);
   position: relative;
   overflow: hidden;
 }
@@ -17,14 +17,14 @@
 .service-hero-title {
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 700;
-  color: var(--duck-dark);
+  color: var(--duck-dark, #1a1a1a);
   margin-bottom: 20px;
   line-height: 1.2;
 }
 
 .service-hero-subtitle {
   font-size: 1.15rem;
-  color: var(--duck-text);
+  color: var(--duck-text, #4a4a4a);
   max-width: 700px;
   margin: 0 auto 30px;
   line-height: 1.7;
@@ -51,8 +51,15 @@
 .section-title {
   font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 700;
-  color: var(--duck-dark);
+  color: var(--duck-dark, #1a1a1a);
   margin-bottom: 10px;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #f6b26b, #e8a04a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .service-pricing-toggle {
@@ -65,29 +72,29 @@
 
 .pricing-toggle-btn {
   padding: 12px 24px;
-  border: 2px solid var(--duck-border);
+  border: 2px solid var(--duck-border, #e0d6c8);
   background: transparent;
   border-radius: 50px;
   font-size: 16px;
   font-weight: 600;
-  color: var(--duck-text);
+  color: var(--duck-text, #4a4a4a);
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: var(--font-primary);
+  font-family: inherit;
 }
 
 .pricing-toggle-btn.active {
-  background: var(--gradient-gold);
-  border-color: var(--duck-gold);
-  color: var(--duck-dark);
+  background: linear-gradient(135deg, #f6b26b, #e8a04a);
+  border-color: #e8a04a;
+  color: #1a1a1a;
 }
 
 .pricing-toggle-btn:hover:not(.active) {
-  border-color: var(--duck-dark-gold);
+  border-color: #d4953a;
 }
 
 .discount-badge {
-  background: var(--duck-dark-gold);
+  background: #d4953a;
   color: white;
   padding: 2px 10px;
   border-radius: 20px;
@@ -112,26 +119,30 @@
 
 .service-offering-card {
   padding: 30px;
-  border: 1px solid var(--duck-border);
+  border: 1px solid var(--duck-border, #e0d6c8);
   border-radius: 16px;
-  background: var(--duck-cream);
+  background: var(--duck-cream, #f8f5f0);
 }
 
 .service-offering-icon {
   font-size: 2.5rem;
-  color: var(--duck-dark-gold);
+  color: #d4953a;
   margin-bottom: 16px;
+}
+
+.service-offering-icon svg {
+  color: #d4953a;
 }
 
 .service-offering-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--duck-dark);
+  color: var(--duck-dark, #1a1a1a);
   margin-bottom: 12px;
 }
 
 .service-offering-description {
-  color: var(--duck-text);
+  color: var(--duck-text, #4a4a4a);
   margin-bottom: 20px;
   line-height: 1.6;
 }
@@ -141,17 +152,18 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding: 0;
 }
 
 .service-offering-features li {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--duck-text);
+  color: var(--duck-text, #4a4a4a);
 }
 
 .feature-check-icon {
-  color: var(--duck-dark-gold);
+  color: #d4953a;
   font-size: 14px;
   flex-shrink: 0;
 }
@@ -159,9 +171,9 @@
 /* Pricing Card */
 .service-pricing-card {
   padding: 30px;
-  border: 2px solid var(--duck-dark-gold);
+  border: 2px solid #d4953a;
   border-radius: 16px;
-  background: var(--gradient-gold);
+  background: linear-gradient(135deg, #fdf6ee, #f8f0e6);
   position: sticky;
   top: 100px;
 }
@@ -174,27 +186,28 @@
 .pricing-plan-name {
   font-size: 1.3rem;
   font-weight: 600;
-  color: var(--duck-dark);
+  color: var(--duck-dark, #1a1a1a);
   margin-bottom: 8px;
 }
 
 .pricing-plan-price {
   font-size: 2.8rem;
   font-weight: 800;
-  color: var(--duck-dark);
+  color: var(--duck-dark, #1a1a1a);
 }
 
 .pricing-plan-period {
   font-size: 1rem;
   font-weight: 400;
   display: block;
-  color: var(--duck-dark);
+  color: var(--duck-dark, #1a1a1a);
   opacity: 0.7;
 }
 
 .pricing-plan-features {
   list-style: none;
   margin-bottom: 24px;
+  padding: 0;
 }
 
 .pricing-plan-features li {
@@ -202,7 +215,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 0;
-  color: var(--duck-dark);
+  color: var(--duck-dark, #1a1a1a);
   border-bottom: 1px solid rgba(22, 27, 38, 0.1);
 }
 
@@ -218,7 +231,7 @@
 /* --- WHY CHOOSE US --- */
 .service-why-choose {
   padding: 60px 0;
-  background: var(--duck-cream);
+  background: var(--duck-cream, #f8f5f0);
 }
 
 .text-center {
@@ -236,38 +249,42 @@
   background: white;
   padding: 30px;
   border-radius: 16px;
-  border: 1px solid var(--duck-border);
+  border: 1px solid var(--duck-border, #e0d6c8);
   text-align: center;
   transition: transform 0.3s ease;
 }
 
 .service-why-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 47px 0 var(--duck-shadow);
+  box-shadow: 0 20px 47px 0 rgba(0, 0, 0, 0.08);
 }
 
 .service-why-icon {
   font-size: 2.5rem;
-  color: var(--duck-dark-gold);
+  color: #d4953a;
   margin-bottom: 16px;
+}
+
+.service-why-icon svg {
+  color: #d4953a;
 }
 
 .service-why-card h3 {
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--duck-dark);
+  color: var(--duck-dark, #1a1a1a);
   margin-bottom: 8px;
 }
 
 .service-why-card p {
-  color: var(--duck-text);
+  color: var(--duck-text, #4a4a4a);
   line-height: 1.5;
 }
 
 /* --- CTA SECTION --- */
 .service-cta {
   padding: 80px 0;
-  background: var(--duck-dark);
+  background: var(--duck-dark, #1a1a1a);
   color: white;
 }
 
