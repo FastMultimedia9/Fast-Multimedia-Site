@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { 
   FaPalette, FaDesktop, FaPenFancy, FaLaptop, FaPrint, FaGlobe,
   FaTools, FaCogs, FaCloudUploadAlt, FaWifi,
-  FaArrowRight, FaStar, FaCheckCircle
+  FaArrowRight, FaStar, FaCheckCircle, FaPlay,
+  FaUsers, FaClock, FaHeadset
 } from 'react-icons/fa';
 import './HomePage.css';
 
@@ -17,7 +18,7 @@ const HomePage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   
-  // Professional hero images
+  // Hero images
   const heroImages = [
     "https://images.unsplash.com/photo-1626785774573-4b799315345d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80",
     "https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80",
@@ -30,7 +31,6 @@ const HomePage = () => {
     "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80",
   ];
 
-  // Updates & Announcements Data
   const updatesData = [
     {
       id: 1,
@@ -78,7 +78,6 @@ const HomePage = () => {
     }
   ];
 
-  // Featured Portfolio Projects
   const featuredPortfolioProjects = [
     {
       id: 'featured-1',
@@ -88,11 +87,7 @@ const HomePage = () => {
       description: 'Award-winning logo design celebrating heritage and future vision.',
       image: '/80th.jpg',
       tags: ['Logo Design', 'Healthcare'],
-      details: [
-        'Winning competition design',
-        'Heritage meets future concept',
-        'Clean sans-serif typography',
-      ],
+      details: ['Winning competition design', 'Heritage meets future concept', 'Clean sans-serif typography'],
       client: 'St. Martin De Porres Hospital',
       year: '2025'
     },
@@ -104,11 +99,7 @@ const HomePage = () => {
       description: 'Sophisticated fashion brand with "Exclusively Different" positioning.',
       image: '/mr-wise.jpg',
       tags: ['Fashion', 'Luxury'],
-      details: [
-        'Complete brand identity',
-        'Premium positioning',
-        'Brand guidelines',
-      ],
+      details: ['Complete brand identity', 'Premium positioning', 'Brand guidelines'],
       client: 'Mr. Wise Clothing',
       year: '2025'
     },
@@ -120,11 +111,7 @@ const HomePage = () => {
       description: 'Product label design with clear ingredient listing.',
       image: '/mango-label.jpg',
       tags: ['Packaging', 'Food'],
-      details: [
-        'Regulatory compliance',
-        'Professional retail appearance',
-        'Clear ingredient display',
-      ],
+      details: ['Regulatory compliance', 'Professional retail appearance', 'Clear ingredient display'],
       client: 'Abidan Royal Enterprise',
       year: '2024'
     },
@@ -290,27 +277,7 @@ const HomePage = () => {
 
   return (
     <div className="homepage">
-      {/* Service Toggle */}
-      <div className={`service-toggle ${isScrolled ? 'scrolled' : ''}`}>
-        <div className="toggle-container">
-          <button
-            className={`toggle-btn ${activeServiceCategory === 'design' ? 'active' : ''}`}
-            onClick={() => setActiveServiceCategory('design')}
-          >
-            <FaPalette className="toggle-icon" />
-            <span className="toggle-text">Design Services</span>
-          </button>
-          <button
-            className={`toggle-btn ${activeServiceCategory === 'tech' ? 'active' : ''}`}
-            onClick={() => setActiveServiceCategory('tech')}
-          >
-            <FaDesktop className="toggle-icon" />
-            <span className="toggle-text">Tech Services</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Hero Section */}
+      {/* Hero Section - Duck Design Style */}
       <section className="hero">
         <div className="hero-background">
           {getActiveHeroImages().map((img, index) => (
@@ -324,6 +291,26 @@ const HomePage = () => {
         </div>
 
         <div className="hero-content">
+          {/* Service Toggle - Positioned inside Hero like Duck Design */}
+          <div className={`service-toggle-wrapper ${isScrolled ? 'scrolled' : ''}`}>
+            <div className="toggle-container">
+              <button
+                className={`toggle-btn ${activeServiceCategory === 'design' ? 'active' : ''}`}
+                onClick={() => setActiveServiceCategory('design')}
+              >
+                <FaPalette className="toggle-icon" />
+                <span className="toggle-text">Design Services</span>
+              </button>
+              <button
+                className={`toggle-btn ${activeServiceCategory === 'tech' ? 'active' : ''}`}
+                onClick={() => setActiveServiceCategory('tech')}
+              >
+                <FaDesktop className="toggle-icon" />
+                <span className="toggle-text">Tech Services</span>
+              </button>
+            </div>
+          </div>
+
           <div className="hero-badge">
             <span className="badge-text">Professional Services</span>
           </div>
@@ -361,16 +348,11 @@ const HomePage = () => {
                 }
               }}
             >
-              <span className="btn-icon">
-                {activeServiceCategory === 'design' ? '🎨' : '🔧'}
-              </span>
-              <span>
-                {activeServiceCategory === 'design' ? 'View Packages' : 'Explore Services'}
-              </span>
+              {activeServiceCategory === 'design' ? 'View Packages' : 'Explore Services'}
               <FaArrowRight className="btn-arrow" />
             </button>
             <button className="btn btn-secondary" onClick={() => navigate('/contact')}>
-              <span>Get Started</span>
+              Get Started
             </button>
           </div>
 
@@ -398,7 +380,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Updates & Announcements Section */}
+      {/* Updates Section */}
       <section className="updates-section">
         <div className="container">
           <div className="section-header">
@@ -420,9 +402,7 @@ const HomePage = () => {
                 >
                   <div className="update-image">
                     <img src={update.image} alt={update.title} />
-                    <div className="update-tag" style={{ 
-                      background: 'linear-gradient(135deg, #ff8b20, #ffca41)'
-                    }}>
+                    <div className="update-tag">
                       {update.tag}
                     </div>
                     <div className="update-type-badge">
@@ -447,9 +427,7 @@ const HomePage = () => {
                 >
                   <div className="update-image">
                     <img src={update.image} alt={update.title} />
-                    <div className="update-tag" style={{ 
-                      background: 'linear-gradient(135deg, #ff8b20, #ffca41)'
-                    }}>
+                    <div className="update-tag">
                       {update.tag}
                     </div>
                     <div className="update-type-badge">
@@ -491,7 +469,6 @@ const HomePage = () => {
                   key={service.id}
                   className="service-card"
                   onClick={() => handleServiceClick(service)}
-                  style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="service-card-inner">
                     <div className="service-header">
@@ -570,7 +547,7 @@ const HomePage = () => {
         </section>
       )}
 
-      {/* How It Works Section */}
+      {/* How It Works */}
       <section className="process-section">
         <div className="container">
           <div className="section-header">
@@ -631,7 +608,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Testimonials */}
       <section className="testimonials-section">
         <div className="container">
           <div className="section-header">
@@ -693,14 +670,10 @@ const HomePage = () => {
                   className={`package-card ${pkg.highlighted ? 'highlighted' : ''} ${selectedPackage === pkg.id ? 'selected' : ''}`}
                   onClick={() => setSelectedPackage(pkg.id)}
                 >
-                  {pkg.highlighted && (
-                    <div className="package-badge">Most Popular</div>
-                  )}
+                  {pkg.highlighted && <div className="package-badge">Most Popular</div>}
                   <div className="package-header">
                     <h3 className="package-name">{pkg.name}</h3>
-                    <div className="package-price">
-                      <span className="price-value">{pkg.price}</span>
-                    </div>
+                    <div className="package-price">{pkg.price}</div>
                   </div>
                   <p className="package-description">{pkg.description}</p>
                   <ul className="package-features">
