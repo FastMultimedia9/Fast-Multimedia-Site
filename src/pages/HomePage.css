@@ -152,63 +152,59 @@ body {
 
 /* ============================================
    HERO SECTION - DUCK DESIGN STYLE
+   Image on Right, Text on Left
    ============================================ */
 .hero {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 80px 20px 60px;
+  padding: 80px 0 60px;
   background: var(--duck-cream);
   position: relative;
   overflow: hidden;
 }
 
-.hero-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 0;
+.hero-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 60px;
 }
 
-.hero-bg-slide {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-size: cover;
-  background-position: center;
-  opacity: 0;
-  transition: opacity 1s ease-in-out;
+/* Left Column - Text Content */
+.hero-left {
+  flex: 1;
+  max-width: 600px;
+  padding: 20px 0;
 }
 
-.hero-bg-slide.active {
-  opacity: 1;
+/* Right Column - Image */
+.hero-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to bottom, rgba(254, 249, 239, 0.2), rgba(254, 249, 239, 0.6));
-}
-
-.hero-content {
-  max-width: 900px;
-  z-index: 2;
+.hero-image-wrapper {
+  width: 100%;
+  max-width: 700px;
   position: relative;
+}
+
+.hero-image-wrapper img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 /* Service Toggle - Inside Hero */
 .service-toggle-wrapper {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   margin-bottom: 30px;
 }
 
@@ -290,7 +286,7 @@ body {
 }
 
 .hero-title {
-  font-size: clamp(2.8rem, 8vw, 4.8rem);
+  font-size: clamp(2.8rem, 5vw, 4.5rem);
   font-weight: 700;
   line-height: 1.1;
   margin-bottom: 20px;
@@ -298,26 +294,22 @@ body {
 }
 
 .hero-subtitle {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: var(--duck-text);
   margin-bottom: 40px;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.6;
+  max-width: 550px;
+  line-height: 1.7;
 }
 
 .hero-actions {
   display: flex;
   gap: 16px;
-  justify-content: center;
   flex-wrap: wrap;
 }
 
 .hero-social-list {
   display: flex;
-  justify-content: center;
-  gap: 20px;
+  gap: 16px;
   margin-top: 40px;
 }
 
@@ -346,6 +338,8 @@ body {
 .hero-scroll-indicator {
   position: absolute;
   bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -359,6 +353,110 @@ body {
   width: 1px;
   height: 50px;
   background: linear-gradient(to bottom, var(--duck-text), transparent);
+}
+
+/* ============================================
+   RESPONSIVE - HERO
+   ============================================ */
+@media (max-width: 1024px) {
+  .hero-container {
+    gap: 40px;
+    padding: 0 30px;
+  }
+  
+  .hero-left {
+    max-width: 500px;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 100px 0 40px;
+  }
+  
+  .hero-container {
+    flex-direction: column;
+    gap: 40px;
+    padding: 0 20px;
+  }
+  
+  .hero-left {
+    max-width: 100%;
+    text-align: center;
+  }
+  
+  .hero-badge {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .hero-subtitle {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .hero-actions {
+    justify-content: center;
+  }
+  
+  .hero-social-list {
+    justify-content: center;
+  }
+  
+  .service-toggle-wrapper {
+    justify-content: center;
+  }
+  
+  .hero-right {
+    width: 100%;
+  }
+  
+  .hero-image-wrapper {
+    max-width: 500px;
+  }
+  
+  .toggle-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+  
+  .toggle-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+  
+  .toggle-icon {
+    font-size: 14px;
+  }
+  
+  .toggle-text {
+    font-size: 11px;
+  }
+  
+  .btn {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+  
+  .hero-social-item {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 /* ============================================
@@ -1570,10 +1668,6 @@ body {
 
 /* Tablet Landscape */
 @media (max-width: 1024px) {
-  .hero-title {
-    font-size: 3.5rem;
-  }
-  
   .quickview-grid {
     grid-template-columns: 1fr;
   }
@@ -1593,28 +1687,6 @@ body {
 
 /* Tablet Portrait */
 @media (max-width: 768px) {
-  .hero {
-    padding: 100px 20px 40px;
-  }
-  
-  .hero-title {
-    font-size: 2.5rem;
-  }
-  
-  .hero-actions {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .toggle-btn {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-  
-  .toggle-text {
-    font-size: 12px;
-  }
-  
   .pricing-grid {
     grid-template-columns: 1fr;
   }
@@ -1656,15 +1728,6 @@ body {
     padding: 30px 20px;
   }
   
-  .hero-social-list {
-    gap: 12px;
-  }
-  
-  .hero-social-item {
-    width: 36px;
-    height: 36px;
-  }
-  
   .services-carousel__item {
     width: 220px;
   }
@@ -1676,41 +1739,6 @@ body {
 
 /* Mobile */
 @media (max-width: 480px) {
-  .hero-title {
-    font-size: 2rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1rem;
-  }
-  
-  .toggle-btn {
-    padding: 6px 12px;
-    font-size: 11px;
-  }
-  
-  .toggle-icon {
-    font-size: 14px;
-  }
-  
-  .toggle-text {
-    font-size: 11px;
-  }
-  
-  .btn {
-    padding: 12px 24px;
-    font-size: 14px;
-  }
-  
-  .btn-large {
-    padding: 14px 28px;
-    font-size: 16px;
-  }
-  
-  .cta-title {
-    font-size: 1.8rem;
-  }
-  
   .modal-title {
     font-size: 28px;
   }
@@ -1789,314 +1817,5 @@ body {
   
   .btn:hover {
     transform: none !important;
-  }
-}
-
-/* ============================================
-   HERO SECTION - DUCK DESIGN STYLE
-   Image on Right, Text on Left
-   ============================================ */
-.hero {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  padding: 80px 0 60px;
-  background: var(--duck-cream);
-  position: relative;
-  overflow: hidden;
-}
-
-.hero-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 20px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 60px;
-}
-
-/* Left Column - Text Content */
-.hero-left {
-  flex: 1;
-  max-width: 600px;
-  padding: 20px 0;
-}
-
-/* Right Column - Image */
-.hero-right {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.hero-image-wrapper {
-  width: 100%;
-  max-width: 700px;
-  position: relative;
-}
-
-.hero-image-wrapper img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Service Toggle - Inside Hero */
-.service-toggle-wrapper {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 30px;
-}
-
-.service-toggle-wrapper.scrolled {
-  position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-.toggle-container {
-  display: flex;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--duck-border);
-  border-radius: 50px;
-  padding: 4px;
-  box-shadow: 0 3px 46px -2px var(--duck-shadow);
-}
-
-.toggle-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 24px;
-  border: none;
-  background: transparent;
-  border-radius: 30px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--duck-text);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: var(--font-primary);
-}
-
-.toggle-btn.active {
-  background: var(--gradient-gold);
-  color: var(--duck-dark);
-  box-shadow: 0 3px 46px -2px var(--duck-shadow);
-}
-
-.toggle-icon {
-  font-size: 16px;
-}
-
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 20px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
-  border-radius: 50px;
-  margin-bottom: 24px;
-  border: 1px solid var(--duck-border);
-}
-
-.badge-text {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--duck-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.hero-title {
-  font-size: clamp(2.8rem, 5vw, 4.5rem);
-  font-weight: 700;
-  line-height: 1.1;
-  margin-bottom: 20px;
-  color: var(--duck-dark);
-}
-
-.hero-subtitle {
-  font-size: 1.1rem;
-  color: var(--duck-text);
-  margin-bottom: 40px;
-  max-width: 550px;
-  line-height: 1.7;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.hero-social-list {
-  display: flex;
-  gap: 16px;
-  margin-top: 40px;
-}
-
-.hero-social-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid var(--duck-border);
-  transition: all 0.3s ease;
-}
-
-.hero-social-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
-.hero-social-item img {
-  width: 20px;
-  height: 20px;
-}
-
-.hero-scroll-indicator {
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  color: var(--duck-text);
-  font-size: 13px;
-  opacity: 0.7;
-}
-
-.scroll-line {
-  width: 1px;
-  height: 50px;
-  background: linear-gradient(to bottom, var(--duck-text), transparent);
-}
-
-/* ============================================
-   RESPONSIVE - HERO
-   ============================================ */
-@media (max-width: 1024px) {
-  .hero-container {
-    gap: 40px;
-    padding: 0 30px;
-  }
-  
-  .hero-left {
-    max-width: 500px;
-  }
-  
-  .hero-title {
-    font-size: 3rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .hero {
-    padding: 100px 0 40px;
-  }
-  
-  .hero-container {
-    flex-direction: column;
-    gap: 40px;
-    padding: 0 20px;
-  }
-  
-  .hero-left {
-    max-width: 100%;
-    text-align: center;
-  }
-  
-  .hero-badge {
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .hero-subtitle {
-    max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .hero-actions {
-    justify-content: center;
-  }
-  
-  .hero-social-list {
-    justify-content: center;
-  }
-  
-  .service-toggle-wrapper {
-    justify-content: center;
-  }
-  
-  .hero-right {
-    width: 100%;
-  }
-  
-  .hero-image-wrapper {
-    max-width: 500px;
-  }
-  
-  .toggle-btn {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-title {
-    font-size: 2rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1rem;
-  }
-  
-  .toggle-btn {
-    padding: 6px 12px;
-    font-size: 11px;
-  }
-  
-  .toggle-icon {
-    font-size: 14px;
-  }
-  
-  .toggle-text {
-    font-size: 11px;
-  }
-  
-  .btn {
-    padding: 12px 24px;
-    font-size: 14px;
-  }
-  
-  .hero-social-item {
-    width: 36px;
-    height: 36px;
   }
 }
