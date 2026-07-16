@@ -25,43 +25,39 @@ const HomePage = () => {
     "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80",
   ];
 
-  // Updates & Announcements Data - Add your own images to public folder
-  // For school-related updates, use type: 'school' - goes to SchoolPage
-  // For services/flyers/tech updates, use type: 'service' or 'flyer' - goes to ContactPage
+  // Updates & Announcements Data
   const updatesData = [
     {
       id: 1,
       title: "New Courses Available",
       subtitle: "3-Month Online Programs",
       description: "Enroll now for Basic ICT, Graphic Design & Web Development. Start Date: 1st May 2026",
-      image: "/images/school-update-1.jpg", // Place in public/images/
+      image: "/images/school-update-1.jpg",
       cta: "Learn More",
       tag: "🎓 New",
-      type: "school", // Goes to SchoolPage
+      type: "school",
       category: "Education"
     },
-    
     {
       id: 3,
       title: "Free Webinar: Web Development",
       subtitle: "Live Online Session",
       description: "Join our free webinar on modern web development. Limited seats available!",
-      image: "/images/tech-update-1.jpg", // Place in public/images/
+      image: "/images/tech-update-1.jpg",
       cta: "Register Free",
       tag: "🎥 Free",
-      type: "flyer", // Goes to ContactPage
+      type: "flyer",
       category: "Event"
     },
-
     {
       id: 5,
       title: "New Computer Repair Service",
       subtitle: "Fast & Reliable",
       description: "Professional computer repair services at affordable prices. Free diagnosis!",
-      image: "/images/tech-update-2.jpg", // Place in public/images/
+      image: "/images/tech-update-2.jpg",
       cta: "Book Service",
       tag: "🔧 New Service",
-      type: "service", // Goes to ContactPage
+      type: "service",
       category: "Tech"
     },
     {
@@ -69,10 +65,10 @@ const HomePage = () => {
       title: "Portfolio Review Day",
       subtitle: "Free Consultation",
       description: "Get your design portfolio reviewed by industry experts. Book your slot today!",
-      image: "/images/service-update-2.jpg", // Place in public/images/
+      image: "/images/service-update-2.jpg",
       cta: "Book Slot",
       tag: "📅 Event",
-      type: "flyer", // Goes to ContactPage
+      type: "flyer",
       category: "Design"
     }
   ];
@@ -134,7 +130,6 @@ const HomePage = () => {
       setIsScrolled(window.scrollY > 50);
     };
 
-    // Auto-rotate hero images
     const interval = setInterval(() => {
       const activeImages = getActiveHeroImages();
       setCurrentImageIndex((prev) => (prev + 1) % activeImages.length);
@@ -151,9 +146,7 @@ const HomePage = () => {
     return activeServiceCategory === 'design' ? heroImages : techHeroImages;
   };
 
-  // Handle update card click based on type
   const handleUpdateClick = (update) => {
-    // Store update info in localStorage
     const updateData = {
       name: update.title,
       category: update.category,
@@ -164,7 +157,6 @@ const HomePage = () => {
     };
     localStorage.setItem('selectedUpdate', JSON.stringify(updateData));
     
-    // Route based on type
     if (update.type === 'school') {
       navigate('/school');
     } else {
@@ -401,11 +393,11 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Updates & Announcements Section - Dynamic Routing */}
+      {/* Updates & Announcements Section */}
       <section className="updates-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-titles">
+            <h2 className="section-title">
               <span className="gradient-text">Latest</span> Updates & Announcements
             </h2>
             <p className="section-subtitle">
@@ -413,10 +405,8 @@ const HomePage = () => {
             </p>
           </div>
           
-          {/* Moving Marquee Container */}
           <div className="marquee-container">
             <div className="marquee-track">
-              {/* First set of updates */}
               {updatesData.map((update) => (
                 <div 
                   key={`first-${update.id}`} 
@@ -427,8 +417,8 @@ const HomePage = () => {
                     <img src={update.image} alt={update.title} />
                     <div className="update-tag" style={{ 
                       background: update.type === 'school' 
-                        ? 'linear-gradient(135deg, #007AFF, #5856D6)' 
-                        : 'linear-gradient(135deg, #ff6b6b, #ee5a24)' 
+                        ? 'linear-gradient(135deg, #ff8b20, #ffca41)' 
+                        : 'linear-gradient(135deg, #ff8b20, #ffca41)' 
                     }}>
                       {update.tag}
                     </div>
@@ -446,7 +436,6 @@ const HomePage = () => {
                   </div>
                 </div>
               ))}
-              {/* Duplicate set for seamless looping */}
               {updatesData.map((update) => (
                 <div 
                   key={`second-${update.id}`} 
@@ -457,8 +446,8 @@ const HomePage = () => {
                     <img src={update.image} alt={update.title} />
                     <div className="update-tag" style={{ 
                       background: update.type === 'school' 
-                        ? 'linear-gradient(135deg, #007AFF, #5856D6)' 
-                        : 'linear-gradient(135deg, #ff6b6b, #ee5a24)' 
+                        ? 'linear-gradient(135deg, #ff8b20, #ffca41)' 
+                        : 'linear-gradient(135deg, #ff8b20, #ffca41)' 
                     }}>
                       {update.tag}
                     </div>
@@ -485,7 +474,7 @@ const HomePage = () => {
       <section className="services-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-titles">
+            <h2 className="section-title">
               {activeServiceCategory === 'design' ? 'Design Services' : 'Tech Services'}
             </h2>
             <p className="section-subtitle">
@@ -527,12 +516,12 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Featured Work (Design only) */}
+      {/* Featured Work */}
       {activeServiceCategory === 'design' && (
         <section className="portfolio-section">
           <div className="container">
             <div className="section-header">
-              <h2 className="section-titles">Featured Work</h2>
+              <h2 className="section-title">Featured Work</h2>
               <p className="section-subtitle">
                 Explore our portfolio of successful design projects
               </p>
@@ -576,6 +565,65 @@ const HomePage = () => {
           </div>
         </section>
       )}
+
+      {/* How It Works Section */}
+      <section className="process-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">How It <span className="gradient-text">Works</span></h2>
+            <p className="section-subtitle">Simple, transparent, and efficient</p>
+          </div>
+          <div className="process-steps">
+            <div className="step">
+              <span className="step-number">1</span>
+              <h4>Choose a Plan</h4>
+              <p>Select the plan that fits your needs and budget.</p>
+            </div>
+            <div className="step">
+              <span className="step-number">2</span>
+              <h4>Payment & Brief</h4>
+              <p>Make payment and provide a brief about your project.</p>
+            </div>
+            <div className="step">
+              <span className="step-number">3</span>
+              <h4>Designer Assigned</h4>
+              <p>A dedicated designer/tech expert is assigned to you.</p>
+            </div>
+            <div className="step">
+              <span className="step-number">4</span>
+              <h4>Receive & Review</h4>
+              <p>Receive your work, request revisions, and approve.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="pricing-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Choose Your <span className="gradient-text">Plan</span></h2>
+            <p className="section-subtitle">Flexible packages for every business</p>
+          </div>
+          <div className="pricing-grid">
+            {packages.map((pkg) => (
+              <div key={pkg.id} className={`pricing-card ${pkg.highlighted ? 'highlighted' : ''}`}>
+                {pkg.highlighted && <div className="pricing-badge">Most Popular</div>}
+                <h3 className="pricing-name">{pkg.name}</h3>
+                <div className="pricing-price">{pkg.price}</div>
+                <ul className="pricing-features">
+                  {pkg.features.map((feature, idx) => (
+                    <li key={idx}>✓ {feature}</li>
+                  ))}
+                </ul>
+                <button className="btn btn-primary" onClick={() => navigate('/contact')}>
+                  Get Started <span className="btn-arrow">→</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Packages Modal */}
       {showPackageModal && (
