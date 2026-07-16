@@ -1045,24 +1045,7 @@ const PortfolioPage = () => {
               </a>
             </div>
             
-            <div className="hero-stats">
-              <div className="stat-card">
-                <div className="stat-number1">{allProjects.length}+</div>
-                <div className="stat-label">Projects Completed</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number1">{categories.length - 1}</div>
-                <div className="stat-label">Design Categories</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number1">98%</div>
-                <div className="stat-label">Client Satisfaction</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number1">2018-2025</div>
-                <div className="stat-label">Active Years</div>
-              </div>
-            </div>
+            
           </div>
         </div>
       </section>
