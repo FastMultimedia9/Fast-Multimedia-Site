@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+// AboutPage.jsx - Updated to match Duck Design layout
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './AboutPage.css';
 
@@ -120,88 +121,201 @@ const AboutPage = () => {
     }
   ];
 
+  const serviceList = [
+    { name: 'Graphic Design' },
+    { name: 'Web Design' },
+    { name: 'Animation' },
+    { name: 'UX/UI' },
+    { name: 'Branding' },
+    { name: 'No-Code Design' }
+  ];
+
   return (
     <div className="about-page">
-      {/* Hero Section */}
-      <section className="about-hero">
+      {/* Hero Section - Duck Design Style */}
+      <section className="hero-section hero-section_default" style={{ 
+        background: "url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center bottom transparent",
+        backgroundSize: "cover"
+      }}>
         <div className="container">
-          <div className="about-hero-content animate-on-scroll">
-            <h1 className="hero-title">About Fast Multimedia</h1>
-            <p className="hero-subtitle">
-              Pioneering graphic design and tech solutions in Ghana since 2018. 
-              We combine creative excellence with technical expertise to transform businesses.
-            </p>
-            <div className="hero-stats">
-              <div className="stat-item">
-                <h3 className="stat-number22">6+</h3>
-                <p className="stat-label">Years of Excellence</p>
+          <div className="hero-section__box">
+            <div className="hero-section__info">
+              <h1 className="page-title page-title_small text-center wow fadeInUp" data-wow-delay=".2s">
+                Fast Multimedia: Design &amp; Tech Solutions for Your Business
+              </h1>
+              <div className="hero-section__txt text-center wow fadeInUp" data-wow-delay=".3s">
+                Founded in 2018, Fast Multimedia provides professional design and technical support services. We specialize in high-quality business solutions through a client-focused approach, serving businesses of all sizes.
               </div>
-              <div className="stat-item">
-                <h3 className="stat-number22">500+</h3>
-                <p className="stat-label">Projects Completed</p>
-              </div>
-              <div className="stat-item">
-                <h3 className="stat-number22">98%</h3>
-                <p className="stat-label">Client Satisfaction</p>
-              </div>
-              <div className="stat-item">
-                <h3 className="stat-number22">50+</h3>
-                <p className="stat-label">Happy Clients</p>
+              <div className="desktop-only">
+                <div className="hero-section__btngroup wow fadeInUp">
+                  <Link to="/contact" className="btn btn-primary btn-primary_arrow">Get Started</Link>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Our Story */}
-      <section className="story-section section">
-        <div className="container">
-          <div className="story-content">
-            <div className="story-text animate-on-scroll">
-              <h2 className="section-title">Our Journey</h2>
-              <p className="story-description">
-                Founded in 2018, Fast Multimedia began as a small graphic design studio in Kpong, 
-                Ghana. What started as a passion for creating beautiful designs has evolved into 
-                a comprehensive creative agency offering both graphic design and technical support services.
-              </p>
-              <p className="story-description">
-                Over the past 6 years, we've grown from a one-person operation to a dedicated team 
-                of professionals, expanding our services to include computer repairs, networking solutions, 
-                and comprehensive tech support while maintaining our core expertise in design.
-              </p>
-              <p className="story-description">
-                Our location on the Akosombo Highway in Kpong has allowed us to serve clients 
-                throughout Ghana while maintaining strong community roots. We're proud to be 
-                part of Ghana's growing creative and tech industry.
-              </p>
-              <div className="story-highlights">
-                <div className="highlight-item">
-                  <i className="fas fa-map-marker-alt"></i>
-                  <div>
-                    <h4>Our Location</h4>
-                    <p>Kpong, Akosombo Highway<br />Eastern Region, Ghana</p>
-                  </div>
+      {/* Expertise Section - Duck Design Style */}
+      <section className="solution-section">
+        <div className="container-wide_l">
+          <div className="solution-section__col">
+            <div className="solution-section__box">
+              <div className="page-pretitle wow fadeInUp" data-wow-delay=".2s">Our Expertise</div>
+              <h2 className="section-title text-left wow fadeInUp" data-wow-delay=".3s">Comprehensive Design &amp; Tech Solutions</h2>
+              <div className="solution-section__txt wow fadeInUp" data-wow-delay=".3s">
+                <p>We offer a wide range of services, including:</p>
+                <div className="hero-section__adv">
+                  {serviceList.map((service, index) => (
+                    <div key={index} className="hero-section__adv-item">
+                      <span>{service.name}</span>
+                    </div>
+                  ))}
                 </div>
-                <div className="highlight-item">
-                  <i className="fas fa-calendar-alt"></i>
-                  <div>
-                    <h4>Established</h4>
-                    <p>2018<br />6+ Years of Service</p>
-                  </div>
-                </div>
+                <p>Fast Multimedia leverages modern technologies to optimize processes and deliver projects faster than traditional in-house teams. Our client-focused approach makes the process transparent and predictable.</p>
+              </div>
+              <div className="solution-section__btngroup wow fadeInUp" data-wow-delay=".4s">
+                <Link to="/portfolio" className="btn btn-border btn-border_arrow">Our Works</Link>
               </div>
             </div>
-            <div className="story-image animate-on-scroll">
-              <img 
-                src="https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Fast Multimedia Studio"
-              />
+            <div className="solution-section__img">
+              <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" width="1320" height="1192" alt="Fast Multimedia Studio" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Mission & Vision */}
+      {/* Trusted By Section - Duck Design Style */}
+      <section className="partner-section">
+        <div className="container">
+          <div className="partner-section__col">
+            <div className="partner-section__left">
+              <h2 className="section-title wow fadeInUp" data-wow-delay=".3s">Trusted by Businesses Across Ghana</h2>
+              <div className="section-txt wow fadeInUp" data-wow-delay=".4s">
+                Our clients include local businesses, startups, and growing companies. Their trust in us reflects the high quality and reliability of our services.
+              </div>
+            </div>
+            <div className="partner-section__right wow fadeInUp">
+              <div className="partner-section__list horslider-left">
+                {[1,2,3,4,5,6,7,8].map((item) => (
+                  <div key={item} className="partner-section__item">
+                    <span style={{ fontSize: '1.4rem', fontWeight: '600', color: '#161B26' }}>
+                      Partner {item}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Our Team Section - Duck Design Style */}
+      <section className="txtimg-section txtimg-section_about">
+        <div className="container">
+          <div className="txtimg-section__list">
+            <div className="txtimg-section__item wow fadeInUp">
+              <div className="txtimg-section__icon">
+                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" width="1000" height="1000" alt="Our Team" />
+              </div>
+              <div className="txtimg-section__info">
+                <div className="txtimg-section__name">Our Team: <br />The Driving Force Behind Fast Multimedia</div>
+                <div className="txtimg-section__txt">
+                  The success of Fast Multimedia lies in the talent and dedication of our team. We prioritize hiring and nurturing highly skilled professionals from diverse fields, creating a flexible and dynamic environment. This empowers our team to deliver impactful solutions that help our clients achieve their business goals.
+                </div>
+              </div>
+            </div>
+
+            <div className="txtimg-section__item wow fadeInUp">
+              <div className="txtimg-section__icon">
+                <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" width="634" height="470" alt="Continuous Learning" />
+              </div>
+              <div className="txtimg-section__info">
+                <div className="txtimg-section__name">Commitment <br />to Continuous Learning</div>
+                <div className="txtimg-section__txt">
+                  Fast Multimedia fosters continuous learning and skill development for its team. The company invests in its people, offering training on new technologies, tools, and methods in creative and technical industries.
+                </div>
+              </div>
+            </div>
+
+            <div className="txtimg-section__item wow fadeInUp">
+              <div className="txtimg-section__icon">
+                <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" width="634" height="470" alt="Our Values" />
+              </div>
+              <div className="txtimg-section__info">
+                <div className="txtimg-section__name">Our Values: <br />High Quality <br />Standards and Client-Centricity</div>
+                <div className="txtimg-section__txt">
+                  At Fast Multimedia, we take pride in our commitment to high standards and attention to detail. With a growing client base, we hold ourselves accountable for delivering top-quality work. Client-centricity and the ability to quickly adapt to changing needs are at the heart of our approach.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Story Section - Duck Design Style */}
+      <section className="story-section">
+        <div className="container">
+          <h2 className="section-title text-left wow fadeInUp" data-wow-delay=".3s">The Rise of Fast Multimedia</h2>
+          <div className="story-section__box">
+            <div className="story-section__list wow fadeInUp">
+              <div className="story-section__item story-section__item-img">
+                <div className="story-section__info">
+                  <div className="story-section__head">
+                    <div className="story-section__name">PROJECTS SPANNING GHANA</div>
+                  </div>
+                  <div className="story-section__txt">
+                    Fast Multimedia is a local company committed to providing tailored solutions that meet the diverse needs of clients, wherever they are.
+                  </div>
+                </div>
+                <div className="story-section__img">
+                  <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" width="468" height="528" alt="Projects" />
+                </div>
+              </div>
+
+              <div className="story-section__item">
+                <div className="story-section__info">
+                  <div className="story-section__head">
+                    <div className="story-section__name">SATISFIED CLIENTS</div>
+                    <div className="story-section__number">50+</div>
+                  </div>
+                  <div className="story-section__txt">
+                    From startups to established businesses, we work with companies of all sizes. Our expertise helps every business achieve success through creative design and tech solutions.
+                  </div>
+                </div>
+              </div>
+
+              <div className="story-section__item">
+                <div className="story-section__info">
+                  <div className="story-section__head">
+                    <div className="story-section__name">TOP-TIER TALENT</div>
+                    <div className="story-section__number">10+</div>
+                  </div>
+                  <div className="story-section__txt">
+                    Fast Multimedia is home to skilled designers and tech professionals. Our flexibility allows us to deliver quality solutions that meet your needs.
+                  </div>
+                </div>
+              </div>
+
+              <div className="story-section__item story-section__item-img">
+                <div className="story-section__info">
+                  <div className="story-section__head">
+                    <div className="story-section__name">INDUSTRY LEADERS</div>
+                  </div>
+                  <div className="story-section__txt">
+                    Fast Multimedia actively participates in industry events and competitions, highlighting our creativity and commitment to excellence.
+                  </div>
+                </div>
+                <div className="story-section__img">
+                  <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" width="468" height="528" alt="Industry Leaders" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mission & Vision Section - Duck Design Style */}
       <section className="mission-vision section">
         <div className="container">
           <div className="mission-vision-grid">
@@ -232,154 +346,23 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Our Values */}
-      <section className="values-section section">
+      {/* CTA Section - Duck Design Style */}
+      <section className="cta-boxbg cta-boxbg_contact">
         <div className="container">
-          <div className="section-header animate-on-scroll">
-            <h2 className="section-title">Our Core Values</h2>
-            <p className="section-subtitle">
-              The principles that guide everything we do at Fast Multimedia
-            </p>
-          </div>
-          
-          <div className="values-grid">
-            {values.map((value) => (
-              <div key={value.id} className="value-card animate-on-scroll">
-                <div className="value-icon">
-                  <i className={value.icon}></i>
-                </div>
-                <h3 className="value-title">{value.title}</h3>
-                <p className="value-description">{value.description}</p>
+          <div className="cta-boxbg__inner">
+            <div className="cta-boxbg__left">
+              <div className="section-pretitle text-left wow fadeInUp" data-wow-delay=".2s">LET'S WORK TOGETHER</div>
+              <div className="section-title text-left wow fadeInUp" data-wow-delay=".3s">Get in touch.</div>
+              <div className="section-txt text-left wow fadeInUp" data-wow-delay=".4s">
+                Have a clear vision in mind? Fantastic.
+                <br />Need help bringing it to life? We've got you covered.
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Our Team */}
-      <section className="team-section section">
-        <div className="container">
-          <div className="section-header animate-on-scroll">
-            <h2 className="section-title">Meet Our Team</h2>
-            <p className="section-subtitle">
-              Talented professionals dedicated to delivering exceptional results
-            </p>
-          </div>
-          
-          <div className="team-grid">
-            {teamMembers.map((member) => (
-              <div key={member.id} className="team-member animate-on-scroll">
-                <div className="member-image">
-                  <img src={member.image} alt={member.name} />
-                </div>
-                <div className="member-info">
-                  <h3 className="member-name">{member.name}</h3>
-                  <p className="member-role">{member.role}</p>
-                  <p className="member-bio">{member.bio}</p>
-                </div>
+              <div className="contactcta-section__btngroup text-left wow fadeInUp" data-wow-delay=".4s">
+                <Link to="/contact" className="btn btn-white btn-primary_arrow">Get Started</Link>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Our Process */}
-      <section className="process-section section">
-        <div className="container">
-          <div className="section-header animate-on-scroll">
-            <h2 className="section-title">Our Work Process</h2>
-            <p className="section-subtitle">
-              A structured approach that ensures quality, efficiency, and satisfaction
-            </p>
-          </div>
-          
-          <div className="process-grid">
-            {processSteps.map((step, index) => (
-              <div key={step.id} className="process-step animate-on-scroll">
-                <div className="step-number">{index + 1}</div>
-                <div className="step-content">
-                  <div className="step-icon">
-                    <i className={step.icon}></i>
-                  </div>
-                  <h3 className="step-title">{step.title}</h3>
-                  <p className="step-description">{step.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="why-choose-section section">
-        <div className="container">
-          <div className="section-header animate-on-scroll">
-            <h2 className="section-title">Why Choose Fast Multimedia</h2>
-            <p className="section-subtitle">
-              What sets us apart in the competitive world of design and tech
-            </p>
-          </div>
-          
-          <div className="features-grid">
-            <div className="feature-card animate-on-scroll">
-              <div className="feature-icon">
-                <i className="fas fa-award"></i>
-              </div>
-              <h3 className="feature-title">6 Years of Experience</h3>
-              <p className="feature-description">
-                With over 6 years in business, we bring proven expertise to every project.
-              </p>
             </div>
-            
-            <div className="feature-card animate-on-scroll">
-              <div className="feature-icon">
-                <i className="fas fa-users"></i>
-              </div>
-              <h3 className="feature-title">Dedicated Team</h3>
-              <p className="feature-description">
-                Our skilled professionals are committed to your success from start to finish.
-              </p>
-            </div>
-            
-            <div className="feature-card animate-on-scroll">
-              <div className="feature-icon">
-                <i className="fas fa-bolt"></i>
-              </div>
-              <h3 className="feature-title">Fast Turnaround</h3>
-              <p className="feature-description">
-                We deliver quality work efficiently without compromising on excellence.
-              </p>
-            </div>
-            
-            <div className="feature-card animate-on-scroll">
-              <div className="feature-icon">
-                <i className="fas fa-headset"></i>
-              </div>
-              <h3 className="feature-title">24/7 Support</h3>
-              <p className="feature-description">
-                Round-the-clock technical support for all your business needs.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="about-cta section">
-        <div className="container">
-          <div className="cta-content animate-on-scroll">
-            <h2 className="cta-title">Ready to Work With Us?</h2>
-            <p className="cta-description">
-              Whether you need stunning designs, reliable tech support, or both, 
-              we're here to help your business succeed.
-            </p>
-            <div className="cta-buttons">
-              <Link to="/contact" className="btn btn-primary">
-                <i className="fas fa-paper-plane"></i> Start a Project
-              </Link>
-              <Link to="/services" className="btn btn-outline">
-                <i className="fas fa-list"></i> View Our Services
-              </Link>
+            <div className="cta-boxbg__img">
+              <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" width="1526" height="848" alt="Contact Us" />
             </div>
           </div>
         </div>
