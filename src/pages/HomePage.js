@@ -1,30 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  FaPenFancy, FaLaptop, FaPrint, FaGlobe,
-  FaTools, FaCogs, FaCloudUploadAlt, FaWifi,
-  FaArrowRight, FaStar, FaUsers, FaCheckCircle,
-  FaRocket, FaPalette, FaDesktop, FaMobile
-} from 'react-icons/fa';
+// Assuming FontAwesome is installed (npm install @fortawesome/fontawesome-free)
+// If not, you can replace icons with emojis or SVGs.
 import './HomePage.css';
 
 const HomePage = () => {
   const [activeServiceCategory, setActiveServiceCategory] = useState('design');
   const navigate = useNavigate();
 
-  // --- Data ---
+  // --- Data --- (Same as your original, but structured differently)
   const services = {
     design: [
-      { id: 'branding', name: 'Brand Identity', price: '₵699+', description: 'Complete brand systems including logo, color, typography.', icon: FaPenFancy },
-      { id: 'uiux', name: 'UI/UX Design', price: '₵899+', description: 'User-centered interfaces for web and mobile.', icon: FaLaptop },
-      { id: 'print', name: 'Print Design', price: '₵549+', description: 'Professional print materials and packaging.', icon: FaPrint },
-      { id: 'web', name: 'Web Design', price: '₵1,299+', description: 'Modern, responsive websites.', icon: FaGlobe },
+      { id: 'branding', name: 'Brand Identity', price: '₵699+', description: 'Complete brand systems including logo, color, typography.', icon: 'fa-pen-fancy' },
+      { id: 'uiux', name: 'UI/UX Design', price: '₵899+', description: 'User-centered interfaces for web and mobile.', icon: 'fa-laptop' },
+      { id: 'print', name: 'Print Design', price: '₵549+', description: 'Professional print materials and packaging.', icon: 'fa-print' },
+      { id: 'web', name: 'Web Design', price: '₵1,299+', description: 'Modern, responsive websites.', icon: 'fa-globe' },
     ],
     tech: [
-      { id: 'repair', name: 'Computer Repair', price: '₵50+/hr', description: 'Professional repair for all computer makes.', icon: FaTools },
-      { id: 'setup', name: 'System Setup', price: '₵150+', description: 'Complete OS installation and configuration.', icon: FaCogs },
-      { id: 'software', name: 'Software Support', price: '₵100+', description: 'Installation and configuration.', icon: FaCloudUploadAlt },
-      { id: 'network', name: 'Networking', price: '₵250+', description: 'Network setup and management.', icon: FaWifi },
+      { id: 'repair', name: 'Computer Repair', price: '₵50+/hr', description: 'Professional repair for all computer makes.', icon: 'fa-tools' },
+      { id: 'setup', name: 'System Setup', price: '₵150+', description: 'Complete OS installation and configuration.', icon: 'fa-cogs' },
+      { id: 'software', name: 'Software Support', price: '₵100+', description: 'Installation and configuration.', icon: 'fa-cloud-upload-alt' },
+      { id: 'network', name: 'Networking', price: '₵250+', description: 'Network setup and management.', icon: 'fa-wifi' },
     ]
   };
 
@@ -61,13 +57,14 @@ const HomePage = () => {
           </p>
           <div className="hero-actions">
             <button className="btn btn-primary" onClick={() => navigate('/contact')}>
-              Get Started <FaArrowRight className="btn-arrow" />
+              Get Started <span className="btn-arrow">→</span>
             </button>
             <button className="btn btn-secondary" onClick={() => navigate('/services')}>
               View Services
             </button>
           </div>
         </div>
+        {/* Optional decorative background elements can be added here */}
       </section>
 
       {/* Services Section */}
@@ -77,38 +74,23 @@ const HomePage = () => {
             <h2 className="section-title">Our <span className="gradient-text">Services</span></h2>
             <p className="section-subtitle">Professional solutions tailored to your needs</p>
             <div className="service-toggle">
-              <button 
-                className={`toggle-btn ${activeServiceCategory === 'design' ? 'active' : ''}`} 
-                onClick={() => setActiveServiceCategory('design')}
-              >
-                <FaPalette /> Design
-              </button>
-              <button 
-                className={`toggle-btn ${activeServiceCategory === 'tech' ? 'active' : ''}`} 
-                onClick={() => setActiveServiceCategory('tech')}
-              >
-                <FaDesktop /> Tech
-              </button>
+              <button className={`toggle-btn ${activeServiceCategory === 'design' ? 'active' : ''}`} onClick={() => setActiveServiceCategory('design')}>🎨 Design</button>
+              <button className={`toggle-btn ${activeServiceCategory === 'tech' ? 'active' : ''}`} onClick={() => setActiveServiceCategory('tech')}>🔧 Tech</button>
             </div>
           </div>
 
           <div className="services-grid">
-            {services[activeServiceCategory].map((service) => {
-              const Icon = service.icon;
-              return (
-                <div key={service.id} className="service-card" onClick={() => handleServiceClick(service)}>
-                  <div className="service-header">
-                    <Icon className="service-icon" />
-                    <span className="service-price">{service.price}</span>
-                  </div>
-                  <h3 className="service-name">{service.name}</h3>
-                  <p className="service-description">{service.description}</p>
-                  <button className="service-cta">
-                    Learn More <FaArrowRight />
-                  </button>
+            {services[activeServiceCategory].map((service) => (
+              <div key={service.id} className="service-card" onClick={() => handleServiceClick(service)}>
+                <div className="service-header">
+                  <i className={`fas ${service.icon} service-icon`}></i>
+                  <span className="service-price">{service.price}</span>
                 </div>
-              );
-            })}
+                <h3 className="service-name">{service.name}</h3>
+                <p className="service-description">{service.description}</p>
+                <button className="service-cta">Learn More →</button>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -145,26 +127,10 @@ const HomePage = () => {
             <p className="section-subtitle">Simple, transparent, and efficient</p>
           </div>
           <div className="process-steps">
-            <div className="step">
-              <span className="step-number">1</span>
-              <h4>Choose a Plan</h4>
-              <p>Select the plan that fits your needs and budget.</p>
-            </div>
-            <div className="step">
-              <span className="step-number">2</span>
-              <h4>Payment & Brief</h4>
-              <p>Make payment and provide a brief about your project.</p>
-            </div>
-            <div className="step">
-              <span className="step-number">3</span>
-              <h4>Designer Assigned</h4>
-              <p>A dedicated designer/tech expert is assigned to you.</p>
-            </div>
-            <div className="step">
-              <span className="step-number">4</span>
-              <h4>Receive & Review</h4>
-              <p>Receive your work, request revisions, and approve.</p>
-            </div>
+            <div className="step"><span className="step-number">1</span><h4>Choose a Plan</h4><p>Select the plan that fits your needs and budget.</p></div>
+            <div className="step"><span className="step-number">2</span><h4>Payment & Brief</h4><p>Make payment and provide a brief about your project.</p></div>
+            <div className="step"><span className="step-number">3</span><h4>Designer Assigned</h4><p>A dedicated designer/tech expert is assigned to you.</p></div>
+            <div className="step"><span className="step-number">4</span><h4>Receive & Review</h4><p>Receive your work, request revisions, and approve.</p></div>
           </div>
         </div>
       </section>
@@ -183,59 +149,11 @@ const HomePage = () => {
                 <h3 className="pricing-name">{pkg.name}</h3>
                 <div className="pricing-price">{pkg.price}</div>
                 <ul className="pricing-features">
-                  {pkg.features.map((feature, idx) => (
-                    <li key={idx}>
-                      <FaCheckCircle className="feature-check" /> {feature}
-                    </li>
-                  ))}
+                  {pkg.features.map((feature, idx) => (<li key={idx}>✓ {feature}</li>))}
                 </ul>
-                <button className="btn btn-primary" onClick={() => navigate('/contact')}>
-                  Get Started <FaArrowRight className="btn-arrow" />
-                </button>
+                <button className="btn btn-primary">Get Started</button>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="testimonials-section">
-        <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">What Our <span className="gradient-text">Clients Say</span></h2>
-            <p className="section-subtitle">Real feedback from real people</p>
-          </div>
-          <div className="testimonials-grid">
-            <div className="testimonial-card">
-              <div className="testimonial-stars">
-                <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
-              </div>
-              <p>"The branding package transformed our business. Professional, creative, and delivered on time!"</p>
-              <div className="testimonial-author">
-                <strong>John Mensah</strong>
-                <span>CEO, TechStart Ghana</span>
-              </div>
-            </div>
-            <div className="testimonial-card">
-              <div className="testimonial-stars">
-                <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
-              </div>
-              <p>"The tech support team is incredible. They fixed our network issues and got us running smoothly."</p>
-              <div className="testimonial-author">
-                <strong>Mary Asare</strong>
-                <span>Operations Manager, EduHub</span>
-              </div>
-            </div>
-            <div className="testimonial-card">
-              <div className="testimonial-stars">
-                <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
-              </div>
-              <p>"From logo design to website, they handled everything. Highly recommend their design services."</p>
-              <div className="testimonial-author">
-                <strong>Kwame Osei</strong>
-                <span>Founder, Abidan Royal</span>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -243,13 +161,10 @@ const HomePage = () => {
       {/* CTA Section */}
       <section className="cta-section">
         <div className="container">
-          <h2 className="cta-title">
-            Ready to elevate your <br />
-            <span className="gradient-text">brand or business</span>?
-          </h2>
+          <h2 className="cta-title">Ready to elevate your <br /><span className="gradient-text">brand or business</span>?</h2>
           <p className="cta-subtitle">Let's create something amazing together.</p>
           <button className="btn btn-primary btn-large" onClick={() => navigate('/contact')}>
-            Start Your Project <FaArrowRight className="btn-arrow" />
+            Start Your Project <span className="btn-arrow">→</span>
           </button>
         </div>
       </section>
