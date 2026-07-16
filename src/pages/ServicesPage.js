@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   FaArrowRight, FaCheckCircle, FaPlusCircle,
   FaComments, FaClipboardList, FaPaintBrush, FaSearch, FaPaperPlane, FaHeadset,
   FaBolt, FaShieldAlt, FaUsers, FaHandshake, FaCalendarCheck, FaFileInvoiceDollar,
-  FaStar, FaClock, FaAward
+  FaStar, FaClock, FaAward, FaPalette, FaMobileAlt, FaPrint, FaShareAlt, FaCode, FaFilm,
+  FaTools, FaWindows, FaDownload, FaLaptop, FaNetworkWired, FaServer, FaShoppingCart, FaRocket
 } from 'react-icons/fa';
 import './Services.css';
 
 const ServicesPage = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('design');
 
   useEffect(() => {
     const animateOnScroll = () => {
@@ -29,21 +29,7 @@ const ServicesPage = () => {
     return () => window.removeEventListener('scroll', animateOnScroll);
   }, []);
 
-  const handleServiceClick = (serviceName, category, price = null) => {
-    const serviceData = {
-      name: serviceName,
-      category: category,
-      price: price,
-      timestamp: Date.now(),
-      type: 'regular'
-    };
-    localStorage.removeItem('selectedService');
-    localStorage.removeItem('selectedValentinePackage');
-    localStorage.setItem('selectedService', JSON.stringify(serviceData));
-    navigate('/contact');
-    showServiceNotification(serviceName);
-  };
-
+  // This function is no longer used for navigation, but kept for potential other uses
   const showServiceNotification = (serviceName) => {
     const notification = document.createElement('div');
     notification.className = 'service-notification';
@@ -63,13 +49,15 @@ const ServicesPage = () => {
     }, 3000);
   };
 
-  // Design Services - Following Duck Design's service structure
+  // Design Services - All visible
   const designServices = [
     {
       id: 1,
       title: 'Graphic Design',
       description: 'Professional graphic design services for all your visual needs.',
       image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaPalette,
+      color: '#ff8b20',
       link: '/graphic-design'
     },
     {
@@ -77,6 +65,8 @@ const ServicesPage = () => {
       title: 'Brand Identity Design',
       description: 'Complete brand identity packages including logo design, color palette, and brand guidelines.',
       image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaPalette,
+      color: '#ffca41',
       link: '/brand-identity'
     },
     {
@@ -84,6 +74,8 @@ const ServicesPage = () => {
       title: 'UI/UX Design',
       description: 'User-centered design for websites and applications focusing on usability and engagement.',
       image: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaMobileAlt,
+      color: '#fdb572',
       link: '/ui-ux-design'
     },
     {
@@ -91,6 +83,8 @@ const ServicesPage = () => {
       title: 'Print & Packaging',
       description: 'Professional print materials and packaging designs that stand out on shelves.',
       image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaPrint,
+      color: '#ffda7a',
       link: '/print-packaging'
     },
     {
@@ -98,6 +92,8 @@ const ServicesPage = () => {
       title: 'Motion Graphics',
       description: 'Animated videos and graphics for social media, presentations, and marketing.',
       image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaFilm,
+      color: '#ff8b20',
       link: '/motion-graphics'
     },
     {
@@ -105,6 +101,8 @@ const ServicesPage = () => {
       title: 'Website Design',
       description: 'Modern, responsive websites that convert visitors into customers.',
       image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaCode,
+      color: '#ffca41',
       link: '/website-design'
     },
     {
@@ -112,6 +110,8 @@ const ServicesPage = () => {
       title: 'Landing Page Design',
       description: 'High-converting landing pages designed to capture leads and drive sales.',
       image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaCode,
+      color: '#fdb572',
       link: '/landing-page'
     },
     {
@@ -119,6 +119,8 @@ const ServicesPage = () => {
       title: 'PowerPoint Design',
       description: 'Professional presentation designs that captivate your audience.',
       image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaFileInvoiceDollar,
+      color: '#ffda7a',
       link: '/powerpoint-design'
     },
     {
@@ -126,6 +128,8 @@ const ServicesPage = () => {
       title: 'SaaS Product Design',
       description: 'Design solutions tailored for software-as-a-service products.',
       image: 'https://images.unsplash.com/photo-1537884944318-390069bb8665?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaLaptop,
+      color: '#ff8b20',
       link: '/saas-design'
     },
     {
@@ -133,6 +137,8 @@ const ServicesPage = () => {
       title: 'Amazon Design',
       description: 'Optimized product listings and branding for Amazon sellers.',
       image: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaShoppingCart,
+      color: '#ffca41',
       link: '/amazon-design'
     },
     {
@@ -140,6 +146,8 @@ const ServicesPage = () => {
       title: 'Startup Design',
       description: 'Design solutions for startups looking to make a strong first impression.',
       image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaRocket,
+      color: '#fdb572',
       link: '/startup-design'
     },
     {
@@ -147,17 +155,21 @@ const ServicesPage = () => {
       title: 'Software Design',
       description: 'User-friendly software interfaces that enhance productivity.',
       image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaServer,
+      color: '#ffda7a',
       link: '/software-design'
     }
   ];
 
-  // Tech Services
+  // Tech Services - All visible
   const techServices = [
     {
       id: 1,
       title: 'Computer Repair',
       description: 'Professional repair services for all computer makes and models.',
       image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaTools,
+      color: '#ff8b20',
       link: '/computer-repair'
     },
     {
@@ -165,6 +177,8 @@ const ServicesPage = () => {
       title: 'Windows Installation',
       description: 'Complete Windows OS installation, configuration, and optimization.',
       image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaWindows,
+      color: '#ffca41',
       link: '/windows-installation'
     },
     {
@@ -172,6 +186,8 @@ const ServicesPage = () => {
       title: 'Software Support',
       description: 'Installation and configuration of all types of software applications.',
       image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaDownload,
+      color: '#fdb572',
       link: '/software-support'
     },
     {
@@ -179,6 +195,8 @@ const ServicesPage = () => {
       title: 'New Computer Setup',
       description: 'Complete setup and configuration of new computer systems.',
       image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaLaptop,
+      color: '#ffda7a',
       link: '/computer-setup'
     },
     {
@@ -186,6 +204,8 @@ const ServicesPage = () => {
       title: 'Networking Solutions',
       description: 'Setup and management of wired and wireless networks.',
       image: 'https://images.unsplash.com/photo-1537884944318-390069bb8665?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaNetworkWired,
+      color: '#ff8b20',
       link: '/networking'
     },
     {
@@ -193,6 +213,8 @@ const ServicesPage = () => {
       title: 'System Management',
       description: 'Ongoing maintenance and management of computer systems.',
       image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaServer,
+      color: '#ffca41',
       link: '/system-management'
     }
   ];
@@ -205,8 +227,6 @@ const ServicesPage = () => {
     '/images/partner-logo-4.svg',
     '/images/partner-logo-5.svg',
   ];
-
-  const currentServices = activeTab === 'design' ? designServices : techServices;
 
   return (
     <div className="services-page">
@@ -254,11 +274,11 @@ const ServicesPage = () => {
         <div className="container">
           <div className="services-hero-content animate-on-scroll">
             <h1 className="page-title page-title_small text-center">
-              Scale your success with outstanding design
+              Scale your success with outstanding <span className="gradient-text">Design</span> &amp; <span className="gradient-text">Tech</span> Services
             </h1>
             <p className="hero-section__txt text-center">
-              Leading companies trust Fast Multimedia to deliver high-quality design at scale. 
-              Book a call and start working with a dedicated team of professional designers.
+              Leading companies trust Fast Multimedia to deliver high-quality design and reliable technical solutions at scale. 
+              Book a call and start working with a dedicated team of professional designers and tech experts.
             </p>
             <div className="hero-section__btngroup">
               <button 
@@ -273,50 +293,89 @@ const ServicesPage = () => {
       </section>
 
       {/* ============================================
-          SERVICES GRID - DUCK DESIGN STYLE
+          DESIGN SERVICES - DUCK DESIGN STYLE
           ============================================ */}
       <section className="dservices-section">
         <div className="container">
-          <h2 className="section-title text-left animate-on-scroll">Design Services</h2>
-          
-          {/* Service Tabs */}
-          <div className="services-tabs animate-on-scroll">
-            <button 
-              className={`tab-btn ${activeTab === 'design' ? 'active' : ''}`}
-              onClick={() => setActiveTab('design')}
-            >
-              <span>Design Services</span>
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'tech' ? 'active' : ''}`}
-              onClick={() => setActiveTab('tech')}
-            >
-              <span>Tech Services</span>
-            </button>
-          </div>
+          <h2 className="section-title text-left animate-on-scroll">
+            <span className="gradient-text">Design</span> Services
+          </h2>
+          <p className="section-subtitle animate-on-scroll">
+            Creative design solutions that make your brand stand out
+          </p>
 
           <div className="dservices-section__list">
-            {currentServices.map((service, index) => (
-              <a 
-                key={service.id} 
-                href={service.link}
-                className="dservices-section__item animate-on-scroll"
-                style={{ animationDelay: `${index * 0.05}s` }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleServiceClick(service.title, activeTab === 'design' ? 'Design Service' : 'Tech Service');
-                }}
-              >
-                <img 
-                  className="dservices-section__icon" 
-                  src={service.image} 
-                  alt={service.title} 
-                />
-                <span className="dservices-section__head">
-                  <span>{service.title}</span>
-                </span>
-              </a>
-            ))}
+            {designServices.map((service, index) => {
+              const Icon = service.icon;
+              return (
+                <Link 
+                  key={service.id} 
+                  to={`/services${service.link}`}
+                  className="dservices-section__item animate-on-scroll"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <img 
+                    className="dservices-section__icon" 
+                    src={service.image} 
+                    alt={service.title} 
+                  />
+                  <div className="dservices-section__overlay">
+                    <div className="dservices-section__icon-wrapper" style={{ backgroundColor: service.color }}>
+                      <Icon className="dservices-section__icon-icon" />
+                    </div>
+                    <span className="dservices-section__head">{service.title}</span>
+                    <p className="dservices-section__desc">{service.description}</p>
+                    <span className="dservices-section__link">
+                      Learn More <FaArrowRight />
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          TECH SERVICES - DUCK DESIGN STYLE
+          ============================================ */}
+      <section className="dservices-section tech-services">
+        <div className="container">
+          <h2 className="section-title text-left animate-on-scroll">
+            <span className="gradient-text">Tech</span> Services
+          </h2>
+          <p className="section-subtitle animate-on-scroll">
+            Reliable technical solutions to keep your systems running smoothly
+          </p>
+
+          <div className="dservices-section__list">
+            {techServices.map((service, index) => {
+              const Icon = service.icon;
+              return (
+                <Link 
+                  key={service.id} 
+                  to={`/services${service.link}`}
+                  className="dservices-section__item animate-on-scroll"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <img 
+                    className="dservices-section__icon" 
+                    src={service.image} 
+                    alt={service.title} 
+                  />
+                  <div className="dservices-section__overlay">
+                    <div className="dservices-section__icon-wrapper" style={{ backgroundColor: service.color }}>
+                      <Icon className="dservices-section__icon-icon" />
+                    </div>
+                    <span className="dservices-section__head">{service.title}</span>
+                    <p className="dservices-section__desc">{service.description}</p>
+                    <span className="dservices-section__link">
+                      Learn More <FaArrowRight />
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -377,7 +436,7 @@ const ServicesPage = () => {
                 What Makes Us Different?
               </h2>
               <div className="include-section__txt animate-on-scroll">
-                We will take care of all your creative needs. No inefficient freelancers. 
+                We will take care of all your creative and technical needs. No inefficient freelancers. 
                 No lengthy hiring procedures. No contracts. Just your work getting done!
               </div>
             </div>
@@ -442,7 +501,7 @@ const ServicesPage = () => {
         <div className="container">
           <h2 className="section-title text-center animate-on-scroll">Who is it For?</h2>
           <p className="section-txt text-center animate-on-scroll">
-            No client or task is too big or small. If you want to strengthen your brand 
+            No client or task is too big or small. If you want to strengthen your brand, improve your technology, 
             and drive more creativity, you're in the right place.
           </p>
           <div className="whois-tabs">
@@ -468,7 +527,7 @@ const ServicesPage = () => {
                 </div>
                 <div className="whois-section__info">
                   <div className="whois-section__head">Multiply your agency output without multiplying your overhead costs.</div>
-                  <div className="whois-section__txt">Overwhelmed? Overworked? Not anymore! Our vetted designers handle your design requests, freeing you up to focus on growing your business and delivering results for your clients.</div>
+                  <div className="whois-section__txt">Overwhelmed? Overworked? Not anymore! Our vetted designers handle your design and tech requests, freeing you up to focus on growing your business and delivering results for your clients.</div>
                   <ul className="whois-section__ul">
                     <li>SAVE TIME AND MONEY ON CREATIVE PRODUCTION</li>
                     <li>SCALE UP AND DOWN AS NEEDED</li>
@@ -482,8 +541,8 @@ const ServicesPage = () => {
                   <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="SMBs" />
                 </div>
                 <div className="whois-section__info">
-                  <div className="whois-section__head">Flat-rate graphic design to help you grow your business.</div>
-                  <div className="whois-section__txt">Don't break your budget or settle for sloppy design that harms your business. Knock your competitors out of the park while saving money.</div>
+                  <div className="whois-section__head">Flat-rate design and tech solutions to help you grow your business.</div>
+                  <div className="whois-section__txt">Don't break your budget or settle for subpar design and technology that harms your business. Knock your competitors out of the park while saving money.</div>
                   <ul className="whois-section__ul">
                     <li>Scale your business</li>
                     <li>Cut hiring costs up to 70%</li>
@@ -498,11 +557,11 @@ const ServicesPage = () => {
                 </div>
                 <div className="whois-section__info">
                   <div className="whois-section__head">Position your marketing team for rapid growth.</div>
-                  <div className="whois-section__txt">Reach your marketing goals without getting bogged down by graphics! You provide the ideas and concepts, and we deliver top-notch marketing materials.</div>
+                  <div className="whois-section__txt">Reach your marketing goals without getting bogged down by graphics and technical issues! You provide the ideas and concepts, and we deliver top-notch marketing materials and tech support.</div>
                   <ul className="whois-section__ul">
-                    <li>Eliminate creative bottlenecks</li>
+                    <li>Eliminate creative and technical bottlenecks</li>
                     <li>Get your creative to market 3x faster</li>
-                    <li>Supplement your existing graphic design process</li>
+                    <li>Supplement your existing design and tech processes</li>
                   </ul>
                 </div>
               </div>
@@ -512,10 +571,10 @@ const ServicesPage = () => {
                   <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Large Enterprise" />
                 </div>
                 <div className="whois-section__info">
-                  <div className="whois-section__head">A Single Subscription to Replace Your Company's Design Departments.</div>
-                  <div className="whois-section__txt">With one subscription, we handle all your business's design needs across every department. Your projects will be overseen by a dedicated manager, and our expert team will efficiently meet any of your demands.</div>
+                  <div className="whois-section__head">A Single Subscription to Replace Your Company's Design and Tech Departments.</div>
+                  <div className="whois-section__txt">With one subscription, we handle all your business's design and tech needs across every department. Your projects will be overseen by a dedicated manager, and our expert team will efficiently meet any of your demands.</div>
                   <ul className="whois-section__ul">
-                    <li>No more in-house design departments or full-time designers</li>
+                    <li>No more in-house design or tech departments</li>
                     <li>Significant time savings for your managers</li>
                     <li>Reduced costs on salaries and recruitment</li>
                   </ul>
@@ -536,19 +595,19 @@ const ServicesPage = () => {
             {[
               {
                 q: 'Who is it for?',
-                a: 'Our service is perfect for businesses of all sizes and entrepreneurs at any stage. Fast Multimedia is ideal for anyone needing cost-effective, high-quality graphic design on an ongoing basis. Hire Designer service makes you feel like you have an in-house designer, but without the hefty price tag.'
+                a: 'Our service is perfect for businesses of all sizes and entrepreneurs at any stage. Fast Multimedia is ideal for anyone needing cost-effective, high-quality design and tech solutions on an ongoing basis. Our service makes you feel like you have an in-house team, but without the hefty price tag.'
               },
               {
                 q: 'What does unlimited requests and revisions really mean?',
-                a: 'With all our plans, you can submit as many design requests as needed, and our designers will work on them during normal business days. Revisions are also unlimited. No matter how many requests or revisions you submit, the price remains the same.'
+                a: 'With all our plans, you can submit as many design and tech requests as needed, and our team will work on them during normal business days. Revisions are also unlimited. No matter how many requests or revisions you submit, the price remains the same.'
               },
               {
                 q: 'What is the turnaround time?',
-                a: 'Our designers will work on your requests during normal business days, all year round. In most cases, we deliver the first update within 24 hours. For more complex requests, it may take up to 48 hours.'
+                a: 'Our team will work on your requests during normal business days, all year round. In most cases, we deliver the first update within 24 hours. For more complex requests, it may take up to 48 hours.'
               },
               {
-                q: 'What kind of designs can I request?',
-                a: 'You can request a wide range of designs, including: Website design, Logo design, Advertising banners, Social media posts, Infographics, Brand merchandise, Brochures, Pitch decks, Flyers, Brand identity, Emails, GIFs, Brand books, Package design, Graphic videos, and more.'
+                q: 'What kind of services can I request?',
+                a: 'You can request a wide range of design and tech services, including: Website design, Logo design, Advertising banners, Social media posts, Infographics, Brand merchandise, Brochures, Pitch decks, Flyers, Brand identity, Emails, GIFs, Brand books, Package design, Graphic videos, Computer repair, Windows installation, Software support, Networking solutions, System management, and more.'
               },
               {
                 q: 'Do I own the rights to the designs?',
@@ -560,11 +619,11 @@ const ServicesPage = () => {
               },
               {
                 q: 'What is your 7-day money-back guarantee?',
-                a: 'All our plans come with a full 7-day money-back guarantee. If, after several design requests, you still don\'t think Fast Multimedia is the right fit for you, we will refund 100% of your initial membership fee.'
+                a: 'All our plans come with a full 7-day money-back guarantee. If, after several requests, you still don\'t think Fast Multimedia is the right fit for you, we will refund 100% of your initial membership fee.'
               },
               {
-                q: 'What are your designers\' working hours?',
-                a: 'Designers work on Monday to Friday, from 09:00 to 18:00 (GMT+2).'
+                q: 'What are your team\'s working hours?',
+                a: 'Our team works on Monday to Friday, from 09:00 to 18:00 (GMT+2).'
               }
             ].map((faq, index) => (
               <div key={index} className="faq-section__item">
