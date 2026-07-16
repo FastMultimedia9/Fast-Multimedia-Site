@@ -4,7 +4,8 @@ import {
   FaPalette, FaDesktop, FaPenFancy, FaLaptop, FaPrint, FaGlobe,
   FaTools, FaCogs, FaCloudUploadAlt, FaWifi,
   FaArrowRight, FaStar, FaCheckCircle, FaPlay,
-  FaUsers, FaClock, FaHeadset
+  FaUsers, FaClock, FaHeadset, FaRocket, FaTrello,
+  FaFileAlt, FaSync, FaTimes, FaCheck
 } from 'react-icons/fa';
 import './HomePage.css';
 
@@ -31,6 +32,94 @@ const HomePage = () => {
     "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80",
   ];
 
+  // Process Steps Data - Duck Design Style
+  const processSteps = [
+    {
+      id: 1,
+      icon: '/images/steps-icon-1.svg',
+      title: 'Choose a Plan',
+      description: 'Clients select from various plans based on their needs and budget.'
+    },
+    {
+      id: 2,
+      icon: '/images/steps-icon-2.svg',
+      title: 'Payment',
+      description: 'After selecting a plan, clients proceed to payment.'
+    },
+    {
+      id: 3,
+      icon: '/images/steps-icon-3.svg',
+      title: 'Onboarding and Brief',
+      description: 'Upon successful payment, a project manager is assigned to the client for onboarding and task clarification. Clients fill out a brief detailing their business and design needs to help designers understand their requirements.'
+    },
+    {
+      id: 4,
+      icon: '/images/steps-icon-4.svg',
+      title: 'Designer Assignment',
+      description: 'A personal designer is assigned to the client after the brief is completed.'
+    },
+    {
+      id: 5,
+      icon: '/images/steps-icon-5.svg',
+      title: 'Task Creation and Submission',
+      description: 'Clients create and submit tasks, providing necessary materials (logos, texts, images, etc.)'
+    },
+    {
+      id: 6,
+      icon: '/images/steps-icon-6.svg',
+      title: 'Feedback and Revisions',
+      description: 'The designer submits completed tasks for review. Clients review the work, request revisions if needed, and the designer updates accordingly.'
+    },
+    {
+      id: 7,
+      icon: '/images/steps-icon-7.svg',
+      title: 'Task Completion',
+      description: 'Once the client is satisfied, the task is marked as complete.'
+    },
+    {
+      id: 8,
+      icon: '/images/steps-icon-8.svg',
+      title: 'New Task, New Project',
+      description: 'After completing one task, clients can create new tasks and continue the process.'
+    }
+  ];
+
+  // Why Choose Us - Duck Design Style
+  const whyChooseUs = [
+    {
+      id: 1,
+      title: 'Flexibility and Client-Centered Approach',
+      image: '/images/why-01.webp',
+      points: [
+        { head: 'Unlimited Requests', desc: 'Submit as many design tasks as you need — no limits' },
+        { head: 'Unlimited Revisions', desc: 'We revise the designs until you\'re completely satisfied' },
+        { head: 'Cancel Anytime', desc: 'No long-term commitments — cancel your subscription anytime' },
+        { head: '7-Day Money-Back Guarantee', desc: 'If you\'re not happy within the first 7 days, you\'ll get a full refund' }
+      ]
+    },
+    {
+      id: 2,
+      title: 'Speed and Professionalism',
+      image: '/images/why-02.webp',
+      points: [
+        { head: 'Professional Designers', desc: 'Your projects are handled by experienced Middle+ and Senior-level designers' },
+        { head: 'Art Director Oversight', desc: 'Every project is reviewed by an art director to ensure quality and consistency' },
+        { head: 'Designer Match', desc: 'We assign designers who best fit your brand style and project requirements' }
+      ]
+    },
+    {
+      id: 3,
+      title: 'Organization and Full Control',
+      image: '/images/why-03.webp',
+      points: [
+        { head: 'Trello Project Management', desc: 'Manage tasks and monitor progress seamlessly with Trello' },
+        { head: 'Unlimited Brand Profiles', desc: 'Create separate brand profiles for multiple projects to keep everything organized' },
+        { head: 'Native Source Files', desc: 'Get all the original source files for your designs for complete ownership and flexibility' }
+      ]
+    }
+  ];
+
+  // Updates & Announcements Data
   const updatesData = [
     {
       id: 1,
@@ -277,7 +366,9 @@ const HomePage = () => {
 
   return (
     <div className="homepage">
-      {/* Hero Section - Duck Design Style */}
+      {/* ============================================
+          HERO SECTION - DUCK DESIGN STYLE
+          ============================================ */}
       <section className="hero">
         <div className="hero-background">
           {getActiveHeroImages().map((img, index) => (
@@ -291,7 +382,7 @@ const HomePage = () => {
         </div>
 
         <div className="hero-content">
-          {/* Service Toggle - Positioned inside Hero like Duck Design */}
+          {/* Service Toggle - Inside Hero like Duck Design */}
           <div className={`service-toggle-wrapper ${isScrolled ? 'scrolled' : ''}`}>
             <div className="toggle-container">
               <button
@@ -312,28 +403,24 @@ const HomePage = () => {
           </div>
 
           <div className="hero-badge">
-            <span className="badge-text">Professional Services</span>
+            <span className="badge-text">YOUR FULL SERVICE DESIGN PARTNER</span>
           </div>
           
           <h1 className="hero-title">
             {activeServiceCategory === 'design' ? (
               <>
-                Exceptional <span className="gradient-text">Design</span>
-                <br />
-                That Drives Results
+                Design <span className="gradient-text">Without Limits</span>
               </>
             ) : (
               <>
-                Reliable <span className="gradient-text">Tech</span>
-                <br />
-                Support & Solutions
+                Tech <span className="gradient-text">Without Limits</span>
               </>
             )}
           </h1>
           
           <p className="hero-subtitle">
             {activeServiceCategory === 'design'
-              ? 'We create stunning visual identities that elevate brands and captivate audiences.'
+              ? 'Unlimited design for a flat monthly fee. We will take care of all your creative needs. No lengthy hiring procedures. No inefficient freelancers. No contracts.'
               : 'Professional IT solutions to keep your systems running smoothly and efficiently.'}
           </p>
           
@@ -352,25 +439,26 @@ const HomePage = () => {
               <FaArrowRight className="btn-arrow" />
             </button>
             <button className="btn btn-secondary" onClick={() => navigate('/contact')}>
-              Get Started
+              Book a Call
             </button>
           </div>
 
-          <div className="hero-stats">
-            <div className="stat">
-              <div className="stat-value">150+</div>
-              <div className="stat-label">Projects</div>
-            </div>
-            <div className="divider"></div>
-            <div className="stat">
-              <div className="stat-value">98%</div>
-              <div className="stat-label">Satisfaction</div>
-            </div>
-            <div className="divider"></div>
-            <div className="stat">
-              <div className="stat-value">24/7</div>
-              <div className="stat-label">Support</div>
-            </div>
+          <div className="hero-social-list">
+            <a href="#" className="hero-social-item" aria-label="Behance">
+              <img src="/images/social-behance.svg" alt="Behance" />
+            </a>
+            <a href="#" className="hero-social-item" aria-label="Facebook">
+              <img src="/images/social-facebook.svg" alt="Facebook" />
+            </a>
+            <a href="#" className="hero-social-item" aria-label="LinkedIn">
+              <img src="/images/social-linkedin.svg" alt="LinkedIn" />
+            </a>
+            <a href="#" className="hero-social-item" aria-label="Instagram">
+              <img src="/images/social-instagram.svg" alt="Instagram" />
+            </a>
+            <a href="#" className="hero-social-item" aria-label="YouTube">
+              <img src="/images/social-youtube.svg" alt="YouTube" />
+            </a>
           </div>
         </div>
 
@@ -380,76 +468,241 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Updates Section */}
-      <section className="updates-section">
+      {/* ============================================
+          PARTNER SECTION - DUCK DESIGN STYLE
+          ============================================ */}
+      <section className="partner-section">
         <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">
-              <span className="gradient-text">Latest</span> Updates & Announcements
-            </h2>
-            <p className="section-subtitle">
-              Stay informed about our new courses, services, and special offers
-            </p>
-          </div>
-          
-          <div className="marquee-container">
-            <div className="marquee-track">
-              {updatesData.map((update) => (
-                <div 
-                  key={`first-${update.id}`} 
-                  className={`update-card ${update.type}`}
-                  onClick={() => handleUpdateClick(update)}
-                >
-                  <div className="update-image">
-                    <img src={update.image} alt={update.title} />
-                    <div className="update-tag">
-                      {update.tag}
-                    </div>
-                    <div className="update-type-badge">
-                      {update.type === 'school' ? '🎓 School' : '📢 Offer'}
-                    </div>
-                  </div>
-                  <div className="update-content">
-                    <h3 className="update-title">{update.title}</h3>
-                    <p className="update-subtitle">{update.subtitle}</p>
-                    <p className="update-description">{update.description}</p>
-                    <button className="update-cta">
-                      {update.cta} <FaArrowRight className="btn-arrow" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {updatesData.map((update) => (
-                <div 
-                  key={`second-${update.id}`} 
-                  className={`update-card ${update.type}`}
-                  onClick={() => handleUpdateClick(update)}
-                >
-                  <div className="update-image">
-                    <img src={update.image} alt={update.title} />
-                    <div className="update-tag">
-                      {update.tag}
-                    </div>
-                    <div className="update-type-badge">
-                      {update.type === 'school' ? '🎓 School' : '📢 Offer'}
-                    </div>
-                  </div>
-                  <div className="update-content">
-                    <h3 className="update-title">{update.title}</h3>
-                    <p className="update-subtitle">{update.subtitle}</p>
-                    <p className="update-description">{update.description}</p>
-                    <button className="update-cta">
-                      {update.cta} <FaArrowRight className="btn-arrow" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+          <div className="partner-section__col">
+            <div className="partner-section__left">
+              <h2 className="section-title">Fix Your Graphic Design Bottleneck</h2>
+              <p className="section-txt">
+                Your brand designs are too important to be left in the hands of unreliable freelancers or expensive creative agencies. Why not hire an experienced designer who knows you by name and your brand by heart?
+              </p>
+              <div className="partner-section__btn desktop-only">
+                <button className="btn btn-secondary" onClick={() => navigate('/pricing')}>
+                  Our Plans <FaArrowRight className="btn-arrow" />
+                </button>
+              </div>
+            </div>
+            <div className="partner-section__right">
+              <div className="partner-section__list partner-logos-scroll">
+                {/* Partner logos would go here - using placeholder images */}
+                <div className="partner-section__item"><img src="/images/partner-logo-1.svg" alt="Partner" /></div>
+                <div className="partner-section__item"><img src="/images/partner-logo-2.svg" alt="Partner" /></div>
+                <div className="partner-section__item"><img src="/images/partner-logo-3.svg" alt="Partner" /></div>
+                <div className="partner-section__item"><img src="/images/partner-logo-4.svg" alt="Partner" /></div>
+                <div className="partner-section__item"><img src="/images/partner-logo-5.svg" alt="Partner" /></div>
+              </div>
+            </div>
+            <div className="partner-section__btn mobile-only">
+              <button className="btn btn-secondary" onClick={() => navigate('/pricing')}>
+                Our Plans <FaArrowRight className="btn-arrow" />
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Services Section */}
+      {/* ============================================
+          OUR SERVICES - DUCK DESIGN STYLE (Carousel)
+          ============================================ */}
+      <section className="services-carousel-section">
+        <div className="container">
+          <h2 className="section-title text-center">Our Services</h2>
+        </div>
+        <div className="services-carousel">
+          <div className="services-carousel__track">
+            {/* First set of service cards */}
+            {services.design.map((service, index) => (
+              <div key={`service-1-${index}`} className="services-carousel__item">
+                <img src={`/images/service-${index + 1}.jpg`} alt={service.name} />
+                <span className="services-carousel__head">{service.name}</span>
+              </div>
+            ))}
+            {services.design.map((service, index) => (
+              <div key={`service-2-${index}`} className="services-carousel__item">
+                <img src={`/images/service-${index + 1}.jpg`} alt={service.name} />
+                <span className="services-carousel__head">{service.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="container">
+          <div className="services-carousel__btn text-center">
+            <button className="btn btn-secondary" onClick={() => navigate('/services')}>
+              All Design Services <FaArrowRight className="btn-arrow" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          PORTFOLIO SECTION
+          ============================================ */}
+      <section className="portfolio-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Our Works</h2>
+          </div>
+          <div className="portfolio-grid">
+            {featuredPortfolioProjects.map((project) => (
+              <div
+                key={project.id}
+                className="portfolio-card"
+                onClick={() => {
+                  setQuickViewProject(project);
+                  setShowQuickView(true);
+                }}
+              >
+                <div className="portfolio-image">
+                  <img src={project.image} alt={project.title} />
+                  <div className="portfolio-overlay">
+                    <button className="view-project-btn">
+                      <span>View Project</span>
+                      <FaArrowRight className="btn-arrow" />
+                    </button>
+                  </div>
+                </div>
+                <div className="portfolio-info">
+                  <div className="portfolio-meta">
+                    <span className="portfolio-category">{project.category}</span>
+                    <span className="portfolio-year">{project.year}</span>
+                  </div>
+                  <h3 className="portfolio-title">{project.title}</h3>
+                  <p className="portfolio-subtitle">{project.subtitle}</p>
+                  <div className="portfolio-tags">
+                    {project.tags.map((tag, idx) => (
+                      <span key={idx} className="portfolio-tag">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="portfolio-section__btn text-center">
+            <button className="btn btn-secondary" onClick={() => navigate('/portfolio')}>
+              See All Our Works <FaArrowRight className="btn-arrow" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          HOW IT WORKS - DUCK DESIGN STYLE
+          ============================================ */}
+      <section className="steps-section">
+        <div className="container">
+          <div className="steps-section__header">
+            <h2 className="section-title">Here's how to get started:</h2>
+            <div className="steps-section__btn desktop-only">
+              <button className="btn btn-secondary" onClick={() => navigate('/pricing')}>
+                See Our Plans <FaArrowRight className="btn-arrow" />
+              </button>
+            </div>
+          </div>
+
+          <div className="steps-grid">
+            {processSteps.slice(0, 4).map((step) => (
+              <div key={step.id} className="step-item">
+                <div className="step-icon">
+                  <img src={step.icon} alt={step.title} />
+                </div>
+                <div className="step-content">
+                  <h4 className="step-title">{step.title}</h4>
+                  <p className="step-description">{step.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="steps-grid steps-grid-more" id="moreSteps">
+            {processSteps.slice(4).map((step) => (
+              <div key={step.id} className="step-item">
+                <div className="step-icon">
+                  <img src={step.icon} alt={step.title} />
+                </div>
+                <div className="step-content">
+                  <h4 className="step-title">{step.title}</h4>
+                  <p className="step-description">{step.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="steps-show-more">
+            <button id="showMoreSteps" className="show-more-btn">
+              <FaArrowRight className="show-more-icon" />
+            </button>
+          </div>
+
+          <div className="steps-section__btn mobile-only">
+            <button className="btn btn-secondary" onClick={() => navigate('/pricing')}>
+              See Our Plans <FaArrowRight className="btn-arrow" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          WHY CHOOSE US - DUCK DESIGN STYLE
+          ============================================ */}
+      <section className="why-section">
+        <div className="container">
+          <div className="why-section__list">
+            {whyChooseUs.map((item, index) => (
+              <div 
+                key={item.id} 
+                className={`why-section__item ${index === 0 ? 'active' : ''}`}
+                style={{ background: index === 0 ? '#fef3d8' : index === 1 ? '#ffe39b' : '#fef3d8' }}
+              >
+                <div className="why-section__info">
+                  <h2 className="section-title text-left">{item.title}</h2>
+                  <div className="why-section__img">
+                    <img src={item.image} alt={item.title} />
+                  </div>
+                </div>
+                <div className="why-section__txt">
+                  {item.points.map((point, idx) => (
+                    <div key={idx} className="why-section__txt-item">
+                      <div className="why-section__head">{point.head}</div>
+                      <div className="why-section__descr">{point.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          CTA - INTERESTED? SECTION
+          ============================================ */}
+      <section className="cta-boxbg">
+        <div className="container">
+          <div className="cta-boxbg__inner">
+            <div className="cta-boxbg__left">
+              <h2 className="section-title text-left">Interested?</h2>
+              <p className="section-txt text-left">
+                Just drop your contact info and we will get back to you as soon as possible.
+              </p>
+              <div className="cta-boxbg__btn">
+                <button className="btn btn-white" onClick={() => navigate('/contact')}>
+                  Book a Call with a Team <FaArrowRight className="btn-arrow" />
+                </button>
+              </div>
+            </div>
+            <div className="cta-boxbg__img">
+              <img src="/images/cta-img.png" alt="Contact Us" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          SERVICES SECTION (Original)
+          ============================================ */}
       <section className="services-section">
         <div className="container">
           <div className="section-header">
@@ -497,89 +750,9 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Featured Work */}
-      {activeServiceCategory === 'design' && (
-        <section className="portfolio-section">
-          <div className="container">
-            <div className="section-header">
-              <h2 className="section-title">Featured Work</h2>
-              <p className="section-subtitle">
-                Explore our portfolio of successful design projects
-              </p>
-            </div>
-
-            <div className="portfolio-grid">
-              {featuredPortfolioProjects.map((project) => (
-                <div
-                  key={project.id}
-                  className="portfolio-card"
-                  onClick={() => {
-                    setQuickViewProject(project);
-                    setShowQuickView(true);
-                  }}
-                >
-                  <div className="portfolio-image">
-                    <img src={project.image} alt={project.title} />
-                    <div className="portfolio-overlay">
-                      <button className="view-project-btn">
-                        <span>View Project</span>
-                        <FaArrowRight className="btn-arrow" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="portfolio-info">
-                    <div className="portfolio-meta">
-                      <span className="portfolio-category">{project.category}</span>
-                      <span className="portfolio-year">{project.year}</span>
-                    </div>
-                    <h3 className="portfolio-title">{project.title}</h3>
-                    <p className="portfolio-subtitle">{project.subtitle}</p>
-                    <div className="portfolio-tags">
-                      {project.tags.map((tag, idx) => (
-                        <span key={idx} className="portfolio-tag">{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* How It Works */}
-      <section className="process-section">
-        <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">How It <span className="gradient-text">Works</span></h2>
-            <p className="section-subtitle">Simple, transparent, and efficient</p>
-          </div>
-          <div className="process-steps">
-            <div className="step">
-              <span className="step-number">1</span>
-              <h4>Choose a Plan</h4>
-              <p>Select the plan that fits your needs and budget.</p>
-            </div>
-            <div className="step">
-              <span className="step-number">2</span>
-              <h4>Payment & Brief</h4>
-              <p>Make payment and provide a brief about your project.</p>
-            </div>
-            <div className="step">
-              <span className="step-number">3</span>
-              <h4>Designer Assigned</h4>
-              <p>A dedicated designer/tech expert is assigned to you.</p>
-            </div>
-            <div className="step">
-              <span className="step-number">4</span>
-              <h4>Receive & Review</h4>
-              <p>Receive your work, request revisions, and approve.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
+      {/* ============================================
+          PRICING SECTION
+          ============================================ */}
       <section className="pricing-section">
         <div className="container">
           <div className="section-header">
@@ -608,7 +781,9 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* ============================================
+          TESTIMONIALS SECTION
+          ============================================ */}
       <section className="testimonials-section">
         <div className="container">
           <div className="section-header">
@@ -650,7 +825,9 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Packages Modal */}
+      {/* ============================================
+          PACKAGES MODAL
+          ============================================ */}
       {showPackageModal && (
         <div className="modal-overlay" onClick={() => setShowPackageModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -711,7 +888,9 @@ const HomePage = () => {
         </div>
       )}
 
-      {/* Quick View Modal */}
+      {/* ============================================
+          QUICK VIEW MODAL
+          ============================================ */}
       {showQuickView && quickViewProject && (
         <div className="modal-overlay" onClick={() => setShowQuickView(false)}>
           <div className="modal-content quickview" onClick={(e) => e.stopPropagation()}>
@@ -773,7 +952,9 @@ const HomePage = () => {
         </div>
       )}
 
-      {/* CTA Section */}
+      {/* ============================================
+          CTA SECTION
+          ============================================ */}
       <section className="cta-section">
         <div className="container">
           <div className="cta-content">
