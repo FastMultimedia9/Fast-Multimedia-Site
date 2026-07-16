@@ -917,22 +917,37 @@ const PortfolioPage = () => {
   ]
 },
     {
-      id: 52,
-      title: 'Restaurant Brand & Menu Design',
-      category: 'branding',
-      description: 'Complete brand identity and menu design for upscale farm-to-table restaurant',
-      detailedDescription: 'Created a full brand identity for a farm-to-table restaurant, including logo, color palette, typography, and menu design. The design reflects the restaurant\'s commitment to fresh, locally-sourced ingredients and rustic elegance.',
-      tags: ['Brand Identity', 'Menu Design', 'Restaurant Branding', 'Typography', 'Print Design'],
-      image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-      client: 'The Harvest Table',
-      year: '2025',
-      duration: '5 weeks',
-      role: 'Lead Brand & Menu Designer',
-      deliverables: ['Logo & Identity', 'Menu Design', 'Brand Guidelines', 'Collateral Materials'],
-      results: ['Increased customer engagement', 'Featured in culinary magazine', 'Successful brand launch'],
-      color: '#BF360C',
-      mockups: []
-    },
+      
+  id: 52,
+  title: 'GRNMA - St. Martin Excursion Event Design',
+  category: 'event',
+  description: 'Complete event branding and promotional design for GRNMA St. Martin chapter excursion',
+  detailedDescription: 'Designed comprehensive event branding and promotional materials for the GRNMA (Ghana Registered Nurses and Midwives Association) St. Martin, Agomanya chapter excursion. The design includes event posters, registration materials, and promotional assets that create excitement and clarity for participants. The visual identity combines professional healthcare branding with vibrant, energetic event aesthetics.',
+  tags: ['Event Design', 'Healthcare Branding', 'Promotional Design', 'Excursion', 'Registration Materials'],
+  image: 'grnma.jpg',
+  client: 'GRNMA - St. Martin, Agomanya Chapter',
+  year: '2026',
+  duration: '2 weeks',
+  role: 'Lead Event & Brand Designer',
+  deliverables: [
+    'Event Poster Design', 
+    'Registration Materials', 
+    'Promotional Graphics', 
+    'Digital Assets',
+    'Social Media Promotion',
+    'Information Materials'
+  ],
+  results: [
+    'Successful excursion promotion', 
+    'High member participation', 
+    'Positive engagement from healthcare professionals',
+    'Strengthened chapter community spirit'
+  ],
+  color: '#004D40',
+  mockups: [
+    '/images/mockups/excursion-poster.jpg'
+  ]
+},
     {
       id: 53,
       title: 'Fashion E-Commerce Website Redesign',
