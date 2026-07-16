@@ -848,22 +848,39 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 50,
-      title: 'Tech Conference Brand Identity',
-      category: 'branding',
-      description: 'Complete brand identity system for international tech innovation conference',
-      detailedDescription: 'Developed a comprehensive brand identity for a major tech conference, including logo design, visual language, wayfinding system, and digital presence. The design conveys innovation, connection, and future-forward thinking.',
-      tags: ['Brand Identity', 'Event Branding', 'Logo Design', 'Conference Design', 'Visual Language'],
-      image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-      client: 'TechForward Conference',
-      year: '2025',
-      duration: '4 weeks',
-      role: 'Lead Brand Designer',
-      deliverables: ['Logo System', 'Brand Guidelines', 'Wayfinding System', 'Digital Assets'],
-      results: ['5,000+ attendees', 'Featured in design publications', 'Successful brand launch'],
-      color: '#1565C0',
-      mockups: []
-    },
+      
+  id: 50,
+  title: 'St. Martin Hospital - REP YOUR GHANA Jersey Event',
+  category: 'branding',
+  description: 'Complete brand identity and promotional design for hospital sports event and jersey launch',
+  detailedDescription: 'Created a comprehensive brand identity and promotional materials for St. Martin De Porres Catholic Hospital\'s "REP YOUR GHANA" jersey event. The design celebrates national pride through sports, featuring bold typography, patriotic colors, and a modern jersey design. The branding includes event posters, digital assets, jersey mockups, and wayfinding signage. The visual language combines healthcare professionalism with Ghanaian cultural elements and sporting energy.',
+  tags: ['Brand Identity', 'Event Branding', 'Sports Design', 'Jersey Design', 'Hospital Event', 'Ghana Pride'],
+  image: 'REP1.jpg',
+  client: 'St. Martin De Porres Catholic Hospital, Agomanya',
+  year: '2026',
+  duration: '3 weeks',
+  role: 'Lead Brand & Event Designer',
+  deliverables: [
+    'Event Brand Identity', 
+    'Jersey Design', 
+    'Promotional Posters', 
+    'Digital Assets',
+    'Wayfinding Signage',
+    'Social Media Graphics',
+    'Event Program Design'
+  ],
+  results: [
+    'Successfully branded hospital sports event',
+    'High community participation',
+    'Strengthened hospital-community relations',
+    'Positive brand recognition'
+  ],
+  color: '#C62828',
+  mockups: [
+    '/images/mockups/jersey-mockup-1.jpg',
+    '/images/mockups/jersey-mockup-2.jpg'
+  ]
+},
     {
       
   id: 51,
@@ -892,11 +909,7 @@ const PortfolioPage = () => {
     '45% repeat booking rate'
   ],
   color: '#FF6B35',
-  mockups: [
-    '/images/mockups/home-service-1.jpg',
-    '/images/mockups/home-service-2.jpg',
-    '/images/mockups/home-service-3.jpg'
-  ]
+  mockups: []
 },
     {
       id: 52,
