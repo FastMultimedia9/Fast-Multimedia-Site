@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  FaPalette, FaMobileAlt, FaPrint, FaShareAlt, FaCode, FaFilm,
-  FaTools, FaWindows, FaDownload, FaLaptop, FaNetworkWired, FaServer,
-  FaArrowRight, FaCheckCircle, FaPlusCircle, FaShoppingCart,
+  FaArrowRight, FaCheckCircle, FaPlusCircle,
   FaComments, FaClipboardList, FaPaintBrush, FaSearch, FaPaperPlane, FaHeadset,
   FaBolt, FaShieldAlt, FaUsers, FaHandshake, FaCalendarCheck, FaFileInvoiceDollar,
   FaStar, FaClock, FaAward
@@ -65,189 +63,150 @@ const ServicesPage = () => {
     }, 3000);
   };
 
-  const graphicDesignServices = [
+  // Design Services - Following Duck Design's service structure
+  const designServices = [
     {
       id: 1,
-      title: 'Brand Identity Design',
-      description: 'Complete brand identity packages including logo design, color palette, typography, and brand guidelines.',
-      features: ['Logo Design', 'Brand Guidelines', 'Business Cards', 'Stationery Design'],
-      icon: FaPalette,
-      color: '#ff8b20',
-      basePrice: '₵699'
+      title: 'Graphic Design',
+      description: 'Professional graphic design services for all your visual needs.',
+      image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/graphic-design'
     },
     {
       id: 2,
-      title: 'UI/UX Design',
-      description: 'User-centered design for websites and applications focusing on usability and engagement.',
-      features: ['Wireframing', 'Prototyping', 'User Testing', 'Responsive Design'],
-      icon: FaMobileAlt,
-      color: '#ffca41',
-      basePrice: '₵899'
+      title: 'Brand Identity Design',
+      description: 'Complete brand identity packages including logo design, color palette, and brand guidelines.',
+      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/brand-identity'
     },
     {
       id: 3,
-      title: 'Print & Packaging',
-      description: 'Professional print materials and packaging designs that stand out on shelves.',
-      features: ['Brochures & Flyers', 'Product Packaging', 'Business Cards', 'Posters & Banners'],
-      icon: FaPrint,
-      color: '#fdb572',
-      basePrice: '₵549'
+      title: 'UI/UX Design',
+      description: 'User-centered design for websites and applications focusing on usability and engagement.',
+      image: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/ui-ux-design'
     },
     {
       id: 4,
-      title: 'Social Media Graphics',
-      description: 'Eye-catching social media content that drives engagement and conversions.',
-      features: ['Social Media Posts', 'Ad Creatives', 'Profile Branding', 'Content Templates'],
-      icon: FaShareAlt,
-      color: '#ffda7a',
-      basePrice: '₵399'
+      title: 'Print & Packaging',
+      description: 'Professional print materials and packaging designs that stand out on shelves.',
+      image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/print-packaging'
     },
     {
       id: 5,
-      title: 'Website Design & Development',
-      description: 'Modern, responsive websites that convert visitors into customers.',
-      features: ['Website Design', 'E-commerce Solutions', 'CMS Integration', 'SEO Optimization'],
-      icon: FaCode,
-      color: '#ff8b20',
-      basePrice: '₵1,500 +'
+      title: 'Motion Graphics',
+      description: 'Animated videos and graphics for social media, presentations, and marketing.',
+      image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/motion-graphics'
     },
     {
       id: 6,
-      title: 'Motion Graphics',
-      description: 'Animated videos and graphics for social media, presentations, and marketing.',
-      features: ['Animated Logos', 'Explainer Videos', 'Social Media Ads', 'Presentation Graphics'],
-      icon: FaFilm,
-      color: '#ffca41',
-      basePrice: '₵799 +'
+      title: 'Website Design',
+      description: 'Modern, responsive websites that convert visitors into customers.',
+      image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/website-design'
+    },
+    {
+      id: 7,
+      title: 'Landing Page Design',
+      description: 'High-converting landing pages designed to capture leads and drive sales.',
+      image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/landing-page'
+    },
+    {
+      id: 8,
+      title: 'PowerPoint Design',
+      description: 'Professional presentation designs that captivate your audience.',
+      image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/powerpoint-design'
+    },
+    {
+      id: 9,
+      title: 'SaaS Product Design',
+      description: 'Design solutions tailored for software-as-a-service products.',
+      image: 'https://images.unsplash.com/photo-1537884944318-390069bb8665?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/saas-design'
+    },
+    {
+      id: 10,
+      title: 'Amazon Design',
+      description: 'Optimized product listings and branding for Amazon sellers.',
+      image: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/amazon-design'
+    },
+    {
+      id: 11,
+      title: 'Startup Design',
+      description: 'Design solutions for startups looking to make a strong first impression.',
+      image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/startup-design'
+    },
+    {
+      id: 12,
+      title: 'Software Design',
+      description: 'User-friendly software interfaces that enhance productivity.',
+      image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/software-design'
     }
   ];
 
+  // Tech Services
   const techServices = [
     {
       id: 1,
-      title: 'Computer Repair & Maintenance',
+      title: 'Computer Repair',
       description: 'Professional repair services for all computer makes and models.',
-      features: ['Hardware Diagnosis', 'Component Replacement', 'System Cleaning', 'Performance Tuning'],
-      icon: FaTools,
-      color: '#ff8b20',
-      basePrice: '₵50/hour'
+      image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/computer-repair'
     },
     {
       id: 2,
-      title: 'Windows Installation & Setup',
+      title: 'Windows Installation',
       description: 'Complete Windows OS installation, configuration, and optimization.',
-      features: ['Windows 10/11 Installation', 'Driver Updates', 'System Optimization', 'Data Migration'],
-      icon: FaWindows,
-      color: '#ffca41',
-      basePrice: '₵150'
+      image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/windows-installation'
     },
     {
       id: 3,
-      title: 'Software Installation & Support',
+      title: 'Software Support',
       description: 'Installation and configuration of all types of software applications.',
-      features: ['Office Suite Setup', 'Creative Software', 'Antivirus Installation', 'Troubleshooting'],
-      icon: FaDownload,
-      color: '#fdb572',
-      basePrice: '₵100'
+      image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/software-support'
     },
     {
       id: 4,
       title: 'New Computer Setup',
       description: 'Complete setup and configuration of new computer systems.',
-      features: ['Initial Setup', 'Software Installation', 'Data Transfer', 'System Optimization'],
-      icon: FaLaptop,
-      color: '#ffda7a',
-      basePrice: '₵200'
+      image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/computer-setup'
     },
     {
       id: 5,
       title: 'Networking Solutions',
-      description: 'Setup and management of wired and wireless networks for businesses and homes.',
-      features: ['Wi-Fi Setup', 'Network Security', 'Router Configuration', 'Troubleshooting'],
-      icon: FaNetworkWired,
-      color: '#ff8b20',
-      basePrice: '₵250'
+      description: 'Setup and management of wired and wireless networks.',
+      image: 'https://images.unsplash.com/photo-1537884944318-390069bb8665?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/networking'
     },
     {
       id: 6,
-      title: 'Computer System Management',
-      description: 'Ongoing maintenance and management of computer systems for optimal performance.',
-      features: ['System Monitoring', 'Regular Updates', 'Backup Solutions', 'Security Management'],
-      icon: FaServer,
-      color: '#ffca41',
-      basePrice: '₵300/month'
+      title: 'System Management',
+      description: 'Ongoing maintenance and management of computer systems.',
+      image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      link: '/system-management'
     }
   ];
 
-  const pricingPlans = [
-    {
-      id: 1,
-      name: 'Starter Package',
-      price: '₵699',
-      originalPrice: '₵848',
-      savings: 'Save ₵149',
-      description: 'Perfect for new businesses needing basic brand identity',
-      features: [
-        'Logo Design (Value: ₵299)',
-        'Business Cards (Value: ₵150)',
-        'Social Media Profile Kit (Value: ₵250)',
-        'Basic Brand Guidelines (Value: ₵149)'
-      ],
-      popular: false
-    },
-    {
-      id: 2,
-      name: 'Professional Package',
-      price: '₵1,499',
-      originalPrice: '₵1,898',
-      savings: 'Save ₵399',
-      description: 'Complete branding solution for growing businesses',
-      features: [
-        'Logo Design + Variations',
-        'Complete Brand Guidelines',
-        'Business Stationery Set',
-        'Social Media Content Kit',
-        'Email Signature Design'
-      ],
-      popular: true
-    },
-    {
-      id: 3,
-      name: 'Website Package',
-      price: '₵1,299',
-      originalPrice: '₵1,548',
-      savings: 'Save ₵249',
-      description: 'Professional website design and development',
-      features: [
-        '5-Page Responsive Website',
-        'Mobile-First Design',
-        'SEO Optimization',
-        'Contact Form Setup',
-        'Social Media Integration'
-      ],
-      popular: false
-    }
+  // Partner logos
+  const partnerLogos = [
+    '/images/partner-logo-1.svg',
+    '/images/partner-logo-2.svg',
+    '/images/partner-logo-3.svg',
+    '/images/partner-logo-4.svg',
+    '/images/partner-logo-5.svg',
   ];
 
-  const processSteps = [
-    { id: 1, title: 'Consultation', description: 'We discuss your project requirements, goals, and timeline.', icon: FaComments },
-    { id: 2, title: 'Planning & Strategy', description: 'We develop a detailed plan and strategy for your project.', icon: FaClipboardList },
-    { id: 3, title: 'Design & Development', description: 'Our team creates and develops your project with precision.', icon: FaPaintBrush },
-    { id: 4, title: 'Review & Feedback', description: 'You review the work and provide feedback for improvements.', icon: FaSearch },
-    { id: 5, title: 'Final Delivery', description: 'We deliver the final product and provide support.', icon: FaPaperPlane },
-    { id: 6, title: 'Support & Maintenance', description: 'Ongoing support and maintenance for your project.', icon: FaHeadset }
-  ];
-
-  const features = [
-    { icon: FaBolt, title: 'Fast Turnaround', description: 'We deliver projects on time without compromising on quality.' },
-    { icon: FaHeadset, title: '24/7 Support', description: 'Round-the-clock technical support for all your needs.' },
-    { icon: FaShieldAlt, title: 'Quality Guarantee', description: 'We stand behind our work with a satisfaction guarantee.' },
-    { icon: FaUsers, title: 'Expert Team', description: 'Skilled professionals in both design and technology.' },
-    { icon: FaTools, title: 'Modern Tools', description: 'Using the latest software and technology for best results.' },
-    { icon: FaHandshake, title: 'Personalized Service', description: 'Tailored solutions to meet your specific business needs.' }
-  ];
-
-  const currentServices = activeTab === 'design' ? graphicDesignServices : techServices;
+  const currentServices = activeTab === 'design' ? designServices : techServices;
 
   return (
     <div className="services-page">
@@ -288,174 +247,187 @@ const ServicesPage = () => {
         `}
       </style>
 
-      {/* Hero Section */}
+      {/* ============================================
+          HERO SECTION - DUCK DESIGN STYLE
+          ============================================ */}
       <section className="services-hero">
         <div className="container">
           <div className="services-hero-content animate-on-scroll">
-            <div className="hero-badge">
-              <span className="badge-text">Comprehensive Services</span>
-            </div>
-            <h1 className="hero-title">
-              Professional <span className="gradient-text">Graphic Design</span> &<br />
-              <span className="gradient-text">Tech Support</span> Services
+            <h1 className="page-title page-title_small text-center">
+              Scale your success with outstanding design
             </h1>
-            <p className="hero-subtitle">
-              From stunning visual designs to reliable technical solutions, we provide 
-              comprehensive services to elevate your business and keep your systems running smoothly.
+            <p className="hero-section__txt text-center">
+              Leading companies trust Fast Multimedia to deliver high-quality design at scale. 
+              Book a call and start working with a dedicated team of professional designers.
             </p>
-            <div className="hero-stats">
-              <div className="stat-item">
-                <span className="stat-number">500+</span>
-                <span className="stat-label">Projects Completed</span>
-              </div>
-              <div className="stat-divider"></div>
-              <div className="stat-item">
-                <span className="stat-number">98%</span>
-                <span className="stat-label">Client Satisfaction</span>
-              </div>
-              <div className="stat-divider"></div>
-              <div className="stat-item">
-                <span className="stat-number">24/7</span>
-                <span className="stat-label">Tech Support</span>
-              </div>
-              <div className="stat-divider"></div>
-              <div className="stat-item">
-                <span className="stat-number">50+</span>
-                <span className="stat-label">Happy Clients</span>
-              </div>
+            <div className="hero-section__btngroup">
+              <button 
+                className="btn btn-primary btn-primary_arrow"
+                onClick={() => navigate('/contact')}
+              >
+                Book a Call <FaArrowRight className="btn-arrow" />
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Services Tabs */}
-      <section className="services-tabs-section">
+      {/* ============================================
+          SERVICES GRID - DUCK DESIGN STYLE
+          ============================================ */}
+      <section className="dservices-section">
         <div className="container">
-          <div className="services-tabs">
+          <h2 className="section-title text-left animate-on-scroll">Design Services</h2>
+          
+          {/* Service Tabs */}
+          <div className="services-tabs animate-on-scroll">
             <button 
               className={`tab-btn ${activeTab === 'design' ? 'active' : ''}`}
               onClick={() => setActiveTab('design')}
             >
-              <FaPalette className="tab-icon" />
-              Graphic Design
+              <span>Design Services</span>
             </button>
             <button 
               className={`tab-btn ${activeTab === 'tech' ? 'active' : ''}`}
               onClick={() => setActiveTab('tech')}
             >
-              <FaTools className="tab-icon" />
-              Tech Support
+              <span>Tech Services</span>
             </button>
           </div>
-          <p className="selection-hint">
-            <FaPlusCircle className="hint-icon" />
-            Click any service to add it to your contact request
-          </p>
-        </div>
-      </section>
 
-      {/* Services Grid */}
-      <section className="services-grid-section">
-        <div className="container">
-          <div className="services-grid">
-            {currentServices.map((service, index) => {
-              const Icon = service.icon;
-              return (
-                <div 
-                  key={service.id} 
-                  className="service-card animate-on-scroll"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                  onClick={() => handleServiceClick(service.title, activeTab === 'design' ? 'Graphic Design' : 'Tech Support', service.basePrice)}
-                >
-                  <div className="service-icon-wrapper" style={{ backgroundColor: service.color }}>
-                    <Icon className="service-icon" />
-                  </div>
-                  <div className="service-header">
-                    <h3 className="service-title">{service.title}</h3>
-                    <span className="service-price">{service.basePrice}</span>
-                  </div>
-                  <p className="service-description">{service.description}</p>
-                  <ul className="service-features">
-                    {service.features.map((feature, idx) => (
-                      <li key={idx}>
-                        <FaCheckCircle className="feature-check" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="service-action">
-                    <span className="service-select-btn">
-                      Select Service <FaArrowRight className="service-select-arrow" />
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works - Process Section */}
-      <section className="process-section">
-        <div className="container">
-          <div className="section-header animate-on-scroll">
-            <h2 className="section-title">How It <span className="gradient-text">Works</span></h2>
-            <p className="section-subtitle">Simple, transparent, and efficient process</p>
-          </div>
-          <div className="process-grid">
-            {processSteps.map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <div key={step.id} className="process-step animate-on-scroll">
-                  <div className="step-number">{step.id}</div>
-                  <div className="step-content">
-                    <div className="step-icon-wrapper">
-                      <Icon className="step-icon" />
-                    </div>
-                    <h4 className="step-title">{step.title}</h4>
-                    <p className="step-description">{step.description}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Plans */}
-      <section className="pricing-plans-section">
-        <div className="container">
-          <div className="section-header animate-on-scroll">
-            <h2 className="section-title">Choose Your <span className="gradient-text">Plan</span></h2>
-            <p className="section-subtitle">Flexible packages for every business need</p>
-          </div>
-          <div className="pricing-grid">
-            {pricingPlans.map((plan, index) => (
-              <div 
-                key={plan.id} 
-                className={`pricing-card animate-on-scroll ${plan.popular ? 'popular' : ''}`}
-                onClick={() => handleServiceClick(plan.name, 'Package', plan.price)}
+          <div className="dservices-section__list">
+            {currentServices.map((service, index) => (
+              <a 
+                key={service.id} 
+                href={service.link}
+                className="dservices-section__item animate-on-scroll"
+                style={{ animationDelay: `${index * 0.05}s` }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleServiceClick(service.title, activeTab === 'design' ? 'Design Service' : 'Tech Service');
+                }}
               >
-                {plan.popular && <div className="popular-badge">Most Popular</div>}
-                <div className="pricing-header">
-                  <h3 className="plan-name">{plan.name}</h3>
-                  <div className="plan-price">
-                    <span className="price">{plan.price}</span>
+                <img 
+                  className="dservices-section__icon" 
+                  src={service.image} 
+                  alt={service.title} 
+                />
+                <span className="dservices-section__head">
+                  <span>{service.title}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          PARTNER SECTION - DUCK DESIGN STYLE
+          ============================================ */}
+      <section className="partner-section">
+        <div className="container">
+          <div className="partner-section__col">
+            <div className="partner-section__left">
+              <h2 className="section-title animate-on-scroll">
+                "Clients we are proud of" <br />
+                Trust from major international companies
+              </h2>
+            </div>
+            <div className="partner-section__right animate-on-scroll">
+              <div className="partner-section__list horslider-left">
+                {partnerLogos.map((logo, index) => (
+                  <div key={index} className="partner-section__item">
+                    <img src={logo} alt="Partner" />
                   </div>
-                  <p className="plan-description">{plan.description}</p>
+                ))}
+                {partnerLogos.map((logo, index) => (
+                  <div key={`dup-${index}`} className="partner-section__item">
+                    <img src={logo} alt="Partner" />
+                  </div>
+                ))}
+              </div>
+              <div className="partner-section__list horslider-rightcenter">
+                {partnerLogos.map((logo, index) => (
+                  <div key={`second-${index}`} className="partner-section__item">
+                    <img src={logo} alt="Partner" />
+                  </div>
+                ))}
+                {partnerLogos.map((logo, index) => (
+                  <div key={`second-dup-${index}`} className="partner-section__item">
+                    <img src={logo} alt="Partner" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          WHAT MAKES US DIFFERENT - DUCK DESIGN STYLE
+          ============================================ */}
+      <section className="include-section" id="include">
+        <div className="container">
+          <div className="include-section__col">
+            <div className="include-section__info">
+              <div className="page-pretitle text-left animate-on-scroll">
+                see how we compare
+              </div>
+              <h2 className="section-title text-left animate-on-scroll">
+                What Makes Us Different?
+              </h2>
+              <div className="include-section__txt animate-on-scroll">
+                We will take care of all your creative needs. No inefficient freelancers. 
+                No lengthy hiring procedures. No contracts. Just your work getting done!
+              </div>
+            </div>
+            <div className="include-section__list">
+              {[
+                'Unlimited requests',
+                'Real-time collaboration',
+                'Unlimited revisions',
+                'Trello Project Management',
+                'Unlimited brand profiles',
+                '7-day money-back guarantee',
+                'Native source files',
+                'Cancel anytime',
+                'Art Director',
+                'Middle+/Senior Designer',
+                'Project Manager'
+              ].map((feature, index) => (
+                <div key={index} className="include-section__item animate-on-scroll">
+                  <div className="include-section__icon">
+                    <img src={`/images/differentsicon-${(index % 11) + 1}.svg`} alt={feature} />
+                  </div>
+                  <div className="include-section__name">{feature}</div>
                 </div>
-                <ul className="plan-features">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx}>
-                      <FaCheckCircle className="feature-check" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <div className="plan-action">
-                  <button className="btn-select-plan">
-                    Select Package <FaArrowRight className="btn-arrow" />
-                  </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          PREFERENCE SECTION - DUCK DESIGN STYLE
+          ============================================ */}
+      <section className="preference-section">
+        <div className="container">
+          <div className="preference-section__list">
+            {[
+              { icon: '/images/preficonn-3.svg', title: 'Fixed monthly rate', desc: 'No hidden costs. Pay the same price every month.' },
+              { icon: '/images/preficonn-4.svg', title: 'Unlimited requests', desc: 'Don\'t limit your creativity. Request as many designs as you need.' },
+              { icon: '/images/preficonn-5.svg', title: 'Unlimited revisions', desc: 'Request changes without limits. We iterate until you say it\'s perfect.' },
+              { icon: '/images/time-icon.svg', title: 'Same-day delivery', desc: 'Receive your designs on the same day with our higher-tier package.' },
+              { icon: '/images/preficonn-6.svg', title: 'Professional designers', desc: 'Work with experienced designers who bring creativity and precision to every project.' },
+              { icon: '/images/preficonn-1.svg', title: 'Designer match', desc: 'Each request goes to the most qualified designer for the job.' }
+            ].map((item, index) => (
+              <div key={index} className="preference-section__item animate-on-scroll">
+                <div className="preference-section__icon">
+                  <img src={item.icon} alt={item.title} />
+                </div>
+                <div className="preference-section__info">
+                  <div className="preference-section__head">{item.title}</div>
+                  <div className="preference-section__txt">{item.desc}</div>
                 </div>
               </div>
             ))}
@@ -463,54 +435,175 @@ const ServicesPage = () => {
         </div>
       </section>
 
-      {/* Why Choose Us */}
-      <section className="why-choose-section">
+      {/* ============================================
+          WHO IS IT FOR - DUCK DESIGN STYLE
+          ============================================ */}
+      <section className="whois-section">
         <div className="container">
-          <div className="section-header animate-on-scroll">
-            <h2 className="section-title">Why Choose <span className="gradient-text">Fast Multimedia</span></h2>
-            <p className="section-subtitle">We combine creative design expertise with technical excellence</p>
-          </div>
-          <div className="features-grid">
-            {features.map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <div key={index} className="feature-card animate-on-scroll">
-                  <div className="feature-icon-wrapper">
-                    <Icon className="feature-icon" />
-                  </div>
-                  <h3 className="feature-title">{feature.title}</h3>
-                  <p className="feature-description">{feature.description}</p>
+          <h2 className="section-title text-center animate-on-scroll">Who is it For?</h2>
+          <p className="section-txt text-center animate-on-scroll">
+            No client or task is too big or small. If you want to strengthen your brand 
+            and drive more creativity, you're in the right place.
+          </p>
+          <div className="whois-tabs">
+            <div className="content-tabs__nav animate-on-scroll">
+              <button className="btn content-tabs__btn active" data-tab="who1">
+                <span>Agencies</span>
+              </button>
+              <button className="btn content-tabs__btn" data-tab="who2">
+                <span>Small and Medium-Sized Businesses</span>
+              </button>
+              <button className="btn content-tabs__btn" data-tab="who3">
+                <span>Marketing teams</span>
+              </button>
+              <button className="btn content-tabs__btn" data-tab="who4">
+                <span>Large Enterprise</span>
+              </button>
+            </div>
+            <div className="whois-section__list">
+              {/* Tab 1 - Agencies */}
+              <div className="content-tabs__items active" data-tab="who1" id="who1">
+                <div className="whois-section__icon">
+                  <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Agencies" />
                 </div>
-              );
-            })}
+                <div className="whois-section__info">
+                  <div className="whois-section__head">Multiply your agency output without multiplying your overhead costs.</div>
+                  <div className="whois-section__txt">Overwhelmed? Overworked? Not anymore! Our vetted designers handle your design requests, freeing you up to focus on growing your business and delivering results for your clients.</div>
+                  <ul className="whois-section__ul">
+                    <li>SAVE TIME AND MONEY ON CREATIVE PRODUCTION</li>
+                    <li>SCALE UP AND DOWN AS NEEDED</li>
+                    <li>MEET TIGHT DEADLINES WITH EASE</li>
+                  </ul>
+                </div>
+              </div>
+              {/* Tab 2 - SMBs */}
+              <div className="content-tabs__items" data-tab="who2" id="who2">
+                <div className="whois-section__icon">
+                  <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="SMBs" />
+                </div>
+                <div className="whois-section__info">
+                  <div className="whois-section__head">Flat-rate graphic design to help you grow your business.</div>
+                  <div className="whois-section__txt">Don't break your budget or settle for sloppy design that harms your business. Knock your competitors out of the park while saving money.</div>
+                  <ul className="whois-section__ul">
+                    <li>Scale your business</li>
+                    <li>Cut hiring costs up to 70%</li>
+                    <li>Limit risk with no contracts</li>
+                  </ul>
+                </div>
+              </div>
+              {/* Tab 3 - Marketing Teams */}
+              <div className="content-tabs__items" data-tab="who3" id="who3">
+                <div className="whois-section__icon">
+                  <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Marketing Teams" />
+                </div>
+                <div className="whois-section__info">
+                  <div className="whois-section__head">Position your marketing team for rapid growth.</div>
+                  <div className="whois-section__txt">Reach your marketing goals without getting bogged down by graphics! You provide the ideas and concepts, and we deliver top-notch marketing materials.</div>
+                  <ul className="whois-section__ul">
+                    <li>Eliminate creative bottlenecks</li>
+                    <li>Get your creative to market 3x faster</li>
+                    <li>Supplement your existing graphic design process</li>
+                  </ul>
+                </div>
+              </div>
+              {/* Tab 4 - Large Enterprise */}
+              <div className="content-tabs__items" data-tab="who4" id="who4">
+                <div className="whois-section__icon">
+                  <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Large Enterprise" />
+                </div>
+                <div className="whois-section__info">
+                  <div className="whois-section__head">A Single Subscription to Replace Your Company's Design Departments.</div>
+                  <div className="whois-section__txt">With one subscription, we handle all your business's design needs across every department. Your projects will be overseen by a dedicated manager, and our expert team will efficiently meet any of your demands.</div>
+                  <ul className="whois-section__ul">
+                    <li>No more in-house design departments or full-time designers</li>
+                    <li>Significant time savings for your managers</li>
+                    <li>Reduced costs on salaries and recruitment</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="cta-section">
+      {/* ============================================
+          FAQ SECTION - DUCK DESIGN STYLE
+          ============================================ */}
+      <section className="faq-section">
         <div className="container">
-          <div className="cta-content animate-on-scroll">
-            <h2 className="cta-title">Ready to Transform Your Business?</h2>
-            <p className="cta-description">
-              Whether you need stunning designs or reliable tech support, 
-              we've got you covered. Get in touch for a free consultation.
-            </p>
-            <div className="cta-buttons">
-              <button 
-                onClick={() => handleServiceClick('Free Consultation', 'Consultation')}
-                className="btn-cta-primary"
-              >
-                <FaCalendarCheck />
-                Book Free Consultation
-              </button>
-              <button 
-                onClick={() => handleServiceClick('Custom Quote', 'Quote')}
-                className="btn-cta-secondary"
-              >
-                <FaFileInvoiceDollar />
-                Request Custom Quote
-              </button>
+          <h2 className="section-title text-center animate-on-scroll">Got Any Questions?</h2>
+          <div className="faq-section__items">
+            {[
+              {
+                q: 'Who is it for?',
+                a: 'Our service is perfect for businesses of all sizes and entrepreneurs at any stage. Fast Multimedia is ideal for anyone needing cost-effective, high-quality graphic design on an ongoing basis. Hire Designer service makes you feel like you have an in-house designer, but without the hefty price tag.'
+              },
+              {
+                q: 'What does unlimited requests and revisions really mean?',
+                a: 'With all our plans, you can submit as many design requests as needed, and our designers will work on them during normal business days. Revisions are also unlimited. No matter how many requests or revisions you submit, the price remains the same.'
+              },
+              {
+                q: 'What is the turnaround time?',
+                a: 'Our designers will work on your requests during normal business days, all year round. In most cases, we deliver the first update within 24 hours. For more complex requests, it may take up to 48 hours.'
+              },
+              {
+                q: 'What kind of designs can I request?',
+                a: 'You can request a wide range of designs, including: Website design, Logo design, Advertising banners, Social media posts, Infographics, Brand merchandise, Brochures, Pitch decks, Flyers, Brand identity, Emails, GIFs, Brand books, Package design, Graphic videos, and more.'
+              },
+              {
+                q: 'Do I own the rights to the designs?',
+                a: 'Yes. All our work is created specifically for you. You have full ownership of the files as soon as you receive them and are free to use them however you like. We always provide source files (PSD, AI, INDD, FIG, SKETCH) along with PNG, JPEG, SVG, and PDF formats.'
+              },
+              {
+                q: 'Can I pause my subscription?',
+                a: 'Yes, you can pause your subscription for up to 7 days, but only during the 3rd month of your subscription.'
+              },
+              {
+                q: 'What is your 7-day money-back guarantee?',
+                a: 'All our plans come with a full 7-day money-back guarantee. If, after several design requests, you still don\'t think Fast Multimedia is the right fit for you, we will refund 100% of your initial membership fee.'
+              },
+              {
+                q: 'What are your designers\' working hours?',
+                a: 'Designers work on Monday to Friday, from 09:00 to 18:00 (GMT+2).'
+              }
+            ].map((faq, index) => (
+              <div key={index} className="faq-section__item">
+                <button className="faq-btn" type="button">{faq.q}</button>
+                <div className="faq-section__answer">
+                  <div className="faq-section__answer-inner">
+                    <p>{faq.a}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          CTA SECTION - DUCK DESIGN STYLE
+          ============================================ */}
+      <section className="cta-boxbg cta-boxbg_contact">
+        <div className="container">
+          <div className="cta-boxbg__inner">
+            <div className="cta-boxbg__left">
+              <div className="section-pretitle text-left animate-on-scroll">LET'S WORK TOGETHER</div>
+              <h2 className="section-title text-left animate-on-scroll">Contact Us</h2>
+              <p className="section-txt text-left animate-on-scroll">
+                Know what you want? Great.<br />
+                Got questions? Even better.
+              </p>
+              <div className="contactcta-section__btngroup text-left animate-on-scroll">
+                <button 
+                  className="btn btn-white btn-primary_arrow"
+                  onClick={() => navigate('/contact')}
+                >
+                  BOOK A CALL NOW <FaArrowRight className="btn-arrow" />
+                </button>
+              </div>
+            </div>
+            <div className="cta-boxbg__img">
+              <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Contact Us" />
             </div>
           </div>
         </div>
