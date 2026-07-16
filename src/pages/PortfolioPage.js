@@ -883,33 +883,38 @@ const PortfolioPage = () => {
 },
     {
       
+  
   id: 51,
-  title: 'Home Service Cleaning App UI/UX',
-  category: 'uiux',
-  description: 'User-friendly mobile app design for on-demand home cleaning services with real-time booking',
-  detailedDescription: 'Designed a comprehensive mobile app for a home cleaning service platform that connects users with professional cleaners. The app features a clean, intuitive interface with service categories, real-time booking, price estimation, and seamless payment integration. The design focuses on creating a trustworthy, professional brand experience that makes booking cleaning services simple and stress-free. Key features include service discovery, instant booking, cleaner profiles with reviews, and real-time tracking.',
-  tags: ['UI/UX Design', 'Mobile App', 'On-Demand Service', 'Home Cleaning', 'User Research', 'Booking System'],
-  image: 'CLEANING.jpg',
-  client: 'CleanConnect Services',
-  year: '2025',
-  duration: '8 weeks',
-  role: 'Lead UI/UX Designer',
+  title: 'FASTMULTIMEDIA - Sports Brand Identity',
+  category: 'branding',
+  description: 'Complete brand identity system for FASTMULTIMEDIA sports division with FIFA partnership branding',
+  detailedDescription: 'Developed a comprehensive brand identity for FASTMULTIMEDIA\'s sports division, featuring official partnership branding with FIFA and CHAN. The design includes a bold, dynamic logo system, brand guidelines, and promotional materials that convey athletic excellence, professionalism, and global sporting prestige. The visual language combines modern typography with energetic sports aesthetics.',
+  tags: ['Brand Identity', 'Sports Branding', 'FIFA Partnership', 'Logo Design', 'Corporate Branding'],
+  image: 'ghana.jpg',
+  client: 'FASTMULTIMEDIA Sports Division',
+  year: '2026',
+  duration: '4 weeks',
+  role: 'Lead Brand Designer',
   deliverables: [
-    'User Research & Personas', 
-    'Wireframes & User Flows', 
-    'High-Fidelity Prototypes', 
-    'Design System', 
-    'Usability Testing', 
-    'Developer Handoff'
+    'Logo System & Variations', 
+    'Brand Guidelines', 
+    'FIFA Partnership Assets', 
+    'Promotional Materials',
+    'Digital Assets',
+    'Merchandise Design',
+    'Event Branding'
   ],
   results: [
-    '4.8 App Store rating', 
-    '150k+ downloads in first 3 months', 
-    '92% user satisfaction rate',
-    '45% repeat booking rate'
+    'Official FIFA partnership branding established',
+    'CHAN tournament brand integration',
+    'Enhanced corporate brand recognition',
+    'Successful sports division launch'
   ],
-  color: '#FF6B35',
-  mockups: []
+  color: '#1A1A2E',
+  mockups: [
+    '/images/mockups/sports-brand-1.jpg',
+    '/images/mockups/sports-brand-2.jpg'
+  ]
 },
     {
       id: 52,
