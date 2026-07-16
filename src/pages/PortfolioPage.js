@@ -865,22 +865,39 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 51,
-      title: 'Wellness Mobile App UI/UX',
-      category: 'uiux',
-      description: 'User-centered mobile app design for wellness and mental health services',
-      detailedDescription: 'Designed a comprehensive mobile app focused on wellness and mental health. Features include mood tracking, guided meditations, therapy session booking, and community support. The design prioritizes calm, soothing aesthetics with intuitive navigation.',
-      tags: ['UI/UX Design', 'Mobile App', 'Wellness', 'Mental Health', 'User Research'],
-      image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-      client: 'MindfulMe Wellness',
-      year: '2025',
-      duration: '10 weeks',
-      role: 'Lead UI/UX Designer',
-      deliverables: ['User Research', 'Wireframes', 'Interactive Prototypes', 'Design System'],
-      results: ['4.9 App Store rating', '200k+ downloads', '95% user retention rate'],
-      color: '#7B1FA2',
-      mockups: []
-    },
+      
+  id: 51,
+  title: 'Home Service Cleaning App UI/UX',
+  category: 'uiux',
+  description: 'User-friendly mobile app design for on-demand home cleaning services with real-time booking',
+  detailedDescription: 'Designed a comprehensive mobile app for a home cleaning service platform that connects users with professional cleaners. The app features a clean, intuitive interface with service categories, real-time booking, price estimation, and seamless payment integration. The design focuses on creating a trustworthy, professional brand experience that makes booking cleaning services simple and stress-free. Key features include service discovery, instant booking, cleaner profiles with reviews, and real-time tracking.',
+  tags: ['UI/UX Design', 'Mobile App', 'On-Demand Service', 'Home Cleaning', 'User Research', 'Booking System'],
+  image: 'CLEANING.jpg',
+  client: 'CleanConnect Services',
+  year: '2025',
+  duration: '8 weeks',
+  role: 'Lead UI/UX Designer',
+  deliverables: [
+    'User Research & Personas', 
+    'Wireframes & User Flows', 
+    'High-Fidelity Prototypes', 
+    'Design System', 
+    'Usability Testing', 
+    'Developer Handoff'
+  ],
+  results: [
+    '4.8 App Store rating', 
+    '150k+ downloads in first 3 months', 
+    '92% user satisfaction rate',
+    '45% repeat booking rate'
+  ],
+  color: '#FF6B35',
+  mockups: [
+    '/images/mockups/home-service-1.jpg',
+    '/images/mockups/home-service-2.jpg',
+    '/images/mockups/home-service-3.jpg'
+  ]
+},
     {
       id: 52,
       title: 'Restaurant Brand & Menu Design',
