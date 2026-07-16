@@ -187,7 +187,7 @@ const ServicesPage = () => {
     return () => window.removeEventListener('scroll', animateOnScroll);
   }, []);
 
-  // Design Services - All visible
+  // ===== DESIGN SERVICES - COMPLETE LIST =====
   const designServices = [
     {
       id: 1,
@@ -198,12 +198,172 @@ const ServicesPage = () => {
       color: '#ff8b20',
       link: '/graphic-design'
     },
-    // ... rest of design services
+    {
+      id: 2,
+      title: 'Brand Identity Design',
+      description: 'Complete brand identity packages including logo design, color palette, and brand guidelines.',
+      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaPalette,
+      color: '#ffca41',
+      link: '/brand-identity'
+    },
+    {
+      id: 3,
+      title: 'UI/UX Design',
+      description: 'User-centered design for websites and applications focusing on usability and engagement.',
+      image: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaMobileAlt,
+      color: '#fdb572',
+      link: '/ui-ux-design'
+    },
+    {
+      id: 4,
+      title: 'Print & Packaging',
+      description: 'Professional print materials and packaging designs that stand out on shelves.',
+      image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaPrint,
+      color: '#ffda7a',
+      link: '/print-packaging'
+    },
+    {
+      id: 5,
+      title: 'Motion Graphics',
+      description: 'Animated videos and graphics for social media, presentations, and marketing.',
+      image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaFilm,
+      color: '#ff8b20',
+      link: '/motion-graphics'
+    },
+    {
+      id: 6,
+      title: 'Website Design',
+      description: 'Modern, responsive websites that convert visitors into customers.',
+      image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaCode,
+      color: '#ffca41',
+      link: '/website-design'
+    },
+    {
+      id: 7,
+      title: 'Landing Page Design',
+      description: 'High-converting landing pages designed to capture leads and drive sales.',
+      image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaCode,
+      color: '#fdb572',
+      link: '/landing-page'
+    },
+    {
+      id: 8,
+      title: 'PowerPoint Design',
+      description: 'Professional presentation designs that captivate your audience.',
+      image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaFileInvoiceDollar,
+      color: '#ffda7a',
+      link: '/powerpoint-design'
+    },
+    {
+      id: 9,
+      title: 'SaaS Product Design',
+      description: 'Design solutions tailored for software-as-a-service products.',
+      image: 'https://images.unsplash.com/photo-1537884944318-390069bb8665?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaLaptop,
+      color: '#ff8b20',
+      link: '/saas-design'
+    },
+    {
+      id: 10,
+      title: 'Amazon Design',
+      description: 'Optimized product listings and branding for Amazon sellers.',
+      image: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaShoppingCart,
+      color: '#ffca41',
+      link: '/amazon-design'
+    },
+    {
+      id: 11,
+      title: 'Startup Design',
+      description: 'Design solutions for startups looking to make a strong first impression.',
+      image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaRocket,
+      color: '#fdb572',
+      link: '/startup-design'
+    },
+    {
+      id: 12,
+      title: 'Software Design',
+      description: 'User-friendly software interfaces that enhance productivity.',
+      image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaServer,
+      color: '#ffda7a',
+      link: '/software-design'
+    }
   ];
 
-  // Tech Services - All visible
+  // ===== TECH SERVICES - COMPLETE LIST =====
   const techServices = [
-    // ... same as before
+    {
+      id: 1,
+      title: 'Computer Repair',
+      description: 'Professional repair services for all computer makes and models.',
+      image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaTools,
+      color: '#ff8b20',
+      link: '/computer-repair'
+    },
+    {
+      id: 2,
+      title: 'Windows Installation',
+      description: 'Complete Windows OS installation, configuration, and optimization.',
+      image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaWindows,
+      color: '#ffca41',
+      link: '/windows-installation'
+    },
+    {
+      id: 3,
+      title: 'Software Support',
+      description: 'Installation and configuration of all types of software applications.',
+      image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaDownload,
+      color: '#fdb572',
+      link: '/software-support'
+    },
+    {
+      id: 4,
+      title: 'New Computer Setup',
+      description: 'Complete setup and configuration of new computer systems.',
+      image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaLaptop,
+      color: '#ffda7a',
+      link: '/computer-setup'
+    },
+    {
+      id: 5,
+      title: 'Networking Solutions',
+      description: 'Setup and management of wired and wireless networks.',
+      image: 'https://images.unsplash.com/photo-1537884944318-390069bb8665?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaNetworkWired,
+      color: '#ff8b20',
+      link: '/networking'
+    },
+    {
+      id: 6,
+      title: 'System Management',
+      description: 'Ongoing maintenance and management of computer systems.',
+      image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: FaServer,
+      color: '#ffca41',
+      link: '/system-management'
+    }
+  ];
+
+  // Partner logos
+  const partnerLogos = [
+    { id: 1, name: 'Google', color: '#4285F4' },
+    { id: 2, name: 'Microsoft', color: '#00A4EF' },
+    { id: 3, name: 'Amazon', color: '#FF9900' },
+    { id: 4, name: 'Meta', color: '#1877F2' },
+    { id: 5, name: 'Apple', color: '#555555' },
   ];
 
   return (
@@ -335,9 +495,34 @@ const ServicesPage = () => {
             </div>
             <div className="partner-section__right animate-on-scroll">
               <div className="partner-section__list horslider-left">
-                {[1,2,3,4,5].map((i) => (
-                  <div key={i} className="partner-section__item">
-                    <div className="partner-logo-placeholder">Logo {i}</div>
+                {partnerLogos.map((logo) => (
+                  <div key={logo.id} className="partner-section__item">
+                    <div className="partner-logo-placeholder" style={{ color: logo.color }}>
+                      {logo.name}
+                    </div>
+                  </div>
+                ))}
+                {partnerLogos.map((logo) => (
+                  <div key={`dup-${logo.id}`} className="partner-section__item">
+                    <div className="partner-logo-placeholder" style={{ color: logo.color }}>
+                      {logo.name}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="partner-section__list horslider-rightcenter">
+                {partnerLogos.map((logo) => (
+                  <div key={`second-${logo.id}`} className="partner-section__item">
+                    <div className="partner-logo-placeholder" style={{ color: logo.color }}>
+                      {logo.name}
+                    </div>
+                  </div>
+                ))}
+                {partnerLogos.map((logo) => (
+                  <div key={`second-dup-${logo.id}`} className="partner-section__item">
+                    <div className="partner-logo-placeholder" style={{ color: logo.color }}>
+                      {logo.name}
+                    </div>
                   </div>
                 ))}
               </div>
