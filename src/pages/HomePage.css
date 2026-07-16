@@ -1764,7 +1764,7 @@ body {
 /* Dark Mode Support - Still Gold/Orange themed */
 @media (prefers-color-scheme: dark) {
   :root {
-    --duck-cream: #1a1a2e;
+    --duck-cream: #5a5333;
     --duck-light-cream: #16213e;
     --duck-border: #2a2a4a;
     --duck-shadow: rgba(0, 0, 0, 0.3);
