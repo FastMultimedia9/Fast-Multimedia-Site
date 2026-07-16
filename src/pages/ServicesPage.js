@@ -29,26 +29,6 @@ const ServicesPage = () => {
     return () => window.removeEventListener('scroll', animateOnScroll);
   }, []);
 
-  // This function is no longer used for navigation, but kept for potential other uses
-  const showServiceNotification = (serviceName) => {
-    const notification = document.createElement('div');
-    notification.className = 'service-notification';
-    notification.innerHTML = `
-      <span class="notification-icon">✓</span>
-      <span>${serviceName} added to request form!</span>
-    `;
-    document.body.appendChild(notification);
-    setTimeout(() => notification.classList.add('show'), 10);
-    setTimeout(() => {
-      notification.classList.remove('show');
-      setTimeout(() => {
-        if (document.body.contains(notification)) {
-          document.body.removeChild(notification);
-        }
-      }, 300);
-    }, 3000);
-  };
-
   // Design Services - All visible
   const designServices = [
     {
@@ -230,43 +210,6 @@ const ServicesPage = () => {
 
   return (
     <div className="services-page">
-      {/* Notification */}
-      <style>
-        {`
-          .service-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--gradient-gold);
-            color: var(--duck-dark);
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px var(--duck-shadow);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 9999;
-            transform: translateX(150%);
-            transition: transform 0.3s ease-in-out;
-            max-width: 350px;
-            font-weight: 600;
-            border: 1px solid var(--duck-border);
-          }
-          .service-notification.show { transform: translateX(0); }
-          .service-notification .notification-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 28px;
-            height: 28px;
-            background: var(--duck-dark);
-            color: var(--duck-gold);
-            border-radius: 50%;
-            font-weight: 700;
-          }
-        `}
-      </style>
-
       {/* ============================================
           HERO SECTION - DUCK DESIGN STYLE
           ============================================ */}
