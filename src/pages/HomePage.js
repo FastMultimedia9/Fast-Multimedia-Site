@@ -171,7 +171,7 @@ const HomePage = () => {
       subtitle: '80th Anniversary',
       category: 'Brand Identity',
       description: 'Award-winning logo design celebrating heritage and future vision.',
-      image: 'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      image: '/80th.jpg',
       tags: ['Logo Design', 'Healthcare'],
       details: ['Winning competition design', 'Heritage meets future concept', 'Clean sans-serif typography'],
       client: 'St. Martin De Porres Hospital',
