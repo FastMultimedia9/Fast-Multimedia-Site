@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { 
+  FaPalette, FaDesktop, FaPenFancy, FaLaptop, FaPrint, FaGlobe,
+  FaTools, FaCogs, FaCloudUploadAlt, FaWifi,
+  FaArrowRight, FaStar, FaCheckCircle
+} from 'react-icons/fa';
 import './HomePage.css';
 
 const HomePage = () => {
@@ -171,7 +176,7 @@ const HomePage = () => {
         name: 'Brand Identity',
         price: '₵699+',
         description: 'Complete brand systems including logo, color, typography.',
-        icon: '🎨',
+        icon: FaPenFancy,
         features: ['Logo Design', 'Brand Guidelines', 'Color Palette', 'Typography']
       },
       {
@@ -179,7 +184,7 @@ const HomePage = () => {
         name: 'UI/UX Design',
         price: '₵899+',
         description: 'User-centered interfaces for web and mobile.',
-        icon: '📱',
+        icon: FaLaptop,
         features: ['Wireframing', 'Prototyping', 'User Testing', 'Responsive']
       },
       {
@@ -187,7 +192,7 @@ const HomePage = () => {
         name: 'Print Design',
         price: '₵549+',
         description: 'Professional print materials and packaging.',
-        icon: '🖨️',
+        icon: FaPrint,
         features: ['Business Cards', 'Packaging', 'Brochures', 'Posters']
       },
       {
@@ -195,7 +200,7 @@ const HomePage = () => {
         name: 'Web Design',
         price: '₵1,299+',
         description: 'Modern, responsive websites.',
-        icon: '💻',
+        icon: FaGlobe,
         features: ['Website Design', 'E-commerce', 'CMS', 'SEO']
       }
     ],
@@ -205,7 +210,7 @@ const HomePage = () => {
         name: 'Computer Repair',
         price: '₵50+/hr',
         description: 'Professional repair for all computer makes.',
-        icon: '🔧',
+        icon: FaTools,
         features: ['Hardware Diagnosis', 'Component Repair', 'System Tuning']
       },
       {
@@ -213,7 +218,7 @@ const HomePage = () => {
         name: 'System Setup',
         price: '₵150+',
         description: 'Complete OS installation and configuration.',
-        icon: '⚙️',
+        icon: FaCogs,
         features: ['Windows Setup', 'Driver Updates', 'Optimization']
       },
       {
@@ -221,7 +226,7 @@ const HomePage = () => {
         name: 'Software Support',
         price: '₵100+',
         description: 'Installation and configuration.',
-        icon: '📦',
+        icon: FaCloudUploadAlt,
         features: ['Office Setup', 'Creative Software', 'Antivirus']
       },
       {
@@ -229,7 +234,7 @@ const HomePage = () => {
         name: 'Networking',
         price: '₵250+',
         description: 'Network setup and management.',
-        icon: '📡',
+        icon: FaWifi,
         features: ['Wi-Fi Setup', 'Security', 'Troubleshooting']
       }
     ]
@@ -292,14 +297,14 @@ const HomePage = () => {
             className={`toggle-btn ${activeServiceCategory === 'design' ? 'active' : ''}`}
             onClick={() => setActiveServiceCategory('design')}
           >
-            <span className="toggle-icon">🎨</span>
+            <FaPalette className="toggle-icon" />
             <span className="toggle-text">Design Services</span>
           </button>
           <button
             className={`toggle-btn ${activeServiceCategory === 'tech' ? 'active' : ''}`}
             onClick={() => setActiveServiceCategory('tech')}
           >
-            <span className="toggle-icon">🔧</span>
+            <FaDesktop className="toggle-icon" />
             <span className="toggle-text">Tech Services</span>
           </button>
         </div>
@@ -362,7 +367,7 @@ const HomePage = () => {
               <span>
                 {activeServiceCategory === 'design' ? 'View Packages' : 'Explore Services'}
               </span>
-              <span className="btn-arrow">→</span>
+              <FaArrowRight className="btn-arrow" />
             </button>
             <button className="btn btn-secondary" onClick={() => navigate('/contact')}>
               <span>Get Started</span>
@@ -416,9 +421,7 @@ const HomePage = () => {
                   <div className="update-image">
                     <img src={update.image} alt={update.title} />
                     <div className="update-tag" style={{ 
-                      background: update.type === 'school' 
-                        ? 'linear-gradient(135deg, #ff8b20, #ffca41)' 
-                        : 'linear-gradient(135deg, #ff8b20, #ffca41)' 
+                      background: 'linear-gradient(135deg, #ff8b20, #ffca41)'
                     }}>
                       {update.tag}
                     </div>
@@ -431,7 +434,7 @@ const HomePage = () => {
                     <p className="update-subtitle">{update.subtitle}</p>
                     <p className="update-description">{update.description}</p>
                     <button className="update-cta">
-                      {update.cta} <span className="btn-arrow">→</span>
+                      {update.cta} <FaArrowRight className="btn-arrow" />
                     </button>
                   </div>
                 </div>
@@ -445,9 +448,7 @@ const HomePage = () => {
                   <div className="update-image">
                     <img src={update.image} alt={update.title} />
                     <div className="update-tag" style={{ 
-                      background: update.type === 'school' 
-                        ? 'linear-gradient(135deg, #ff8b20, #ffca41)' 
-                        : 'linear-gradient(135deg, #ff8b20, #ffca41)' 
+                      background: 'linear-gradient(135deg, #ff8b20, #ffca41)'
                     }}>
                       {update.tag}
                     </div>
@@ -460,7 +461,7 @@ const HomePage = () => {
                     <p className="update-subtitle">{update.subtitle}</p>
                     <p className="update-description">{update.description}</p>
                     <button className="update-cta">
-                      {update.cta} <span className="btn-arrow">→</span>
+                      {update.cta} <FaArrowRight className="btn-arrow" />
                     </button>
                   </div>
                 </div>
@@ -483,35 +484,38 @@ const HomePage = () => {
           </div>
 
           <div className="services-grid">
-            {services[activeServiceCategory].map((service, index) => (
-              <div
-                key={service.id}
-                className="service-card"
-                onClick={() => handleServiceClick(service)}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="service-card-inner">
-                  <div className="service-header">
-                    <div className="service-icon">{service.icon}</div>
-                    <div className="service-price">{service.price}</div>
+            {services[activeServiceCategory].map((service, index) => {
+              const Icon = service.icon;
+              return (
+                <div
+                  key={service.id}
+                  className="service-card"
+                  onClick={() => handleServiceClick(service)}
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="service-card-inner">
+                    <div className="service-header">
+                      <Icon className="service-icon" />
+                      <div className="service-price">{service.price}</div>
+                    </div>
+                    <h3 className="service-name">{service.name}</h3>
+                    <p className="service-description">{service.description}</p>
+                    <ul className="service-features">
+                      {service.features.map((feature, idx) => (
+                        <li key={idx}>
+                          <FaCheckCircle className="feature-check" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <button className="service-cta">
+                      <span>Select Service</span>
+                      <FaArrowRight className="cta-arrow" />
+                    </button>
                   </div>
-                  <h3 className="service-name">{service.name}</h3>
-                  <p className="service-description">{service.description}</p>
-                  <ul className="service-features">
-                    {service.features.map((feature, idx) => (
-                      <li key={idx}>
-                        <span className="feature-check">✓</span>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <button className="service-cta">
-                    <span>Select Service</span>
-                    <span className="cta-arrow">→</span>
-                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -542,7 +546,7 @@ const HomePage = () => {
                     <div className="portfolio-overlay">
                       <button className="view-project-btn">
                         <span>View Project</span>
-                        <span className="btn-arrow">→</span>
+                        <FaArrowRight className="btn-arrow" />
                       </button>
                     </div>
                   </div>
@@ -613,14 +617,58 @@ const HomePage = () => {
                 <div className="pricing-price">{pkg.price}</div>
                 <ul className="pricing-features">
                   {pkg.features.map((feature, idx) => (
-                    <li key={idx}>✓ {feature}</li>
+                    <li key={idx}>
+                      <FaCheckCircle className="feature-check" /> {feature}
+                    </li>
                   ))}
                 </ul>
                 <button className="btn btn-primary" onClick={() => navigate('/contact')}>
-                  Get Started <span className="btn-arrow">→</span>
+                  Get Started <FaArrowRight className="btn-arrow" />
                 </button>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="testimonials-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">What Our <span className="gradient-text">Clients Say</span></h2>
+            <p className="section-subtitle">Real feedback from real people</p>
+          </div>
+          <div className="testimonials-grid">
+            <div className="testimonial-card">
+              <div className="testimonial-stars">
+                <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
+              </div>
+              <p>"The branding package transformed our business. Professional, creative, and delivered on time!"</p>
+              <div className="testimonial-author">
+                <strong>John Mensah</strong>
+                <span>CEO, TechStart Ghana</span>
+              </div>
+            </div>
+            <div className="testimonial-card">
+              <div className="testimonial-stars">
+                <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
+              </div>
+              <p>"The tech support team is incredible. They fixed our network issues and got us running smoothly."</p>
+              <div className="testimonial-author">
+                <strong>Mary Asare</strong>
+                <span>Operations Manager, EduHub</span>
+              </div>
+            </div>
+            <div className="testimonial-card">
+              <div className="testimonial-stars">
+                <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
+              </div>
+              <p>"From logo design to website, they handled everything. Highly recommend their design services."</p>
+              <div className="testimonial-author">
+                <strong>Kwame Osei</strong>
+                <span>Founder, Abidan Royal</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -658,7 +706,7 @@ const HomePage = () => {
                   <ul className="package-features">
                     {pkg.features.map((feature, idx) => (
                       <li key={idx}>
-                        <span className="feature-icon">✓</span>
+                        <FaCheckCircle className="feature-icon" />
                         {feature}
                       </li>
                     ))}
@@ -683,7 +731,7 @@ const HomePage = () => {
                 }}
               >
                 <span>Get Started with {selectedPackage}</span>
-                <span className="btn-arrow">→</span>
+                <FaArrowRight className="btn-arrow" />
               </button>
             </div>
           </div>
@@ -737,7 +785,7 @@ const HomePage = () => {
                     }}
                   >
                     <span>Start Similar Project</span>
-                    <span className="btn-arrow">→</span>
+                    <FaArrowRight className="btn-arrow" />
                   </button>
                   <button
                     className="btn btn-secondary"
@@ -769,7 +817,7 @@ const HomePage = () => {
                 onClick={() => navigate('/contact')}
               >
                 <span>Start Your Project</span>
-                <span className="btn-arrow">→</span>
+                <FaArrowRight className="btn-arrow" />
               </button>
               <button
                 className="btn btn-secondary"
