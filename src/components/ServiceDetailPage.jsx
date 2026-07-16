@@ -76,7 +76,12 @@ const ServiceDetailPage = ({ service }) => {
           <div className="hero-section__col">
             <div className="hero-section__left">
               <ul className="breadcrumbs">
-                <li><a href="/">Home</a> <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none"><path d="M6.5 12L10.5 8L6.5 4" stroke="#434C62" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></li>
+                <li>
+                  <a href="/">Home</a>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
+                    <path d="M6.5 12L10.5 8L6.5 4" stroke="#434C62" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </li>
                 <li><span>{service.title} Services</span></li>
               </ul>
               <h1 className="page-title wow fadeInUp" data-wow-delay=".2s">
@@ -92,25 +97,11 @@ const ServiceDetailPage = ({ service }) => {
               </div>
             </div>
             <div className="hero-section__right wow fadeInUp" data-wow-delay=".3s">
-              {/* Mobile Image - visible on smaller screens */}
               <div className="mobile-only_xl">
-                <img 
-                  src={images.mobile} 
-                  alt={service.title} 
-                  className="hero-image-mobile"
-                  width="1420" 
-                  height="878"
-                />
+                <img src={images.mobile} alt={service.title} className="hero-image-mobile" />
               </div>
-              {/* Desktop Image - visible on larger screens */}
               <div className="desktop-only_xl">
-                <img 
-                  src={images.desktop} 
-                  alt={service.title} 
-                  className="hero-image-desktop"
-                  width="1700" 
-                  height="1162"
-                />
+                <img src={images.desktop} alt={service.title} className="hero-image-desktop" />
               </div>
             </div>
           </div>
@@ -214,9 +205,7 @@ const ServiceDetailPage = ({ service }) => {
                     <span className="price-item__currency active">₵</span>
                     <span data-price="1199" className="price-item__price">{price.replace('₵', '')}</span>
                   </div>
-                  <div className="price-item__price-txt">
-                    PER MONTH
-                  </div>
+                  <div className="price-item__price-txt">PER MONTH</div>
                 </div>
               </div>
               <button className="btn btn-white price-item__link" onClick={handleBookCall}>
@@ -227,18 +216,312 @@ const ServiceDetailPage = ({ service }) => {
         </div>
       </section>
 
+      {/* ===== ALWAYS-ON SECTION ===== */}
+      <section className="always-section" id="include">
+        <div className="container">
+          <div className="always-section__info">
+            <h2 className="section-title text-left wow fadeInUp" data-wow-delay=".3s">
+              We're always-on to deliver the {service.title.toLowerCase()} you want when you need it
+            </h2>
+          </div>
+          <div className="always-section__list wow fadeInUp">
+            <div className="always-section__item">
+              <div className="always-section__head">
+                <div className="always-section__icon">
+                  <img src="https://duck.design/wp-content/uploads/2024/05/serviconalw03.png" width="103" height="103" alt="" />
+                </div>
+                <div className="always-section__name">Digital Ads &amp; <br />Marketing Design</div>
+              </div>
+              <div className="always-section__txt">Facebook, Instagram, Pinterest, Google Display and Banner ads — whatever channels you're investing in, Fast Multimedia can deliver the content and creative you need at lightning fast speeds!</div>
+            </div>
+            <div className="always-section__item">
+              <div className="always-section__head">
+                <div className="always-section__icon">
+                  <img src="https://duck.design/wp-content/uploads/2024/05/graficicon02.svg" width="103" height="103" alt="" />
+                </div>
+                <div className="always-section__name">Motion Graphics Design</div>
+              </div>
+              <div className="always-section__txt">Use Fast Multimedia's motion graphics design studio to enhance your website design, digital campaigns, collateral and presentations.</div>
+            </div>
+            <div className="always-section__item">
+              <div className="always-section__head">
+                <div className="always-section__icon">
+                  <img src="https://duck.design/wp-content/uploads/2024/05/graficicon03.svg" width="103" height="103" alt="" />
+                </div>
+                <div className="always-section__name">Print, Merch &amp; <br />Packaging Design</div>
+              </div>
+              <div className="always-section__txt">Get on-brand and meticulously designed packaging for various products, posters, book covers, magazines, tradeshow graphics, stickers, and more.</div>
+            </div>
+            <div className="always-section__item">
+              <div className="always-section__head">
+                <div className="always-section__icon">
+                  <img src="https://duck.design/wp-content/uploads/2024/05/serviconalw05.png" width="103" height="103" alt="" />
+                </div>
+                <div className="always-section__name">Pitch Deck Design</div>
+              </div>
+              <div className="always-section__txt">Level up your slides, as well as produce eye-catching branded templates to help your teams scale presentation design.</div>
+            </div>
+            <div className="always-section__item">
+              <div className="always-section__head">
+                <div className="always-section__icon">
+                  <img src="https://duck.design/wp-content/uploads/2024/05/serviconalw04.png" width="104" height="103" alt="" />
+                </div>
+                <div className="always-section__name">Illustration &amp; <br />Infographic Design</div>
+              </div>
+              <div className="always-section__txt">Create on-brand graphical illustrations, infographics and data visualization for use across your websites, collateral, reports and presentations.</div>
+            </div>
+            <div className="always-section__item">
+              <div className="always-section__head">
+                <div className="always-section__icon">
+                  <img src="https://duck.design/wp-content/uploads/2024/05/graficicon06.svg" width="103" height="103" alt="" />
+                </div>
+                <div className="always-section__name">Landing Page Design</div>
+              </div>
+              <div className="always-section__txt">Marketing, Digital and Product teams rely on Fast Multimedia to create landing pages from scratch or based on existing materials for thoughtful UX wireframes and high-fidelity UI designs.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== PORTFOLIO SECTION ===== */}
+      <section className="portfolio-mini portfolio-tabs__section" id="portfolio">
+        <div className="container">
+          <h2 className="section-title text-center wow fadeInUp" data-wow-delay=".3s">
+            Take a look at some of our {service.title} work
+          </h2>
+          <div className="portfolio-tabs">
+            <div className="portfolio-tabs__nav">
+              <a href="#1" className="btn portfolio-tabs__btn active" data-tab="1">
+                <span>Branding</span>
+              </a>
+              <a href="#2" className="btn portfolio-tabs__btn" data-tab="2">
+                <span>Infographics</span>
+              </a>
+              <a href="#3" className="btn portfolio-tabs__btn" data-tab="3">
+                <span>Logo</span>
+              </a>
+              <a href="#4" className="btn portfolio-tabs__btn" data-tab="4">
+                <span>Presentation Design</span>
+              </a>
+              <a href="#5" className="btn portfolio-tabs__btn" data-tab="5">
+                <span>UI/UX Design + Mobile App</span>
+              </a>
+              <a href="#6" className="btn portfolio-tabs__btn" data-tab="6">
+                <span>Website</span>
+              </a>
+              <a href="#7" className="btn portfolio-tabs__btn" data-tab="7">
+                <span>SAAS</span>
+              </a>
+              <a href="#8" className="btn portfolio-tabs__btn" data-tab="8">
+                <span>Social Media banners &amp; Ad Creative</span>
+              </a>
+              <a href="#9" className="btn portfolio-tabs__btn" data-tab="9">
+                <span>Gifs</span>
+              </a>
+              <a href="#10" className="btn portfolio-tabs__btn" data-tab="10">
+                <span>Printing</span>
+              </a>
+              <a href="#11" className="btn portfolio-tabs__btn" data-tab="11">
+                <span>Videos</span>
+              </a>
+            </div>
+            <div className="portfolio-tabs__main">
+              <div className="portfolio-tabs__items portfolio-tab active" data-tab="1" id="1">
+                <div className="portfolio-slider-box">
+                  <div className="portfolio-tabs__slider">
+                    {[1,2,3,4,5,6].map((i) => (
+                      <div key={i} style={{ backgroundColor: i % 2 === 0 ? '#7A48E8' : '#F57B0C' }}>
+                        <a href="#" className="portfolio-tabs__img" data-lightbox="portfolio" data-bg={i % 2 === 0 ? '#7A48E8' : '#F57B0C'}>
+                          <img 
+                            src={`https://duck.design/wp-content/uploads/2025/05/1-${i}-1.png`} 
+                            alt={`Portfolio ${i}`}
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="portfolio-tabs__items portfolio-tab" data-tab="2" id="2">
+                <div className="portfolio-slider-box">
+                  <div className="portfolio-tabs__slider">
+                    {[2,3,4,5,6,7].map((i) => (
+                      <div key={i} style={{ backgroundColor: i % 2 === 0 ? '#4955AE' : '#915ACF' }}>
+                        <a href="#" className="portfolio-tabs__img" data-lightbox="portfolio" data-bg={i % 2 === 0 ? '#4955AE' : '#915ACF'}>
+                          <img 
+                            src={`https://duck.design/wp-content/uploads/2025/10/infographics-${i}.png`} 
+                            alt={`Infographic ${i}`}
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="portfolio-tabs__items portfolio-tab" data-tab="3" id="3">
+                <div className="portfolio-slider-box">
+                  <div className="portfolio-tabs__slider">
+                    {[1,2,3,4,5,6].map((i) => (
+                      <div key={i} style={{ backgroundColor: i % 2 === 0 ? '#272727' : '#7F3E87' }}>
+                        <a href="#" className="portfolio-tabs__img" data-lightbox="portfolio" data-bg={i % 2 === 0 ? '#272727' : '#7F3E87'}>
+                          <img 
+                            src={`https://duck.design/wp-content/uploads/2025/05/2-${i}-1.png`} 
+                            alt={`Logo ${i}`}
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="portfolio-tabs__items portfolio-tab" data-tab="4" id="4">
+                <div className="portfolio-slider-box">
+                  <div className="portfolio-tabs__slider">
+                    {[4,3,2,1,6,5].map((i) => (
+                      <div key={i} style={{ backgroundColor: i % 2 === 0 ? '#FF9F59' : '#DCFF03' }}>
+                        <a href="#" className="portfolio-tabs__img" data-lightbox="portfolio" data-bg={i % 2 === 0 ? '#FF9F59' : '#DCFF03'}>
+                          <img 
+                            src={`https://duck.design/wp-content/uploads/2025/06/pd-${i}.png`} 
+                            alt={`Presentation ${i}`}
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="portfolio-tabs__items portfolio-tab" data-tab="5" id="5">
+                <div className="portfolio-slider-box">
+                  <div className="portfolio-tabs__slider">
+                    {[4,3,2,1,6,5].map((i) => (
+                      <div key={i} style={{ backgroundColor: i % 2 === 0 ? '#5D7DF7' : '#9136FD' }}>
+                        <a href="#" className="portfolio-tabs__img" data-lightbox="portfolio" data-bg={i % 2 === 0 ? '#5D7DF7' : '#9136FD'}>
+                          <img 
+                            src={`https://duck.design/wp-content/uploads/2025/06/uxui-${i}.png`} 
+                            alt={`UI/UX ${i}`}
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="portfolio-tabs__items portfolio-tab" data-tab="6" id="6">
+                <div className="portfolio-slider-box">
+                  <div className="portfolio-tabs__slider">
+                    {[4,3,2,1,6,5].map((i) => (
+                      <div key={i} style={{ backgroundColor: i % 2 === 0 ? '#EEFF81' : '#EDEFF2' }}>
+                        <a href="#" className="portfolio-tabs__img" data-lightbox="portfolio" data-bg={i % 2 === 0 ? '#EEFF81' : '#EDEFF2'}>
+                          <img 
+                            src={`https://duck.design/wp-content/uploads/2025/06/website-${i}.png`} 
+                            alt={`Website ${i}`}
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="portfolio-tabs__items portfolio-tab" data-tab="7" id="7">
+                <div className="portfolio-slider-box">
+                  <div className="portfolio-tabs__slider">
+                    {[4,3,2,1,6,5].map((i) => (
+                      <div key={i} style={{ backgroundColor: i % 2 === 0 ? '#213238' : '#CBD7E7' }}>
+                        <a href="#" className="portfolio-tabs__img" data-lightbox="portfolio" data-bg={i % 2 === 0 ? '#213238' : '#CBD7E7'}>
+                          <img 
+                            src={`https://duck.design/wp-content/uploads/2025/06/saas-${i}.png`} 
+                            alt={`SAAS ${i}`}
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="portfolio-tabs__items portfolio-tab" data-tab="8" id="8">
+                <div className="portfolio-slider-box">
+                  <div className="portfolio-tabs__slider">
+                    {[6,5,4,3,2,1].map((i) => (
+                      <div key={i} style={{ backgroundColor: i % 2 === 0 ? '#323232' : '#242422' }}>
+                        <a href="#" className="portfolio-tabs__img" data-lightbox="portfolio" data-bg={i % 2 === 0 ? '#323232' : '#242422'}>
+                          <img 
+                            src={`https://duck.design/wp-content/uploads/2025/06/smm-${i}.png`} 
+                            alt={`Social Media ${i}`}
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="portfolio-tabs__items portfolio-tab" data-tab="9" id="9">
+                <div className="portfolio-slider-box">
+                  <div className="portfolio-tabs__slider">
+                    {[4,3,2,6,5,1].map((i) => (
+                      <div key={i} style={{ backgroundColor: i % 2 === 0 ? '#001122' : '#EDB51A' }}>
+                        <a href="#" className="portfolio-tabs__img" data-lightbox="portfolio" data-bg={i % 2 === 0 ? '#001122' : '#EDB51A'}>
+                          <img 
+                            src={`https://duck.design/wp-content/uploads/2022/01/${i}.gif`} 
+                            alt={`GIF ${i}`}
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="portfolio-tabs__items portfolio-tab" data-tab="10" id="10">
+                <div className="portfolio-slider-box">
+                  <div className="portfolio-tabs__slider">
+                    {[1,2,3,4,5,6].map((i) => (
+                      <div key={i} style={{ backgroundColor: i % 2 === 0 ? '#7D99A7' : '#E99274' }}>
+                        <a href="#" className="portfolio-tabs__img" data-lightbox="portfolio" data-bg={i % 2 === 0 ? '#7D99A7' : '#E99274'}>
+                          <img 
+                            src={`https://duck.design/wp-content/uploads/2025/05/${i}.png`} 
+                            alt={`Print ${i}`}
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="portfolio-tabs__items portfolio-tab" data-tab="11" id="11">
+                <div className="portfolio-slider-box">
+                  <div className="portfolio-tabs__slider">
+                    {[1,2,3,4].map((i) => (
+                      <div key={i} style={{ backgroundColor: '#3A3B6A' }}>
+                        <div className="portfolio-tabs__video js-video" data-bg="#3A3B6A">
+                          <button className="btn portfolio-tabs__video-btn js-portfolio-video" data-src="bBfKDRrD5fA">
+                            <img src="https://duck.design/wp-content/uploads/2022/02/1-3.webp" alt="Video" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ===== WHAT MAKES US DIFFERENT ===== */}
       <section className="different-section">
         <div className="container">
           <div className="different-section__col">
             <div className="different-section__img wow fadeInUp" data-wow-delay=".2s">
-              <svg width="459" height="571" viewBox="0 0 459 571" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="50" y="50" width="359" height="471" rx="30" fill="#F8F5F0" stroke="#E8E0D6" strokeWidth="2"/>
-                <circle cx="229" cy="285" r="150" fill="#E8A04A" opacity="0.1"/>
-                <circle cx="229" cy="285" r="100" fill="#E8A04A" opacity="0.15"/>
-                <circle cx="229" cy="285" r="50" fill="#E8A04A" opacity="0.2"/>
-                <text x="229" y="295" textAnchor="middle" fontFamily="Arial" fontSize="24" fontWeight="bold" fill="#2C3449">{service.title}</text>
-              </svg>
+              <img width="459" height="571" src="https://duck.design/wp-content/uploads/2022/02/6099982-1.svg" alt="What makes us different" />
             </div>
             <div className="different-section__info">
               <h2 className="section-title text-left wow fadeInUp" data-wow-delay=".2s">
@@ -246,7 +529,7 @@ const ServiceDetailPage = ({ service }) => {
               </h2>
               <div className="different-section__txt wow fadeInUp" data-wow-delay=".3s">
                 <p>Fast Multimedia delivers speedy, high-quality {service.title.toLowerCase()} work with a transparent subscription model. Over 400 high-growth and enterprise companies trust Fast Multimedia to produce great, on-brand {service.title.toLowerCase()} at scale.</p>
-                <p>Invite your entire team to make requests—from {service.title.toLowerCase()} to marketing assets—in one centralized platform with a dedicated team that scales up and down with your needs.</p>
+                <p>Invite your entire team to make {service.title.toLowerCase()} requests—from {service.title.toLowerCase()} to marketing assets—in one centralized platform with a dedicated team that scales up and down with your needs.</p>
               </div>
               <div className="different-section__btn wow fadeInUp" data-wow-delay=".4s">
                 <button className="btn btn-primary btn-primary_arrow" onClick={handleBookCall}>
@@ -258,16 +541,30 @@ const ServiceDetailPage = ({ service }) => {
         </div>
       </section>
 
+      {/* ===== CTA SERVICES SECTION ===== */}
+      <section className="cta-services">
+        <div className="container">
+          <h2 className="section-title text-left wow fadeInUp" data-wow-delay=".2s">
+            Fast Multimedia is a tech-enabled company, developing its own proprietary software to brief, manage, and coordinate a high-volume of design projects, making it possible to keep pace with teams at Amazon, Puma, Facebook, and more.
+          </h2>
+          <div className="cta-services__txt text-left wow fadeInUp" data-wow-delay=".3s">
+            Learn how Fast Multimedia can revolutionize the way your organization gets {service.title.toLowerCase()} work done. Book a call today.
+          </div>
+          <div className="cta-services__btn wow fadeInUp" data-wow-delay=".4s">
+            <button className="btn btn-primary btn-primary_arrow" onClick={handleBookCall}>
+              START YOUR PROJECT <FaArrowRight className="btn-arrow" />
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* ===== PREFERENCE SECTION ===== */}
       <section className="preference-section">
         <div className="container">
           <div className="preference-section__list">
             <div className="preference-section__item wow fadeInUp">
               <div className="preference-section__icon">
-                <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-                  <circle cx="50" cy="50" r="45" fill="#E8A04A" opacity="0.1"/>
-                  <text x="50" y="60" textAnchor="middle" fontSize="40">💰</text>
-                </svg>
+                <img src="https://duck.design/wp-content/uploads/2024/07/preficonn-3.svg" width="100" height="100" alt="Fixed monthly rate" />
               </div>
               <div className="preference-section__info">
                 <div className="preference-section__head">Fixed monthly rate</div>
@@ -276,22 +573,16 @@ const ServiceDetailPage = ({ service }) => {
             </div>
             <div className="preference-section__item wow fadeInUp">
               <div className="preference-section__icon">
-                <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-                  <circle cx="50" cy="50" r="45" fill="#E8A04A" opacity="0.1"/>
-                  <text x="50" y="60" textAnchor="middle" fontSize="40">♾️</text>
-                </svg>
+                <img src="https://duck.design/wp-content/uploads/2024/07/preficonn-4.svg" width="101" height="100" alt="Unlimited requests" />
               </div>
               <div className="preference-section__info">
                 <div className="preference-section__head">Unlimited requests</div>
-                <div className="preference-section__txt">Don't limit your creativity. Request as many designs as you need.</div>
+                <div className="preference-section__txt">Don't limit your creativity. Request as many {service.title.toLowerCase()} as you need.</div>
               </div>
             </div>
             <div className="preference-section__item wow fadeInUp">
               <div className="preference-section__icon">
-                <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-                  <circle cx="50" cy="50" r="45" fill="#E8A04A" opacity="0.1"/>
-                  <text x="50" y="60" textAnchor="middle" fontSize="40">🔄</text>
-                </svg>
+                <img src="https://duck.design/wp-content/uploads/2024/07/preficonn-5.svg" width="101" height="100" alt="Unlimited revisions" />
               </div>
               <div className="preference-section__info">
                 <div className="preference-section__head">Unlimited revisions</div>
@@ -300,22 +591,16 @@ const ServiceDetailPage = ({ service }) => {
             </div>
             <div className="preference-section__item wow fadeInUp">
               <div className="preference-section__icon">
-                <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-                  <circle cx="50" cy="50" r="45" fill="#E8A04A" opacity="0.1"/>
-                  <text x="50" y="60" textAnchor="middle" fontSize="40">⏱️</text>
-                </svg>
+                <img src="https://duck.design/wp-content/uploads/2024/11/time-icon.svg" width="100" height="100" alt="Same-day delivery" />
               </div>
               <div className="preference-section__info">
                 <div className="preference-section__head">Same-day delivery</div>
-                <div className="preference-section__txt">Receive your designs on the same day with our higher-tier package.</div>
+                <div className="preference-section__txt">Receive your {service.title.toLowerCase()} on the same day with our higher-tier package.</div>
               </div>
             </div>
             <div className="preference-section__item wow fadeInUp">
               <div className="preference-section__icon">
-                <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-                  <circle cx="50" cy="50" r="45" fill="#E8A04A" opacity="0.1"/>
-                  <text x="50" y="60" textAnchor="middle" fontSize="40">👨‍🎨</text>
-                </svg>
+                <img src="https://duck.design/wp-content/uploads/2024/07/preficonn-6.svg" width="101" height="100" alt="Professional designers" />
               </div>
               <div className="preference-section__info">
                 <div className="preference-section__head">Professional designers</div>
@@ -324,10 +609,7 @@ const ServiceDetailPage = ({ service }) => {
             </div>
             <div className="preference-section__item wow fadeInUp">
               <div className="preference-section__icon">
-                <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-                  <circle cx="50" cy="50" r="45" fill="#E8A04A" opacity="0.1"/>
-                  <text x="50" y="60" textAnchor="middle" fontSize="40">🎯</text>
-                </svg>
+                <img src="https://duck.design/wp-content/uploads/2024/07/preficonn-1.svg" width="101" height="100" alt="Designer match" />
               </div>
               <div className="preference-section__info">
                 <div className="preference-section__head">Designer match</div>
@@ -338,7 +620,7 @@ const ServiceDetailPage = ({ service }) => {
         </div>
       </section>
 
-      {/* ===== CTA SECTION ===== */}
+      {/* ===== BIG CTA SECTION ===== */}
       <section className="bigcta-section bigcta-section__2col">
         <div className="bigcta-section__inner">
           <div className="container">
