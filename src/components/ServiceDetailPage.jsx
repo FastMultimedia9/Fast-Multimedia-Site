@@ -84,19 +84,19 @@ const ServiceDetailPage = ({ service }) => {
                 </li>
                 <li><span>{service.title} Services</span></li>
               </ul>
-              <h1 className="page-title wow fadeInUp" data-wow-delay=".2s">
+              <h1 className="page-title">
                 {service.title} <span className="gradient-text">Services</span>
               </h1>
-              <div className="hero-section__txt wow fadeInUp" data-wow-delay=".3s">
+              <div className="hero-section__txt">
                 {service.longDescription || `Get all your ${service.title.toLowerCase()} needs met with our dedicated team of experts.`}
               </div>
-              <div className="hero-section__btngroup wow fadeInUp" data-wow-delay=".4s">
+              <div className="hero-section__btngroup">
                 <button className="btn btn-primary btn-primary_arrow" onClick={handleBookCall}>
                   Book a 15 min demo <FaArrowRight className="btn-arrow" />
                 </button>
               </div>
             </div>
-            <div className="hero-section__right wow fadeInUp" data-wow-delay=".3s">
+            <div className="hero-section__right">
               <div className="mobile-only_xl">
                 <img src={images.mobile} alt={service.title} className="hero-image-mobile" />
               </div>
@@ -113,14 +113,14 @@ const ServiceDetailPage = ({ service }) => {
         <div className="container">
           <div className="team-section__column">
             <div className="team-section__info">
-              <h2 className="section-title wow fadeInUp" data-wow-delay=".2s">
+              <h2 className="section-title">
                 A dedicated <span className="txtorange_bg">super team</span> for all types of {service.title.toLowerCase()} from A to Z
               </h2>
-              <div className="team-section__txt wow fadeInUp" data-wow-delay=".3s">
+              <div className="team-section__txt">
                 {service.offeringsDescription || `Professional ${service.title.toLowerCase()} solutions for all your business needs.`}
               </div>
             </div>
-            <div className="team-section__list wow fadeInUp">
+            <div className="team-section__list">
               <div className="team-section__item">
                 <div className="team-section__head">7+ years</div>
                 <div className="team-section__item-txt">Fast Multimedia<br /> on the market</div>
@@ -220,11 +220,11 @@ const ServiceDetailPage = ({ service }) => {
       <section className="always-section" id="include">
         <div className="container">
           <div className="always-section__info">
-            <h2 className="section-title text-left wow fadeInUp" data-wow-delay=".3s">
+            <h2 className="section-title text-left">
               We're always-on to deliver the {service.title.toLowerCase()} you want when you need it
             </h2>
           </div>
-          <div className="always-section__list wow fadeInUp">
+          <div className="always-section__list">
             <div className="always-section__item">
               <div className="always-section__head">
                 <div className="always-section__icon">
@@ -286,7 +286,7 @@ const ServiceDetailPage = ({ service }) => {
       {/* ===== PORTFOLIO SECTION ===== */}
       <section className="portfolio-mini portfolio-tabs__section" id="portfolio">
         <div className="container">
-          <h2 className="section-title text-center wow fadeInUp" data-wow-delay=".3s">
+          <h2 className="section-title text-center">
             Take a look at some of our {service.title} work
           </h2>
           <div className="portfolio-tabs">
@@ -520,18 +520,18 @@ const ServiceDetailPage = ({ service }) => {
       <section className="different-section">
         <div className="container">
           <div className="different-section__col">
-            <div className="different-section__img wow fadeInUp" data-wow-delay=".2s">
+            <div className="different-section__img">
               <img width="459" height="571" src="https://duck.design/wp-content/uploads/2022/02/6099982-1.svg" alt="What makes us different" />
             </div>
             <div className="different-section__info">
-              <h2 className="section-title text-left wow fadeInUp" data-wow-delay=".2s">
+              <h2 className="section-title text-left">
                 What makes us different?
               </h2>
-              <div className="different-section__txt wow fadeInUp" data-wow-delay=".3s">
+              <div className="different-section__txt">
                 <p>Fast Multimedia delivers speedy, high-quality {service.title.toLowerCase()} work with a transparent subscription model. Over 400 high-growth and enterprise companies trust Fast Multimedia to produce great, on-brand {service.title.toLowerCase()} at scale.</p>
                 <p>Invite your entire team to make {service.title.toLowerCase()} requests—from {service.title.toLowerCase()} to marketing assets—in one centralized platform with a dedicated team that scales up and down with your needs.</p>
               </div>
-              <div className="different-section__btn wow fadeInUp" data-wow-delay=".4s">
+              <div className="different-section__btn">
                 <button className="btn btn-primary btn-primary_arrow" onClick={handleBookCall}>
                   SEE IT IN ACTION <FaArrowRight className="btn-arrow" />
                 </button>
@@ -544,13 +544,13 @@ const ServiceDetailPage = ({ service }) => {
       {/* ===== CTA SERVICES SECTION ===== */}
       <section className="cta-services">
         <div className="container">
-          <h2 className="section-title text-left wow fadeInUp" data-wow-delay=".2s">
+          <h2 className="section-title text-left">
             Fast Multimedia is a tech-enabled company, developing its own proprietary software to brief, manage, and coordinate a high-volume of design projects, making it possible to keep pace with teams at Amazon, Puma, Facebook, and more.
           </h2>
-          <div className="cta-services__txt text-left wow fadeInUp" data-wow-delay=".3s">
+          <div className="cta-services__txt text-left">
             Learn how Fast Multimedia can revolutionize the way your organization gets {service.title.toLowerCase()} work done. Book a call today.
           </div>
-          <div className="cta-services__btn wow fadeInUp" data-wow-delay=".4s">
+          <div className="cta-services__btn">
             <button className="btn btn-primary btn-primary_arrow" onClick={handleBookCall}>
               START YOUR PROJECT <FaArrowRight className="btn-arrow" />
             </button>
@@ -562,7 +562,7 @@ const ServiceDetailPage = ({ service }) => {
       <section className="preference-section">
         <div className="container">
           <div className="preference-section__list">
-            <div className="preference-section__item wow fadeInUp">
+            <div className="preference-section__item">
               <div className="preference-section__icon">
                 <img src="https://duck.design/wp-content/uploads/2024/07/preficonn-3.svg" width="100" height="100" alt="Fixed monthly rate" />
               </div>
@@ -571,7 +571,7 @@ const ServiceDetailPage = ({ service }) => {
                 <div className="preference-section__txt">No hidden costs. Pay the same price every month.</div>
               </div>
             </div>
-            <div className="preference-section__item wow fadeInUp">
+            <div className="preference-section__item">
               <div className="preference-section__icon">
                 <img src="https://duck.design/wp-content/uploads/2024/07/preficonn-4.svg" width="101" height="100" alt="Unlimited requests" />
               </div>
@@ -580,7 +580,7 @@ const ServiceDetailPage = ({ service }) => {
                 <div className="preference-section__txt">Don't limit your creativity. Request as many {service.title.toLowerCase()} as you need.</div>
               </div>
             </div>
-            <div className="preference-section__item wow fadeInUp">
+            <div className="preference-section__item">
               <div className="preference-section__icon">
                 <img src="https://duck.design/wp-content/uploads/2024/07/preficonn-5.svg" width="101" height="100" alt="Unlimited revisions" />
               </div>
@@ -589,7 +589,7 @@ const ServiceDetailPage = ({ service }) => {
                 <div className="preference-section__txt">Request changes without limits. We iterate until you say it's perfect.</div>
               </div>
             </div>
-            <div className="preference-section__item wow fadeInUp">
+            <div className="preference-section__item">
               <div className="preference-section__icon">
                 <img src="https://duck.design/wp-content/uploads/2024/11/time-icon.svg" width="100" height="100" alt="Same-day delivery" />
               </div>
@@ -598,7 +598,7 @@ const ServiceDetailPage = ({ service }) => {
                 <div className="preference-section__txt">Receive your {service.title.toLowerCase()} on the same day with our higher-tier package.</div>
               </div>
             </div>
-            <div className="preference-section__item wow fadeInUp">
+            <div className="preference-section__item">
               <div className="preference-section__icon">
                 <img src="https://duck.design/wp-content/uploads/2024/07/preficonn-6.svg" width="101" height="100" alt="Professional designers" />
               </div>
@@ -607,7 +607,7 @@ const ServiceDetailPage = ({ service }) => {
                 <div className="preference-section__txt">Work with experienced designers who bring creativity and precision to every project.</div>
               </div>
             </div>
-            <div className="preference-section__item wow fadeInUp">
+            <div className="preference-section__item">
               <div className="preference-section__icon">
                 <img src="https://duck.design/wp-content/uploads/2024/07/preficonn-1.svg" width="101" height="100" alt="Designer match" />
               </div>
@@ -624,10 +624,10 @@ const ServiceDetailPage = ({ service }) => {
       <section className="bigcta-section bigcta-section__2col">
         <div className="bigcta-section__inner">
           <div className="container">
-            <h2 className="bigcta-section__title text-center wow fadeInUp" data-wow-delay=".2s">
+            <h2 className="bigcta-section__title text-center">
               Your one-stop-shop for good {service.title.toLowerCase()}
             </h2>
-            <div className="bigcta-section__column wow fadeInUp" data-wow-delay=".3s">
+            <div className="bigcta-section__column">
               <div className="bigcta-section__txt">
                 Come join 400+ companies who are doing {service.title.toLowerCase()} at scale without increasing headcount
               </div>
