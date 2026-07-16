@@ -116,6 +116,14 @@ const HomePage = () => {
     'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
   ];
 
+  // Tech service images
+  const techServiceImages = [
+    'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  ];
+
   // Updates & Announcements Data
   const updatesData = [
     {
@@ -171,7 +179,7 @@ const HomePage = () => {
       subtitle: '80th Anniversary',
       category: 'Brand Identity',
       description: 'Award-winning logo design celebrating heritage and future vision.',
-      image: '/80th.jpg',
+      image: 'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       tags: ['Logo Design', 'Healthcare'],
       details: ['Winning competition design', 'Heritage meets future concept', 'Clean sans-serif typography'],
       client: 'St. Martin De Porres Hospital',
@@ -573,24 +581,31 @@ const HomePage = () => {
         </div>
         <div className="services-carousel">
           <div className="services-carousel__track">
-            {services.design.map((service, index) => (
-              <div key={`service-1-${index}`} className="services-carousel__item">
-                <img src={serviceImages[index % serviceImages.length]} alt={service.name} />
-                <span className="services-carousel__head">{service.name}</span>
-              </div>
-            ))}
-            {services.design.map((service, index) => (
-              <div key={`service-2-${index}`} className="services-carousel__item">
-                <img src={serviceImages[index % serviceImages.length]} alt={service.name} />
-                <span className="services-carousel__head">{service.name}</span>
-              </div>
-            ))}
+            {services[activeServiceCategory].map((service, index) => {
+              const imageSet = activeServiceCategory === 'design' ? serviceImages : techServiceImages;
+              return (
+                <div key={`service-1-${index}`} className="services-carousel__item">
+                  <img src={imageSet[index % imageSet.length]} alt={service.name} />
+                  <span className="services-carousel__head">{service.name}</span>
+                </div>
+              );
+            })}
+            {services[activeServiceCategory].map((service, index) => {
+              const imageSet = activeServiceCategory === 'design' ? serviceImages : techServiceImages;
+              return (
+                <div key={`service-2-${index}`} className="services-carousel__item">
+                  <img src={imageSet[index % imageSet.length]} alt={service.name} />
+                  <span className="services-carousel__head">{service.name}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
         <div className="container">
           <div className="services-carousel__btn text-center">
             <button className="btn btn-secondary" onClick={() => navigate('/services')}>
-              All Design Services <FaArrowRight className="btn-arrow" />
+              {activeServiceCategory === 'design' ? 'All Design Services' : 'All Tech Services'}
+              <FaArrowRight className="btn-arrow" />
             </button>
           </div>
         </div>
@@ -766,7 +781,7 @@ const HomePage = () => {
       </section>
 
       {/* ============================================
-          SERVICES SECTION (Original)
+          SERVICES SECTION (Original Grid)
           ============================================ */}
       <section className="services-section">
         <div className="container">
