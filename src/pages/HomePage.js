@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FaPalette, FaDesktop, FaPenFancy, FaLaptop, FaPrint, FaGlobe,
@@ -10,7 +10,6 @@ import {
 import './HomePage.css';
 
 const HomePage = () => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showQuickView, setShowQuickView] = useState(false);
   const [quickViewProject, setQuickViewProject] = useState(null);
   const [showPackageModal, setShowPackageModal] = useState(false);
@@ -18,19 +17,6 @@ const HomePage = () => {
   const [selectedPackage, setSelectedPackage] = useState('basic');
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
-  
-  // Hero images
-  const heroImages = [
-    "https://images.unsplash.com/photo-1626785774573-4b799315345d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80",
-    "https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80",
-    "https://images.unsplash.com/photo-1542744094-3a31f272c490?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80",
-  ];
-
-  const techHeroImages = [
-    "https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80",
-    "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80",
-    "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80",
-  ];
 
   // Process Steps Data - Duck Design Style
   const processSteps = [
@@ -206,26 +192,14 @@ const HomePage = () => {
     },
   ];
 
-  useEffect(() => {
+  // Handle scroll for toggle button
+  React.useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-
-    const interval = setInterval(() => {
-      const activeImages = getActiveHeroImages();
-      setCurrentImageIndex((prev) => (prev + 1) % activeImages.length);
-    }, 4000);
-
     window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearInterval(interval);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const getActiveHeroImages = () => {
-    return activeServiceCategory === 'design' ? heroImages : techHeroImages;
-  };
 
   const handleUpdateClick = (update) => {
     const updateData = {
@@ -368,97 +342,102 @@ const HomePage = () => {
     <div className="homepage">
       {/* ============================================
           HERO SECTION - DUCK DESIGN STYLE
+          Image on Right, Text on Left
           ============================================ */}
       <section className="hero">
-        <div className="hero-background">
-          {getActiveHeroImages().map((img, index) => (
-            <div
-              key={index}
-              className={`hero-bg-slide ${index === currentImageIndex ? 'active' : ''}`}
-              style={{ backgroundImage: `url(${img})` }}
-            />
-          ))}
-          <div className="hero-overlay"></div>
-        </div>
+        <div className="hero-container">
+          {/* Left Column - Text Content */}
+          <div className="hero-left">
+            <div className={`service-toggle-wrapper ${isScrolled ? 'scrolled' : ''}`}>
+              <div className="toggle-container">
+                <button
+                  className={`toggle-btn ${activeServiceCategory === 'design' ? 'active' : ''}`}
+                  onClick={() => setActiveServiceCategory('design')}
+                >
+                  <FaPalette className="toggle-icon" />
+                  <span className="toggle-text">Design Services</span>
+                </button>
+                <button
+                  className={`toggle-btn ${activeServiceCategory === 'tech' ? 'active' : ''}`}
+                  onClick={() => setActiveServiceCategory('tech')}
+                >
+                  <FaDesktop className="toggle-icon" />
+                  <span className="toggle-text">Tech Services</span>
+                </button>
+              </div>
+            </div>
 
-        <div className="hero-content">
-          {/* Service Toggle - Inside Hero like Duck Design */}
-          <div className={`service-toggle-wrapper ${isScrolled ? 'scrolled' : ''}`}>
-            <div className="toggle-container">
+            <div className="hero-badge">
+              <span className="badge-text">YOUR FULL SERVICE DESIGN PARTNER</span>
+            </div>
+            
+            <h1 className="hero-title">
+              {activeServiceCategory === 'design' ? (
+                <>Design <span className="gradient-text">Without Limits</span></>
+              ) : (
+                <>Tech <span className="gradient-text">Without Limits</span></>
+              )}
+            </h1>
+            
+            <p className="hero-subtitle">
+              {activeServiceCategory === 'design'
+                ? 'Unlimited design for a flat monthly fee. We will take care of all your creative needs. No lengthy hiring procedures. No inefficient freelancers. No contracts.'
+                : 'Professional IT solutions to keep your systems running smoothly and efficiently.'}
+            </p>
+            
+            <div className="hero-actions">
               <button
-                className={`toggle-btn ${activeServiceCategory === 'design' ? 'active' : ''}`}
-                onClick={() => setActiveServiceCategory('design')}
+                className="btn btn-primary"
+                onClick={() => {
+                  if (activeServiceCategory === 'design') {
+                    setShowPackageModal(true);
+                  } else {
+                    navigate('/services');
+                  }
+                }}
               >
-                <FaPalette className="toggle-icon" />
-                <span className="toggle-text">Design Services</span>
+                {activeServiceCategory === 'design' ? 'View Packages' : 'Explore Services'}
+                <FaArrowRight className="btn-arrow" />
               </button>
-              <button
-                className={`toggle-btn ${activeServiceCategory === 'tech' ? 'active' : ''}`}
-                onClick={() => setActiveServiceCategory('tech')}
-              >
-                <FaDesktop className="toggle-icon" />
-                <span className="toggle-text">Tech Services</span>
+              <button className="btn btn-secondary" onClick={() => navigate('/contact')}>
+                Book a Call
               </button>
+            </div>
+
+            <div className="hero-social-list">
+              <a href="#" className="hero-social-item" aria-label="Behance">
+                <img src="/images/social-behance.svg" alt="Behance" />
+              </a>
+              <a href="#" className="hero-social-item" aria-label="Facebook">
+                <img src="/images/social-facebook.svg" alt="Facebook" />
+              </a>
+              <a href="#" className="hero-social-item" aria-label="LinkedIn">
+                <img src="/images/social-linkedin.svg" alt="LinkedIn" />
+              </a>
+              <a href="#" className="hero-social-item" aria-label="Instagram">
+                <img src="/images/social-instagram.svg" alt="Instagram" />
+              </a>
+              <a href="#" className="hero-social-item" aria-label="YouTube">
+                <img src="/images/social-youtube.svg" alt="YouTube" />
+              </a>
             </div>
           </div>
 
-          <div className="hero-badge">
-            <span className="badge-text">YOUR FULL SERVICE DESIGN PARTNER</span>
-          </div>
-          
-          <h1 className="hero-title">
-            {activeServiceCategory === 'design' ? (
-              <>
-                Design <span className="gradient-text">Without Limits</span>
-              </>
-            ) : (
-              <>
-                Tech <span className="gradient-text">Without Limits</span>
-              </>
-            )}
-          </h1>
-          
-          <p className="hero-subtitle">
-            {activeServiceCategory === 'design'
-              ? 'Unlimited design for a flat monthly fee. We will take care of all your creative needs. No lengthy hiring procedures. No inefficient freelancers. No contracts.'
-              : 'Professional IT solutions to keep your systems running smoothly and efficiently.'}
-          </p>
-          
-          <div className="hero-actions">
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                if (activeServiceCategory === 'design') {
-                  setShowPackageModal(true);
-                } else {
-                  navigate('/services');
-                }
-              }}
-            >
-              {activeServiceCategory === 'design' ? 'View Packages' : 'Explore Services'}
-              <FaArrowRight className="btn-arrow" />
-            </button>
-            <button className="btn btn-secondary" onClick={() => navigate('/contact')}>
-              Book a Call
-            </button>
-          </div>
-
-          <div className="hero-social-list">
-            <a href="#" className="hero-social-item" aria-label="Behance">
-              <img src="/images/social-behance.svg" alt="Behance" />
-            </a>
-            <a href="#" className="hero-social-item" aria-label="Facebook">
-              <img src="/images/social-facebook.svg" alt="Facebook" />
-            </a>
-            <a href="#" className="hero-social-item" aria-label="LinkedIn">
-              <img src="/images/social-linkedin.svg" alt="LinkedIn" />
-            </a>
-            <a href="#" className="hero-social-item" aria-label="Instagram">
-              <img src="/images/social-instagram.svg" alt="Instagram" />
-            </a>
-            <a href="#" className="hero-social-item" aria-label="YouTube">
-              <img src="/images/social-youtube.svg" alt="YouTube" />
-            </a>
+          {/* Right Column - Hero Image */}
+          <div className="hero-right">
+            <div className="hero-image-wrapper">
+              <picture>
+                <source srcSet="https://duck.design/wp-content/uploads/2026/06/hero-avif.avif" type="image/avif" />
+                <source srcSet="https://duck.design/wp-content/uploads/2026/06/hero-webp.webp" type="image/webp" />
+                <img 
+                  src="https://duck.design/wp-content/uploads/2025/01/hv2-desktop.png" 
+                  alt="Design Without Limits" 
+                  className="hero-image"
+                  loading="eager"
+                  fetchpriority="high"
+                />
+              </picture>
+            </div>
           </div>
         </div>
 
@@ -487,7 +466,6 @@ const HomePage = () => {
             </div>
             <div className="partner-section__right">
               <div className="partner-section__list partner-logos-scroll">
-                {/* Partner logos would go here - using placeholder images */}
                 <div className="partner-section__item"><img src="/images/partner-logo-1.svg" alt="Partner" /></div>
                 <div className="partner-section__item"><img src="/images/partner-logo-2.svg" alt="Partner" /></div>
                 <div className="partner-section__item"><img src="/images/partner-logo-3.svg" alt="Partner" /></div>
@@ -513,7 +491,6 @@ const HomePage = () => {
         </div>
         <div className="services-carousel">
           <div className="services-carousel__track">
-            {/* First set of service cards */}
             {services.design.map((service, index) => (
               <div key={`service-1-${index}`} className="services-carousel__item">
                 <img src={`/images/service-${index + 1}.jpg`} alt={service.name} />
