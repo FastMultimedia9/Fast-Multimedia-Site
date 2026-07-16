@@ -10,7 +10,7 @@ const PortfolioPage = () => {
   const [activeView, setActiveView] = useState('grid');
   const navigate = useNavigate();
 
-  // Complete projects data with all 48 projects including new images
+  // Complete projects data with all 55 projects including new ones
   const allProjects = [
     {
       id: 1,
@@ -828,10 +828,130 @@ const PortfolioPage = () => {
       results: ['High exhibition space bookings', 'Successful staff engagement', 'Professional event presentation'],
       color: '#C62828',
       mockups: []
+    },
+    // ===== NEW 7 PROJECTS =====
+    {
+      id: 49,
+      title: 'Eco-Friendly Product Packaging',
+      category: 'packaging',
+      description: 'Sustainable packaging design for eco-conscious consumer products',
+      detailedDescription: 'Created a complete sustainable packaging system for a range of eco-friendly products. The design uses recycled materials, minimal printing, and communicates the brand\'s commitment to environmental responsibility.',
+      tags: ['Packaging Design', 'Sustainability', 'Eco-Friendly', 'Print Design', 'Brand Identity'],
+      image: 'https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      client: 'EcoLife Products',
+      year: '2025',
+      duration: '3 weeks',
+      role: 'Lead Packaging Designer',
+      deliverables: ['Packaging System', 'Sustainable Materials Guide', 'Production Files', 'Brand Applications'],
+      results: ['40% reduction in packaging waste', 'Award-winning design', 'Increased brand recognition'],
+      color: '#2E7D32',
+      mockups: []
+    },
+    {
+      id: 50,
+      title: 'Tech Conference Brand Identity',
+      category: 'branding',
+      description: 'Complete brand identity system for international tech innovation conference',
+      detailedDescription: 'Developed a comprehensive brand identity for a major tech conference, including logo design, visual language, wayfinding system, and digital presence. The design conveys innovation, connection, and future-forward thinking.',
+      tags: ['Brand Identity', 'Event Branding', 'Logo Design', 'Conference Design', 'Visual Language'],
+      image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      client: 'TechForward Conference',
+      year: '2025',
+      duration: '4 weeks',
+      role: 'Lead Brand Designer',
+      deliverables: ['Logo System', 'Brand Guidelines', 'Wayfinding System', 'Digital Assets'],
+      results: ['5,000+ attendees', 'Featured in design publications', 'Successful brand launch'],
+      color: '#1565C0',
+      mockups: []
+    },
+    {
+      id: 51,
+      title: 'Wellness Mobile App UI/UX',
+      category: 'uiux',
+      description: 'User-centered mobile app design for wellness and mental health services',
+      detailedDescription: 'Designed a comprehensive mobile app focused on wellness and mental health. Features include mood tracking, guided meditations, therapy session booking, and community support. The design prioritizes calm, soothing aesthetics with intuitive navigation.',
+      tags: ['UI/UX Design', 'Mobile App', 'Wellness', 'Mental Health', 'User Research'],
+      image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      client: 'MindfulMe Wellness',
+      year: '2025',
+      duration: '10 weeks',
+      role: 'Lead UI/UX Designer',
+      deliverables: ['User Research', 'Wireframes', 'Interactive Prototypes', 'Design System'],
+      results: ['4.9 App Store rating', '200k+ downloads', '95% user retention rate'],
+      color: '#7B1FA2',
+      mockups: []
+    },
+    {
+      id: 52,
+      title: 'Restaurant Brand & Menu Design',
+      category: 'branding',
+      description: 'Complete brand identity and menu design for upscale farm-to-table restaurant',
+      detailedDescription: 'Created a full brand identity for a farm-to-table restaurant, including logo, color palette, typography, and menu design. The design reflects the restaurant\'s commitment to fresh, locally-sourced ingredients and rustic elegance.',
+      tags: ['Brand Identity', 'Menu Design', 'Restaurant Branding', 'Typography', 'Print Design'],
+      image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      client: 'The Harvest Table',
+      year: '2025',
+      duration: '5 weeks',
+      role: 'Lead Brand & Menu Designer',
+      deliverables: ['Logo & Identity', 'Menu Design', 'Brand Guidelines', 'Collateral Materials'],
+      results: ['Increased customer engagement', 'Featured in culinary magazine', 'Successful brand launch'],
+      color: '#BF360C',
+      mockups: []
+    },
+    {
+      id: 53,
+      title: 'Fashion E-Commerce Website Redesign',
+      category: 'web',
+      description: 'Modern e-commerce website redesign for luxury fashion brand',
+      detailedDescription: 'Led the complete redesign of a luxury fashion brand\'s e-commerce website. The project focused on creating an immersive shopping experience with stunning visuals, intuitive navigation, and seamless checkout process.',
+      tags: ['Web Design', 'E-Commerce', 'Luxury Brand', 'Shopify Development', 'UX Design'],
+      image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      client: 'Luxe Fashion House',
+      year: '2024',
+      duration: '8 weeks',
+      role: 'Lead Web Designer',
+      deliverables: ['Website Design', 'UX Research', 'Development Handoff', 'Mobile Optimization'],
+      results: ['65% increase in conversions', '40% higher mobile sales', 'Brand perception improved'],
+      color: '#880E4F',
+      mockups: []
+    },
+    {
+      id: 54,
+      title: 'Creative Agency Portfolio Website',
+      category: 'web',
+      description: 'Dynamic portfolio website design for award-winning creative agency',
+      detailedDescription: 'Designed a visually stunning portfolio website for a creative agency that showcases their work and attracts high-value clients. The design uses bold typography, immersive visuals, and interactive elements.',
+      tags: ['Web Design', 'Agency Portfolio', 'Interactive Design', 'Typography', 'Visual Design'],
+      image: 'https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      client: 'Creative Studio',
+      year: '2024',
+      duration: '6 weeks',
+      role: 'Senior Web Designer',
+      deliverables: ['Website Design', 'Interactive Prototypes', 'Style Guide', 'Design System'],
+      results: ['300% increase in inquiries', 'Featured on design blogs', 'New high-value clients'],
+      color: '#D32F2F',
+      mockups: []
+    },
+    {
+      id: 55,
+      title: 'Craft Beer Label Collection',
+      category: 'packaging',
+      description: 'Bold, artistic label designs for craft beer brand\'s seasonal collection',
+      detailedDescription: 'Created a collection of artistic label designs for a craft brewery\'s seasonal beer releases. Each label tells a unique story while maintaining brand consistency through color palette and illustration style.',
+      tags: ['Label Design', 'Craft Beer', 'Illustration', 'Packaging', 'Brand Identity'],
+      image: 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      client: 'Craft Brew Co.',
+      year: '2024',
+      duration: '4 weeks',
+      role: 'Lead Packaging Designer',
+      deliverables: ['Label Designs', 'Illustrations', 'Brand Applications', 'Production Files'],
+      results: ['Featured in craft beer magazine', 'Increased sales by 45%', 'Award-winning design'],
+      color: '#E65100',
+      mockups: []
     }
   ];
 
-  // Categories with updated counts (48 projects total)
+  // Categories with updated counts (55 projects total)
   const categories = [
     { id: 'all', name: 'All Projects', icon: 'fas fa-th', count: allProjects.length },
     { id: 'web', name: 'Web Design', icon: 'fas fa-desktop', count: allProjects.filter(p => p.category === 'web').length },
@@ -900,7 +1020,7 @@ const PortfolioPage = () => {
 
   return (
     <div className="portfolio-page">
-      {/* Hero Section */}
+      {/* Hero Section - Duck Design Color Scheme */}
       <section className="portfolio-hero section">
         <div className="container">
           <div className="hero-content animate-on-scroll">
@@ -939,7 +1059,7 @@ const PortfolioPage = () => {
                 <div className="stat-label">Client Satisfaction</div>
               </div>
               <div className="stat-card">
-                <div className="stat-number1">2018-2026</div>
+                <div className="stat-number1">2018-2025</div>
                 <div className="stat-label">Active Years</div>
               </div>
             </div>
