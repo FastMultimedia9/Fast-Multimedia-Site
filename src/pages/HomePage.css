@@ -1,6 +1,6 @@
 /* ============================================
    DUCK DESIGN STYLE HOMEPAGE - COMPLETE CSS
-   NO PURPLE - ONLY GOLD/ORANGE
+   GOLD/ORANGE COLOR SCHEME ONLY - NO DARK MODE
    ============================================ */
 
 /* --- RESET & BASE --- */
@@ -11,7 +11,7 @@
 }
 
 :root {
-  /* Duck Design Color Scheme - NO PURPLE */
+  /* Duck Design Gold Color Scheme */
   --duck-gold: #ffca41;
   --duck-dark-gold: #ff8b20;
   --duck-light-gold: #ffda7a;
@@ -523,10 +523,6 @@ body {
   color: white;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
   max-width: 80%;
-}
-
-.services-carousel__head .white-txt {
-  color: white;
 }
 
 .services-carousel__btn .btn {
@@ -1761,8 +1757,27 @@ body {
   }
 }
 
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .partner-section__list,
+  .services-carousel__track {
+    animation: none !important;
+  }
+}
 
-/* Touch Device Optimizations */
+/* ============================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ============================================ */
 @media (hover: none) and (pointer: coarse) {
   .service-card:hover,
   .portfolio-card:hover,
