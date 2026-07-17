@@ -63,7 +63,7 @@ const SchoolPage = () => {
       actualPrice: 600,
       monthlyInstallment: 300,
       description: 'Learn essential computer skills, Microsoft Office, and internet fundamentals.',
-      longDescription: 'Master the fundamental computer skills needed for modern workplaces. This comprehensive course covers computer basics, Microsoft Office applications, internet navigation, email management, and essential digital literacy skills.',
+      longDescription: 'Master the fundamental computer skills needed for modern workplaces.',
       icon: <FaLaptop />,
       image: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -74,7 +74,7 @@ const SchoolPage = () => {
         'Microsoft PowerPoint - presentations and slideshows'
       ],
       schedule: `Online & In-Person | Start Date: ${startDate}`,
-      prerequisites: 'No prior computer experience required - complete beginners welcome!',
+      prerequisites: 'No prior computer experience required',
       certificate: 'Certificate in Basic I.C.T & Office Skills',
       students: 412,
       rating: 4.9,
@@ -93,7 +93,7 @@ const SchoolPage = () => {
       actualPrice: 750,
       monthlyInstallment: 375,
       description: 'Learn Photoshop, Illustrator, InDesign and master visual communication.',
-      longDescription: 'Unlock your creative potential with our Graphic Design course. You will learn industry-standard software and design principles that will enable you to create stunning visual content for print and digital media.',
+      longDescription: 'Unlock your creative potential with our Graphic Design course.',
       icon: <FaPalette />,
       image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -123,7 +123,7 @@ const SchoolPage = () => {
       actualPrice: 800,
       monthlyInstallment: 400,
       description: 'Master HTML, CSS, JavaScript, and build modern websites.',
-      longDescription: 'Learn to build professional, responsive websites from scratch. This comprehensive web development course takes you from absolute beginner to a confident web developer.',
+      longDescription: 'Learn to build professional, responsive websites from scratch.',
       icon: <FaCode />,
       image: 'https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -153,7 +153,7 @@ const SchoolPage = () => {
       actualPrice: 650,
       monthlyInstallment: 325,
       description: 'Learn computer networking fundamentals, setup, and configuration.',
-      longDescription: 'Master the essentials of computer networking. This course covers network fundamentals, IP addressing, network setup, troubleshooting, and security basics.',
+      longDescription: 'Master the essentials of computer networking.',
       icon: <FaNetworkWired />,
       image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -183,7 +183,7 @@ const SchoolPage = () => {
       actualPrice: 850,
       monthlyInstallment: 425,
       description: 'Comprehensive IT support training for help desk and system administration.',
-      longDescription: 'Become a complete IT support professional. This intensive course covers hardware, software, networking, security, and customer service skills needed for IT support roles.',
+      longDescription: 'Become a complete IT support professional.',
       icon: <FaHeadset />,
       image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -283,23 +283,23 @@ const SchoolPage = () => {
           <div className="school-hero-stats">
             <div className="hero-stat">
               <div className="stat-number">5</div>
-              <div className="stat-label">Professional Courses</div>
+              <div className="stat-label">Courses</div>
             </div>
             <div className="hero-stat">
               <div className="stat-number">2</div>
-              <div className="stat-label">Months Duration</div>
+              <div className="stat-label">Months</div>
             </div>
             <div className="hero-stat">
               <div className="stat-number">Online & In-Person</div>
-              <div className="stat-label">Flexible Learning</div>
+              <div className="stat-label">Learning</div>
             </div>
             <div className="hero-stat">
               <div className="stat-number">24/7</div>
-              <div className="stat-label">Student Support</div>
+              <div className="stat-label">Support</div>
             </div>
           </div>
           <button className="whatsapp-hero-btn" onClick={handleWhatsAppClick}>
-            <FaWhatsapp /> Chat with us on WhatsApp
+            <FaWhatsapp /> Chat on WhatsApp
           </button>
         </div>
       </div>
@@ -310,19 +310,19 @@ const SchoolPage = () => {
             className={`tab-btn ${activeTab === 'courses' ? 'active' : ''}`}
             onClick={() => setActiveTab('courses')}
           >
-            <FaBookOpen /> Our Courses
+            <FaBookOpen /> Courses
           </button>
           <button 
             className={`tab-btn ${activeTab === 'about' ? 'active' : ''}`}
             onClick={() => setActiveTab('about')}
           >
-            <FaGraduationCap /> About School
+            <FaGraduationCap /> About
           </button>
           <button 
             className={`tab-btn ${activeTab === 'contact' ? 'active' : ''}`}
             onClick={() => setActiveTab('contact')}
           >
-            <FaEnvelope /> Enroll Now
+            <FaEnvelope /> Enroll
           </button>
         </div>
       </div>
@@ -380,7 +380,7 @@ const SchoolPage = () => {
                         <span className="installment-note">or {course.installmentPrice}/month</span>
                       </div>
                       <button className="view-details-btn">
-                        View Details <FaArrowRight />
+                        Details <FaArrowRight />
                       </button>
                     </div>
                   </div>
@@ -406,7 +406,7 @@ const SchoolPage = () => {
                 <FaWhatsapp className="whatsapp-cta-icon" />
                 <div>
                   <h3>Have Questions?</h3>
-                  <p>Chat with us directly on WhatsApp for quick responses</p>
+                  <p>Chat with us directly on WhatsApp</p>
                 </div>
                 <button className="whatsapp-cta-btn" onClick={handleWhatsAppClick}>
                   <FaWhatsapp /> Chat Now
@@ -419,14 +419,14 @@ const SchoolPage = () => {
         {activeTab === 'details' && selectedCourse && (
           <div className="course-details">
             <button className="back-btn" onClick={() => setActiveTab('courses')}>
-              <FaArrowRight /> Back to All Courses
+              <FaArrowRight /> Back
             </button>
             
             <div className="details-grid">
               <div className="details-image">
                 <img src={selectedCourse.image} alt={selectedCourse.title} />
                 <div className="course-badge">{selectedCourse.category}</div>
-                <div className="duration-badge">2 Months Course</div>
+                <div className="duration-badge">2 Months</div>
               </div>
               <div className="details-info">
                 <h1 className="details-title">{selectedCourse.title}</h1>
@@ -440,7 +440,7 @@ const SchoolPage = () => {
                 <div className="details-delivery">
                   <FaGlobe /> {selectedCourse.deliveryMode}
                 </div>
-                
+
                 <div className="payment-selector">
                   <h3>Payment Options</h3>
                   <div className="payment-buttons">
@@ -448,7 +448,7 @@ const SchoolPage = () => {
                       className={`payment-btn ${selectedPaymentPlan === 'full' ? 'active' : ''}`}
                       onClick={() => setSelectedPaymentPlan('full')}
                     >
-                      Full Payment: {selectedCourse.fullPrice}
+                      Full: {selectedCourse.fullPrice}
                     </button>
                     <button 
                       className={`payment-btn ${selectedPaymentPlan === 'installment' ? 'active' : ''}`}
@@ -517,9 +517,8 @@ const SchoolPage = () => {
                 <p className="schedule-info">{selectedCourse.schedule}</p>
                 <div className="format-highlight">
                   <span><FaGlobe /> Online & In-Person</span>
-                  <span><FaCalendarAlt /> Start Date: {startDate}</span>
-                  <span><FaCertificate /> Certificate Awarded Upon Completion</span>
-                  <span><FaWhatsapp /> WhatsApp Support Available</span>
+                  <span><FaCalendarAlt /> Start: {startDate}</span>
+                  <span><FaCertificate /> Certificate Included</span>
                 </div>
               </div>
 
@@ -542,7 +541,7 @@ const SchoolPage = () => {
               <div className="details-section">
                 <h2><FaAward /> Certificate</h2>
                 <p>{selectedCourse.certificate}</p>
-                <p className="certificate-note"><FaCheckCircle /> Officially recognized certificate upon successful completion</p>
+                <p className="certificate-note"><FaCheckCircle /> Officially recognized certificate</p>
               </div>
             </div>
 
@@ -563,14 +562,14 @@ const SchoolPage = () => {
                 <form className="enquiry-form" onSubmit={handleEnquirySubmit}>
                   <input
                     type="text"
-                    placeholder="Your Full Name *"
+                    placeholder="Full Name *"
                     value={enquiryName}
                     onChange={(e) => setEnquiryName(e.target.value)}
                     required
                   />
                   <input
                     type="email"
-                    placeholder="Your Email Address *"
+                    placeholder="Email Address *"
                     value={enquiryEmail}
                     onChange={(e) => setEnquiryEmail(e.target.value)}
                     required
@@ -600,7 +599,7 @@ const SchoolPage = () => {
                     <option>Installment Plan (2 months)</option>
                   </select>
                   <textarea
-                    placeholder="Additional Information (Occupation, Experience Level, etc.)"
+                    placeholder="Additional Information"
                     value={enquiryMessage}
                     onChange={(e) => setEnquiryMessage(e.target.value)}
                     rows="3"
@@ -632,24 +631,24 @@ const SchoolPage = () => {
               <div className="about-card">
                 <div className="about-icon"><FaRocket /></div>
                 <h3>Our Mission</h3>
-                <p>To provide accessible, high-quality education through both online and in-person learning that empowers individuals with practical skills for career advancement and business growth.</p>
+                <p>To provide accessible, high-quality education through online and in-person learning.</p>
               </div>
               <div className="about-card">
                 <div className="about-icon"><FaEye /></div>
                 <h3>Our Vision</h3>
-                <p>To become Ghana's leading institution for technology and creative education, producing globally competitive graduates through flexible learning options.</p>
+                <p>To become Ghana's leading institution for technology and creative education.</p>
               </div>
               <div className="about-card">
                 <div className="about-icon"><FaHeart /></div>
                 <h3>Our Values</h3>
-                <p>Excellence, Accessibility, Practical Learning, Student Success, and Continuous Improvement.</p>
+                <p>Excellence, Accessibility, Practical Learning, Student Success.</p>
               </div>
             </div>
 
             <div className="about-stats">
               <div className="stat-item">
                 <div className="stat-number">2010</div>
-                <div className="stat-label">Year Established</div>
+                <div className="stat-label">Established</div>
               </div>
               <div className="stat-item">
                 <div className="stat-number">1000+</div>
@@ -657,27 +656,11 @@ const SchoolPage = () => {
               </div>
               <div className="stat-item">
                 <div className="stat-number">10+</div>
-                <div className="stat-label">Expert Instructors</div>
+                <div className="stat-label">Instructors</div>
               </div>
               <div className="stat-item">
                 <div className="stat-number">Online & In-Person</div>
-                <div className="stat-label">Flexible Learning</div>
-              </div>
-            </div>
-
-            <div className="delivery-modes">
-              <h2><FaGlobe /> Learning Options</h2>
-              <div className="delivery-grid">
-                <div className="delivery-card">
-                  <span className="delivery-icon"><FaGlobe /></span>
-                  <h3>Online Learning</h3>
-                  <p>Learn from anywhere with our comprehensive online platform. Access course materials, join live sessions, and get support remotely.</p>
-                </div>
-                <div className="delivery-card">
-                  <span className="delivery-icon"><FaBuilding /></span>
-                  <h3>In-Person Learning</h3>
-                  <p>Join us at our physical location for hands-on training, direct interaction with instructors, and collaborative learning experiences.</p>
-                </div>
+                <div className="stat-label">Learning</div>
               </div>
             </div>
 
@@ -687,7 +670,7 @@ const SchoolPage = () => {
                 <div className="info-card">
                   <span className="info-icon"><FaClock /></span>
                   <h3>Duration</h3>
-                  <p>2 Months per course</p>
+                  <p>2 Months</p>
                 </div>
                 <div className="info-card">
                   <span className="info-icon"><FaGlobe /></span>
@@ -702,12 +685,12 @@ const SchoolPage = () => {
                 <div className="info-card">
                   <span className="info-icon"><FaCertificate /></span>
                   <h3>Certificate</h3>
-                  <p>Awarded upon completion</p>
+                  <p>Awarded</p>
                 </div>
                 <div className="info-card">
                   <span className="info-icon"><FaWhatsapp /></span>
                   <h3>Support</h3>
-                  <p>24/7 WhatsApp Support</p>
+                  <p>24/7 WhatsApp</p>
                 </div>
               </div>
             </div>
@@ -724,7 +707,7 @@ const SchoolPage = () => {
 
             <div className="contact-buttons">
               <button className="whatsapp-about-btn" onClick={handleWhatsAppClick}>
-                <FaWhatsapp /> Contact us on WhatsApp
+                <FaWhatsapp /> Contact on WhatsApp
               </button>
             </div>
           </div>
@@ -736,30 +719,15 @@ const SchoolPage = () => {
               <h1><FaEnvelope /> Enroll Now</h1>
               <p>Start your learning journey with us today</p>
               <div className="enrollment-dates">
-                <span><FaCalendarAlt /> Start Date: {startDate}</span>
-                <span><FaClock /> Duration: 2 Months</span>
+                <span><FaCalendarAlt /> Start: {startDate}</span>
+                <span><FaClock /> 2 Months</span>
                 <span><FaGlobe /> Online & In-Person</span>
-                <span><FaCertificate /> Certificate Included</span>
-                <span><FaWhatsapp /> WhatsApp Support</span>
+                <span><FaCertificate /> Certificate</span>
               </div>
             </div>
 
             <div className="contact-grid">
               <div className="contact-info">
-                <div className="info-item">
-                  <div className="info-icon"><FaGlobe /></div>
-                  <div>
-                    <h3>Location</h3>
-                    <p>Online & In-Person - Learn from Anywhere</p>
-                  </div>
-                </div>
-                <div className="info-item">
-                  <div className="info-icon"><FaPhone /></div>
-                  <div>
-                    <h3>Call Us</h3>
-                    <p>+233 50 515 9131<br />+233 24 615 2416</p>
-                  </div>
-                </div>
                 <div className="info-item">
                   <div className="info-icon"><FaWhatsapp /></div>
                   <div>
@@ -768,17 +736,24 @@ const SchoolPage = () => {
                   </div>
                 </div>
                 <div className="info-item">
+                  <div className="info-icon"><FaPhone /></div>
+                  <div>
+                    <h3>Call Us</h3>
+                    <p>+233 50 515 9131</p>
+                  </div>
+                </div>
+                <div className="info-item">
                   <div className="info-icon"><FaEnvelope /></div>
                   <div>
-                    <h3>Email Us</h3>
+                    <h3>Email</h3>
                     <p>fasttech227@gmail.com</p>
                   </div>
                 </div>
                 <div className="info-item">
                   <div className="info-icon"><FaMoneyBillWave /></div>
                   <div>
-                    <h3>Payment Options</h3>
-                    <p>Full Payment or Installment Plans Available</p>
+                    <h3>Payment</h3>
+                    <p>Full Payment or Installment</p>
                   </div>
                 </div>
               </div>
@@ -828,7 +803,7 @@ const SchoolPage = () => {
                   </select>
                   
                   <textarea
-                    placeholder="Additional Information (Occupation, Experience Level, etc.)"
+                    placeholder="Additional Information"
                     value={enquiryMessage}
                     onChange={(e) => setEnquiryMessage(e.target.value)}
                     rows="4"
@@ -841,7 +816,7 @@ const SchoolPage = () => {
                     {isSubmitting ? 'Sending...' : 'Submit Enrollment →'}
                   </button>
                 </form>
-                <p className="form-note"><FaWhatsapp /> We'll contact you via WhatsApp within 24 hours with payment instructions and course access details.</p>
+                <p className="form-note"><FaWhatsapp /> We'll contact you via WhatsApp within 24 hours</p>
               </div>
             </div>
           </div>
@@ -850,8 +825,8 @@ const SchoolPage = () => {
 
       <div className="school-footer">
         <div className="container">
-          <h2><FaRocket /> Start Your Learning Journey Today</h2>
-          <p>2 Months • Online & In-Person • Certificate Awarded • Start Date: {startDate}</p>
+          <h2><FaRocket /> Start Your Learning Journey</h2>
+          <p>2 Months • Online & In-Person • Certificate • Start: {startDate}</p>
           <div className="footer-buttons">
             <button 
               className="footer-btn primary"
@@ -860,7 +835,7 @@ const SchoolPage = () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
             >
-              <FaBookOpen /> Explore Courses
+              <FaBookOpen /> Explore
             </button>
             <button 
               className="footer-btn secondary"
@@ -869,13 +844,13 @@ const SchoolPage = () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
             >
-              <FaEnvelope /> Enroll Now
+              <FaEnvelope /> Enroll
             </button>
             <button 
               className="footer-btn whatsapp"
               onClick={handleWhatsAppClick}
             >
-              <FaWhatsapp /> Chat on WhatsApp
+              <FaWhatsapp /> WhatsApp
             </button>
           </div>
         </div>
