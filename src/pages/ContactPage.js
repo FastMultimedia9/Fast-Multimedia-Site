@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { 
+  FaUser, FaEnvelope, FaPhone, FaBuilding, 
+  FaProjectDiagram, FaMoneyBillWave, FaClock,
+  FaWhatsapp, FaPaperPlane, FaCheckCircle,
+  FaTimes, FaPlus, FaStar, FaTag, FaGift,
+  FaHeart, FaArrowRight, FaChevronDown,
+  FaChevronUp, FaLightbulb, FaSearch,
+  FaPalette, FaTools, FaBox, FaBolt,
+  FaPhoneAlt, FaSpinner, FaUserCircle,
+  FaClipboardList, FaCalendarAlt, FaCommentDots,
+  FaHandshake, FaShieldAlt, FaRocket,
+  FaCheck, FaMinus, FaRegCircle
+} from 'react-icons/fa';
 import './ContactPage.css';
 
 const ContactPage = () => {
@@ -32,7 +45,6 @@ const ContactPage = () => {
   const displayWhatsappNumber = '+233505159131';
   const emailAddress = 'fasttech227@gmail.com';
   
-  // Christmas packages mapping
   const christmasPackages = {
     'basic': {
       name: 'Festive Starter',
@@ -51,12 +63,11 @@ const ContactPage = () => {
     }
   };
 
-  // Helper function to append service to message
   const appendServiceToMessage = (serviceData) => {
     let serviceMessage = `I'm interested in: ${serviceData.name}\n\n`;
     
     if (serviceData.type === 'valentine') {
-      serviceMessage += `🎯 Valentine's Day Package Request\n`;
+      serviceMessage += `Valentine's Day Package Request\n`;
     } else {
       serviceMessage += `Service Details:\n`;
     }
@@ -74,7 +85,6 @@ const ContactPage = () => {
     return serviceMessage;
   };
 
-  // Check for service selection from URL or localStorage
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const serviceName = queryParams.get('service');
@@ -188,7 +198,6 @@ const ContactPage = () => {
     }
   }, [location.search]);
 
-  // Scroll animation
   useEffect(() => {
     const animateOnScroll = () => {
       const elements = document.querySelectorAll('.animate-on-scroll');
@@ -243,54 +252,52 @@ const ContactPage = () => {
     navigate('/services');
   };
 
-  // Format message for WhatsApp/Email with service info
   const formatMessage = () => {
     let serviceInfo = '';
     
     if (selectedService) {
-      serviceInfo = `\n🎯 *REQUESTED SERVICE:* ${selectedService.name}\n`;
-      serviceInfo += `📊 *Category:* ${selectedService.category || 'Not specified'}\n`;
+      serviceInfo = `\nREQUESTED SERVICE: ${selectedService.name}\n`;
+      serviceInfo += `Category: ${selectedService.category || 'Not specified'}\n`;
       if (selectedService.price && selectedService.price !== '') {
-        serviceInfo += `💰 *Price Info:* ${selectedService.price}\n`;
+        serviceInfo += `Price Info: ${selectedService.price}\n`;
       }
       
       if (selectedService.type === 'valentine') {
-        serviceInfo += `💖 *Valentine's Special:* Limited time offer - Romantic theme included!\n`;
+        serviceInfo += `Valentine's Special: Limited time offer - Romantic theme included!\n`;
       }
     }
     
     const packageInfo = selectedPackage ? 
-      `\n🎁 *SELECTED CHRISTMAS PACKAGE:* ${christmasPackages[selectedPackage]?.name} (${christmasPackages[selectedPackage]?.price})` : '';
+      `\nSELECTED CHRISTMAS PACKAGE: ${christmasPackages[selectedPackage]?.name} (${christmasPackages[selectedPackage]?.price})` : '';
     
     const packageFeatures = selectedPackage ? 
-      `\n✨ *Package Includes:*\n${christmasPackages[selectedPackage]?.features.map(f => `• ${f}`).join('\n')}` : '';
+      `\nPackage Includes:\n${christmasPackages[selectedPackage]?.features.map(f => `• ${f}`).join('\n')}` : '';
     
     const christmasBonus = isChristmasMode ? 
-      '\n🎅 *CHRISTMAS SPECIAL:* 25% holiday discount + free social media pack included!' : '';
+      '\nCHRISTMAS SPECIAL: 25% holiday discount + free social media pack included!' : '';
     
-    return `📋 *NEW PROJECT REQUEST* 📋
+    return `NEW PROJECT REQUEST
 
-👤 *Client Information:*
+Client Information:
 • Name: ${formData.name}
 • Email: ${formData.email}
 • Phone: ${formData.phone}
 • Company: ${formData.company || 'Not provided'}
 ${serviceInfo}${packageInfo}${packageFeatures}
 
-🎯 *Project Details:*
+Project Details:
 • Project Type: ${formData.projectType}
 • Budget Range: ${formData.budget || 'Not specified'}
 • Timeline: ${formData.timeline || 'Not specified'}
 • Preferred Contact: ${formData.preferredContact === 'whatsapp' ? 'WhatsApp' : 'Email'}
 ${christmasBonus}
 
-📝 *Project Description:*
+Project Description:
 ${formData.message}
 
-📧 *This message was sent via Fast Multimedia Services Page*`;
+This message was sent via Fast Multimedia Services Page`;
   };
 
-  // Send via WhatsApp
   const sendViaWhatsApp = () => {
     const message = formatMessage();
     const encodedMessage = encodeURIComponent(message);
@@ -298,7 +305,6 @@ ${formData.message}
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
-  // Send via Email
   const sendViaEmail = () => {
     const subject = `Project Request - ${selectedService ? selectedService.name : 'Fast Multimedia'}`;
     const body = formatMessage();
@@ -413,11 +419,10 @@ ${formData.message}
 
   return (
     <div className={`contact-page ${isChristmasMode ? 'christmas-mode' : ''}`}>
-      {/* Service Added Notification */}
       {serviceAdded && selectedService && (
         <div className="service-added-notification">
           <div className="notification-content">
-            <span className="notification-icon">✓</span>
+            <FaCheckCircle className="notification-icon" />
             <div className="notification-text">
               <strong>{selectedService.name}</strong> has been added to your request!
               {selectedService.price && (
@@ -429,13 +434,12 @@ ${formData.message}
               onClick={() => setServiceAdded(false)}
               aria-label="Close notification"
             >
-              ✕
+              <FaTimes />
             </button>
           </div>
         </div>
       )}
 
-      {/* Christmas Snowfall for Christmas Mode */}
       {isChristmasMode && (
         <div className="snowfall">
           {[...Array(30)].map((_, i) => (
@@ -454,16 +458,16 @@ ${formData.message}
         </div>
       )}
 
-      {/* Hero Section */}
       <section className={`contact-hero ${isChristmasMode ? 'christmas-hero' : ''}`}>
         <div className="container">
           <div className="hero-content animate-on-scroll">
             {isChristmasMode && (
               <div className="christmas-badge">
-                <span>🎄 Christmas Design Package Request 🎁</span>
+                <FaGift className="badge-icon" />
+                <span>Christmas Design Package Request</span>
                 {selectedPackage && (
                   <div className="selected-package-badge">
-                    <span>🎁</span>
+                    <FaGift />
                     <span>{christmasPackages[selectedPackage]?.name} Package Selected</span>
                   </div>
                 )}
@@ -478,47 +482,46 @@ ${formData.message}
                 : 'Ready to start your project? Fill the form and send your request via WhatsApp or Email.'}
             </p>
             
-            {/* Selected Service Info */}
             {selectedService && (
               <div className="selected-service-card">
                 <div className="service-card-header">
-                  <h3><span>✓</span> Selected Service</h3>
+                  <h3><FaCheckCircle className="header-icon" /> Selected Service</h3>
                   <div className="service-card-actions">
                     <button 
                       className="btn-service-remove"
                       onClick={clearSelectedService}
                       aria-label="Remove service"
                     >
-                      <span>✕</span> Remove
+                      <FaTimes /> Remove
                     </button>
                     <button 
                       className="btn-service-add"
                       onClick={addAnotherService}
                       aria-label="Add another service"
                     >
-                      <span>+</span> Add Another
+                      <FaPlus /> Add Another
                     </button>
                   </div>
                 </div>
                 <div className="service-card-content">
                   <div className="service-info">
                     <div className="service-name">
-                      <span>★</span>
+                      <FaStar className="icon-gold" />
                       <strong>{selectedService.name}</strong>
                     </div>
                     <div className="service-category">
-                      <span>🏷️</span>
+                      <FaTag />
                       <span>{selectedService.category || 'General Service'}</span>
                     </div>
                     {selectedService.price && (
                       <div className="service-price">
-                        <span>💰</span>
+                        <FaMoneyBillWave />
                         <span>{selectedService.price}</span>
                       </div>
                     )}
                     {selectedService.type === 'valentine' && (
                       <div className="service-badge valentine-badge">
-                        <span>❤️</span>
+                        <FaHeart />
                         <span>Valentine's Special</span>
                       </div>
                     )}
@@ -530,17 +533,17 @@ ${formData.message}
             {isChristmasMode && selectedPackage && (
               <div className="selected-package-card">
                 <div className="package-header">
-                  <h3><span>🎁</span> Selected Package: {christmasPackages[selectedPackage]?.name}</h3>
+                  <h3><FaGift className="icon-gold" /> Selected Package: {christmasPackages[selectedPackage]?.name}</h3>
                   <div className="package-price">{christmasPackages[selectedPackage]?.price}</div>
                 </div>
                 <div className="package-features">
                   <h4>Package Includes:</h4>
                   <ul>
                     {christmasPackages[selectedPackage]?.features.slice(0, 3).map((feature, index) => (
-                      <li key={index}><span>✓</span> {feature}</li>
+                      <li key={index}><FaCheck className="icon-gold" /> {feature}</li>
                     ))}
                     {christmasPackages[selectedPackage]?.features.length > 3 && (
-                      <li><span>⋯</span> ...and more!</li>
+                      <li><FaMinus className="icon-gold" /> ...and more!</li>
                     )}
                   </ul>
                 </div>
@@ -550,7 +553,6 @@ ${formData.message}
         </div>
       </section>
 
-      {/* Contact Form Section */}
       <section className="contact-form-section">
         <div className="container">
           <div className="contact-form-wrapper">
@@ -567,7 +569,7 @@ ${formData.message}
                 
                 {!selectedService && (
                   <div className="service-selection-hint">
-                    <span>💡</span>
+                    <FaLightbulb className="hint-icon" />
                     <span>
                       Want to select a specific service?{' '}
                       <button 
@@ -584,9 +586,11 @@ ${formData.message}
 
               {isSubmitted ? (
                 <div className="success-message animate-on-scroll">
-                  <div className="success-icon">✓</div>
+                  <div className="success-icon">
+                    <FaCheckCircle />
+                  </div>
                   <h3 className="success-title">
-                    {submissionMethod === 'whatsapp' ? '📱 Opening WhatsApp...' : '📧 Opening Email...'}
+                    {submissionMethod === 'whatsapp' ? 'Opening WhatsApp...' : 'Opening Email...'}
                   </h3>
                   <p className="success-text">
                     {submissionMethod === 'whatsapp' 
@@ -623,27 +627,27 @@ ${formData.message}
                       className="btn btn-secondary"
                       type="button"
                     >
-                      <span>✏️</span> Edit Request
+                      <FaEdit /> Edit Request
                     </button>
                     <button 
                       onClick={addAnotherService}
                       className="btn btn-primary"
                       type="button"
                     >
-                      <span>+</span> Add Another Service
+                      <FaPlus /> Add Another Service
                     </button>
                   </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="contact-form animate-on-scroll">
                   <div className="form-section-header">
-                    <h3><span>👤</span> Your Information</h3>
+                    <h3><FaUserCircle className="section-icon" /> Your Information</h3>
                   </div>
                   
                   <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="name" className="form-label">
-                        Full Name *
+                        <FaUser className="label-icon" /> Full Name *
                       </label>
                       <input
                         type="text"
@@ -659,7 +663,7 @@ ${formData.message}
 
                     <div className="form-group">
                       <label htmlFor="email" className="form-label">
-                        Email Address *
+                        <FaEnvelope className="label-icon" /> Email Address *
                       </label>
                       <input
                         type="email"
@@ -677,7 +681,7 @@ ${formData.message}
                   <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="phone" className="form-label">
-                        Phone Number *
+                        <FaPhone className="label-icon" /> Phone Number *
                       </label>
                       <input
                         type="tel"
@@ -694,7 +698,7 @@ ${formData.message}
 
                     <div className="form-group">
                       <label htmlFor="company" className="form-label">
-                        Company/Organization
+                        <FaBuilding className="label-icon" /> Company/Organization
                       </label>
                       <input
                         type="text"
@@ -709,13 +713,13 @@ ${formData.message}
                   </div>
 
                   <div className="form-section-header">
-                    <h3><span>📋</span> Project Details</h3>
+                    <h3><FaClipboardList className="section-icon" /> Project Details</h3>
                   </div>
 
                   <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="projectType" className="form-label">
-                        Project Type *
+                        <FaProjectDiagram className="label-icon" /> Project Type *
                       </label>
                       <select
                         id="projectType"
@@ -734,7 +738,7 @@ ${formData.message}
 
                     <div className="form-group">
                       <label htmlFor="budget" className="form-label">
-                        Budget Range
+                        <FaMoneyBillWave className="label-icon" /> Budget Range
                       </label>
                       <select
                         id="budget"
@@ -754,7 +758,7 @@ ${formData.message}
                   <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="timeline" className="form-label">
-                        Project Timeline
+                        <FaClock className="label-icon" /> Project Timeline
                       </label>
                       <select
                         id="timeline"
@@ -770,8 +774,8 @@ ${formData.message}
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="preferredContact" className="form-label">
-                        Send Via *
+                      <label className="form-label">
+                        <FaPaperPlane className="label-icon" /> Send Via *
                       </label>
                       <div className="contact-method-selector">
                         <label className={`method-option ${formData.preferredContact === 'whatsapp' ? 'selected' : ''}`}>
@@ -784,7 +788,7 @@ ${formData.message}
                             required
                           />
                           <div className="option-content">
-                            <span className="method-icon">💬</span>
+                            <FaWhatsapp className="method-icon whatsapp-icon" />
                             <span>WhatsApp</span>
                             <small>Instant messaging</small>
                           </div>
@@ -800,7 +804,7 @@ ${formData.message}
                             required
                           />
                           <div className="option-content">
-                            <span className="method-icon">✉️</span>
+                            <FaEnvelope className="method-icon email-icon" />
                             <span>Email</span>
                             <small>Formal communication</small>
                           </div>
@@ -811,7 +815,7 @@ ${formData.message}
 
                   <div className="form-group">
                     <label htmlFor="message" className="form-label">
-                      Project Description *
+                      <FaCommentDots className="label-icon" /> Project Description *
                     </label>
                     <textarea
                       id="message"
@@ -854,17 +858,17 @@ ${formData.message}
                     >
                       {isLoading ? (
                         <>
-                          <span className="spinner"></span> Preparing...
+                          <FaSpinner className="spinner" /> Preparing...
                         </>
                       ) : (
                         <>
                           {formData.preferredContact === 'whatsapp' ? (
                             <>
-                              <span>💬</span> Send via WhatsApp
+                              <FaWhatsapp /> Send via WhatsApp
                             </>
                           ) : (
                             <>
-                              <span>✉️</span> Send via Email
+                              <FaPaperPlane /> Send via Email
                             </>
                           )}
                         </>
@@ -888,10 +892,9 @@ ${formData.message}
               )}
             </div>
 
-            {/* Quick Contact Sidebar */}
             <div className="quick-contact-sidebar">
               <div className="contact-card">
-                <h3><span>⚡</span> Quick Contact</h3>
+                <h3><FaBolt className="card-icon" /> Quick Contact</h3>
                 <p>Prefer to contact us directly?</p>
                 
                 <div className="quick-actions">
@@ -901,7 +904,7 @@ ${formData.message}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <span>💬</span> Chat on WhatsApp
+                    <FaWhatsapp /> Chat on WhatsApp
                   </a>
                   
                   <a 
@@ -910,13 +913,13 @@ ${formData.message}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <span>✉️</span> Send Email
+                    <FaEnvelope /> Send Email
                   </a>
                 </div>
                 
                 <div className="contact-info">
                   <div className="info-item">
-                    <span>📞</span>
+                    <FaPhoneAlt className="info-icon" />
                     <div>
                       <strong>Call Us</strong>
                       <span>{displayWhatsappNumber}</span>
@@ -924,7 +927,7 @@ ${formData.message}
                   </div>
                   
                   <div className="info-item">
-                    <span>🕐</span>
+                    <FaClock className="info-icon" />
                     <div>
                       <strong>Response Time</strong>
                       <span>Within 24 hours</span>
@@ -933,9 +936,8 @@ ${formData.message}
                 </div>
               </div>
               
-              {/* Browse Services Card */}
               <div className="browse-services-card">
-                <h3><span>🔍</span> Browse Services</h3>
+                <h3><FaSearch className="card-icon" /> Browse Services</h3>
                 <p>Not sure what you need? Browse our services:</p>
                 <div className="service-categories">
                   <button 
@@ -943,7 +945,7 @@ ${formData.message}
                     onClick={() => navigate('/services#design-services')}
                     type="button"
                   >
-                    <span>🎨</span>
+                    <FaPalette className="btn-icon" />
                     <span>Graphic Design</span>
                   </button>
                   <button 
@@ -951,7 +953,7 @@ ${formData.message}
                     onClick={() => navigate('/services#tech-services')}
                     type="button"
                   >
-                    <span>🔧</span>
+                    <FaTools className="btn-icon" />
                     <span>Tech Support</span>
                   </button>
                   <button 
@@ -959,7 +961,7 @@ ${formData.message}
                     onClick={() => navigate('/services#pricing-section')}
                     type="button"
                   >
-                    <span>📦</span>
+                    <FaBox className="btn-icon" />
                     <span>Packages</span>
                   </button>
                 </div>
@@ -969,7 +971,6 @@ ${formData.message}
         </div>
       </section>
 
-      {/* FAQ Section */}
       <section className={`faq-section ${isChristmasMode ? 'christmas-faq' : ''}`}>
         <div className="container">
           <div className="section-header animate-on-scroll">
@@ -995,7 +996,11 @@ ${formData.message}
                   <h3 className="question-title">
                     {faq.question}
                   </h3>
-                  <span className={`faq-chevron ${activeFAQ === index ? 'active' : ''}`}>▼</span>
+                  {activeFAQ === index ? (
+                    <FaChevronUp className="faq-chevron active" />
+                  ) : (
+                    <FaChevronDown className="faq-chevron" />
+                  )}
                 </div>
                 <div className={`faq-answer ${activeFAQ === index ? 'show' : ''}`}>
                   <p>{faq.answer}</p>

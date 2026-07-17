@@ -1,9 +1,6 @@
 /* ContactPage.css - Duck Design Color Scheme */
 /* Gold/Orange/Cream Theme - No Purple, No Dark Mode */
 
-/* ============================================
-   ROOT VARIABLES - DUCK DESIGN COLORS
-   ============================================ */
 :root {
   --duck-gold: #ffca41;
   --duck-dark-gold: #ff8b20;
@@ -20,9 +17,6 @@
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
 }
 
-/* ============================================
-   RESET & BASE
-   ============================================ */
 * {
   margin: 0;
   padding: 0;
@@ -41,24 +35,6 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
-}
-
-.section {
-  padding: 80px 0;
-}
-
-.section-title {
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 700;
-  color: var(--duck-dark);
-  margin-bottom: 10px;
-}
-
-.section-subtitle {
-  font-size: 1.1rem;
-  color: var(--duck-text);
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 /* ============================================
@@ -131,17 +107,6 @@ body {
   box-shadow: 0 8px 25px rgba(234, 67, 53, 0.4);
 }
 
-.btn-christmas {
-  background: var(--gradient-gold);
-  color: var(--duck-dark);
-  box-shadow: 0 4px 15px rgba(255, 202, 65, 0.4);
-}
-
-.btn-christmas:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(255, 202, 65, 0.6);
-}
-
 /* ============================================
    ANIMATIONS
    ============================================ */
@@ -192,7 +157,6 @@ body {
   line-height: 1.7;
 }
 
-/* Christmas Badge */
 .christmas-badge {
   display: inline-flex;
   align-items: center;
@@ -207,6 +171,11 @@ body {
   color: var(--duck-dark);
   margin-bottom: 30px;
   box-shadow: 0 4px 15px rgba(255, 202, 65, 0.3);
+}
+
+.badge-icon {
+  color: var(--duck-dark);
+  font-size: 1.2rem;
 }
 
 .selected-package-badge {
@@ -252,8 +221,9 @@ body {
   gap: 10px;
 }
 
-.service-card-header h3 span {
+.header-icon {
   color: var(--duck-dark-gold);
+  font-size: 1.2rem;
 }
 
 .service-card-actions {
@@ -326,7 +296,7 @@ body {
   color: var(--duck-dark);
 }
 
-.service-name span {
+.icon-gold {
   color: var(--duck-dark-gold);
 }
 
@@ -424,10 +394,6 @@ body {
   gap: 8px;
   font-size: 0.9rem;
   color: var(--duck-text);
-}
-
-.package-features li span {
-  color: var(--duck-dark-gold);
 }
 
 /* ============================================
@@ -553,9 +519,6 @@ body {
   align-items: start;
 }
 
-/* ============================================
-   FORM CONTAINER
-   ============================================ */
 .form-container {
   background: var(--duck-white);
   border-radius: 24px;
@@ -594,6 +557,10 @@ body {
   color: var(--duck-dark);
 }
 
+.hint-icon {
+  color: var(--duck-dark-gold);
+}
+
 .btn-service-browse {
   background: var(--gradient-gold);
   border: none;
@@ -630,7 +597,7 @@ body {
   gap: 10px;
 }
 
-.form-section-header h3 span {
+.section-icon {
   color: var(--duck-dark-gold);
 }
 
@@ -645,11 +612,18 @@ body {
 }
 
 .form-label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--duck-dark);
   margin-bottom: 6px;
+}
+
+.label-icon {
+  color: var(--duck-dark-gold);
+  font-size: 0.85rem;
 }
 
 .form-input,
@@ -724,6 +698,14 @@ body {
 .method-option .option-content .method-icon {
   font-size: 2rem;
   margin-bottom: 6px;
+}
+
+.method-option .option-content .whatsapp-icon {
+  color: #25D366;
+}
+
+.method-option .option-content .email-icon {
+  color: #EA4335;
 }
 
 .method-option .option-content span {
@@ -808,12 +790,6 @@ body {
 }
 
 .spinner {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border: 3px solid rgba(22, 27, 38, 0.1);
-  border-radius: 50%;
-  border-top-color: var(--duck-dark);
   animation: spin 0.8s ease infinite;
 }
 
@@ -991,6 +967,10 @@ body {
   margin-bottom: 8px;
 }
 
+.card-icon {
+  color: var(--duck-dark-gold);
+}
+
 .contact-card p {
   color: var(--duck-text);
   font-size: 0.95rem;
@@ -1023,7 +1003,8 @@ body {
   padding: 8px 0;
 }
 
-.info-item span:first-child {
+.info-icon {
+  color: var(--duck-dark-gold);
   font-size: 1.1rem;
   width: 24px;
   margin-top: 2px;
@@ -1090,6 +1071,11 @@ body {
   transition: all 0.3s ease;
   font-family: var(--font-primary);
   color: var(--duck-dark);
+}
+
+.btn-icon {
+  color: var(--duck-dark-gold);
+  font-size: 1.1rem;
 }
 
 .service-category-btn:hover {
@@ -1185,7 +1171,6 @@ body {
    RESPONSIVE DESIGN
    ============================================ */
 
-/* Tablet */
 @media (max-width: 1024px) {
   .contact-form-wrapper {
     grid-template-columns: 1fr;
@@ -1263,7 +1248,6 @@ body {
   }
 }
 
-/* Mobile */
 @media (max-width: 480px) {
   .contact-hero {
     padding: 60px 0 30px;
