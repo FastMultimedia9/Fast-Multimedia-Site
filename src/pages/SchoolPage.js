@@ -57,9 +57,7 @@ const SchoolPage = () => {
       fullPrice: 'GH₵ 400',
       installmentPrice: 'GH₵ 220/month',
       actualPrice: 400,
-      monthlyInstallment: 220,
       description: 'Learn essential computer skills, Microsoft Office, and internet fundamentals.',
-      longDescription: 'Master the fundamental computer skills needed for modern workplaces.',
       image: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
         'Computer hardware and software fundamentals',
@@ -68,11 +66,6 @@ const SchoolPage = () => {
         'Microsoft Excel - spreadsheets and basic formulas',
         'Microsoft PowerPoint - presentations and slideshows'
       ],
-      schedule: `Online & In-Person | Start Date: ${startDate}`,
-      prerequisites: 'No prior computer experience required',
-      certificate: 'Certificate in Basic I.C.T & Office Skills',
-      students: 412,
-      rating: 4.9,
       deliveryMode: 'Online & In-Person'
     },
     {
@@ -85,9 +78,7 @@ const SchoolPage = () => {
       fullPrice: 'GH₵ 500',
       installmentPrice: 'GH₵ 275/month',
       actualPrice: 500,
-      monthlyInstallment: 275,
       description: 'Learn Photoshop, Illustrator, InDesign and master visual communication.',
-      longDescription: 'Unlock your creative potential with our Graphic Design course.',
       image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
         'Adobe Photoshop: Photo editing and manipulation',
@@ -96,11 +87,6 @@ const SchoolPage = () => {
         'Color theory and typography fundamentals',
         'Brand identity and logo design principles'
       ],
-      schedule: `Online & In-Person | Start Date: ${startDate}`,
-      prerequisites: 'Passion for design, no prior experience needed',
-      certificate: 'Certificate in Graphic Design',
-      students: 389,
-      rating: 4.8,
       deliveryMode: 'Online & In-Person'
     },
     {
@@ -113,9 +99,7 @@ const SchoolPage = () => {
       fullPrice: 'GH₵ 550',
       installmentPrice: 'GH₵ 290/month',
       actualPrice: 550,
-      monthlyInstallment: 290,
       description: 'Master HTML, CSS, JavaScript, and build modern websites.',
-      longDescription: 'Learn to build professional, responsive websites from scratch.',
       image: 'https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
         'HTML5 - Structure and semantics',
@@ -124,11 +108,6 @@ const SchoolPage = () => {
         'Responsive web design principles',
         'Website hosting and deployment'
       ],
-      schedule: `Online & In-Person | Start Date: ${startDate}`,
-      prerequisites: 'Basic computer knowledge, no prior coding experience required',
-      certificate: 'Certificate in Web Development',
-      students: 356,
-      rating: 4.9,
       deliveryMode: 'Online & In-Person'
     },
     {
@@ -141,9 +120,7 @@ const SchoolPage = () => {
       fullPrice: 'GH₵ 450',
       installmentPrice: 'GH₵ 240/month',
       actualPrice: 450,
-      monthlyInstallment: 240,
       description: 'Learn computer networking fundamentals, setup, and configuration.',
-      longDescription: 'Master the essentials of computer networking.',
       image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
         'Network fundamentals and OSI model',
@@ -152,11 +129,6 @@ const SchoolPage = () => {
         'Router and switch configuration',
         'Network troubleshooting techniques'
       ],
-      schedule: `Online & In-Person | Start Date: ${startDate}`,
-      prerequisites: 'Basic computer knowledge, interest in networking',
-      certificate: 'Certificate in Networking Basics',
-      students: 278,
-      rating: 4.7,
       deliveryMode: 'Online & In-Person'
     },
     {
@@ -169,9 +141,7 @@ const SchoolPage = () => {
       fullPrice: 'GH₵ 600',
       installmentPrice: 'GH₵ 320/month',
       actualPrice: 600,
-      monthlyInstallment: 320,
       description: 'Comprehensive IT support training for help desk and system administration.',
-      longDescription: 'Become a complete IT support professional.',
       image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
         'Computer hardware assembly and maintenance',
@@ -180,11 +150,6 @@ const SchoolPage = () => {
         'Network setup and configuration',
         'IT security fundamentals'
       ],
-      schedule: `Online & In-Person | Start Date: ${startDate}`,
-      prerequisites: 'Basic computer knowledge, interest in IT support',
-      certificate: 'Certificate in Full I.T Support',
-      students: 345,
-      rating: 4.8,
       deliveryMode: 'Online & In-Person'
     }
   ];
@@ -341,7 +306,7 @@ const SchoolPage = () => {
   return (
     <div className="school-page">
       {/* Hero */}
-      <section className="school-hero">
+      <div className="school-hero">
         <div className="container">
           <h1 className="school-hero-title">
             Welcome to <span className="gradient-text">Fast Multimedia</span> Institute
@@ -358,26 +323,26 @@ const SchoolPage = () => {
           <div className="school-hero-stats">
             <div className="hero-stat">
               <div className="stat-number">5</div>
-              <div className="stat-label">Professional Courses</div>
+              <div className="stat-label">Courses</div>
             </div>
             <div className="hero-stat">
               <div className="stat-number">2</div>
-              <div className="stat-label">Months Duration</div>
+              <div className="stat-label">Months</div>
             </div>
             <div className="hero-stat">
               <div className="stat-number">Online & In-Person</div>
-              <div className="stat-label">Flexible Learning</div>
+              <div className="stat-label">Learning</div>
             </div>
             <div className="hero-stat">
               <div className="stat-number">24/7</div>
-              <div className="stat-label">Student Support</div>
+              <div className="stat-label">Support</div>
             </div>
           </div>
           <button className="whatsapp-hero-btn" onClick={handleWhatsAppClick}>
-            💬 Chat with us on WhatsApp
+            💬 Chat on WhatsApp
           </button>
         </div>
-      </section>
+      </div>
 
       {/* Tabs */}
       <div className="school-tabs">
@@ -445,11 +410,11 @@ const SchoolPage = () => {
                     <h3 className="course-title">{course.title}</h3>
                     <p className="course-description">{course.description}</p>
                     <div className="course-meta">
-                      <span className="course-duration">⏱️ {course.duration}</span>
-                      <span className="course-level">📊 {course.level}</span>
+                      <span>⏱️ {course.duration}</span>
+                      <span>📊 {course.level}</span>
                     </div>
                     <div className="course-meta">
-                      <span className="course-delivery">🌐 {course.deliveryMode}</span>
+                      <span>🌐 {course.deliveryMode}</span>
                     </div>
                     <div className="course-footer">
                       <div>
@@ -465,13 +430,13 @@ const SchoolPage = () => {
 
             <div className="open-to-all">
               <div className="open-to-all-content">
-                <span className="open-icon">👥</span>
+                <span>👥</span>
                 <h3>Open To:</h3>
                 <div className="audience-tags">
-                  <span className="audience-tag">🎓 Students</span>
-                  <span className="audience-tag">💼 Job Seekers</span>
-                  <span className="audience-tag">👔 Workers</span>
-                  <span className="audience-tag">🏢 Business Owners</span>
+                  <span>🎓 Students</span>
+                  <span>💼 Job Seekers</span>
+                  <span>👔 Workers</span>
+                  <span>🏢 Business Owners</span>
                 </div>
               </div>
             </div>
@@ -500,7 +465,7 @@ const SchoolPage = () => {
 
             <div className="bundle-builder">
               <h2>Build Your Bundle</h2>
-              <p className="bundle-subtitle">Select 2 or more courses for discounts</p>
+              <p>Select 2 or more courses for discounts</p>
               
               <div className="bundle-courses-selector">
                 {courses.map(course => (
@@ -561,7 +526,7 @@ const SchoolPage = () => {
                   <div className="bundle-icon">🎁</div>
                   <h3>{bundle.courses}</h3>
                   <div className="bundle-discount">{bundle.discount}</div>
-                  <p className="bundle-savings">{bundle.price}</p>
+                  <p>{bundle.price}</p>
                   <button 
                     className="bundle-btn"
                     onClick={() => {
@@ -592,7 +557,7 @@ const SchoolPage = () => {
               </div>
               <div className="details-info">
                 <h1 className="details-title">{selectedCourse.title}</h1>
-                <p className="details-long-desc">{selectedCourse.longDescription}</p>
+                <p className="details-desc">{selectedCourse.description}</p>
                 
                 <div className="details-delivery">
                   🌐 {selectedCourse.deliveryMode}
@@ -600,28 +565,28 @@ const SchoolPage = () => {
 
                 <div className="details-meta-grid">
                   <div className="meta-item">
-                    <span className="meta-icon">⏱️</span>
+                    <span>⏱️</span>
                     <div>
                       <div className="meta-label">Duration</div>
                       <div className="meta-value">{selectedCourse.duration}</div>
                     </div>
                   </div>
                   <div className="meta-item">
-                    <span className="meta-icon">📊</span>
+                    <span>📊</span>
                     <div>
                       <div className="meta-label">Level</div>
                       <div className="meta-value">{selectedCourse.level}</div>
                     </div>
                   </div>
                   <div className="meta-item">
-                    <span className="meta-icon">💰</span>
+                    <span>💰</span>
                     <div>
                       <div className="meta-label">Price</div>
                       <div className="meta-value">{selectedCourse.fullPrice}</div>
                     </div>
                   </div>
                   <div className="meta-item">
-                    <span className="meta-icon">📜</span>
+                    <span>📜</span>
                     <div>
                       <div className="meta-label">Certificate</div>
                       <div className="meta-value">Included</div>
@@ -654,12 +619,9 @@ const SchoolPage = () => {
 
               <div className="details-section">
                 <h2>📅 Course Format</h2>
-                <p className="schedule-info">{selectedCourse.schedule}</p>
-                <div className="format-highlight">
-                  <span>🌐 Online & In-Person</span>
-                  <span>📅 Start Date: {startDate}</span>
-                  <span>📜 Certificate Included</span>
-                </div>
+                <p>🌐 Online & In-Person</p>
+                <p>📅 Start Date: {startDate}</p>
+                <p>📜 Certificate Included</p>
               </div>
             </div>
           </div>
@@ -694,7 +656,7 @@ const SchoolPage = () => {
             <div className="about-stats">
               <div className="stat-item">
                 <div className="stat-number">2010</div>
-                <div className="stat-label">Year Established</div>
+                <div className="stat-label">Established</div>
               </div>
               <div className="stat-item">
                 <div className="stat-number">1000+</div>
@@ -702,47 +664,44 @@ const SchoolPage = () => {
               </div>
               <div className="stat-item">
                 <div className="stat-number">10+</div>
-                <div className="stat-label">Expert Instructors</div>
+                <div className="stat-label">Instructors</div>
               </div>
               <div className="stat-item">
                 <div className="stat-number">Online & In-Person</div>
-                <div className="stat-label">Flexible Learning</div>
+                <div className="stat-label">Learning</div>
               </div>
             </div>
 
-            <div className="course-info">
-              <h2>📚 Course Information</h2>
-              <div className="info-grid">
-                <div className="info-card">
-                  <span className="info-icon">⏱️</span>
-                  <h3>Duration</h3>
-                  <p>2 Months</p>
-                </div>
-                <div className="info-card">
-                  <span className="info-icon">🌐</span>
-                  <h3>Format</h3>
-                  <p>Online & In-Person</p>
-                </div>
-                <div className="info-card">
-                  <span className="info-icon">📅</span>
-                  <h3>Start Date</h3>
-                  <p>{startDate}</p>
-                </div>
-                <div className="info-card">
-                  <span className="info-icon">📜</span>
-                  <h3>Certificate</h3>
-                  <p>Awarded</p>
-                </div>
-                <div className="info-card">
-                  <span className="info-icon">💬</span>
-                  <h3>Support</h3>
-                  <p>24/7 WhatsApp</p>
-                </div>
+            <div className="info-grid">
+              <div className="info-card">
+                <span>⏱️</span>
+                <h3>Duration</h3>
+                <p>2 Months</p>
+              </div>
+              <div className="info-card">
+                <span>🌐</span>
+                <h3>Format</h3>
+                <p>Online & In-Person</p>
+              </div>
+              <div className="info-card">
+                <span>📅</span>
+                <h3>Start Date</h3>
+                <p>{startDate}</p>
+              </div>
+              <div className="info-card">
+                <span>📜</span>
+                <h3>Certificate</h3>
+                <p>Awarded</p>
+              </div>
+              <div className="info-card">
+                <span>💬</span>
+                <h3>Support</h3>
+                <p>24/7 WhatsApp</p>
               </div>
             </div>
 
             <button className="whatsapp-about-btn" onClick={handleWhatsAppClick}>
-              💬 Contact us on WhatsApp
+              💬 Contact on WhatsApp
             </button>
           </div>
         )}
@@ -764,31 +723,31 @@ const SchoolPage = () => {
             <div className="contact-grid">
               <div className="contact-info">
                 <div className="info-item">
-                  <div className="info-icon">💬</div>
+                  <span>💬</span>
                   <div>
                     <h3>WhatsApp</h3>
                     <p>+233 50 515 9131</p>
                   </div>
                 </div>
                 <div className="info-item">
-                  <div className="info-icon">📞</div>
+                  <span>📞</span>
                   <div>
                     <h3>Call Us</h3>
-                    <p>+233 50 515 9131<br />+233 24 615 2416</p>
+                    <p>+233 50 515 9131</p>
                   </div>
                 </div>
                 <div className="info-item">
-                  <div className="info-icon">✉️</div>
+                  <span>✉️</span>
                   <div>
                     <h3>Email</h3>
                     <p>fasttech227@gmail.com</p>
                   </div>
                 </div>
                 <div className="info-item">
-                  <div className="info-icon">💰</div>
+                  <span>💰</span>
                   <div>
                     <h3>Payment</h3>
-                    <p>Full Payment or Installment Plans</p>
+                    <p>Full Payment or Installment</p>
                   </div>
                 </div>
               </div>
@@ -820,7 +779,6 @@ const SchoolPage = () => {
                 <form onSubmit={handleEnquirySubmit}>
                   <input
                     type="text"
-                    name="name"
                     placeholder="Full Name *"
                     value={enquiryName}
                     onChange={(e) => setEnquiryName(e.target.value)}
@@ -828,7 +786,6 @@ const SchoolPage = () => {
                   />
                   <input
                     type="email"
-                    name="email"
                     placeholder="Email Address *"
                     value={enquiryEmail}
                     onChange={(e) => setEnquiryEmail(e.target.value)}
@@ -836,7 +793,6 @@ const SchoolPage = () => {
                   />
                   <input
                     type="tel"
-                    name="phone"
                     placeholder="Phone Number *"
                     value={enquiryPhone}
                     onChange={(e) => setEnquiryPhone(e.target.value)}
@@ -846,7 +802,6 @@ const SchoolPage = () => {
                   {!showBundleEnrollment ? (
                     <>
                       <select 
-                        name="course"
                         value={selectedCourseForForm}
                         onChange={(e) => setSelectedCourseForForm(e.target.value)}
                         required
@@ -857,7 +812,6 @@ const SchoolPage = () => {
                         ))}
                       </select>
                       <select 
-                        name="payment"
                         value={selectedPaymentOption}
                         onChange={(e) => setSelectedPaymentOption(e.target.value)}
                       >
@@ -897,7 +851,6 @@ const SchoolPage = () => {
                   )}
                   
                   <textarea
-                    name="message"
                     placeholder="Additional Information"
                     value={enquiryMessage}
                     onChange={(e) => setEnquiryMessage(e.target.value)}
@@ -911,7 +864,7 @@ const SchoolPage = () => {
                     {isSubmitting ? 'Sending...' : (showBundleEnrollment ? 'Submit Bundle →' : 'Submit →')}
                   </button>
                 </form>
-                <p className="form-note">💬 We'll contact you via WhatsApp within 24 hours</p>
+                <p>💬 We'll contact you via WhatsApp within 24 hours</p>
               </div>
             </div>
           </div>
@@ -919,13 +872,13 @@ const SchoolPage = () => {
       </div>
 
       {/* Footer */}
-      <div className="school-footer-cta">
+      <div className="school-footer">
         <div className="container">
           <h2>🚀 Start Your Learning Journey</h2>
           <p>2 Months • Online & In-Person • Certificate • Start: {startDate}</p>
-          <div className="cta-buttons">
+          <div className="footer-buttons">
             <button 
-              className="cta-button primary"
+              className="footer-btn primary"
               onClick={() => {
                 setActiveTab('courses');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -934,7 +887,7 @@ const SchoolPage = () => {
               📚 Explore
             </button>
             <button 
-              className="cta-button secondary"
+              className="footer-btn secondary"
               onClick={() => {
                 setActiveTab('contact');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -943,7 +896,7 @@ const SchoolPage = () => {
               ✉️ Enroll
             </button>
             <button 
-              className="cta-button whatsapp"
+              className="footer-btn whatsapp"
               onClick={handleWhatsAppClick}
             >
               💬 WhatsApp
