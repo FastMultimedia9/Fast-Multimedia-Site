@@ -1,4 +1,4 @@
-/* SchoolPage.css */
+/* SchoolPage.css - Minimal CSS */
 .school-page {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   background-color: #fef9ef;
@@ -14,9 +14,31 @@
 
 /* Hero */
 .school-page .school-hero {
-  padding: 60px 0 40px;
+  padding: 80px 0 50px;
   background: linear-gradient(135deg, #fef3d8 0%, #ffca41 100%);
   text-align: center;
+  position: relative;
+  min-height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.school-page .school-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.school-page .school-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 16px;
 }
 
 .school-page .school-hero-title {
@@ -44,11 +66,14 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .school-page .hero-badge {
-  background: rgba(255,255,255,0.85);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.85);
   padding: 6px 16px;
   border-radius: 50px;
   font-size: 0.85rem;
@@ -65,7 +90,7 @@
 }
 
 .school-page .hero-stat {
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
   padding: 12px;
   border-radius: 12px;
 }
@@ -90,6 +115,9 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Tabs */
@@ -118,6 +146,10 @@
   cursor: pointer;
   background: transparent;
   color: #585a61;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .school-page .tab-btn:hover {
@@ -135,7 +167,7 @@
   gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
-  margin: 20px 0 24px;
+  margin: 20px 0 28px;
 }
 
 .school-page .filter-btn {
@@ -147,6 +179,7 @@
   font-weight: 600;
   cursor: pointer;
   color: #585a61;
+  font-family: inherit;
 }
 
 .school-page .filter-btn.active {
@@ -160,7 +193,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .school-page .course-card {
@@ -169,11 +202,12 @@
   overflow: hidden;
   border: 1px solid #ffe39b;
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .school-page .course-card:hover {
   transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(122, 85, 28, 0.15);
 }
 
 .school-page .course-card-image {
@@ -216,6 +250,11 @@
   padding: 14px 16px 16px;
 }
 
+.school-page .course-icon {
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+}
+
 .school-page .course-title {
   font-size: 1rem;
   font-weight: 700;
@@ -239,6 +278,9 @@
 .school-page .course-duration,
 .school-page .course-level,
 .school-page .course-delivery {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 0.75rem;
   color: #585a61;
 }
@@ -273,6 +315,10 @@
   font-size: 0.8rem;
   cursor: pointer;
   color: #161b26;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* Open To All */
@@ -280,7 +326,7 @@
   background: #ffffff;
   border-radius: 16px;
   padding: 16px;
-  margin: 16px 0 24px;
+  margin: 16px 0 28px;
   border: 1px solid #ffe39b;
 }
 
@@ -309,6 +355,9 @@
 }
 
 .school-page .audience-tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   background: #fef3d8;
   padding: 4px 12px;
   border-radius: 30px;
@@ -322,7 +371,7 @@
   background: #25D366;
   border-radius: 16px;
   padding: 16px 20px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .school-page .whatsapp-cta-content {
@@ -332,6 +381,10 @@
   flex-wrap: wrap;
   gap: 12px;
   color: #fff;
+}
+
+.school-page .whatsapp-cta-icon {
+  font-size: 2rem;
 }
 
 .school-page .whatsapp-cta-content h3 {
@@ -353,28 +406,36 @@
   border-radius: 50px;
   font-weight: 700;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
 }
 
-/* Bundle */
+/* Bundle Section */
 .school-page .bundle-section {
   padding: 20px 0 40px;
 }
 
 .school-page .bundle-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .school-page .bundle-header h1 {
   font-size: 1.8rem;
   color: #161b26;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .school-page .bundle-builder {
   background: #ffffff;
   border-radius: 16px;
   padding: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   border: 1px solid #ffe39b;
 }
 
@@ -425,6 +486,10 @@
 .school-page .bundle-course-option.selected .bundle-course-checkbox {
   background: #ffca41;
   border-color: #ffca41;
+}
+
+.school-page .bundle-course-icon {
+  font-size: 1.2rem;
 }
 
 .school-page .bundle-course-info {
@@ -486,6 +551,7 @@
   font-weight: 700;
   color: #161b26;
   cursor: pointer;
+  font-family: inherit;
   margin-top: 10px;
 }
 
@@ -493,7 +559,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .school-page .bundle-card {
@@ -533,7 +599,49 @@
   font-weight: 600;
   cursor: pointer;
   color: #161b26;
+  font-family: inherit;
   font-size: 0.85rem;
+}
+
+.school-page .payment-info {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid #ffe39b;
+}
+
+.school-page .payment-info h2 {
+  font-size: 1.1rem;
+  color: #161b26;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.school-page .installment-example {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.school-page .installment-item {
+  background: #fef3d8;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.school-page .installment-item strong {
+  color: #161b26;
+}
+
+.school-page .installment-item span {
+  color: #ff8b20;
+  font-weight: 700;
 }
 
 /* Details */
@@ -548,7 +656,11 @@
   font-weight: 600;
   cursor: pointer;
   color: #585a61;
+  font-family: inherit;
   font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   margin-bottom: 12px;
 }
 
@@ -656,6 +768,7 @@
   font-weight: 700;
   cursor: pointer;
   color: #161b26;
+  font-family: inherit;
   width: 100%;
 }
 
@@ -677,6 +790,9 @@
   font-size: 1rem;
   color: #161b26;
   margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .school-page .features-list {
@@ -686,23 +802,36 @@
 }
 
 .school-page .features-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
   padding: 3px 0;
   font-size: 0.85rem;
   color: #585a61;
 }
 
+.school-page .feature-icon {
+  color: #ff8b20;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
 .school-page .format-highlight {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   padding: 10px;
   background: #fef3d8;
   border-radius: 8px;
 }
 
 .school-page .format-highlight span {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-weight: 600;
   color: #161b26;
   font-size: 0.85rem;
-  padding: 2px 0;
 }
 
 /* About */
@@ -718,6 +847,10 @@
 .school-page .about-hero h1 {
   font-size: 1.8rem;
   color: #161b26;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .school-page .about-grid {
@@ -819,6 +952,10 @@
   margin: 0;
 }
 
+.school-page .contact-buttons {
+  text-align: center;
+}
+
 .school-page .whatsapp-about-btn {
   padding: 10px 24px;
   background: #25D366;
@@ -827,8 +964,10 @@
   border-radius: 50px;
   font-weight: 700;
   cursor: pointer;
-  display: block;
-  margin: 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
 }
 
 /* Contact */
@@ -844,6 +983,10 @@
 .school-page .contact-header h1 {
   font-size: 1.8rem;
   color: #161b26;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .school-page .enrollment-dates {
@@ -861,6 +1004,9 @@
   font-weight: 600;
   color: #161b26;
   font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .school-page .contact-grid {
@@ -927,6 +1073,7 @@
   font-weight: 600;
   cursor: pointer;
   color: #161b26;
+  font-family: inherit;
   font-size: 0.85rem;
 }
 
@@ -942,6 +1089,7 @@
   border: 2px solid #ffe39b;
   border-radius: 8px;
   font-size: 0.85rem;
+  font-family: inherit;
   background: #fafafa;
   color: #161b26;
   width: 100%;
@@ -1007,6 +1155,7 @@
   font-size: 0.9rem;
   cursor: pointer;
   color: #161b26;
+  font-family: inherit;
 }
 
 .school-page .send-btn:disabled {
@@ -1018,6 +1167,9 @@
   margin-top: 8px;
   font-size: 0.8rem;
   color: #585a61;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* Footer */
@@ -1032,6 +1184,10 @@
   font-size: 1.5rem;
   font-weight: 700;
   color: #161b26;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .school-page .school-footer-cta p {
@@ -1055,6 +1211,10 @@
   font-weight: 700;
   font-size: 0.85rem;
   cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .school-page .cta-button.primary {
