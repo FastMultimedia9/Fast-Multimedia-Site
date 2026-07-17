@@ -1,28 +1,17 @@
 /* ContactPage.css - Duck Design Color Scheme */
-/* Gold/Orange/Cream Theme - No Purple, No Dark Mode */
-/* This CSS only applies to elements with classes from ContactPage.jsx */
+/* This CSS only applies to elements within ContactPage component */
 
-:root {
-  --duck-gold: #ffca41;
-  --duck-dark-gold: #ff8b20;
-  --duck-light-gold: #ffda7a;
-  --duck-cream: #fef9ef;
-  --duck-light-cream: #fef3d8;
-  --duck-dark: #161b26;
-  --duck-text: #585a61;
-  --duck-border: #ffe39b;
-  --duck-shadow: rgba(122, 85, 28, 0.2);
-  --duck-white: #ffffff;
-  --gradient-gold: linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%);
-  --gradient-orange: linear-gradient(180deg, #ff8b20 0%, #fdb572 100%);
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+/* Reset and Base */
+.contact-page * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* Base styles - scoped to .contact-page */
 .contact-page {
-  font-family: var(--font-primary);
-  background-color: var(--duck-cream);
-  color: var(--duck-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background-color: #fef9ef;
+  color: #585a61;
   line-height: 1.6;
   overflow-x: hidden;
 }
@@ -33,9 +22,7 @@
   padding: 0 20px;
 }
 
-/* ============================================
-   BUTTONS
-   ============================================ */
+/* Buttons */
 .contact-page .btn {
   display: inline-flex;
   align-items: center;
@@ -49,15 +36,15 @@
   cursor: pointer;
   transition: all 0.3s ease;
   text-decoration: none;
-  font-family: var(--font-primary);
+  font-family: inherit;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--duck-dark);
+  color: #161b26;
 }
 
 .contact-page .btn-primary {
-  background: var(--gradient-gold);
-  color: var(--duck-dark);
+  background: linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%);
+  color: #161b26;
   box-shadow: 0 4px 15px rgba(255, 202, 65, 0.4);
 }
 
@@ -68,8 +55,8 @@
 
 .contact-page .btn-secondary {
   background: transparent;
-  color: var(--duck-dark);
-  border: 2px solid var(--duck-dark);
+  color: #161b26;
+  border: 2px solid #161b26;
 }
 
 .contact-page .btn-secondary:hover {
@@ -103,9 +90,7 @@
   box-shadow: 0 8px 25px rgba(234, 67, 53, 0.4);
 }
 
-/* ============================================
-   ANIMATIONS
-   ============================================ */
+/* Animations */
 .contact-page .animate-on-scroll {
   opacity: 0;
   transform: translateY(30px);
@@ -117,12 +102,10 @@
   transform: translateY(0);
 }
 
-/* ============================================
-   HERO SECTION
-   ============================================ */
+/* Hero Section */
 .contact-page .contact-hero {
   padding: 120px 0 80px;
-  background: var(--duck-cream);
+  background: #fef9ef;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -140,14 +123,14 @@
 .contact-page .contact-title {
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 700;
-  color: var(--duck-dark);
+  color: #161b26;
   margin-bottom: 20px;
   line-height: 1.2;
 }
 
 .contact-page .contact-subtitle {
   font-size: 1.2rem;
-  color: var(--duck-text);
+  color: #585a61;
   max-width: 600px;
   margin: 0 auto 40px;
   line-height: 1.7;
@@ -159,18 +142,18 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  background: var(--gradient-gold);
+  background: linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%);
   padding: 12px 30px;
   border-radius: 50px;
   font-weight: 700;
   font-size: 1.1rem;
-  color: var(--duck-dark);
+  color: #161b26;
   margin-bottom: 30px;
   box-shadow: 0 4px 15px rgba(255, 202, 65, 0.3);
 }
 
 .contact-page .badge-icon {
-  color: var(--duck-dark);
+  color: #161b26;
   font-size: 1.2rem;
 }
 
@@ -184,17 +167,15 @@
   font-size: 0.9rem;
 }
 
-/* ============================================
-   SELECTED SERVICE CARD
-   ============================================ */
+/* Selected Service Card */
 .contact-page .selected-service-card {
-  background: var(--duck-white);
+  background: #ffffff;
   border-radius: 16px;
   padding: 24px 30px;
   margin: 30px auto;
   max-width: 700px;
-  border: 2px solid var(--duck-gold);
-  box-shadow: 0 8px 30px var(--duck-shadow);
+  border: 2px solid #ffca41;
+  box-shadow: 0 8px 30px rgba(122, 85, 28, 0.2);
 }
 
 .contact-page .service-card-header {
@@ -205,20 +186,20 @@
   gap: 12px;
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--duck-border);
+  border-bottom: 1px solid #ffe39b;
 }
 
 .contact-page .service-card-header h3 {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--duck-dark);
+  color: #161b26;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .contact-page .header-icon {
-  color: var(--duck-dark-gold);
+  color: #ff8b20;
   font-size: 1.2rem;
 }
 
@@ -240,7 +221,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-family: var(--font-primary);
+  font-family: inherit;
 }
 
 .contact-page .btn-service-remove:hover {
@@ -249,9 +230,9 @@
 }
 
 .contact-page .btn-service-add {
-  background: var(--duck-light-cream);
-  color: var(--duck-dark);
-  border: 1px solid var(--duck-border);
+  background: #fef3d8;
+  color: #161b26;
+  border: 1px solid #ffe39b;
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 0.85rem;
@@ -261,12 +242,12 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-family: var(--font-primary);
+  font-family: inherit;
 }
 
 .contact-page .btn-service-add:hover {
-  background: var(--duck-gold);
-  border-color: var(--duck-gold);
+  background: #ffca41;
+  border-color: #ffca41;
   transform: translateY(-2px);
 }
 
@@ -289,34 +270,34 @@
   align-items: center;
   gap: 8px;
   font-size: 1.05rem;
-  color: var(--duck-dark);
+  color: #161b26;
 }
 
 .contact-page .icon-gold {
-  color: var(--duck-dark-gold);
+  color: #ff8b20;
 }
 
 .contact-page .service-category {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: var(--duck-light-cream);
+  background: #fef3d8;
   padding: 4px 14px;
   border-radius: 20px;
   font-size: 0.85rem;
-  color: var(--duck-dark);
+  color: #161b26;
 }
 
 .contact-page .service-price {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: var(--gradient-gold);
+  background: linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%);
   padding: 4px 14px;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--duck-dark);
+  color: #161b26;
 }
 
 .contact-page .service-badge.valentine-badge {
@@ -331,17 +312,15 @@
   font-weight: 600;
 }
 
-/* ============================================
-   SELECTED PACKAGE CARD
-   ============================================ */
+/* Selected Package Card */
 .contact-page .selected-package-card {
-  background: var(--duck-white);
+  background: #ffffff;
   border-radius: 16px;
   padding: 24px 30px;
   margin: 20px auto 0;
   max-width: 700px;
-  border: 2px solid var(--duck-gold);
-  box-shadow: 0 8px 30px var(--duck-shadow);
+  border: 2px solid #ffca41;
+  box-shadow: 0 8px 30px rgba(122, 85, 28, 0.2);
 }
 
 .contact-page .package-header {
@@ -352,13 +331,13 @@
   gap: 12px;
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--duck-border);
+  border-bottom: 1px solid #ffe39b;
 }
 
 .contact-page .package-header h3 {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--duck-dark);
+  color: #161b26;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -367,13 +346,13 @@
 .contact-page .package-price {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--duck-dark-gold);
+  color: #ff8b20;
 }
 
 .contact-page .package-features h4 {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--duck-dark);
+  color: #161b26;
   margin-bottom: 10px;
 }
 
@@ -390,22 +369,20 @@
   align-items: center;
   gap: 8px;
   font-size: 0.9rem;
-  color: var(--duck-text);
+  color: #585a61;
 }
 
-/* ============================================
-   SERVICE ADDED NOTIFICATION
-   ============================================ */
+/* Notification */
 .contact-page .service-added-notification {
   position: fixed;
   top: 20px;
   right: 20px;
   z-index: 9999;
-  background: var(--duck-white);
+  background: #ffffff;
   border-radius: 12px;
   padding: 16px 24px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  border-left: 4px solid var(--duck-gold);
+  border-left: 4px solid #ffca41;
   max-width: 400px;
   animation: slideInRight 0.5s ease;
 }
@@ -429,7 +406,7 @@
 
 .contact-page .notification-icon {
   font-size: 1.5rem;
-  color: var(--duck-dark-gold);
+  color: #ff8b20;
   margin-top: 2px;
 }
 
@@ -439,25 +416,25 @@
 
 .contact-page .notification-text strong {
   display: block;
-  color: var(--duck-dark);
+  color: #161b26;
   font-size: 0.95rem;
 }
 
 .contact-page .notification-price {
   display: inline-block;
-  background: var(--duck-light-cream);
+  background: #fef3d8;
   padding: 2px 12px;
   border-radius: 12px;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--duck-dark);
+  color: #161b26;
   margin-top: 4px;
 }
 
 .contact-page .notification-close {
   background: none;
   border: none;
-  color: var(--duck-text);
+  color: #585a61;
   cursor: pointer;
   font-size: 1.2rem;
   padding: 4px;
@@ -465,13 +442,11 @@
 }
 
 .contact-page .notification-close:hover {
-  color: var(--duck-dark);
+  color: #161b26;
   transform: rotate(90deg);
 }
 
-/* ============================================
-   SNOWFALL
-   ============================================ */
+/* Snowfall */
 .contact-page .snowfall {
   position: fixed;
   top: 0;
@@ -501,12 +476,10 @@
   }
 }
 
-/* ============================================
-   CONTACT FORM SECTION
-   ============================================ */
+/* Form Section */
 .contact-page .contact-form-section {
   padding: 60px 0 80px;
-  background: var(--duck-cream);
+  background: #fef9ef;
 }
 
 .contact-page .contact-form-wrapper {
@@ -517,15 +490,15 @@
 }
 
 .contact-page .form-container {
-  background: var(--duck-white);
+  background: #ffffff;
   border-radius: 24px;
   padding: 48px;
-  box-shadow: 0 20px 60px var(--duck-shadow);
-  border: 1px solid var(--duck-border);
+  box-shadow: 0 20px 60px rgba(122, 85, 28, 0.2);
+  border: 1px solid #ffe39b;
 }
 
 .contact-page .form-container.christmas-form {
-  border-color: var(--duck-gold);
+  border-color: #ffca41;
   box-shadow: 0 20px 60px rgba(255, 202, 65, 0.2);
 }
 
@@ -547,28 +520,28 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: var(--duck-light-cream);
+  background: #fef3d8;
   padding: 10px 20px;
   border-radius: 50px;
   font-size: 0.95rem;
-  color: var(--duck-dark);
+  color: #161b26;
 }
 
 .contact-page .hint-icon {
-  color: var(--duck-dark-gold);
+  color: #ff8b20;
 }
 
 .contact-page .btn-service-browse {
-  background: var(--gradient-gold);
+  background: linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%);
   border: none;
   padding: 4px 16px;
   border-radius: 20px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: var(--font-primary);
+  font-family: inherit;
   font-size: 0.9rem;
-  color: var(--duck-dark);
+  color: #161b26;
 }
 
 .contact-page .btn-service-browse:hover {
@@ -576,26 +549,24 @@
   box-shadow: 0 4px 15px rgba(255, 202, 65, 0.3);
 }
 
-/* ============================================
-   FORM ELEMENTS
-   ============================================ */
+/* Form Elements */
 .contact-page .form-section-header {
   margin: 30px 0 20px;
   padding-bottom: 10px;
-  border-bottom: 2px solid var(--duck-border);
+  border-bottom: 2px solid #ffe39b;
 }
 
 .contact-page .form-section-header h3 {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--duck-dark);
+  color: #161b26;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .contact-page .section-icon {
-  color: var(--duck-dark-gold);
+  color: #ff8b20;
 }
 
 .contact-page .form-row {
@@ -614,12 +585,12 @@
   gap: 8px;
   font-weight: 600;
   font-size: 0.9rem;
-  color: var(--duck-dark);
+  color: #161b26;
   margin-bottom: 6px;
 }
 
 .contact-page .label-icon {
-  color: var(--duck-dark-gold);
+  color: #ff8b20;
   font-size: 0.85rem;
 }
 
@@ -628,22 +599,22 @@
 .contact-page .form-textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid var(--duck-border);
+  border: 2px solid #ffe39b;
   border-radius: 12px;
   font-size: 1rem;
-  font-family: var(--font-primary);
+  font-family: inherit;
   transition: all 0.3s ease;
   background: #fafafa;
-  color: var(--duck-dark);
+  color: #161b26;
 }
 
 .contact-page .form-input:focus,
 .contact-page .form-select:focus,
 .contact-page .form-textarea:focus {
   outline: none;
-  border-color: var(--duck-gold);
+  border-color: #ffca41;
   box-shadow: 0 0 0 4px rgba(255, 202, 65, 0.1);
-  background: var(--duck-white);
+  background: #ffffff;
 }
 
 .contact-page .form-textarea {
@@ -654,13 +625,11 @@
 .contact-page .form-hint {
   display: block;
   font-size: 0.8rem;
-  color: var(--duck-text);
+  color: #585a61;
   margin-top: 4px;
 }
 
-/* ============================================
-   CONTACT METHOD SELECTOR
-   ============================================ */
+/* Contact Method Selector */
 .contact-page .contact-method-selector {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -685,7 +654,7 @@
   flex-direction: column;
   align-items: center;
   padding: 16px 12px;
-  border: 2px solid var(--duck-border);
+  border: 2px solid #ffe39b;
   border-radius: 12px;
   transition: all 0.3s ease;
   background: #fafafa;
@@ -708,23 +677,21 @@
 .contact-page .method-option .option-content span {
   font-weight: 600;
   font-size: 0.95rem;
-  color: var(--duck-dark);
+  color: #161b26;
 }
 
 .contact-page .method-option .option-content small {
   font-size: 0.75rem;
-  color: var(--duck-text);
+  color: #585a61;
 }
 
 .contact-page .method-option.selected .option-content {
-  border-color: var(--duck-gold);
-  background: var(--duck-light-cream);
+  border-color: #ffca41;
+  background: #fef3d8;
   box-shadow: 0 0 0 4px rgba(255, 202, 65, 0.1);
 }
 
-/* ============================================
-   FORM AGREEMENT
-   ============================================ */
+/* Form Agreement */
 .contact-page .form-agreement {
   margin: 24px 0;
 }
@@ -735,7 +702,7 @@
   gap: 12px;
   cursor: pointer;
   font-size: 0.95rem;
-  color: var(--duck-text);
+  color: #585a61;
 }
 
 .contact-page .checkbox-label input[type="checkbox"] {
@@ -743,13 +710,11 @@
   height: 20px;
   min-width: 20px;
   margin-top: 2px;
-  accent-color: var(--duck-dark-gold);
+  accent-color: #ff8b20;
   cursor: pointer;
 }
 
-/* ============================================
-   FORM FOOTER
-   ============================================ */
+/* Form Footer */
 .contact-page .form-footer {
   margin-top: 30px;
 }
@@ -767,11 +732,11 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  font-family: var(--font-primary);
+  font-family: inherit;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: var(--gradient-gold);
-  color: var(--duck-dark);
+  background: linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%);
+  color: #161b26;
   box-shadow: 0 4px 15px rgba(255, 202, 65, 0.4);
 }
 
@@ -794,20 +759,18 @@
   to { transform: rotate(360deg); }
 }
 
-/* ============================================
-   FORM INSTRUCTIONS
-   ============================================ */
+/* Form Instructions */
 .contact-page .form-instructions {
   margin-top: 24px;
   padding: 20px 24px;
-  background: var(--duck-light-cream);
+  background: #fef3d8;
   border-radius: 12px;
-  border: 1px solid var(--duck-border);
+  border: 1px solid #ffe39b;
 }
 
 .contact-page .instructions-title {
   font-size: 0.95rem;
-  color: var(--duck-dark);
+  color: #161b26;
   margin-bottom: 8px;
 }
 
@@ -822,7 +785,7 @@
   padding: 4px 0 4px 32px;
   position: relative;
   font-size: 0.9rem;
-  color: var(--duck-text);
+  color: #585a61;
 }
 
 .contact-page .instructions-list li::before {
@@ -832,19 +795,17 @@
   top: 4px;
   width: 22px;
   height: 22px;
-  background: var(--gradient-gold);
+  background: linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--duck-dark);
+  color: #161b26;
 }
 
-/* ============================================
-   SUCCESS MESSAGE
-   ============================================ */
+/* Success Message */
 .contact-page .success-message {
   text-align: center;
   padding: 40px 20px;
@@ -852,27 +813,27 @@
 
 .contact-page .success-icon {
   font-size: 4rem;
-  color: var(--duck-dark-gold);
+  color: #ff8b20;
   margin-bottom: 20px;
 }
 
 .contact-page .success-title {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--duck-dark);
+  color: #161b26;
   margin-bottom: 12px;
 }
 
 .contact-page .success-text {
   font-size: 1.05rem;
-  color: var(--duck-text);
+  color: #585a61;
   max-width: 500px;
   margin: 0 auto 24px;
   line-height: 1.7;
 }
 
 .contact-page .selected-service-summary {
-  background: var(--duck-light-cream);
+  background: #fef3d8;
   padding: 20px;
   border-radius: 12px;
   margin: 20px auto;
@@ -882,7 +843,7 @@
 .contact-page .selected-service-summary h4 {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--duck-dark);
+  color: #161b26;
   margin-bottom: 8px;
 }
 
@@ -891,15 +852,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  background: var(--duck-white);
+  background: #ffffff;
   border-radius: 8px;
   font-size: 0.95rem;
-  color: var(--duck-dark);
+  color: #161b26;
 }
 
 .contact-page .summary-price {
   font-weight: 700;
-  color: var(--duck-dark-gold);
+  color: #ff8b20;
 }
 
 .contact-page .backup-instructions {
@@ -908,18 +869,18 @@
   border-radius: 12px;
   margin: 20px 0;
   text-align: left;
-  border: 1px solid var(--duck-border);
+  border: 1px solid #ffe39b;
 }
 
 .contact-page .backup-instructions p {
   font-size: 0.95rem;
-  color: var(--duck-dark);
+  color: #161b26;
   margin-bottom: 8px;
 }
 
 .contact-page .instructions-text {
   font-size: 0.9rem;
-  color: var(--duck-text);
+  color: #585a61;
   white-space: pre-line;
   line-height: 1.8;
 }
@@ -937,9 +898,7 @@
   letter-spacing: 0;
 }
 
-/* ============================================
-   QUICK CONTACT SIDEBAR
-   ============================================ */
+/* Quick Contact Sidebar */
 .contact-page .quick-contact-sidebar {
   display: flex;
   flex-direction: column;
@@ -947,17 +906,17 @@
 }
 
 .contact-page .contact-card {
-  background: var(--duck-white);
+  background: #ffffff;
   border-radius: 16px;
   padding: 28px 24px;
-  box-shadow: 0 8px 30px var(--duck-shadow);
-  border: 1px solid var(--duck-border);
+  box-shadow: 0 8px 30px rgba(122, 85, 28, 0.2);
+  border: 1px solid #ffe39b;
 }
 
 .contact-page .contact-card h3 {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--duck-dark);
+  color: #161b26;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -965,11 +924,11 @@
 }
 
 .contact-page .card-icon {
-  color: var(--duck-dark-gold);
+  color: #ff8b20;
 }
 
 .contact-page .contact-card p {
-  color: var(--duck-text);
+  color: #585a61;
   font-size: 0.95rem;
   margin-bottom: 16px;
 }
@@ -990,7 +949,7 @@
 }
 
 .contact-page .contact-info {
-  border-top: 1px solid var(--duck-border);
+  border-top: 1px solid #ffe39b;
   padding-top: 16px;
 }
 
@@ -1001,7 +960,7 @@
 }
 
 .contact-page .info-icon {
-  color: var(--duck-dark-gold);
+  color: #ff8b20;
   font-size: 1.1rem;
   width: 24px;
   margin-top: 2px;
@@ -1014,28 +973,26 @@
 
 .contact-page .info-item strong {
   font-size: 0.85rem;
-  color: var(--duck-dark);
+  color: #161b26;
 }
 
 .contact-page .info-item span:last-child {
   font-size: 0.9rem;
-  color: var(--duck-text);
+  color: #585a61;
 }
 
-/* ============================================
-   BROWSE SERVICES CARD
-   ============================================ */
+/* Browse Services Card */
 .contact-page .browse-services-card {
-  background: var(--duck-light-cream);
+  background: #fef3d8;
   border-radius: 16px;
   padding: 24px;
-  border: 1px solid var(--duck-border);
+  border: 1px solid #ffe39b;
 }
 
 .contact-page .browse-services-card h3 {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--duck-dark);
+  color: #161b26;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1044,7 +1001,7 @@
 
 .contact-page .browse-services-card p {
   font-size: 0.9rem;
-  color: var(--duck-text);
+  color: #585a61;
   margin-bottom: 16px;
 }
 
@@ -1059,38 +1016,36 @@
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: var(--duck-white);
-  border: 1px solid var(--duck-border);
+  background: #ffffff;
+  border: 1px solid #ffe39b;
   border-radius: 12px;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: var(--font-primary);
-  color: var(--duck-dark);
+  font-family: inherit;
+  color: #161b26;
 }
 
 .contact-page .btn-icon {
-  color: var(--duck-dark-gold);
+  color: #ff8b20;
   font-size: 1.1rem;
 }
 
 .contact-page .service-category-btn:hover {
-  border-color: var(--duck-gold);
+  border-color: #ffca41;
   transform: translateX(4px);
   box-shadow: 0 4px 15px rgba(255, 202, 65, 0.2);
 }
 
-/* ============================================
-   FAQ SECTION
-   ============================================ */
+/* FAQ Section */
 .contact-page .faq-section {
-  background: var(--duck-white);
+  background: #ffffff;
   padding: 80px 0;
 }
 
 .contact-page .faq-section.christmas-faq {
-  background: var(--duck-cream);
+  background: #fef9ef;
 }
 
 .contact-page .faq-section .section-header {
@@ -1103,8 +1058,8 @@
 }
 
 .contact-page .faq-item {
-  background: var(--duck-cream);
-  border: 1px solid var(--duck-border);
+  background: #fef9ef;
+  border: 1px solid #ffe39b;
   border-radius: 12px;
   margin-bottom: 16px;
   overflow: hidden;
@@ -1113,11 +1068,11 @@
 }
 
 .contact-page .faq-item:hover {
-  border-color: var(--duck-gold);
+  border-color: #ffca41;
 }
 
 .contact-page .faq-item.active {
-  border-color: var(--duck-gold);
+  border-color: #ffca41;
   box-shadow: 0 4px 20px rgba(255, 202, 65, 0.15);
 }
 
@@ -1132,12 +1087,12 @@
 .contact-page .question-title {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--duck-dark);
+  color: #161b26;
   margin: 0;
 }
 
 .contact-page .faq-chevron {
-  color: var(--duck-dark-gold);
+  color: #ff8b20;
   font-size: 0.9rem;
   transition: transform 0.3s ease;
 }
@@ -1159,15 +1114,12 @@
 
 .contact-page .faq-answer p {
   font-size: 0.95rem;
-  color: var(--duck-text);
+  color: #585a61;
   line-height: 1.7;
   margin: 0;
 }
 
-/* ============================================
-   RESPONSIVE DESIGN
-   ============================================ */
-
+/* Responsive */
 @media (max-width: 1024px) {
   .contact-page .contact-form-wrapper {
     grid-template-columns: 1fr;
