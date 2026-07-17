@@ -84,7 +84,6 @@ const ContactPage = () => {
     
     let serviceData = null;
     
-    // First, check for Valentine's package
     const storedValentinePackage = localStorage.getItem('selectedValentinePackage');
     if (storedValentinePackage) {
       try {
@@ -96,7 +95,6 @@ const ContactPage = () => {
       }
     }
     
-    // Then check for regular service
     if (!serviceData) {
       const storedService = localStorage.getItem('selectedService');
       if (storedService) {
@@ -110,7 +108,6 @@ const ContactPage = () => {
       }
     }
     
-    // Process URL parameters as fallback
     if (!serviceData && serviceName) {
       serviceData = {
         name: decodeURIComponent(serviceName),
@@ -121,19 +118,15 @@ const ContactPage = () => {
       };
     }
     
-    // Process the service data
     if (serviceData && serviceData.name) {
       setSelectedService(serviceData);
       setServiceAdded(true);
       
       const serviceMessage = appendServiceToMessage(serviceData);
       
-      // Update form data
       setFormData(prev => {
         const currentMessage = prev.message || '';
         const hasExistingMessage = currentMessage.trim().length > 0;
-        
-        // Check if this service is already in the message
         const serviceAlreadyAdded = currentMessage.includes(serviceData.name);
         
         if (!serviceAlreadyAdded) {
@@ -150,13 +143,11 @@ const ContactPage = () => {
         return prev;
       });
       
-      // Show service added notification
       setTimeout(() => {
         setServiceAdded(false);
       }, 3000);
     }
     
-    // Check for Christmas mode
     const projectType = queryParams.get('project') || '';
     const packageName = queryParams.get('type') || '';
     
@@ -372,7 +363,7 @@ ${formData.message}
     'New Computer Setup',
     'Networking Solutions',
     'Computer System Management',
-    'Valentine\'s Day Design',
+    "Valentine's Day Design",
     'Other'
   ];
 
@@ -464,7 +455,7 @@ ${formData.message}
       )}
 
       {/* Hero Section */}
-      <section className={`contact-hero section ${isChristmasMode ? 'christmas-hero' : ''}`}>
+      <section className={`contact-hero ${isChristmasMode ? 'christmas-hero' : ''}`}>
         <div className="container">
           <div className="hero-content animate-on-scroll">
             {isChristmasMode && (
@@ -560,7 +551,7 @@ ${formData.message}
       </section>
 
       {/* Contact Form Section */}
-      <section className="contact-form-section section">
+      <section className="contact-form-section">
         <div className="container">
           <div className="contact-form-wrapper">
             <div className={`form-container ${isChristmasMode ? 'christmas-form' : ''}`}>
@@ -793,7 +784,7 @@ ${formData.message}
                             required
                           />
                           <div className="option-content">
-                            <span className="method-icon whatsapp">💬</span>
+                            <span className="method-icon">💬</span>
                             <span>WhatsApp</span>
                             <small>Instant messaging</small>
                           </div>
@@ -809,7 +800,7 @@ ${formData.message}
                             required
                           />
                           <div className="option-content">
-                            <span className="method-icon email">✉️</span>
+                            <span className="method-icon">✉️</span>
                             <span>Email</span>
                             <small>Formal communication</small>
                           </div>
@@ -858,7 +849,7 @@ ${formData.message}
                   <div className="form-footer">
                     <button 
                       type="submit" 
-                      className={`submit-btn ${isChristmasMode ? 'btn-christmas' : 'btn-primary'}`}
+                      className={`submit-btn ${isChristmasMode ? 'btn-christmas' : ''}`}
                       disabled={isLoading}
                     >
                       {isLoading ? (
@@ -979,7 +970,7 @@ ${formData.message}
       </section>
 
       {/* FAQ Section */}
-      <section className={`faq-section section ${isChristmasMode ? 'christmas-faq' : ''}`}>
+      <section className={`faq-section ${isChristmasMode ? 'christmas-faq' : ''}`}>
         <div className="container">
           <div className="section-header animate-on-scroll">
             <h2 className="section-title">
@@ -998,7 +989,7 @@ ${formData.message}
                 onClick={() => toggleFAQ(index)}
                 role="button"
                 tabIndex={0}
-                onKeyPress={(e) => e.key === 'Enter' && toggleFAQ(index)}
+                onKeyDown={(e) => e.key === 'Enter' && toggleFAQ(index)}
               >
                 <div className="faq-question">
                   <h3 className="question-title">

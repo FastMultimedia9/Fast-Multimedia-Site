@@ -14,6 +14,7 @@
   --duck-text: #585a61;
   --duck-border: #ffe39b;
   --duck-shadow: rgba(122, 85, 28, 0.2);
+  --duck-white: #ffffff;
   --gradient-gold: linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%);
   --gradient-orange: linear-gradient(180deg, #ff8b20 0%, #fdb572 100%);
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
@@ -60,20 +61,13 @@ body {
   margin: 0 auto;
 }
 
-.text-center {
-  text-align: center;
-}
-
-.text-left {
-  text-align: left;
-}
-
 /* ============================================
    BUTTONS
    ============================================ */
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   padding: 14px 32px;
   border: none;
@@ -86,6 +80,7 @@ body {
   font-family: var(--font-primary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  color: var(--duck-dark);
 }
 
 .btn-primary {
@@ -112,7 +107,7 @@ body {
 
 .btn-whatsapp {
   background: #25D366;
-  color: #fff;
+  color: #ffffff;
   text-transform: none;
   letter-spacing: 0;
 }
@@ -125,7 +120,7 @@ body {
 
 .btn-email {
   background: #EA4335;
-  color: #fff;
+  color: #ffffff;
   text-transform: none;
   letter-spacing: 0;
 }
@@ -228,7 +223,7 @@ body {
    SELECTED SERVICE CARD
    ============================================ */
 .selected-service-card {
-  background: #fff;
+  background: var(--duck-white);
   border-radius: 16px;
   padding: 24px 30px;
   margin: 30px auto;
@@ -328,6 +323,7 @@ body {
   align-items: center;
   gap: 8px;
   font-size: 1.05rem;
+  color: var(--duck-dark);
 }
 
 .service-name span {
@@ -373,7 +369,7 @@ body {
    SELECTED PACKAGE CARD
    ============================================ */
 .selected-package-card {
-  background: #fff;
+  background: var(--duck-white);
   border-radius: 16px;
   padding: 24px 30px;
   margin: 20px auto 0;
@@ -442,7 +438,7 @@ body {
   top: 20px;
   right: 20px;
   z-index: 9999;
-  background: #fff;
+  background: var(--duck-white);
   border-radius: 12px;
   padding: 16px 24px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
@@ -527,7 +523,7 @@ body {
 .snowflake {
   position: absolute;
   top: -10px;
-  background: #fff;
+  background: #ffffff;
   border-radius: 50%;
   opacity: 0.8;
   animation: snowfall linear infinite;
@@ -561,7 +557,7 @@ body {
    FORM CONTAINER
    ============================================ */
 .form-container {
-  background: #fff;
+  background: var(--duck-white);
   border-radius: 24px;
   padding: 48px;
   box-shadow: 0 20px 60px var(--duck-shadow);
@@ -676,7 +672,7 @@ body {
   outline: none;
   border-color: var(--duck-gold);
   box-shadow: 0 0 0 4px rgba(255, 202, 65, 0.1);
-  background: #fff;
+  background: var(--duck-white);
 }
 
 .form-textarea {
@@ -922,7 +918,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  background: #fff;
+  background: var(--duck-white);
   border-radius: 8px;
   font-size: 0.95rem;
   color: var(--duck-dark);
@@ -963,6 +959,11 @@ body {
   margin-top: 24px;
 }
 
+.success-actions .btn {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 /* ============================================
    QUICK CONTACT SIDEBAR
    ============================================ */
@@ -973,7 +974,7 @@ body {
 }
 
 .contact-card {
-  background: #fff;
+  background: var(--duck-white);
   border-radius: 16px;
   padding: 28px 24px;
   box-shadow: 0 8px 30px var(--duck-shadow);
@@ -1080,7 +1081,7 @@ body {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: #fff;
+  background: var(--duck-white);
   border: 1px solid var(--duck-border);
   border-radius: 12px;
   font-size: 0.9rem;
@@ -1101,7 +1102,7 @@ body {
    FAQ SECTION
    ============================================ */
 .faq-section {
-  background: #fff;
+  background: var(--duck-white);
   padding: 80px 0;
 }
 
@@ -1315,5 +1316,9 @@ body {
   .submit-btn {
     font-size: 0.95rem;
     padding: 14px 20px;
+  }
+  
+  .quick-contact-sidebar {
+    grid-template-columns: 1fr;
   }
 }
