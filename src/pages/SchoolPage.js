@@ -59,6 +59,7 @@ const SchoolPage = () => {
 
   const startDate = getStartDate();
 
+  // All 5 courses defined here
   const courses = [
     {
       id: 'basic-ict',
@@ -253,6 +254,7 @@ const SchoolPage = () => {
     let discountPercent = 0;
     if (selectedCourses.length === 2) discountPercent = 10;
     if (selectedCourses.length === 3) discountPercent = 15;
+    if (selectedCourses.length >= 4) discountPercent = 20;
     
     const discount = (total * discountPercent) / 100;
     const final = total - discount;
@@ -286,7 +288,8 @@ const SchoolPage = () => {
 
   const bundleDiscounts = [
     { courses: 'Any 2 Courses', discount: '10% OFF', price: 'Save up to GH₵ 110' },
-    { courses: 'Any 3 Courses', discount: '15% OFF', price: 'Save up to GH₵ 240' }
+    { courses: 'Any 3 Courses', discount: '15% OFF', price: 'Save up to GH₵ 240' },
+    { courses: 'Any 4+ Courses', discount: '20% OFF', price: 'Save up to GH₵ 400' }
   ];
 
   const categories = ['all', 'Technology', 'Design'];
@@ -488,6 +491,7 @@ const SchoolPage = () => {
               ))}
             </div>
 
+            {/* Courses Grid - All 5 courses will display here */}
             <div className="courses-grid">
               {courses.filter(c => selectedCategory === 'all' || c.category === selectedCategory).map(course => (
                 <div 
@@ -567,7 +571,7 @@ const SchoolPage = () => {
 
             <div className="bundle-builder">
               <h2>Build Your Own Bundle</h2>
-              <p className="bundle-subtitle">Select 2 or 3 courses and get instant discounts</p>
+              <p className="bundle-subtitle">Select 2 or more courses and get instant discounts</p>
               
               <div className="bundle-courses-selector">
                 {courses.map(course => (
@@ -708,7 +712,7 @@ const SchoolPage = () => {
                 </div>
               </div>
               <div className="bundle-note">
-                <FaGift /> <strong>Bundle Special:</strong> Save 10% on 2 courses or 15% on 3 courses with flexible installment plans!
+                <FaGift /> <strong>Bundle Special:</strong> Save 10% on 2 courses, 15% on 3 courses, or 20% on 4+ courses with flexible installment plans!
               </div>
             </div>
           </div>
@@ -1157,7 +1161,7 @@ const SchoolPage = () => {
                   ) : (
                     <>
                       <div className="bundle-course-selection">
-                        <label>Select Courses for Bundle (2 or 3 courses):</label>
+                        <label>Select Courses for Bundle (2 or more courses):</label>
                         {courses.map(course => (
                           <label key={course.id} className="bundle-checkbox-label">
                             <input
