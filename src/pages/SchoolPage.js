@@ -71,7 +71,7 @@ const SchoolPage = () => {
       actualPrice: 400,
       monthlyInstallment: 220,
       description: 'Learn essential computer skills, Microsoft Office, and internet fundamentals.',
-      longDescription: 'Master the fundamental computer skills needed for modern workplaces. This comprehensive course covers computer basics, Microsoft Office applications, internet navigation, email management, and essential digital literacy skills.',
+      longDescription: 'Master the fundamental computer skills needed for modern workplaces.',
       icon: <FaLaptop />,
       image: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -107,7 +107,7 @@ const SchoolPage = () => {
       actualPrice: 500,
       monthlyInstallment: 275,
       description: 'Learn Photoshop, Illustrator, InDesign and master visual communication.',
-      longDescription: 'Unlock your creative potential with our Graphic Design course. You will learn industry-standard software and design principles that will enable you to create stunning visual content for print and digital media.',
+      longDescription: 'Unlock your creative potential with our Graphic Design course.',
       icon: <FaPaintBrush />,
       image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -143,7 +143,7 @@ const SchoolPage = () => {
       actualPrice: 550,
       monthlyInstallment: 290,
       description: 'Master HTML, CSS, JavaScript, and build modern websites.',
-      longDescription: 'Learn to build professional, responsive websites from scratch. This comprehensive web development course takes you from absolute beginner to a confident web developer.',
+      longDescription: 'Learn to build professional, responsive websites from scratch.',
       icon: <FaCode />,
       image: 'https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -179,7 +179,7 @@ const SchoolPage = () => {
       actualPrice: 450,
       monthlyInstallment: 240,
       description: 'Learn computer networking fundamentals, setup, and configuration.',
-      longDescription: 'Master the essentials of computer networking. This course covers network fundamentals, IP addressing, network setup, troubleshooting, and security basics.',
+      longDescription: 'Master the essentials of computer networking.',
       icon: <FaNetworkWired />,
       image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -215,7 +215,7 @@ const SchoolPage = () => {
       actualPrice: 600,
       monthlyInstallment: 320,
       description: 'Comprehensive IT support training for help desk and system administration.',
-      longDescription: 'Become a complete IT support professional. This intensive course covers hardware, software, networking, security, and customer service skills needed for IT support roles.',
+      longDescription: 'Become a complete IT support professional.',
       icon: <FaHeadset />,
       image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -317,16 +317,15 @@ const SchoolPage = () => {
       setIsSubmitting(true);
 
       try {
-        const message = `*BUNDLE ENROLLMENT*\n\nName: ${enquiryName}\nEmail: ${enquiryEmail}\nPhone: ${enquiryPhone}\n\nCourses: ${coursesList}\nOriginal Price: GH₵ ${totalOriginal}\nDiscount: ${bundlePrice.discountPercent}% OFF (Save GH₵ ${discountAmount})\nFinal Price: GH₵ ${finalAmount}\nPayment Plan: ${bundlePaymentPlan === 'full' ? 'Full Payment' : `Installment - GH₵ ${bundleMonthlyInstallment}/month for ${bundleInstallmentMonths} months`}\n\nStart Date: ${startDate}\nDuration: 2 Months per course\nDelivery: Online & In-Person\n\nMessage: ${enquiryMessage || 'No additional message'}`;
+        const message = `BUNDLE ENROLLMENT\n\nName: ${enquiryName}\nEmail: ${enquiryEmail}\nPhone: ${enquiryPhone}\n\nCourses: ${coursesList}\nOriginal Price: GH₵ ${totalOriginal}\nDiscount: ${bundlePrice.discountPercent}% OFF (Save GH₵ ${discountAmount})\nFinal Price: GH₵ ${finalAmount}\nPayment Plan: ${bundlePaymentPlan === 'full' ? 'Full Payment' : `Installment - GH₵ ${bundleMonthlyInstallment}/month for ${bundleInstallmentMonths} months`}\n\nStart Date: ${startDate}\nDuration: 2 Months per course\nDelivery: Online & In-Person\n\nMessage: ${enquiryMessage || 'No additional message'}`;
         
         const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
         
-        alert(`✅ Thank you ${enquiryName}!\n\nYour BUNDLE enrollment for ${selectedBundleCourses.length} courses has been prepared!\n\nWe will contact you via WhatsApp shortly.\n\n📅 Start Date: ${startDate}\n⏱️ Duration: 2 Months per course\n💻 Delivery: Online & In-Person`);
+        alert(`Thank you ${enquiryName}! Your BUNDLE enrollment has been prepared. We will contact you via WhatsApp shortly.`);
         resetBundleForm();
       } catch (error) {
-        console.error('Error:', error);
-        alert(`⚠️ Your bundle enrollment request has been saved successfully!\n\nWe will contact you within 24 hours.\n\nThank you for choosing Fast Multimedia Institute.`);
+        alert('Your bundle enrollment request has been saved. We will contact you within 24 hours.');
         resetBundleForm();
       } finally {
         setIsSubmitting(false);
@@ -338,16 +337,15 @@ const SchoolPage = () => {
       setIsSubmitting(true);
 
       try {
-        const message = `*ENROLLMENT REQUEST*\n\nName: ${enquiryName}\nEmail: ${enquiryEmail}\nPhone: ${enquiryPhone}\nCourse: ${courseValue}\nPayment Option: ${paymentValue}\n\nStart Date: ${startDate}\nDuration: 2 Months\nDelivery: Online & In-Person\n\nMessage: ${enquiryMessage || 'No additional message'}`;
+        const message = `ENROLLMENT REQUEST\n\nName: ${enquiryName}\nEmail: ${enquiryEmail}\nPhone: ${enquiryPhone}\nCourse: ${courseValue}\nPayment Option: ${paymentValue}\n\nStart Date: ${startDate}\nDuration: 2 Months\nDelivery: Online & In-Person\n\nMessage: ${enquiryMessage || 'No additional message'}`;
         
         const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
         
-        alert(`✅ Thank you ${enquiryName}!\n\nYour enrollment request for ${courseValue} has been prepared!\n\nWe will contact you via WhatsApp shortly.\n\n📅 Start Date: ${startDate}\n⏱️ Duration: 2 Months\n💻 Delivery: Online & In-Person`);
+        alert(`Thank you ${enquiryName}! Your enrollment request has been prepared. We will contact you via WhatsApp shortly.`);
         resetSingleForm();
       } catch (error) {
-        console.error('Error:', error);
-        alert(`⚠️ Your enrollment request has been saved successfully!\n\nWe will contact you within 24 hours.\n\nThank you for choosing Fast Multimedia Institute.`);
+        alert('Your enrollment request has been saved. We will contact you within 24 hours.');
         resetSingleForm();
       } finally {
         setIsSubmitting(false);
@@ -394,6 +392,7 @@ const SchoolPage = () => {
 
   return (
     <div className="school-page">
+      {/* Hero Section - Simplified */}
       <section className="school-hero">
         <div className="school-hero-overlay"></div>
         <div className="school-hero-content">
@@ -431,42 +430,40 @@ const SchoolPage = () => {
             <FaWhatsapp /> Chat with us on WhatsApp
           </button>
         </div>
-        <div className="school-hero-scroll">
-          <span>Explore Courses</span>
-          <div className="scroll-arrow"><FaChevronDown /></div>
-        </div>
       </section>
 
+      {/* Tab Navigation */}
       <div className="school-tabs">
         <div className="container">
           <button 
             className={`tab-btn ${activeTab === 'courses' ? 'active' : ''}`}
             onClick={() => setActiveTab('courses')}
           >
-            <FaBookOpen /> Our Courses
+            <FaBookOpen /> Courses
           </button>
           <button 
             className={`tab-btn ${activeTab === 'bundle' ? 'active' : ''}`}
             onClick={() => setActiveTab('bundle')}
           >
-            <FaGift /> Bundle Discounts
+            <FaGift /> Bundles
           </button>
           <button 
             className={`tab-btn ${activeTab === 'about' ? 'active' : ''}`}
             onClick={() => setActiveTab('about')}
           >
-            <FaGraduationCap /> About School
+            <FaGraduationCap /> About
           </button>
           <button 
             className={`tab-btn ${activeTab === 'contact' ? 'active' : ''}`}
             onClick={() => setActiveTab('contact')}
           >
-            <FaEnvelope /> Enroll Now
+            <FaEnvelope /> Enroll
           </button>
         </div>
       </div>
 
       <div className="container">
+        {/* Courses Tab */}
         {activeTab === 'courses' && (
           <>
             <div className="category-filter">
@@ -477,11 +474,6 @@ const SchoolPage = () => {
                   onClick={() => setSelectedCategory(cat)}
                 >
                   {cat === 'all' ? 'All Courses' : cat}
-                  {cat !== 'all' && (
-                    <span className="filter-count">
-                      {courses.filter(c => c.category === cat).length}
-                    </span>
-                  )}
                 </button>
               ))}
             </div>
@@ -519,7 +511,7 @@ const SchoolPage = () => {
                         <span className="installment-note">or {course.installmentPrice}/month</span>
                       </div>
                       <button className="view-details-btn">
-                        View Details <FaArrowRight />
+                        Details <FaArrowRight />
                       </button>
                     </div>
                   </div>
@@ -545,7 +537,7 @@ const SchoolPage = () => {
                 <FaWhatsapp className="whatsapp-cta-icon" />
                 <div>
                   <h3>Have Questions?</h3>
-                  <p>Chat with us directly on WhatsApp for quick responses</p>
+                  <p>Chat with us directly on WhatsApp</p>
                 </div>
                 <button className="whatsapp-cta-btn" onClick={handleWhatsAppClick}>
                   <FaWhatsapp /> Chat Now
@@ -555,6 +547,7 @@ const SchoolPage = () => {
           </>
         )}
 
+        {/* Bundle Tab - Simplified */}
         {activeTab === 'bundle' && (
           <div className="bundle-section">
             <div className="bundle-header">
@@ -563,8 +556,8 @@ const SchoolPage = () => {
             </div>
 
             <div className="bundle-builder">
-              <h2>Build Your Own Bundle</h2>
-              <p className="bundle-subtitle">Select 2 or more courses and get instant discounts</p>
+              <h2>Build Your Bundle</h2>
+              <p className="bundle-subtitle">Select 2 or more courses for discounts</p>
               
               <div className="bundle-courses-selector">
                 {courses.map(course => (
@@ -587,7 +580,7 @@ const SchoolPage = () => {
 
               {selectedBundleCourses.length > 0 && (
                 <div className="bundle-summary">
-                  <h3>Your Bundle Summary</h3>
+                  <h3>Bundle Summary</h3>
                   <div className="bundle-price-breakdown">
                     <div className="price-row">
                       <span>Original Price:</span>
@@ -595,7 +588,7 @@ const SchoolPage = () => {
                     </div>
                     {bundlePrice.discount > 0 && (
                       <div className="price-row discount">
-                        <span>Bundle Discount ({bundlePrice.discountPercent}% OFF):</span>
+                        <span>Discount ({bundlePrice.discountPercent}% OFF):</span>
                         <span>- GH₵ {bundlePrice.discount}</span>
                       </div>
                     )}
@@ -603,45 +596,6 @@ const SchoolPage = () => {
                       <span>Final Price:</span>
                       <span>GH₵ {bundlePrice.final}</span>
                     </div>
-                  </div>
-
-                  <div className="bundle-payment-options">
-                    <h4>Payment Options</h4>
-                    <div className="payment-buttons">
-                      <button 
-                        className={`payment-btn ${bundlePaymentPlan === 'full' ? 'active' : ''}`}
-                        onClick={() => setBundlePaymentPlan('full')}
-                      >
-                        Full Payment: GH₵ {bundlePrice.final}
-                      </button>
-                      <button 
-                        className={`payment-btn ${bundlePaymentPlan === 'installment' ? 'active' : ''}`}
-                        onClick={() => setBundlePaymentPlan('installment')}
-                      >
-                        Installment Plan
-                      </button>
-                    </div>
-
-                    {bundlePaymentPlan === 'installment' && (
-                      <div className="installment-options">
-                        <label>Choose installment duration:</label>
-                        <div className="installment-months">
-                          {[2, 3, 4].map(months => (
-                            <button
-                              key={months}
-                              className={`month-option ${bundleInstallmentMonths === months ? 'active' : ''}`}
-                              onClick={() => setBundleInstallmentMonths(months)}
-                            >
-                              {months} months
-                              <small>GH₵ {calculateBundleInstallment(bundlePrice.final, months)}/month</small>
-                            </button>
-                          ))}
-                        </div>
-                        <p className="installment-note-bundle">
-                          <FaLightbulb /> {bundleInstallmentMonths}-month plan: GH₵ {bundleMonthlyInstallment}/month
-                        </p>
-                      </div>
-                    )}
                   </div>
 
                   <button 
@@ -673,15 +627,15 @@ const SchoolPage = () => {
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                   >
-                    Enquire Now <FaArrowRight />
+                    Enquire <FaArrowRight />
                   </button>
                 </div>
               ))}
             </div>
 
             <div className="payment-info">
-              <h2><FaMoneyBillWave /> Installment Plans Available</h2>
-              <p>Pay in easy monthly installments. Contact us to set up your payment plan.</p>
+              <h2><FaMoneyBillWave /> Installment Plans</h2>
+              <p>Pay in easy monthly installments</p>
               <div className="installment-example">
                 <div className="installment-item">
                   <strong>Basic I.C.T & Office</strong>
@@ -704,54 +658,29 @@ const SchoolPage = () => {
                   <span>GH₵ 320/month × 2 months</span>
                 </div>
               </div>
-              <div className="bundle-note">
-                <FaGift /> <strong>Bundle Special:</strong> Save 10% on 2 courses, 15% on 3 courses, or 20% on 4+ courses with flexible installment plans!
-              </div>
             </div>
           </div>
         )}
 
+        {/* Details Tab - Simplified */}
         {activeTab === 'details' && selectedCourse && (
           <div className="course-details">
             <button className="back-btn" onClick={() => setActiveTab('courses')}>
-              <FaArrowRight /> Back to All Courses
+              <FaArrowRight /> Back
             </button>
             
             <div className="details-grid">
               <div className="details-image">
                 <img src={selectedCourse.image} alt={selectedCourse.title} />
                 <div className="course-badge">{selectedCourse.category}</div>
-                <div className="duration-badge">2 Months Course</div>
+                <div className="duration-badge">2 Months</div>
               </div>
               <div className="details-info">
                 <h1 className="details-title">{selectedCourse.title}</h1>
-                <div className="details-rating">
-                  <span className="stars"><FaStar /></span>
-                  <span className="rating-value">{selectedCourse.rating}</span>
-                  <span className="students">({selectedCourse.students}+ students)</span>
-                </div>
                 <p className="details-long-desc">{selectedCourse.longDescription}</p>
                 
                 <div className="details-delivery">
                   <span><FaGlobe /> {selectedCourse.deliveryMode}</span>
-                </div>
-                
-                <div className="payment-selector">
-                  <h3>Payment Options</h3>
-                  <div className="payment-buttons">
-                    <button 
-                      className={`payment-btn ${selectedPaymentPlan === 'full' ? 'active' : ''}`}
-                      onClick={() => setSelectedPaymentPlan('full')}
-                    >
-                      Full Payment: {selectedCourse.fullPrice}
-                    </button>
-                    <button 
-                      className={`payment-btn ${selectedPaymentPlan === 'installment' ? 'active' : ''}`}
-                      onClick={() => setSelectedPaymentPlan('installment')}
-                    >
-                      Installment: {selectedCourse.installmentPrice}/month
-                    </button>
-                  </div>
                 </div>
 
                 <div className="details-meta-grid">
@@ -773,7 +702,7 @@ const SchoolPage = () => {
                     <span className="meta-icon"><FaMoneyBillWave /></span>
                     <div>
                       <div className="meta-label">Price</div>
-                      <div className="meta-value">{getPriceDisplay()}</div>
+                      <div className="meta-value">{selectedCourse.fullPrice}</div>
                     </div>
                   </div>
                   <div className="meta-item">
@@ -784,6 +713,17 @@ const SchoolPage = () => {
                     </div>
                   </div>
                 </div>
+
+                <button 
+                  className="enquire-btn"
+                  onClick={() => {
+                    setSelectedCourseForForm(selectedCourse.title);
+                    setShowEnquiryForm(true);
+                    setShowBundleEnrollment(false);
+                  }}
+                >
+                  Enroll Now - {getPriceDisplay()}
+                </button>
               </div>
             </div>
 
@@ -791,7 +731,7 @@ const SchoolPage = () => {
               <div className="details-section">
                 <h2><FaCheckCircle /> What You'll Learn</h2>
                 <ul className="features-list">
-                  {selectedCourse.features.map((feature, idx) => (
+                  {selectedCourse.features.slice(0, 5).map((feature, idx) => (
                     <li key={idx}><FaCheckCircle className="feature-icon" /> {feature}</li>
                   ))}
                 </ul>
@@ -803,116 +743,14 @@ const SchoolPage = () => {
                 <div className="format-highlight">
                   <span><FaGlobe /> Online & In-Person</span>
                   <span><FaCalendarAlt /> Start Date: {startDate}</span>
-                  <span><FaCertificate /> Certificate Awarded Upon Completion</span>
-                  <span><FaWhatsapp /> WhatsApp Support Available</span>
+                  <span><FaCertificate /> Certificate Included</span>
                 </div>
               </div>
-
-              <div className="details-section">
-                <h2><FaUsers /> Who Is This For?</h2>
-                <p>{selectedCourse.targetAudience}</p>
-                <div className="audience-badges">
-                  <span><FaUserGraduate /> Students</span>
-                  <span><FaBriefcase /> Job Seekers</span>
-                  <span><FaUserTie /> Workers</span>
-                  <span><FaBuilding /> Business Owners</span>
-                </div>
-              </div>
-
-              <div className="details-section">
-                <h2><FaTools /> Prerequisites</h2>
-                <p>{selectedCourse.prerequisites}</p>
-              </div>
-
-              <div className="details-section">
-                <h2><FaAward /> Certificate</h2>
-                <p>{selectedCourse.certificate}</p>
-                <p className="certificate-note"><FaCheckCircle /> Officially recognized certificate upon successful completion</p>
-              </div>
-            </div>
-
-            <div className="enquiry-section">
-              <h2>Ready to Enroll?</h2>
-              <p>Start Date: {startDate} | 2 Months | Online & In-Person</p>
-              {!showEnquiryForm ? (
-                <button 
-                  className="enquire-btn"
-                  onClick={() => {
-                    setSelectedCourseForForm(selectedCourse.title);
-                    setShowEnquiryForm(true);
-                    setShowBundleEnrollment(false);
-                  }}
-                >
-                  Enroll Now - {getPriceDisplay()}
-                </button>
-              ) : (
-                <form className="enquiry-form" onSubmit={handleEnquirySubmit}>
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Your Full Name *"
-                    value={enquiryName}
-                    onChange={(e) => setEnquiryName(e.target.value)}
-                    required
-                  />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Your Email Address *"
-                    value={enquiryEmail}
-                    onChange={(e) => setEnquiryEmail(e.target.value)}
-                    required
-                  />
-                  <input
-                    type="tel"
-                    name="phone"
-                    placeholder="Phone Number *"
-                    value={enquiryPhone}
-                    onChange={(e) => setEnquiryPhone(e.target.value)}
-                    required
-                  />
-                  <select 
-                    name="course"
-                    value={selectedCourseForForm}
-                    onChange={(e) => setSelectedCourseForForm(e.target.value)}
-                    required
-                  >
-                    <option value="">Select Course *</option>
-                    {courses.map(course => (
-                      <option key={course.id} value={course.title}>{course.title} - {course.fullPrice}</option>
-                    ))}
-                  </select>
-                  <select 
-                    name="payment"
-                    value={selectedPaymentOption}
-                    onChange={(e) => setSelectedPaymentOption(e.target.value)}
-                  >
-                    <option>Full Payment</option>
-                    <option>Installment Plan (2 months)</option>
-                  </select>
-                  <textarea
-                    name="message"
-                    placeholder="Additional Information (Occupation, Experience Level, etc.)"
-                    value={enquiryMessage}
-                    onChange={(e) => setEnquiryMessage(e.target.value)}
-                    rows="3"
-                  />
-                  <button type="submit" className="submit-btn" disabled={isSubmitting}>
-                    {isSubmitting ? 'Sending...' : 'Submit Enrollment →'}
-                  </button>
-                  <button 
-                    type="button" 
-                    className="cancel-btn"
-                    onClick={() => setShowEnquiryForm(false)}
-                  >
-                    Cancel
-                  </button>
-                </form>
-              )}
             </div>
           </div>
         )}
 
+        {/* About Tab - Simplified */}
         {activeTab === 'about' && (
           <div className="about-school">
             <div className="about-hero">
@@ -924,17 +762,17 @@ const SchoolPage = () => {
               <div className="about-card">
                 <div className="about-icon"><FaRocket /></div>
                 <h3>Our Mission</h3>
-                <p>To provide accessible, high-quality education through both online and in-person learning that empowers individuals with practical skills for career advancement and business growth.</p>
+                <p>To provide accessible, high-quality education through online and in-person learning.</p>
               </div>
               <div className="about-card">
                 <div className="about-icon"><FaEye /></div>
                 <h3>Our Vision</h3>
-                <p>To become Ghana's leading institution for technology and creative education, producing globally competitive graduates through flexible learning options.</p>
+                <p>To become Ghana's leading institution for technology and creative education.</p>
               </div>
               <div className="about-card">
                 <div className="about-icon"><FaHeart /></div>
                 <h3>Our Values</h3>
-                <p>Excellence, Accessibility, Practical Learning, Student Success, and Continuous Improvement.</p>
+                <p>Excellence, Accessibility, Practical Learning, Student Success.</p>
               </div>
             </div>
 
@@ -957,29 +795,13 @@ const SchoolPage = () => {
               </div>
             </div>
 
-            <div className="delivery-modes">
-              <h2><FaGlobe /> Learning Options</h2>
-              <div className="delivery-grid">
-                <div className="delivery-card">
-                  <span className="delivery-icon"><FaLaptop /></span>
-                  <h3>Online Learning</h3>
-                  <p>Learn from anywhere with our comprehensive online platform. Access course materials, join live sessions, and get support remotely.</p>
-                </div>
-                <div className="delivery-card">
-                  <span className="delivery-icon"><FaBuilding /></span>
-                  <h3>In-Person Learning</h3>
-                  <p>Join us at our physical location for hands-on training, direct interaction with instructors, and collaborative learning experiences.</p>
-                </div>
-              </div>
-            </div>
-
             <div className="course-info">
               <h2><FaBookOpen /> Course Information</h2>
               <div className="info-grid">
                 <div className="info-card">
                   <span className="info-icon"><FaClock /></span>
                   <h3>Duration</h3>
-                  <p>2 Months per course</p>
+                  <p>2 Months</p>
                 </div>
                 <div className="info-card">
                   <span className="info-icon"><FaGlobe /></span>
@@ -994,23 +816,13 @@ const SchoolPage = () => {
                 <div className="info-card">
                   <span className="info-icon"><FaCertificate /></span>
                   <h3>Certificate</h3>
-                  <p>Awarded upon completion</p>
+                  <p>Awarded</p>
                 </div>
                 <div className="info-card">
                   <span className="info-icon"><FaWhatsapp /></span>
                   <h3>Support</h3>
-                  <p>24/7 WhatsApp Support</p>
+                  <p>24/7 WhatsApp</p>
                 </div>
-              </div>
-            </div>
-
-            <div className="target-audience">
-              <h2><FaUsers /> Open To:</h2>
-              <div className="audience-grid">
-                <div className="audience-card"><FaUserGraduate /> Students</div>
-                <div className="audience-card"><FaBriefcase /> Job Seekers</div>
-                <div className="audience-card"><FaUserTie /> Workers</div>
-                <div className="audience-card"><FaBuilding /> Business Owners</div>
               </div>
             </div>
 
@@ -1022,27 +834,27 @@ const SchoolPage = () => {
           </div>
         )}
 
+        {/* Contact Tab - Simplified */}
         {activeTab === 'contact' && (
           <div className="contact-school">
             <div className="contact-header">
               <h1><FaEnvelope /> Enroll Now</h1>
               <p>Start your learning journey with us today</p>
               <div className="enrollment-dates">
-                <span><FaCalendarAlt /> Start Date: {startDate}</span>
-                <span><FaClock /> Duration: 2 Months</span>
+                <span><FaCalendarAlt /> Start: {startDate}</span>
+                <span><FaClock /> 2 Months</span>
                 <span><FaGlobe /> Online & In-Person</span>
-                <span><FaCertificate /> Certificate Included</span>
-                <span><FaWhatsapp /> WhatsApp Support</span>
+                <span><FaCertificate /> Certificate</span>
               </div>
             </div>
 
             <div className="contact-grid">
               <div className="contact-info">
                 <div className="info-item">
-                  <div className="info-icon"><FaGlobe /></div>
+                  <div className="info-icon"><FaWhatsapp /></div>
                   <div>
-                    <h3>Location</h3>
-                    <p>Online & In-Person - Learn from Anywhere</p>
+                    <h3>WhatsApp</h3>
+                    <p>{displayWhatsappNumber}</p>
                   </div>
                 </div>
                 <div className="info-item">
@@ -1053,31 +865,23 @@ const SchoolPage = () => {
                   </div>
                 </div>
                 <div className="info-item">
-                  <div className="info-icon"><FaWhatsapp /></div>
-                  <div>
-                    <h3>WhatsApp</h3>
-                    <p>{displayWhatsappNumber}</p>
-                  </div>
-                </div>
-                <div className="info-item">
                   <div className="info-icon"><FaEnvelope /></div>
                   <div>
-                    <h3>Email Us</h3>
-                    <p>fasttech227@gmail.com<br />fastmultimedia.site</p>
+                    <h3>Email</h3>
+                    <p>fasttech227@gmail.com</p>
                   </div>
                 </div>
                 <div className="info-item">
                   <div className="info-icon"><FaMoneyBillWave /></div>
                   <div>
-                    <h3>Payment Options</h3>
-                    <p>Full Payment or Installment Plans Available</p>
-                    <p className="payment-note"><FaGift /> Bundle discounts available for multiple courses</p>
+                    <h3>Payment</h3>
+                    <p>Full Payment or Installment Plans</p>
                   </div>
                 </div>
               </div>
 
               <div className="contact-form">
-                <h2>{showBundleEnrollment ? 'Bundle Enrollment Form' : 'Single Course Enrollment'}</h2>
+                <h2>{showBundleEnrollment ? 'Bundle Enrollment' : 'Course Enrollment'}</h2>
                 
                 {!showBundleEnrollment && (
                   <button 
@@ -1087,7 +891,7 @@ const SchoolPage = () => {
                       setSelectedBundleCourses([]);
                     }}
                   >
-                    <FaGift /> Want to enroll in multiple courses? Click here for bundle discounts!
+                    <FaGift /> Bundle discounts available
                   </button>
                 )}
 
@@ -1096,7 +900,7 @@ const SchoolPage = () => {
                     className="switch-to-single"
                     onClick={() => setShowBundleEnrollment(false)}
                   >
-                    <FaArrowRight /> Back to single course enrollment
+                    <FaArrowRight /> Single course enrollment
                   </button>
                 )}
                 
@@ -1145,13 +949,13 @@ const SchoolPage = () => {
                         onChange={(e) => setSelectedPaymentOption(e.target.value)}
                       >
                         <option>Full Payment</option>
-                        <option>Installment Plan (2 months)</option>
+                        <option>Installment Plan</option>
                       </select>
                     </>
                   ) : (
                     <>
                       <div className="bundle-course-selection">
-                        <label>Select Courses for Bundle (2 or more courses):</label>
+                        <label>Select Courses (2 or more):</label>
                         {courses.map(course => (
                           <label key={course.id} className="bundle-checkbox-label">
                             <input
@@ -1165,67 +969,47 @@ const SchoolPage = () => {
                       </div>
                       
                       {selectedBundleCourses.length >= 2 && (
-                        <>
-                          <div className="bundle-pricing-info">
-                            <p><FaGift /> <strong>Bundle Discount Applied!</strong></p>
-                            <p>Original: GH₵ {bundlePrice.total}</p>
-                            <p>Discount: {bundlePrice.discountPercent}% OFF (Save GH₵ {bundlePrice.discount})</p>
-                            <p><strong>Final Price: GH₵ {bundlePrice.final}</strong></p>
-                          </div>
-                          
-                          <select 
-                            value={bundlePaymentPlan}
-                            onChange={(e) => setBundlePaymentPlan(e.target.value)}
-                          >
-                            <option value="full">Full Payment: GH₵ {bundlePrice.final}</option>
-                            <option value="installment">Installment Plan</option>
-                          </select>
-                          
-                          {bundlePaymentPlan === 'installment' && (
-                            <select 
-                              value={bundleInstallmentMonths}
-                              onChange={(e) => setBundleInstallmentMonths(Number(e.target.value))}
-                            >
-                              <option value={2}>2 months - GH₵ {calculateBundleInstallment(bundlePrice.final, 2)}/month</option>
-                              <option value={3}>3 months - GH₵ {calculateBundleInstallment(bundlePrice.final, 3)}/month</option>
-                              <option value={4}>4 months - GH₵ {calculateBundleInstallment(bundlePrice.final, 4)}/month</option>
-                            </select>
-                          )}
-                        </>
+                        <div className="bundle-pricing-info">
+                          <p><strong>Bundle Discount Applied!</strong></p>
+                          <p>Original: GH₵ {bundlePrice.total}</p>
+                          <p>Discount: {bundlePrice.discountPercent}% OFF</p>
+                          <p><strong>Final: GH₵ {bundlePrice.final}</strong></p>
+                        </div>
                       )}
                       
                       {selectedBundleCourses.length > 0 && selectedBundleCourses.length < 2 && (
-                        <p className="bundle-warning"><FaLightbulb /> Please select at least 2 courses to get bundle discount</p>
+                        <p className="bundle-warning">Select at least 2 courses</p>
                       )}
                     </>
                   )}
                   
                   <textarea
                     name="message"
-                    placeholder="Additional Information (Occupation, Experience Level, etc.)"
+                    placeholder="Additional Information"
                     value={enquiryMessage}
                     onChange={(e) => setEnquiryMessage(e.target.value)}
-                    rows="4"
+                    rows="3"
                   />
                   <button 
                     type="submit" 
                     className="send-btn" 
                     disabled={isSubmitting || (showBundleEnrollment && selectedBundleCourses.length < 2)}
                   >
-                    {isSubmitting ? 'Sending...' : (showBundleEnrollment ? 'Submit Bundle Enrollment →' : 'Submit Enrollment →')}
+                    {isSubmitting ? 'Sending...' : (showBundleEnrollment ? 'Submit Bundle →' : 'Submit →')}
                   </button>
                 </form>
-                <p className="form-note"><FaWhatsapp /> We'll contact you via WhatsApp within 24 hours with payment instructions and course access details.</p>
+                <p className="form-note"><FaWhatsapp /> We'll contact you via WhatsApp within 24 hours</p>
               </div>
             </div>
           </div>
         )}
       </div>
 
+      {/* Footer */}
       <div className="school-footer-cta">
         <div className="container">
-          <h2><FaRocket /> Start Your Learning Journey Today</h2>
-          <p>2 Months • Online & In-Person • Certificate Awarded • Start Date: {startDate}</p>
+          <h2><FaRocket /> Start Your Learning Journey</h2>
+          <p>2 Months • Online & In-Person • Certificate • Start: {startDate}</p>
           <div className="cta-buttons">
             <button 
               className="cta-button primary"
@@ -1234,23 +1018,22 @@ const SchoolPage = () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
             >
-              <FaBookOpen /> Explore Courses
+              <FaBookOpen /> Explore
             </button>
             <button 
               className="cta-button secondary"
               onClick={() => {
                 setActiveTab('contact');
-                setShowBundleEnrollment(false);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
             >
-              <FaEnvelope /> Enroll Now
+              <FaEnvelope /> Enroll
             </button>
             <button 
               className="cta-button whatsapp"
               onClick={handleWhatsAppClick}
             >
-              <FaWhatsapp /> Chat on WhatsApp
+              <FaWhatsapp /> WhatsApp
             </button>
           </div>
         </div>
