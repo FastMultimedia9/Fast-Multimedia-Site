@@ -339,7 +339,7 @@ const HomePage = () => {
   // Social Media Links
   const socialLinks = [
     { icon: FaBehance, url: 'https://www.behance.net/abrantiekwame', label: 'Behance' },
-    { icon: FaFacebookF, url: 'https://facebook.com/Fast Multimedia', label: 'Facebook' },
+    { icon: FaFacebookF, url: 'https://facebook.com/profile.php?id=100063646042170', label: 'Facebook' },
     { icon: FaLinkedinIn, url: 'https://linkedin.com/company/fast-multimedia-bb548b285', label: 'LinkedIn' },
     { icon: FaInstagram, url: 'https://instagram.com/fastmultimedia9', label: 'Instagram' },
     { icon: FaYoutube, url: 'https://youtube.com/fastmultimedia', label: 'YouTube' }
