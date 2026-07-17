@@ -17,7 +17,7 @@ const HomePage = () => {
   const [quickViewProject, setQuickViewProject] = useState(null);
   const [showPackageModal, setShowPackageModal] = useState(false);
   const [activeServiceCategory, setActiveServiceCategory] = useState('design');
-  const [selectedPackage, setSelectedPackage] = useState('basic');
+  const [selectedPackage, setSelectedPackage] = useState('starter');
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
 
@@ -336,6 +336,15 @@ const HomePage = () => {
     }
   ];
 
+  // Social Media Links
+  const socialLinks = [
+    { icon: FaBehance, url: 'https://www.behance.net/fastmultimedia', label: 'Behance' },
+    { icon: FaFacebookF, url: 'https://facebook.com/fastmultimedia', label: 'Facebook' },
+    { icon: FaLinkedinIn, url: 'https://linkedin.com/company/fastmultimedia', label: 'LinkedIn' },
+    { icon: FaInstagram, url: 'https://instagram.com/fastmultimedia9', label: 'Instagram' },
+    { icon: FaYoutube, url: 'https://youtube.com/fastmultimedia', label: 'YouTube' }
+  ];
+
   const handleServiceClick = (service) => {
     const serviceData = {
       name: service.name,
@@ -423,22 +432,23 @@ const HomePage = () => {
               </button>
             </div>
 
+            {/* Social Media Links - With Actual URLs */}
             <div className="hero-social-list">
-              <a href="#" className="hero-social-item" aria-label="Behance">
-                <FaBehance />
-              </a>
-              <a href="#" className="hero-social-item" aria-label="Facebook">
-                <FaFacebookF />
-              </a>
-              <a href="#" className="hero-social-item" aria-label="LinkedIn">
-                <FaLinkedinIn />
-              </a>
-              <a href="#" className="hero-social-item" aria-label="Instagram">
-                <FaInstagram />
-              </a>
-              <a href="#" className="hero-social-item" aria-label="YouTube">
-                <FaYoutube />
-              </a>
+              {socialLinks.map((social, index) => {
+                const Icon = social.icon;
+                return (
+                  <a 
+                    key={index}
+                    href={social.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hero-social-item" 
+                    aria-label={social.label}
+                  >
+                    <Icon />
+                  </a>
+                );
+              })}
             </div>
           </div>
 
@@ -956,7 +966,9 @@ const HomePage = () => {
                 className="btn btn-primary btn-large"
                 onClick={() => {
                   const selected = packages.find(p => p.id === selectedPackage);
-                  handleServiceClick(selected);
+                  if (selected) {
+                    handleServiceClick(selected);
+                  }
                   setShowPackageModal(false);
                 }}
               >
