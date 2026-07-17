@@ -76,12 +76,6 @@ const ContactPage = () => {
 
   // Check for service selection from URL or localStorage
   useEffect(() => {
-    console.log('ContactPage: Checking for service data...');
-    console.log('LocalStorage contents:', {
-      selectedService: localStorage.getItem('selectedService'),
-      selectedValentinePackage: localStorage.getItem('selectedValentinePackage')
-    });
-
     const queryParams = new URLSearchParams(location.search);
     const serviceName = queryParams.get('service');
     const category = queryParams.get('category');
@@ -96,10 +90,8 @@ const ContactPage = () => {
       try {
         serviceData = JSON.parse(storedValentinePackage);
         serviceData.type = 'valentine';
-        console.log('Found Valentine package:', serviceData);
         localStorage.removeItem('selectedValentinePackage');
       } catch (error) {
-        console.error('Error parsing Valentine package:', error);
         localStorage.removeItem('selectedValentinePackage');
       }
     }
@@ -111,10 +103,8 @@ const ContactPage = () => {
         try {
           serviceData = JSON.parse(storedService);
           serviceData.type = serviceData.type || 'regular';
-          console.log('Found regular service:', serviceData);
           localStorage.removeItem('selectedService');
         } catch (error) {
-          console.error('Error parsing stored service:', error);
           localStorage.removeItem('selectedService');
         }
       }
@@ -129,7 +119,6 @@ const ContactPage = () => {
         type: 'url',
         timestamp: Date.now()
       };
-      console.log('Found URL service:', serviceData);
     }
     
     // Process the service data
@@ -151,8 +140,6 @@ const ContactPage = () => {
           const newMessage = serviceMessage + 
             (hasExistingMessage ? currentMessage : 'Please provide more details about my project requirements...');
           
-          console.log('Setting new message with service:', serviceData.name);
-          
           return {
             ...prev,
             projectType: serviceData.category || serviceData.name,
@@ -160,7 +147,6 @@ const ContactPage = () => {
           };
         }
         
-        console.log('Service already added to message:', serviceData.name);
         return prev;
       });
       
@@ -211,6 +197,7 @@ const ContactPage = () => {
     }
   }, [location.search]);
 
+  // Scroll animation
   useEffect(() => {
     const animateOnScroll = () => {
       const elements = document.querySelectorAll('.animate-on-scroll');
@@ -243,7 +230,6 @@ const ContactPage = () => {
     if (selectedService) {
       setFormData(prev => {
         const messageLines = prev.message.split('\n');
-        // Find and remove lines containing the service name
         const filteredLines = messageLines.filter(line => 
           !line.includes(selectedService.name) && 
           !line.includes('Service Details:') &&
@@ -277,7 +263,6 @@ const ContactPage = () => {
         serviceInfo += `💰 *Price Info:* ${selectedService.price}\n`;
       }
       
-      // Add Valentine's special note
       if (selectedService.type === 'valentine') {
         serviceInfo += `💖 *Valentine's Special:* Limited time offer - Romantic theme included!\n`;
       }
@@ -391,7 +376,6 @@ ${formData.message}
     'Other'
   ];
 
-  // Fixed Budget Ranges - from lowest to highest
   const budgetRanges = [
     'Not sure yet',
     'Less than ₵500',
@@ -405,7 +389,6 @@ ${formData.message}
     '₵100,000+'
   ];
 
-  // Updated Timeline options starting from minutes/hours
   const timelines = [
     'Select timeline',
     'Emergency (within 24 hours)',
@@ -443,7 +426,7 @@ ${formData.message}
       {serviceAdded && selectedService && (
         <div className="service-added-notification">
           <div className="notification-content">
-            <i className="fas fa-check-circle"></i>
+            <span className="notification-icon">✓</span>
             <div className="notification-text">
               <strong>{selectedService.name}</strong> has been added to your request!
               {selectedService.price && (
@@ -455,7 +438,7 @@ ${formData.message}
               onClick={() => setServiceAdded(false)}
               aria-label="Close notification"
             >
-              <i className="fas fa-times"></i>
+              ✕
             </button>
           </div>
         </div>
@@ -489,7 +472,7 @@ ${formData.message}
                 <span>🎄 Christmas Design Package Request 🎁</span>
                 {selectedPackage && (
                   <div className="selected-package-badge">
-                    <i className="fas fa-gift"></i>
+                    <span>🎁</span>
                     <span>{christmasPackages[selectedPackage]?.name} Package Selected</span>
                   </div>
                 )}
@@ -508,43 +491,43 @@ ${formData.message}
             {selectedService && (
               <div className="selected-service-card">
                 <div className="service-card-header">
-                  <h3><i className="fas fa-check-circle"></i> Selected Service</h3>
+                  <h3><span>✓</span> Selected Service</h3>
                   <div className="service-card-actions">
                     <button 
                       className="btn-service-remove"
                       onClick={clearSelectedService}
                       aria-label="Remove service"
                     >
-                      <i className="fas fa-times"></i> Remove
+                      <span>✕</span> Remove
                     </button>
                     <button 
                       className="btn-service-add"
                       onClick={addAnotherService}
                       aria-label="Add another service"
                     >
-                      <i className="fas fa-plus"></i> Add Another
+                      <span>+</span> Add Another
                     </button>
                   </div>
                 </div>
                 <div className="service-card-content">
                   <div className="service-info">
                     <div className="service-name">
-                      <i className="fas fa-star"></i>
+                      <span>★</span>
                       <strong>{selectedService.name}</strong>
                     </div>
                     <div className="service-category">
-                      <i className="fas fa-tag"></i>
+                      <span>🏷️</span>
                       <span>{selectedService.category || 'General Service'}</span>
                     </div>
                     {selectedService.price && (
                       <div className="service-price">
-                        <i className="fas fa-money-bill-wave"></i>
+                        <span>💰</span>
                         <span>{selectedService.price}</span>
                       </div>
                     )}
                     {selectedService.type === 'valentine' && (
                       <div className="service-badge valentine-badge">
-                        <i className="fas fa-heart"></i>
+                        <span>❤️</span>
                         <span>Valentine's Special</span>
                       </div>
                     )}
@@ -556,17 +539,17 @@ ${formData.message}
             {isChristmasMode && selectedPackage && (
               <div className="selected-package-card">
                 <div className="package-header">
-                  <h3><i className="fas fa-gift"></i> Selected Package: {christmasPackages[selectedPackage]?.name}</h3>
+                  <h3><span>🎁</span> Selected Package: {christmasPackages[selectedPackage]?.name}</h3>
                   <div className="package-price">{christmasPackages[selectedPackage]?.price}</div>
                 </div>
                 <div className="package-features">
                   <h4>Package Includes:</h4>
                   <ul>
                     {christmasPackages[selectedPackage]?.features.slice(0, 3).map((feature, index) => (
-                      <li key={index}><i className="fas fa-check"></i> {feature}</li>
+                      <li key={index}><span>✓</span> {feature}</li>
                     ))}
                     {christmasPackages[selectedPackage]?.features.length > 3 && (
-                      <li><i className="fas fa-ellipsis-h"></i> ...and more!</li>
+                      <li><span>⋯</span> ...and more!</li>
                     )}
                   </ul>
                 </div>
@@ -593,7 +576,7 @@ ${formData.message}
                 
                 {!selectedService && (
                   <div className="service-selection-hint">
-                    <i className="fas fa-lightbulb"></i>
+                    <span>💡</span>
                     <span>
                       Want to select a specific service?{' '}
                       <button 
@@ -610,9 +593,7 @@ ${formData.message}
 
               {isSubmitted ? (
                 <div className="success-message animate-on-scroll">
-                  <div className="success-icon">
-                    <i className="fas fa-check-circle"></i>
-                  </div>
+                  <div className="success-icon">✓</div>
                   <h3 className="success-title">
                     {submissionMethod === 'whatsapp' ? '📱 Opening WhatsApp...' : '📧 Opening Email...'}
                   </h3>
@@ -651,21 +632,21 @@ ${formData.message}
                       className="btn btn-secondary"
                       type="button"
                     >
-                      <i className="fas fa-edit"></i> Edit Request
+                      <span>✏️</span> Edit Request
                     </button>
                     <button 
                       onClick={addAnotherService}
                       className="btn btn-primary"
                       type="button"
                     >
-                      <i className="fas fa-plus"></i> Add Another Service
+                      <span>+</span> Add Another Service
                     </button>
                   </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="contact-form animate-on-scroll">
                   <div className="form-section-header">
-                    <h3><i className="fas fa-user"></i> Your Information</h3>
+                    <h3><span>👤</span> Your Information</h3>
                   </div>
                   
                   <div className="form-row">
@@ -737,7 +718,7 @@ ${formData.message}
                   </div>
 
                   <div className="form-section-header">
-                    <h3><i className="fas fa-project-diagram"></i> Project Details</h3>
+                    <h3><span>📋</span> Project Details</h3>
                   </div>
 
                   <div className="form-row">
@@ -812,7 +793,7 @@ ${formData.message}
                             required
                           />
                           <div className="option-content">
-                            <i className="fab fa-whatsapp"></i>
+                            <span className="method-icon whatsapp">💬</span>
                             <span>WhatsApp</span>
                             <small>Instant messaging</small>
                           </div>
@@ -828,7 +809,7 @@ ${formData.message}
                             required
                           />
                           <div className="option-content">
-                            <i className="fas fa-envelope"></i>
+                            <span className="method-icon email">✉️</span>
                             <span>Email</span>
                             <small>Formal communication</small>
                           </div>
@@ -852,7 +833,7 @@ ${formData.message}
                       placeholder={selectedService 
                         ? "Add any additional details about your service request, specific requirements, timeline expectations, etc..."
                         : "Describe your project in detail: goals, requirements, target audience, colors, examples, etc..."}
-                    ></textarea>
+                    />
                     <small className="form-hint">
                       Be as detailed as possible. Include any references, examples, or specific requirements.
                       {selectedService && " Your selected service information is already included."}
@@ -882,17 +863,17 @@ ${formData.message}
                     >
                       {isLoading ? (
                         <>
-                          <i className="fas fa-spinner fa-spin"></i> Preparing...
+                          <span className="spinner"></span> Preparing...
                         </>
                       ) : (
                         <>
                           {formData.preferredContact === 'whatsapp' ? (
                             <>
-                              <i className="fab fa-whatsapp"></i> Send via WhatsApp
+                              <span>💬</span> Send via WhatsApp
                             </>
                           ) : (
                             <>
-                              <i className="fas fa-paper-plane"></i> Send via Email
+                              <span>✉️</span> Send via Email
                             </>
                           )}
                         </>
@@ -919,7 +900,7 @@ ${formData.message}
             {/* Quick Contact Sidebar */}
             <div className="quick-contact-sidebar">
               <div className="contact-card">
-                <h3><i className="fas fa-bolt"></i> Quick Contact</h3>
+                <h3><span>⚡</span> Quick Contact</h3>
                 <p>Prefer to contact us directly?</p>
                 
                 <div className="quick-actions">
@@ -929,7 +910,7 @@ ${formData.message}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <i className="fab fa-whatsapp"></i> Chat on WhatsApp
+                    <span>💬</span> Chat on WhatsApp
                   </a>
                   
                   <a 
@@ -938,13 +919,13 @@ ${formData.message}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <i className="fas fa-envelope"></i> Send Email
+                    <span>✉️</span> Send Email
                   </a>
                 </div>
                 
                 <div className="contact-info">
                   <div className="info-item">
-                    <i className="fas fa-phone"></i>
+                    <span>📞</span>
                     <div>
                       <strong>Call Us</strong>
                       <span>{displayWhatsappNumber}</span>
@@ -952,7 +933,7 @@ ${formData.message}
                   </div>
                   
                   <div className="info-item">
-                    <i className="fas fa-clock"></i>
+                    <span>🕐</span>
                     <div>
                       <strong>Response Time</strong>
                       <span>Within 24 hours</span>
@@ -963,7 +944,7 @@ ${formData.message}
               
               {/* Browse Services Card */}
               <div className="browse-services-card">
-                <h3><i className="fas fa-search"></i> Browse Services</h3>
+                <h3><span>🔍</span> Browse Services</h3>
                 <p>Not sure what you need? Browse our services:</p>
                 <div className="service-categories">
                   <button 
@@ -971,7 +952,7 @@ ${formData.message}
                     onClick={() => navigate('/services#design-services')}
                     type="button"
                   >
-                    <i className="fas fa-palette"></i>
+                    <span>🎨</span>
                     <span>Graphic Design</span>
                   </button>
                   <button 
@@ -979,7 +960,7 @@ ${formData.message}
                     onClick={() => navigate('/services#tech-services')}
                     type="button"
                   >
-                    <i className="fas fa-tools"></i>
+                    <span>🔧</span>
                     <span>Tech Support</span>
                   </button>
                   <button 
@@ -987,7 +968,7 @@ ${formData.message}
                     onClick={() => navigate('/services#pricing-section')}
                     type="button"
                   >
-                    <i className="fas fa-box"></i>
+                    <span>📦</span>
                     <span>Packages</span>
                   </button>
                 </div>
@@ -1023,7 +1004,7 @@ ${formData.message}
                   <h3 className="question-title">
                     {faq.question}
                   </h3>
-                  <i className={`fas fa-chevron-${activeFAQ === index ? 'up' : 'down'}`}></i>
+                  <span className={`faq-chevron ${activeFAQ === index ? 'active' : ''}`}>▼</span>
                 </div>
                 <div className={`faq-answer ${activeFAQ === index ? 'show' : ''}`}>
                   <p>{faq.answer}</p>
