@@ -11,9 +11,9 @@ import {
   FaPhoneAlt, FaSpinner, FaUserCircle,
   FaClipboardList, FaCalendarAlt, FaCommentDots,
   FaHandshake, FaShieldAlt, FaRocket,
-  FaCheck, FaMinus, FaRegCircle
+  FaCheck, FaMinus, FaRegCircle, FaEdit
 } from 'react-icons/fa';
-import './ContactPage.css'; // CSS only affects this component
+import './ContactPage.css';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -46,18 +46,18 @@ const ContactPage = () => {
   const emailAddress = 'fasttech227@gmail.com';
   
   const christmasPackages = {
-    'basic': {
+    basic: {
       name: 'Festive Starter',
       price: '$499',
       features: ['Christmas Logo Design', 'Holiday Color Palette', '3 Social Media Templates', 'Email Newsletter Design', '1 Revision']
     },
-    'pro': {
+    pro: {
       name: 'Merry Marketing',
       price: '$899',
       features: ['Complete Social Media Kit', 'Website Holiday Banner', 'Email Campaign Design', 'Product Packaging Mockup', '3 Revisions']
     },
-    'premium': {
-      name: 'Santa\'s Workshop',
+    premium: {
+      name: "Santa's Workshop",
       price: '$1499',
       features: ['Complete Brand Guidelines', 'Print Materials', 'Animated Social Posts', 'Gift Card Design', 'Unlimited Revisions']
     }
@@ -418,598 +418,600 @@ This message was sent via Fast Multimedia Services Page`;
   ];
 
   return (
-    <div className={`contact-page ${isChristmasMode ? 'christmas-mode' : ''}`}>
-      {serviceAdded && selectedService && (
-        <div className="service-added-notification">
-          <div className="notification-content">
-            <FaCheckCircle className="notification-icon" />
-            <div className="notification-text">
-              <strong>{selectedService.name}</strong> has been added to your request!
-              {selectedService.price && (
-                <span className="notification-price">Price: {selectedService.price}</span>
-              )}
-            </div>
-            <button 
-              className="notification-close"
-              onClick={() => setServiceAdded(false)}
-              aria-label="Close notification"
-            >
-              <FaTimes />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {isChristmasMode && (
-        <div className="snowfall">
-          {[...Array(30)].map((_, i) => (
-            <div 
-              key={i} 
-              className="snowflake"
-              style={{
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                opacity: Math.random() * 0.5 + 0.3,
-                width: `${Math.random() * 8 + 4}px`,
-                height: `${Math.random() * 8 + 4}px`
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      <section className={`contact-hero ${isChristmasMode ? 'christmas-hero' : ''}`}>
-        <div className="container">
-          <div className="hero-content animate-on-scroll">
-            {isChristmasMode && (
-              <div className="christmas-badge">
-                <FaGift className="badge-icon" />
-                <span>Christmas Design Package Request</span>
-                {selectedPackage && (
-                  <div className="selected-package-badge">
-                    <FaGift />
-                    <span>{christmasPackages[selectedPackage]?.name} Package Selected</span>
-                  </div>
+    <div className="contact-page">
+      <div className={isChristmasMode ? 'christmas-mode' : ''}>
+        {serviceAdded && selectedService && (
+          <div className="service-added-notification">
+            <div className="notification-content">
+              <FaCheckCircle className="notification-icon" />
+              <div className="notification-text">
+                <strong>{selectedService.name}</strong> has been added to your request!
+                {selectedService.price && (
+                  <span className="notification-price">Price: {selectedService.price}</span>
                 )}
               </div>
-            )}
-            <h1 className="contact-title">
-              {selectedService ? `Request: ${selectedService.name}` : 'Start Your Project'}
-            </h1>
-            <p className="contact-subtitle">
-              {selectedService 
-                ? `Your selected service has been added to the form below. Complete your details and send your request.`
-                : 'Ready to start your project? Fill the form and send your request via WhatsApp or Email.'}
-            </p>
-            
-            {selectedService && (
-              <div className="selected-service-card">
-                <div className="service-card-header">
-                  <h3><FaCheckCircle className="header-icon" /> Selected Service</h3>
-                  <div className="service-card-actions">
-                    <button 
-                      className="btn-service-remove"
-                      onClick={clearSelectedService}
-                      aria-label="Remove service"
-                    >
-                      <FaTimes /> Remove
-                    </button>
-                    <button 
-                      className="btn-service-add"
-                      onClick={addAnotherService}
-                      aria-label="Add another service"
-                    >
-                      <FaPlus /> Add Another
-                    </button>
-                  </div>
-                </div>
-                <div className="service-card-content">
-                  <div className="service-info">
-                    <div className="service-name">
-                      <FaStar className="icon-gold" />
-                      <strong>{selectedService.name}</strong>
-                    </div>
-                    <div className="service-category">
-                      <FaTag />
-                      <span>{selectedService.category || 'General Service'}</span>
-                    </div>
-                    {selectedService.price && (
-                      <div className="service-price">
-                        <FaMoneyBillWave />
-                        <span>{selectedService.price}</span>
-                      </div>
-                    )}
-                    {selectedService.type === 'valentine' && (
-                      <div className="service-badge valentine-badge">
-                        <FaHeart />
-                        <span>Valentine's Special</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {isChristmasMode && selectedPackage && (
-              <div className="selected-package-card">
-                <div className="package-header">
-                  <h3><FaGift className="icon-gold" /> Selected Package: {christmasPackages[selectedPackage]?.name}</h3>
-                  <div className="package-price">{christmasPackages[selectedPackage]?.price}</div>
-                </div>
-                <div className="package-features">
-                  <h4>Package Includes:</h4>
-                  <ul>
-                    {christmasPackages[selectedPackage]?.features.slice(0, 3).map((feature, index) => (
-                      <li key={index}><FaCheck className="icon-gold" /> {feature}</li>
-                    ))}
-                    {christmasPackages[selectedPackage]?.features.length > 3 && (
-                      <li><FaMinus className="icon-gold" /> ...and more!</li>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section className="contact-form-section">
-        <div className="container">
-          <div className="contact-form-wrapper">
-            <div className={`form-container ${isChristmasMode ? 'christmas-form' : ''}`}>
-              <div className="form-header animate-on-scroll">
-                <h2 className="section-title">
-                  {selectedService ? `Request ${selectedService.name}` : 'Project Request Form'}
-                </h2>
-                <p className="section-subtitle">
-                  {selectedService 
-                    ? 'Complete your details below and send your service request'
-                    : 'Fill out your project details and choose how to send it to us'}
-                </p>
-                
-                {!selectedService && (
-                  <div className="service-selection-hint">
-                    <FaLightbulb className="hint-icon" />
-                    <span>
-                      Want to select a specific service?{' '}
-                      <button 
-                        className="btn-service-browse"
-                        onClick={addAnotherService}
-                        type="button"
-                      >
-                        Browse Services
-                      </button>
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {isSubmitted ? (
-                <div className="success-message animate-on-scroll">
-                  <div className="success-icon">
-                    <FaCheckCircle />
-                  </div>
-                  <h3 className="success-title">
-                    {submissionMethod === 'whatsapp' ? 'Opening WhatsApp...' : 'Opening Email...'}
-                  </h3>
-                  <p className="success-text">
-                    {submissionMethod === 'whatsapp' 
-                      ? 'Your project request has been prepared! WhatsApp should open with your message ready to send. Please review and send it to us.'
-                      : 'Your project request has been prepared! Your email client will open with your message ready to send. Please review and send it to us.'}
-                  </p>
-                  
-                  {selectedService && (
-                    <div className="selected-service-summary">
-                      <h4>Requested Service:</h4>
-                      <div className="summary-item">
-                        <strong>{selectedService.name}</strong>
-                        {selectedService.price && (
-                          <span className="summary-price">{selectedService.price}</span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="backup-instructions">
-                    <p>
-                      <strong>If {submissionMethod === 'whatsapp' ? 'WhatsApp' : 'Email'} didn't open:</strong>
-                    </p>
-                    <div className="instructions-text">
-                      {submissionMethod === 'whatsapp' 
-                        ? `1. Open WhatsApp\n2. Start chat with ${displayWhatsappNumber}\n3. Copy and send the prepared message`
-                        : `1. Open your email client\n2. Send to ${emailAddress}\n3. Use subject: "Project Request - ${selectedService ? selectedService.name : 'Fast Multimedia'}"`}
-                    </div>
-                  </div>
-                  
-                  <div className="success-actions">
-                    <button 
-                      onClick={() => setIsSubmitted(false)}
-                      className="btn btn-secondary"
-                      type="button"
-                    >
-                      <FaEdit /> Edit Request
-                    </button>
-                    <button 
-                      onClick={addAnotherService}
-                      className="btn btn-primary"
-                      type="button"
-                    >
-                      <FaPlus /> Add Another Service
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="contact-form animate-on-scroll">
-                  <div className="form-section-header">
-                    <h3><FaUserCircle className="section-icon" /> Your Information</h3>
-                  </div>
-                  
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="name" className="form-label">
-                        <FaUser className="label-icon" /> Full Name *
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className="form-input"
-                        required
-                        placeholder="Enter your full name"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="email" className="form-label">
-                        <FaEnvelope className="label-icon" /> Email Address *
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="form-input"
-                        required
-                        placeholder="Enter your email address"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="phone" className="form-label">
-                        <FaPhone className="label-icon" /> Phone Number *
-                      </label>
-                      <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="form-input"
-                        required
-                        placeholder="Enter your phone number"
-                      />
-                      <small className="form-hint">For WhatsApp communication</small>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="company" className="form-label">
-                        <FaBuilding className="label-icon" /> Company/Organization
-                      </label>
-                      <input
-                        type="text"
-                        id="company"
-                        name="company"
-                        value={formData.company}
-                        onChange={handleChange}
-                        className="form-input"
-                        placeholder="Your company name (if applicable)"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-section-header">
-                    <h3><FaClipboardList className="section-icon" /> Project Details</h3>
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="projectType" className="form-label">
-                        <FaProjectDiagram className="label-icon" /> Project Type *
-                      </label>
-                      <select
-                        id="projectType"
-                        name="projectType"
-                        value={formData.projectType}
-                        onChange={handleChange}
-                        className="form-select"
-                        required
-                      >
-                        <option value="">Select project type</option>
-                        {projectTypes.map(type => (
-                          <option key={type} value={type}>{type}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="budget" className="form-label">
-                        <FaMoneyBillWave className="label-icon" /> Budget Range
-                      </label>
-                      <select
-                        id="budget"
-                        name="budget"
-                        value={formData.budget}
-                        onChange={handleChange}
-                        className="form-select"
-                      >
-                        <option value="">Select budget range</option>
-                        {budgetRanges.map(range => (
-                          <option key={range} value={range}>{range}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="timeline" className="form-label">
-                        <FaClock className="label-icon" /> Project Timeline
-                      </label>
-                      <select
-                        id="timeline"
-                        name="timeline"
-                        value={formData.timeline}
-                        onChange={handleChange}
-                        className="form-select"
-                      >
-                        {timelines.map(time => (
-                          <option key={time} value={time}>{time}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">
-                        <FaPaperPlane className="label-icon" /> Send Via *
-                      </label>
-                      <div className="contact-method-selector">
-                        <label className={`method-option ${formData.preferredContact === 'whatsapp' ? 'selected' : ''}`}>
-                          <input
-                            type="radio"
-                            name="preferredContact"
-                            value="whatsapp"
-                            checked={formData.preferredContact === 'whatsapp'}
-                            onChange={handleChange}
-                            required
-                          />
-                          <div className="option-content">
-                            <FaWhatsapp className="method-icon whatsapp-icon" />
-                            <span>WhatsApp</span>
-                            <small>Instant messaging</small>
-                          </div>
-                        </label>
-                        
-                        <label className={`method-option ${formData.preferredContact === 'email' ? 'selected' : ''}`}>
-                          <input
-                            type="radio"
-                            name="preferredContact"
-                            value="email"
-                            checked={formData.preferredContact === 'email'}
-                            onChange={handleChange}
-                            required
-                          />
-                          <div className="option-content">
-                            <FaEnvelope className="method-icon email-icon" />
-                            <span>Email</span>
-                            <small>Formal communication</small>
-                          </div>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="message" className="form-label">
-                      <FaCommentDots className="label-icon" /> Project Description *
-                    </label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      className="form-textarea"
-                      required
-                      rows="6"
-                      placeholder={selectedService 
-                        ? "Add any additional details about your service request, specific requirements, timeline expectations, etc..."
-                        : "Describe your project in detail: goals, requirements, target audience, colors, examples, etc..."}
-                    />
-                    <small className="form-hint">
-                      Be as detailed as possible. Include any references, examples, or specific requirements.
-                      {selectedService && " Your selected service information is already included."}
-                    </small>
-                  </div>
-
-                  <div className="form-agreement">
-                    <label className="checkbox-label">
-                      <input 
-                        type="checkbox" 
-                        name="agreeToTerms"
-                        checked={formData.agreeToTerms}
-                        onChange={handleChange}
-                        required
-                      />
-                      <span>
-                        I agree that Fast Multimedia can contact me regarding this project request *
-                      </span>
-                    </label>
-                  </div>
-
-                  <div className="form-footer">
-                    <button 
-                      type="submit" 
-                      className={`submit-btn ${isChristmasMode ? 'btn-christmas' : ''}`}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <FaSpinner className="spinner" /> Preparing...
-                        </>
-                      ) : (
-                        <>
-                          {formData.preferredContact === 'whatsapp' ? (
-                            <>
-                              <FaWhatsapp /> Send via WhatsApp
-                            </>
-                          ) : (
-                            <>
-                              <FaPaperPlane /> Send via Email
-                            </>
-                          )}
-                        </>
-                      )}
-                    </button>
-                    
-                    <div className="form-instructions">
-                      <p className="instructions-title">
-                        <strong>How it works:</strong>
-                      </p>
-                      <ol className="instructions-list">
-                        <li>Fill out all required fields above</li>
-                        <li>Click "{formData.preferredContact === 'whatsapp' ? 'Send via WhatsApp' : 'Send via Email'}"</li>
-                        <li>{formData.preferredContact === 'whatsapp' ? 'WhatsApp will open with your project details' : 'Your email client will open with your project details'}</li>
-                        <li>Review and send the message to us</li>
-                        <li>We'll contact you within 24 hours (Christmas projects: within 4 hours)</li>
-                      </ol>
-                    </div>
-                  </div>
-                </form>
-              )}
-            </div>
-
-            <div className="quick-contact-sidebar">
-              <div className="contact-card">
-                <h3><FaBolt className="card-icon" /> Quick Contact</h3>
-                <p>Prefer to contact us directly?</p>
-                
-                <div className="quick-actions">
-                  <a 
-                    href={`https://wa.me/${whatsappNumber}?text=Hi%20Fast%20Multimedia!%20I%20want%20to%20discuss%20a%20project.`}
-                    className="btn btn-whatsapp"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <FaWhatsapp /> Chat on WhatsApp
-                  </a>
-                  
-                  <a 
-                    href={`mailto:${emailAddress}?subject=Project%20Inquiry`}
-                    className="btn btn-email"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <FaEnvelope /> Send Email
-                  </a>
-                </div>
-                
-                <div className="contact-info">
-                  <div className="info-item">
-                    <FaPhoneAlt className="info-icon" />
-                    <div>
-                      <strong>Call Us</strong>
-                      <span>{displayWhatsappNumber}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="info-item">
-                    <FaClock className="info-icon" />
-                    <div>
-                      <strong>Response Time</strong>
-                      <span>Within 24 hours</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="browse-services-card">
-                <h3><FaSearch className="card-icon" /> Browse Services</h3>
-                <p>Not sure what you need? Browse our services:</p>
-                <div className="service-categories">
-                  <button 
-                    className="service-category-btn"
-                    onClick={() => navigate('/services#design-services')}
-                    type="button"
-                  >
-                    <FaPalette className="btn-icon" />
-                    <span>Graphic Design</span>
-                  </button>
-                  <button 
-                    className="service-category-btn"
-                    onClick={() => navigate('/services#tech-services')}
-                    type="button"
-                  >
-                    <FaTools className="btn-icon" />
-                    <span>Tech Support</span>
-                  </button>
-                  <button 
-                    className="service-category-btn"
-                    onClick={() => navigate('/services#pricing-section')}
-                    type="button"
-                  >
-                    <FaBox className="btn-icon" />
-                    <span>Packages</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className={`faq-section ${isChristmasMode ? 'christmas-faq' : ''}`}>
-        <div className="container">
-          <div className="section-header animate-on-scroll">
-            <h2 className="section-title">
-              Frequently Asked Questions
-            </h2>
-            <p className="section-subtitle">
-              Common questions about our services and process
-            </p>
-          </div>
-
-          <div className="faq-grid">
-            {faqs.map((faq, index) => (
-              <div 
-                key={index} 
-                className={`faq-item animate-on-scroll ${activeFAQ === index ? 'active' : ''}`}
-                onClick={() => toggleFAQ(index)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && toggleFAQ(index)}
+              <button 
+                className="notification-close"
+                onClick={() => setServiceAdded(false)}
+                aria-label="Close notification"
               >
-                <div className="faq-question">
-                  <h3 className="question-title">
-                    {faq.question}
-                  </h3>
-                  {activeFAQ === index ? (
-                    <FaChevronUp className="faq-chevron active" />
-                  ) : (
-                    <FaChevronDown className="faq-chevron" />
-                  )}
-                </div>
-                <div className={`faq-answer ${activeFAQ === index ? 'show' : ''}`}>
-                  <p>{faq.answer}</p>
-                </div>
-              </div>
+                <FaTimes />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {isChristmasMode && (
+          <div className="snowfall">
+            {[...Array(30)].map((_, i) => (
+              <div 
+                key={i} 
+                className="snowflake"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 5}s`,
+                  opacity: Math.random() * 0.5 + 0.3,
+                  width: `${Math.random() * 8 + 4}px`,
+                  height: `${Math.random() * 8 + 4}px`
+                }}
+              />
             ))}
           </div>
-        </div>
-      </section>
+        )}
+
+        <section className={`contact-hero ${isChristmasMode ? 'christmas-hero' : ''}`}>
+          <div className="container">
+            <div className="hero-content animate-on-scroll">
+              {isChristmasMode && (
+                <div className="christmas-badge">
+                  <FaGift className="badge-icon" />
+                  <span>Christmas Design Package Request</span>
+                  {selectedPackage && (
+                    <div className="selected-package-badge">
+                      <FaGift />
+                      <span>{christmasPackages[selectedPackage]?.name} Package Selected</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              <h1 className="contact-title">
+                {selectedService ? `Request: ${selectedService.name}` : 'Start Your Project'}
+              </h1>
+              <p className="contact-subtitle">
+                {selectedService 
+                  ? `Your selected service has been added to the form below. Complete your details and send your request.`
+                  : 'Ready to start your project? Fill the form and send your request via WhatsApp or Email.'}
+              </p>
+              
+              {selectedService && (
+                <div className="selected-service-card">
+                  <div className="service-card-header">
+                    <h3><FaCheckCircle className="header-icon" /> Selected Service</h3>
+                    <div className="service-card-actions">
+                      <button 
+                        className="btn-service-remove"
+                        onClick={clearSelectedService}
+                        aria-label="Remove service"
+                      >
+                        <FaTimes /> Remove
+                      </button>
+                      <button 
+                        className="btn-service-add"
+                        onClick={addAnotherService}
+                        aria-label="Add another service"
+                      >
+                        <FaPlus /> Add Another
+                      </button>
+                    </div>
+                  </div>
+                  <div className="service-card-content">
+                    <div className="service-info">
+                      <div className="service-name">
+                        <FaStar className="icon-gold" />
+                        <strong>{selectedService.name}</strong>
+                      </div>
+                      <div className="service-category">
+                        <FaTag />
+                        <span>{selectedService.category || 'General Service'}</span>
+                      </div>
+                      {selectedService.price && (
+                        <div className="service-price">
+                          <FaMoneyBillWave />
+                          <span>{selectedService.price}</span>
+                        </div>
+                      )}
+                      {selectedService.type === 'valentine' && (
+                        <div className="service-badge valentine-badge">
+                          <FaHeart />
+                          <span>Valentine's Special</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {isChristmasMode && selectedPackage && (
+                <div className="selected-package-card">
+                  <div className="package-header">
+                    <h3><FaGift className="icon-gold" /> Selected Package: {christmasPackages[selectedPackage]?.name}</h3>
+                    <div className="package-price">{christmasPackages[selectedPackage]?.price}</div>
+                  </div>
+                  <div className="package-features">
+                    <h4>Package Includes:</h4>
+                    <ul>
+                      {christmasPackages[selectedPackage]?.features.slice(0, 3).map((feature, index) => (
+                        <li key={index}><FaCheck className="icon-gold" /> {feature}</li>
+                      ))}
+                      {christmasPackages[selectedPackage]?.features.length > 3 && (
+                        <li><FaMinus className="icon-gold" /> ...and more!</li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="contact-form-section">
+          <div className="container">
+            <div className="contact-form-wrapper">
+              <div className={`form-container ${isChristmasMode ? 'christmas-form' : ''}`}>
+                <div className="form-header animate-on-scroll">
+                  <h2 className="section-title">
+                    {selectedService ? `Request ${selectedService.name}` : 'Project Request Form'}
+                  </h2>
+                  <p className="section-subtitle">
+                    {selectedService 
+                      ? 'Complete your details below and send your service request'
+                      : 'Fill out your project details and choose how to send it to us'}
+                  </p>
+                  
+                  {!selectedService && (
+                    <div className="service-selection-hint">
+                      <FaLightbulb className="hint-icon" />
+                      <span>
+                        Want to select a specific service?{' '}
+                        <button 
+                          className="btn-service-browse"
+                          onClick={addAnotherService}
+                          type="button"
+                        >
+                          Browse Services
+                        </button>
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {isSubmitted ? (
+                  <div className="success-message animate-on-scroll">
+                    <div className="success-icon">
+                      <FaCheckCircle />
+                    </div>
+                    <h3 className="success-title">
+                      {submissionMethod === 'whatsapp' ? 'Opening WhatsApp...' : 'Opening Email...'}
+                    </h3>
+                    <p className="success-text">
+                      {submissionMethod === 'whatsapp' 
+                        ? 'Your project request has been prepared! WhatsApp should open with your message ready to send. Please review and send it to us.'
+                        : 'Your project request has been prepared! Your email client will open with your message ready to send. Please review and send it to us.'}
+                    </p>
+                    
+                    {selectedService && (
+                      <div className="selected-service-summary">
+                        <h4>Requested Service:</h4>
+                        <div className="summary-item">
+                          <strong>{selectedService.name}</strong>
+                          {selectedService.price && (
+                            <span className="summary-price">{selectedService.price}</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="backup-instructions">
+                      <p>
+                        <strong>If {submissionMethod === 'whatsapp' ? 'WhatsApp' : 'Email'} didn't open:</strong>
+                      </p>
+                      <div className="instructions-text">
+                        {submissionMethod === 'whatsapp' 
+                          ? `1. Open WhatsApp\n2. Start chat with ${displayWhatsappNumber}\n3. Copy and send the prepared message`
+                          : `1. Open your email client\n2. Send to ${emailAddress}\n3. Use subject: "Project Request - ${selectedService ? selectedService.name : 'Fast Multimedia'}"`}
+                      </div>
+                    </div>
+                    
+                    <div className="success-actions">
+                      <button 
+                        onClick={() => setIsSubmitted(false)}
+                        className="btn btn-secondary"
+                        type="button"
+                      >
+                        <FaEdit /> Edit Request
+                      </button>
+                      <button 
+                        onClick={addAnotherService}
+                        className="btn btn-primary"
+                        type="button"
+                      >
+                        <FaPlus /> Add Another Service
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="contact-form animate-on-scroll">
+                    <div className="form-section-header">
+                      <h3><FaUserCircle className="section-icon" /> Your Information</h3>
+                    </div>
+                    
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="name" className="form-label">
+                          <FaUser className="label-icon" /> Full Name *
+                        </label>
+                        <input
+                          type="text"
+                          id="name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          className="form-input"
+                          required
+                          placeholder="Enter your full name"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="email" className="form-label">
+                          <FaEnvelope className="label-icon" /> Email Address *
+                        </label>
+                        <input
+                          type="email"
+                          id="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          className="form-input"
+                          required
+                          placeholder="Enter your email address"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="phone" className="form-label">
+                          <FaPhone className="label-icon" /> Phone Number *
+                        </label>
+                        <input
+                          type="tel"
+                          id="phone"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          className="form-input"
+                          required
+                          placeholder="Enter your phone number"
+                        />
+                        <small className="form-hint">For WhatsApp communication</small>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="company" className="form-label">
+                          <FaBuilding className="label-icon" /> Company/Organization
+                        </label>
+                        <input
+                          type="text"
+                          id="company"
+                          name="company"
+                          value={formData.company}
+                          onChange={handleChange}
+                          className="form-input"
+                          placeholder="Your company name (if applicable)"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-section-header">
+                      <h3><FaClipboardList className="section-icon" /> Project Details</h3>
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="projectType" className="form-label">
+                          <FaProjectDiagram className="label-icon" /> Project Type *
+                        </label>
+                        <select
+                          id="projectType"
+                          name="projectType"
+                          value={formData.projectType}
+                          onChange={handleChange}
+                          className="form-select"
+                          required
+                        >
+                          <option value="">Select project type</option>
+                          {projectTypes.map(type => (
+                            <option key={type} value={type}>{type}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="budget" className="form-label">
+                          <FaMoneyBillWave className="label-icon" /> Budget Range
+                        </label>
+                        <select
+                          id="budget"
+                          name="budget"
+                          value={formData.budget}
+                          onChange={handleChange}
+                          className="form-select"
+                        >
+                          <option value="">Select budget range</option>
+                          {budgetRanges.map(range => (
+                            <option key={range} value={range}>{range}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="timeline" className="form-label">
+                          <FaClock className="label-icon" /> Project Timeline
+                        </label>
+                        <select
+                          id="timeline"
+                          name="timeline"
+                          value={formData.timeline}
+                          onChange={handleChange}
+                          className="form-select"
+                        >
+                          {timelines.map(time => (
+                            <option key={time} value={time}>{time}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">
+                          <FaPaperPlane className="label-icon" /> Send Via *
+                        </label>
+                        <div className="contact-method-selector">
+                          <label className={`method-option ${formData.preferredContact === 'whatsapp' ? 'selected' : ''}`}>
+                            <input
+                              type="radio"
+                              name="preferredContact"
+                              value="whatsapp"
+                              checked={formData.preferredContact === 'whatsapp'}
+                              onChange={handleChange}
+                              required
+                            />
+                            <div className="option-content">
+                              <FaWhatsapp className="method-icon whatsapp-icon" />
+                              <span>WhatsApp</span>
+                              <small>Instant messaging</small>
+                            </div>
+                          </label>
+                          
+                          <label className={`method-option ${formData.preferredContact === 'email' ? 'selected' : ''}`}>
+                            <input
+                              type="radio"
+                              name="preferredContact"
+                              value="email"
+                              checked={formData.preferredContact === 'email'}
+                              onChange={handleChange}
+                              required
+                            />
+                            <div className="option-content">
+                              <FaEnvelope className="method-icon email-icon" />
+                              <span>Email</span>
+                              <small>Formal communication</small>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="message" className="form-label">
+                        <FaCommentDots className="label-icon" /> Project Description *
+                      </label>
+                      <textarea
+                        id="message"
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        className="form-textarea"
+                        required
+                        rows="6"
+                        placeholder={selectedService 
+                          ? "Add any additional details about your service request, specific requirements, timeline expectations, etc..."
+                          : "Describe your project in detail: goals, requirements, target audience, colors, examples, etc..."}
+                      />
+                      <small className="form-hint">
+                        Be as detailed as possible. Include any references, examples, or specific requirements.
+                        {selectedService && " Your selected service information is already included."}
+                      </small>
+                    </div>
+
+                    <div className="form-agreement">
+                      <label className="checkbox-label">
+                        <input 
+                          type="checkbox" 
+                          name="agreeToTerms"
+                          checked={formData.agreeToTerms}
+                          onChange={handleChange}
+                          required
+                        />
+                        <span>
+                          I agree that Fast Multimedia can contact me regarding this project request *
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="form-footer">
+                      <button 
+                        type="submit" 
+                        className={`submit-btn ${isChristmasMode ? 'btn-christmas' : ''}`}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <>
+                            <FaSpinner className="spinner" /> Preparing...
+                          </>
+                        ) : (
+                          <>
+                            {formData.preferredContact === 'whatsapp' ? (
+                              <>
+                                <FaWhatsapp /> Send via WhatsApp
+                              </>
+                            ) : (
+                              <>
+                                <FaPaperPlane /> Send via Email
+                              </>
+                            )}
+                          </>
+                        )}
+                      </button>
+                      
+                      <div className="form-instructions">
+                        <p className="instructions-title">
+                          <strong>How it works:</strong>
+                        </p>
+                        <ol className="instructions-list">
+                          <li>Fill out all required fields above</li>
+                          <li>Click "{formData.preferredContact === 'whatsapp' ? 'Send via WhatsApp' : 'Send via Email'}"</li>
+                          <li>{formData.preferredContact === 'whatsapp' ? 'WhatsApp will open with your project details' : 'Your email client will open with your project details'}</li>
+                          <li>Review and send the message to us</li>
+                          <li>We'll contact you within 24 hours (Christmas projects: within 4 hours)</li>
+                        </ol>
+                      </div>
+                    </div>
+                  </form>
+                )}
+              </div>
+
+              <div className="quick-contact-sidebar">
+                <div className="contact-card">
+                  <h3><FaBolt className="card-icon" /> Quick Contact</h3>
+                  <p>Prefer to contact us directly?</p>
+                  
+                  <div className="quick-actions">
+                    <a 
+                      href={`https://wa.me/${whatsappNumber}?text=Hi%20Fast%20Multimedia!%20I%20want%20to%20discuss%20a%20project.`}
+                      className="btn btn-whatsapp"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FaWhatsapp /> Chat on WhatsApp
+                    </a>
+                    
+                    <a 
+                      href={`mailto:${emailAddress}?subject=Project%20Inquiry`}
+                      className="btn btn-email"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FaEnvelope /> Send Email
+                    </a>
+                  </div>
+                  
+                  <div className="contact-info">
+                    <div className="info-item">
+                      <FaPhoneAlt className="info-icon" />
+                      <div>
+                        <strong>Call Us</strong>
+                        <span>{displayWhatsappNumber}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="info-item">
+                      <FaClock className="info-icon" />
+                      <div>
+                        <strong>Response Time</strong>
+                        <span>Within 24 hours</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="browse-services-card">
+                  <h3><FaSearch className="card-icon" /> Browse Services</h3>
+                  <p>Not sure what you need? Browse our services:</p>
+                  <div className="service-categories">
+                    <button 
+                      className="service-category-btn"
+                      onClick={() => navigate('/services#design-services')}
+                      type="button"
+                    >
+                      <FaPalette className="btn-icon" />
+                      <span>Graphic Design</span>
+                    </button>
+                    <button 
+                      className="service-category-btn"
+                      onClick={() => navigate('/services#tech-services')}
+                      type="button"
+                    >
+                      <FaTools className="btn-icon" />
+                      <span>Tech Support</span>
+                    </button>
+                    <button 
+                      className="service-category-btn"
+                      onClick={() => navigate('/services#pricing-section')}
+                      type="button"
+                    >
+                      <FaBox className="btn-icon" />
+                      <span>Packages</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className={`faq-section ${isChristmasMode ? 'christmas-faq' : ''}`}>
+          <div className="container">
+            <div className="section-header animate-on-scroll">
+              <h2 className="section-title">
+                Frequently Asked Questions
+              </h2>
+              <p className="section-subtitle">
+                Common questions about our services and process
+              </p>
+            </div>
+
+            <div className="faq-grid">
+              {faqs.map((faq, index) => (
+                <div 
+                  key={index} 
+                  className={`faq-item animate-on-scroll ${activeFAQ === index ? 'active' : ''}`}
+                  onClick={() => toggleFAQ(index)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && toggleFAQ(index)}
+                >
+                  <div className="faq-question">
+                    <h3 className="question-title">
+                      {faq.question}
+                    </h3>
+                    {activeFAQ === index ? (
+                      <FaChevronUp className="faq-chevron active" />
+                    ) : (
+                      <FaChevronDown className="faq-chevron" />
+                    )}
+                  </div>
+                  <div className={`faq-answer ${activeFAQ === index ? 'show' : ''}`}>
+                    <p>{faq.answer}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   );
 };
