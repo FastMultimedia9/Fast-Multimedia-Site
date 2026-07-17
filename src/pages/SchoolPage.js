@@ -9,8 +9,7 @@ import {
   FaLightbulb, FaHeart, 
   FaUserGraduate, FaBriefcase, FaBuilding, FaUserTie,
   FaGlobe, FaPaintBrush, FaTools, FaNetworkWired,
-  FaHeadset, FaShieldAlt, FaWifi, FaServer,
-  FaWhatsapp
+  FaHeadset, FaWhatsapp
 } from 'react-icons/fa';
 import './SchoolPage.css';
 
@@ -59,7 +58,6 @@ const SchoolPage = () => {
 
   const startDate = getStartDate();
 
-  // All 5 courses defined here
   const courses = [
     {
       id: 'basic-ict',
@@ -73,7 +71,7 @@ const SchoolPage = () => {
       actualPrice: 400,
       monthlyInstallment: 220,
       description: 'Learn essential computer skills, Microsoft Office, and internet fundamentals.',
-      longDescription: 'Master the fundamental computer skills needed for modern workplaces. This comprehensive course covers computer basics, Microsoft Office applications, internet navigation, email management, and essential digital literacy skills. Perfect for beginners, students, job seekers, and professionals looking to enhance their office productivity.',
+      longDescription: 'Master the fundamental computer skills needed for modern workplaces. This comprehensive course covers computer basics, Microsoft Office applications, internet navigation, email management, and essential digital literacy skills.',
       icon: <FaLaptop />,
       image: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -109,7 +107,7 @@ const SchoolPage = () => {
       actualPrice: 500,
       monthlyInstallment: 275,
       description: 'Learn Photoshop, Illustrator, InDesign and master visual communication.',
-      longDescription: 'Unlock your creative potential with our Graphic Design course. You will learn industry-standard software and design principles that will enable you to create stunning visual content for print and digital media. Perfect for aspiring designers, business owners, and creative professionals.',
+      longDescription: 'Unlock your creative potential with our Graphic Design course. You will learn industry-standard software and design principles that will enable you to create stunning visual content for print and digital media.',
       icon: <FaPaintBrush />,
       image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -145,7 +143,7 @@ const SchoolPage = () => {
       actualPrice: 550,
       monthlyInstallment: 290,
       description: 'Master HTML, CSS, JavaScript, and build modern websites.',
-      longDescription: 'Learn to build professional, responsive websites from scratch. This comprehensive web development course takes you from absolute beginner to a confident web developer. You will learn frontend technologies, understand how websites work, and build real-world projects.',
+      longDescription: 'Learn to build professional, responsive websites from scratch. This comprehensive web development course takes you from absolute beginner to a confident web developer.',
       icon: <FaCode />,
       image: 'https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -181,7 +179,7 @@ const SchoolPage = () => {
       actualPrice: 450,
       monthlyInstallment: 240,
       description: 'Learn computer networking fundamentals, setup, and configuration.',
-      longDescription: 'Master the essentials of computer networking. This course covers network fundamentals, IP addressing, network setup, troubleshooting, and security basics. Perfect for IT beginners, system administrators, and anyone looking to understand how networks work.',
+      longDescription: 'Master the essentials of computer networking. This course covers network fundamentals, IP addressing, network setup, troubleshooting, and security basics.',
       icon: <FaNetworkWired />,
       image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -217,7 +215,7 @@ const SchoolPage = () => {
       actualPrice: 600,
       monthlyInstallment: 320,
       description: 'Comprehensive IT support training for help desk and system administration.',
-      longDescription: 'Become a complete IT support professional. This intensive course covers hardware, software, networking, security, and customer service skills needed for IT support roles. Prepare for real-world IT support challenges and build a strong foundation for your IT career.',
+      longDescription: 'Become a complete IT support professional. This intensive course covers hardware, software, networking, security, and customer service skills needed for IT support roles.',
       icon: <FaHeadset />,
       image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -396,7 +394,6 @@ const SchoolPage = () => {
 
   return (
     <div className="school-page">
-      {/* Hero Section */}
       <section className="school-hero">
         <div className="school-hero-overlay"></div>
         <div className="school-hero-content">
@@ -440,7 +437,6 @@ const SchoolPage = () => {
         </div>
       </section>
 
-      {/* Tab Navigation */}
       <div className="school-tabs">
         <div className="container">
           <button 
@@ -471,7 +467,6 @@ const SchoolPage = () => {
       </div>
 
       <div className="container">
-        {/* Courses Tab */}
         {activeTab === 'courses' && (
           <>
             <div className="category-filter">
@@ -491,7 +486,6 @@ const SchoolPage = () => {
               ))}
             </div>
 
-            {/* Courses Grid - All 5 courses will display here */}
             <div className="courses-grid">
               {courses.filter(c => selectedCategory === 'all' || c.category === selectedCategory).map(course => (
                 <div 
@@ -561,7 +555,6 @@ const SchoolPage = () => {
           </>
         )}
 
-        {/* Bundle Discounts Tab */}
         {activeTab === 'bundle' && (
           <div className="bundle-section">
             <div className="bundle-header">
@@ -718,7 +711,6 @@ const SchoolPage = () => {
           </div>
         )}
 
-        {/* Course Details Tab */}
         {activeTab === 'details' && selectedCourse && (
           <div className="course-details">
             <button className="back-btn" onClick={() => setActiveTab('courses')}>
@@ -921,7 +913,6 @@ const SchoolPage = () => {
           </div>
         )}
 
-        {/* About School Tab */}
         {activeTab === 'about' && (
           <div className="about-school">
             <div className="about-hero">
@@ -1031,7 +1022,6 @@ const SchoolPage = () => {
           </div>
         )}
 
-        {/* Contact / Enroll Tab */}
         {activeTab === 'contact' && (
           <div className="contact-school">
             <div className="contact-header">
@@ -1232,7 +1222,6 @@ const SchoolPage = () => {
         )}
       </div>
 
-      {/* Footer CTA */}
       <div className="school-footer-cta">
         <div className="container">
           <h2><FaRocket /> Start Your Learning Journey Today</h2>
