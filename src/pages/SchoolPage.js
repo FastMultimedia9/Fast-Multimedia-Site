@@ -61,7 +61,7 @@ const SchoolPage = () => {
       title: 'Basic I.C.T & Office',
       category: 'Technology',
       level: 'Beginner',
-      duration: '3 Months',
+      duration: '2 Months',
       price: 600,
       fullPrice: 'GH₵ 600',
       installmentPrice: 'GH₵ 220/month',
@@ -96,7 +96,7 @@ const SchoolPage = () => {
       title: 'Graphic Design',
       category: 'Design',
       level: 'Beginner to Intermediate',
-      duration: '3 Months',
+      duration: '2 Months',
       price: 750,
       fullPrice: 'GH₵ 750',
       installmentPrice: 'GH₵ 275/month',
@@ -131,7 +131,7 @@ const SchoolPage = () => {
       title: 'Web Development',
       category: 'Technology',
       level: 'Beginner to Advanced',
-      duration: '3 Months',
+      duration: '2 Months',
       price: 800,
       fullPrice: 'GH₵ 800',
       installmentPrice: 'GH₵ 290/month',
@@ -237,7 +237,7 @@ const SchoolPage = () => {
       setIsSubmitting(true);
 
       try {
-        alert(`✅ Thank you ${enquiryName}!\n\nYour BUNDLE enrollment for ${selectedBundleCourses.length} courses has been received!\n\n📚 Courses: ${coursesList}\n💰 Original Price: GH₵ ${totalOriginal}\n🎉 Discount: ${bundlePrice.discountPercent}% OFF (Save GH₵ ${discountAmount})\n💵 Final Price: GH₵ ${finalAmount}\n💳 Payment Plan: ${bundlePaymentPlan === 'full' ? 'Full Payment' : `Installment - GH₵ ${bundleMonthlyInstallment}/month for ${bundleInstallmentMonths} months`}\n\nWe will contact you within 24 hours with payment instructions and course access details.\n\n📅 Start Date: ${startDate}\n⏱️ Duration: 3 Months per course\n💻 Format: 100% Online`);
+        alert(`✅ Thank you ${enquiryName}!\n\nYour BUNDLE enrollment for ${selectedBundleCourses.length} courses has been received!\n\n📚 Courses: ${coursesList}\n💰 Original Price: GH₵ ${totalOriginal}\n🎉 Discount: ${bundlePrice.discountPercent}% OFF (Save GH₵ ${discountAmount})\n💵 Final Price: GH₵ ${finalAmount}\n💳 Payment Plan: ${bundlePaymentPlan === 'full' ? 'Full Payment' : `Installment - GH₵ ${bundleMonthlyInstallment}/month for ${bundleInstallmentMonths} months`}\n\nWe will contact you within 24 hours with payment instructions and course access details.\n\n📅 Start Date: ${startDate}\n⏱️ Duration: 2 Months per course\n💻 Format: 100% Online`);
         resetBundleForm();
       } catch (error) {
         console.error('Error:', error);
@@ -253,7 +253,7 @@ const SchoolPage = () => {
       setIsSubmitting(true);
 
       try {
-        alert(`✅ Thank you ${enquiryName}!\n\nYour enrollment request for ${courseValue} has been received.\n\nWe will contact you within 24 hours with payment instructions and course access details.\n\n📅 Start Date: ${startDate}\n⏱️ Duration: 3 Months\n💻 Format: 100% Online`);
+        alert(`✅ Thank you ${enquiryName}!\n\nYour enrollment request for ${courseValue} has been received.\n\nWe will contact you within 24 hours with payment instructions and course access details.\n\n📅 Start Date: ${startDate}\n⏱️ Duration: 2 Months\n💻 Format: 100% Online`);
         resetSingleForm();
       } catch (error) {
         console.error('Error:', error);
@@ -306,7 +306,7 @@ const SchoolPage = () => {
             Welcome to <span className="gradient-text">Fast Multimedia</span> Institute
           </h1>
           <p className="school-hero-subtitle">
-            3 Months Online Courses • 100% Online • Certificate Awarded
+            2 Months Online Courses • 100% Online • Certificate Awarded
           </p>
           <div className="school-hero-badge">
             <span className="hero-badge"><FaCalendarAlt /> Start Date: {startDate}</span>
@@ -403,7 +403,7 @@ const SchoolPage = () => {
                   <div className="course-card-image">
                     <img src={course.image} alt={course.title} />
                     <div className="course-category">{course.category}</div>
-                    <div className="course-badge">3 Months</div>
+                    <div className="course-badge">2 Months</div>
                   </div>
                   <div className="course-card-content">
                     <div className="course-icon">{course.icon}</div>
@@ -574,15 +574,15 @@ const SchoolPage = () => {
               <div className="installment-example">
                 <div className="installment-item">
                   <strong>Basic I.C.T & Office</strong>
-                  <span>GH₵ 220/month × 3 months</span>
+                  <span>GH₵ 220/month × 2 months</span>
                 </div>
                 <div className="installment-item">
                   <strong>Graphic Design</strong>
-                  <span>GH₵ 275/month × 3 months</span>
+                  <span>GH₵ 275/month × 2 months</span>
                 </div>
                 <div className="installment-item">
                   <strong>Web Development</strong>
-                  <span>GH₵ 290/month × 3 months</span>
+                  <span>GH₵ 290/month × 2 months</span>
                 </div>
               </div>
               <div className="bundle-note">
@@ -603,7 +603,7 @@ const SchoolPage = () => {
               <div className="details-image">
                 <img src={selectedCourse.image} alt={selectedCourse.title} />
                 <div className="course-badge">{selectedCourse.category}</div>
-                <div className="duration-badge">3 Months Course</div>
+                <div className="duration-badge">2 Months Course</div>
               </div>
               <div className="details-info">
                 <h1 className="details-title">{selectedCourse.title}</h1>
@@ -710,7 +710,7 @@ const SchoolPage = () => {
 
             <div className="enquiry-section">
               <h2>Ready to Enroll?</h2>
-              <p>Start Date: {startDate} | 3 Months | 100% Online</p>
+              <p>Start Date: {startDate} | 2 Months | 100% Online</p>
               {!showEnquiryForm ? (
                 <button 
                   className="enquire-btn"
@@ -765,7 +765,7 @@ const SchoolPage = () => {
                     onChange={(e) => setSelectedPaymentOption(e.target.value)}
                   >
                     <option>Full Payment</option>
-                    <option>Installment Plan (3 months)</option>
+                    <option>Installment Plan (2 months)</option>
                   </select>
                   <textarea
                     name="message"
@@ -841,7 +841,7 @@ const SchoolPage = () => {
                 <div className="info-card">
                   <span className="info-icon"><FaClock /></span>
                   <h3>Duration</h3>
-                  <p>3 Months per course</p>
+                  <p>2 Months per course</p>
                 </div>
                 <div className="info-card">
                   <span className="info-icon"><FaGlobe /></span>
@@ -881,7 +881,7 @@ const SchoolPage = () => {
               <p>Start your learning journey with us today</p>
               <div className="enrollment-dates">
                 <span><FaCalendarAlt /> Start Date: {startDate}</span>
-                <span><FaClock /> Duration: 3 Months</span>
+                <span><FaClock /> Duration: 2 Months</span>
                 <span><FaGlobe /> 100% Online</span>
                 <span><FaCertificate /> Certificate Included</span>
               </div>
@@ -989,7 +989,7 @@ const SchoolPage = () => {
                         onChange={(e) => setSelectedPaymentOption(e.target.value)}
                       >
                         <option>Full Payment</option>
-                        <option>Installment Plan (3 months)</option>
+                        <option>Installment Plan (2 months)</option>
                       </select>
                     </>
                   ) : (
@@ -1071,7 +1071,7 @@ const SchoolPage = () => {
       <div className="school-footer-cta">
         <div className="container">
           <h2><FaRocket /> Start Your Learning Journey Today</h2>
-          <p>3 Months • 100% Online • Certificate Awarded • Start Date: {startDate}</p>
+          <p>2 Months • 100% Online • Certificate Awarded • Start Date: {startDate}</p>
           <div className="cta-buttons">
             <button 
               className="cta-button primary"
