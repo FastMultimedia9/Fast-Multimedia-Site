@@ -29,7 +29,7 @@ const AboutPage = () => {
       id: 1,
       name: 'Teye James',
       role: 'Founder & Creative Director',
-      bio: 'With over 8 years in graphic design and tech solutions, Teye leads our vision to provide exceptional design and technical services.',
+      bio: 'With over 8 years in graphic design, UI/UX Design and Tech Support, Teye leads our vision to provide exceptional design and technical services.',
       image: '/images/Teye-James.JPG'
     },
     {
