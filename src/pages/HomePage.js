@@ -21,7 +21,6 @@ const HomePage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
 
-  // Process Steps Data - With React Icons
   const processSteps = [
     {
       id: 1,
@@ -73,7 +72,6 @@ const HomePage = () => {
     }
   ];
 
-  // Why Choose Us - Duck Design Style
   const whyChooseUs = [
     {
       id: 1,
@@ -108,7 +106,6 @@ const HomePage = () => {
     }
   ];
 
-  // Service images - Using Unsplash for demonstration
   const serviceImages = [
     'https://images.unsplash.com/photo-1626785774573-4b799315345d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
     'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
@@ -116,7 +113,6 @@ const HomePage = () => {
     'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
   ];
 
-  // Tech service images
   const techServiceImages = [
     'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
     'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
@@ -124,7 +120,6 @@ const HomePage = () => {
     'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
   ];
 
-  // Updates & Announcements Data
   const updatesData = [
     {
       id: 1,
@@ -211,7 +206,6 @@ const HomePage = () => {
     },
   ];
 
-  // Handle scroll for toggle button
   React.useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -336,7 +330,6 @@ const HomePage = () => {
     }
   ];
 
-  // Social Media Links
   const socialLinks = [
     { icon: FaBehance, url: 'https://www.behance.net/abrantiekwame', label: 'Behance' },
     { icon: FaFacebookF, url: 'https://facebook.com/profile.php?id=100063646042170', label: 'Facebook' },
@@ -368,13 +361,9 @@ const HomePage = () => {
 
   return (
     <div className="homepage">
-      {/* ============================================
-          HERO SECTION - DUCK DESIGN STYLE
-          Image on Right, Text on Left
-          ============================================ */}
+      {/* Hero Section */}
       <section className="hero">
         <div className="hero-container">
-          {/* Left Column - Text Content */}
           <div className="hero-left">
             <div className={`service-toggle-wrapper ${isScrolled ? 'scrolled' : ''}`}>
               <div className="toggle-container">
@@ -432,7 +421,6 @@ const HomePage = () => {
               </button>
             </div>
 
-            {/* Social Media Links - With Actual URLs */}
             <div className="hero-social-list">
               {socialLinks.map((social, index) => {
                 const Icon = social.icon;
@@ -452,7 +440,6 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Right Column - Hero Image */}
           <div className="hero-right">
             <div className="hero-image-wrapper">
               <picture>
@@ -476,9 +463,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ============================================
-          UPDATES & ANNOUNCEMENTS SECTION
-          ============================================ */}
+      {/* Updates Section */}
       <section className="updates-section">
         <div className="container">
           <div className="section-header">
@@ -547,9 +532,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ============================================
-          PARTNER SECTION - DUCK DESIGN STYLE
-          ============================================ */}
+      {/* Partner Section */}
       <section className="partner-section">
         <div className="container">
           <div className="partner-section__col">
@@ -582,9 +565,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ============================================
-          OUR SERVICES - DUCK DESIGN STYLE (Carousel)
-          ============================================ */}
+      {/* Services Carousel */}
       <section className="services-carousel-section">
         <div className="container">
           <h2 className="section-title text-center">Our Services</h2>
@@ -621,9 +602,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ============================================
-          PORTFOLIO SECTION
-          ============================================ */}
+      {/* Portfolio Section */}
       <section className="portfolio-section">
         <div className="container">
           <div className="section-header">
@@ -672,9 +651,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ============================================
-          HOW IT WORKS - DUCK DESIGN STYLE
-          ============================================ */}
+      {/* How It Works Section */}
       <section className="steps-section">
         <div className="container">
           <div className="steps-section__header">
@@ -734,9 +711,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ============================================
-          WHY CHOOSE US - DUCK DESIGN STYLE
-          ============================================ */}
+      {/* Why Choose Us Section */}
       <section className="why-section">
         <div className="container">
           <div className="why-section__list">
@@ -766,9 +741,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ============================================
-          CTA - INTERESTED? SECTION
-          ============================================ */}
+      {/* CTA Box */}
       <section className="cta-boxbg">
         <div className="container">
           <div className="cta-boxbg__inner">
@@ -790,9 +763,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ============================================
-          SERVICES SECTION (Original Grid)
-          ============================================ */}
+      {/* Services Grid Section */}
       <section className="services-section">
         <div className="container">
           <div className="section-header">
@@ -840,9 +811,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ============================================
-          PRICING SECTION
-          ============================================ */}
+      {/* Pricing Section */}
       <section className="pricing-section">
         <div className="container">
           <div className="section-header">
@@ -871,9 +840,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ============================================
-          TESTIMONIALS SECTION
-          ============================================ */}
+      {/* Testimonials Section */}
       <section className="testimonials-section">
         <div className="container">
           <div className="section-header">
@@ -915,9 +882,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ============================================
-          PACKAGES MODAL
-          ============================================ */}
+      {/* Package Modal */}
       {showPackageModal && (
         <div className="modal-overlay" onClick={() => setShowPackageModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -980,9 +945,7 @@ const HomePage = () => {
         </div>
       )}
 
-      {/* ============================================
-          QUICK VIEW MODAL
-          ============================================ */}
+      {/* Quick View Modal */}
       {showQuickView && quickViewProject && (
         <div className="modal-overlay" onClick={() => setShowQuickView(false)}>
           <div className="modal-content quickview" onClick={(e) => e.stopPropagation()}>
@@ -1044,9 +1007,7 @@ const HomePage = () => {
         </div>
       )}
 
-      {/* ============================================
-          CTA SECTION
-          ============================================ */}
+      {/* CTA Section */}
       <section className="cta-section">
         <div className="container">
           <div className="cta-content">
