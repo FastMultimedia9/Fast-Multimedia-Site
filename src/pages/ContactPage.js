@@ -13,7 +13,7 @@ import {
   FaHandshake, FaShieldAlt, FaRocket,
   FaCheck, FaMinus, FaRegCircle
 } from 'react-icons/fa';
-import './ContactPage.css';
+import './ContactPage.css'; // CSS only affects this component
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({

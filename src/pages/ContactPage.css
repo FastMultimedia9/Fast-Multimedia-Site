@@ -1,5 +1,6 @@
 /* ContactPage.css - Duck Design Color Scheme */
 /* Gold/Orange/Cream Theme - No Purple, No Dark Mode */
+/* This CSS only applies to elements with classes from ContactPage.jsx */
 
 :root {
   --duck-gold: #ffca41;
@@ -17,13 +18,8 @@
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
+/* Base styles - scoped to .contact-page */
+.contact-page {
   font-family: var(--font-primary);
   background-color: var(--duck-cream);
   color: var(--duck-text);
@@ -31,7 +27,7 @@ body {
   overflow-x: hidden;
 }
 
-.container {
+.contact-page .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
@@ -40,7 +36,7 @@ body {
 /* ============================================
    BUTTONS
    ============================================ */
-.btn {
+.contact-page .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -59,49 +55,49 @@ body {
   color: var(--duck-dark);
 }
 
-.btn-primary {
+.contact-page .btn-primary {
   background: var(--gradient-gold);
   color: var(--duck-dark);
   box-shadow: 0 4px 15px rgba(255, 202, 65, 0.4);
 }
 
-.btn-primary:hover {
+.contact-page .btn-primary:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(255, 202, 65, 0.6);
 }
 
-.btn-secondary {
+.contact-page .btn-secondary {
   background: transparent;
   color: var(--duck-dark);
   border: 2px solid var(--duck-dark);
 }
 
-.btn-secondary:hover {
+.contact-page .btn-secondary:hover {
   background: rgba(22, 27, 38, 0.05);
   transform: translateY(-3px);
 }
 
-.btn-whatsapp {
+.contact-page .btn-whatsapp {
   background: #25D366;
   color: #ffffff;
   text-transform: none;
   letter-spacing: 0;
 }
 
-.btn-whatsapp:hover {
+.contact-page .btn-whatsapp:hover {
   background: #128C7E;
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
 }
 
-.btn-email {
+.contact-page .btn-email {
   background: #EA4335;
   color: #ffffff;
   text-transform: none;
   letter-spacing: 0;
 }
 
-.btn-email:hover {
+.contact-page .btn-email:hover {
   background: #C62828;
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(234, 67, 53, 0.4);
@@ -110,13 +106,13 @@ body {
 /* ============================================
    ANIMATIONS
    ============================================ */
-.animate-on-scroll {
+.contact-page .animate-on-scroll {
   opacity: 0;
   transform: translateY(30px);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.animate-on-scroll.animated {
+.contact-page .animate-on-scroll.animated {
   opacity: 1;
   transform: translateY(0);
 }
@@ -124,7 +120,7 @@ body {
 /* ============================================
    HERO SECTION
    ============================================ */
-.contact-hero {
+.contact-page .contact-hero {
   padding: 120px 0 80px;
   background: var(--duck-cream);
   text-align: center;
@@ -132,16 +128,16 @@ body {
   overflow: hidden;
 }
 
-.contact-hero.christmas-hero {
+.contact-page .contact-hero.christmas-hero {
   background: linear-gradient(180deg, #fef3d8 0%, #fef9ef 100%);
 }
 
-.contact-hero .hero-content {
+.contact-page .hero-content {
   max-width: 800px;
   margin: 0 auto;
 }
 
-.contact-title {
+.contact-page .contact-title {
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 700;
   color: var(--duck-dark);
@@ -149,7 +145,7 @@ body {
   line-height: 1.2;
 }
 
-.contact-subtitle {
+.contact-page .contact-subtitle {
   font-size: 1.2rem;
   color: var(--duck-text);
   max-width: 600px;
@@ -157,7 +153,7 @@ body {
   line-height: 1.7;
 }
 
-.christmas-badge {
+.contact-page .christmas-badge {
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
@@ -173,12 +169,12 @@ body {
   box-shadow: 0 4px 15px rgba(255, 202, 65, 0.3);
 }
 
-.badge-icon {
+.contact-page .badge-icon {
   color: var(--duck-dark);
   font-size: 1.2rem;
 }
 
-.selected-package-badge {
+.contact-page .selected-package-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -191,7 +187,7 @@ body {
 /* ============================================
    SELECTED SERVICE CARD
    ============================================ */
-.selected-service-card {
+.contact-page .selected-service-card {
   background: var(--duck-white);
   border-radius: 16px;
   padding: 24px 30px;
@@ -201,7 +197,7 @@ body {
   box-shadow: 0 8px 30px var(--duck-shadow);
 }
 
-.service-card-header {
+.contact-page .service-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -212,7 +208,7 @@ body {
   border-bottom: 1px solid var(--duck-border);
 }
 
-.service-card-header h3 {
+.contact-page .service-card-header h3 {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--duck-dark);
@@ -221,17 +217,17 @@ body {
   gap: 10px;
 }
 
-.header-icon {
+.contact-page .header-icon {
   color: var(--duck-dark-gold);
   font-size: 1.2rem;
 }
 
-.service-card-actions {
+.contact-page .service-card-actions {
   display: flex;
   gap: 10px;
 }
 
-.btn-service-remove {
+.contact-page .btn-service-remove {
   background: #fee2e2;
   color: #dc2626;
   border: none;
@@ -247,12 +243,12 @@ body {
   font-family: var(--font-primary);
 }
 
-.btn-service-remove:hover {
+.contact-page .btn-service-remove:hover {
   background: #fecaca;
   transform: translateY(-2px);
 }
 
-.btn-service-add {
+.contact-page .btn-service-add {
   background: var(--duck-light-cream);
   color: var(--duck-dark);
   border: 1px solid var(--duck-border);
@@ -268,19 +264,19 @@ body {
   font-family: var(--font-primary);
 }
 
-.btn-service-add:hover {
+.contact-page .btn-service-add:hover {
   background: var(--duck-gold);
   border-color: var(--duck-gold);
   transform: translateY(-2px);
 }
 
-.service-card-content {
+.contact-page .service-card-content {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
 }
 
-.service-info {
+.contact-page .service-info {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -288,7 +284,7 @@ body {
   width: 100%;
 }
 
-.service-name {
+.contact-page .service-name {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -296,11 +292,11 @@ body {
   color: var(--duck-dark);
 }
 
-.icon-gold {
+.contact-page .icon-gold {
   color: var(--duck-dark-gold);
 }
 
-.service-category {
+.contact-page .service-category {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -311,7 +307,7 @@ body {
   color: var(--duck-dark);
 }
 
-.service-price {
+.contact-page .service-price {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -323,7 +319,7 @@ body {
   color: var(--duck-dark);
 }
 
-.service-badge.valentine-badge {
+.contact-page .service-badge.valentine-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -338,7 +334,7 @@ body {
 /* ============================================
    SELECTED PACKAGE CARD
    ============================================ */
-.selected-package-card {
+.contact-page .selected-package-card {
   background: var(--duck-white);
   border-radius: 16px;
   padding: 24px 30px;
@@ -348,7 +344,7 @@ body {
   box-shadow: 0 8px 30px var(--duck-shadow);
 }
 
-.package-header {
+.contact-page .package-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -359,7 +355,7 @@ body {
   border-bottom: 1px solid var(--duck-border);
 }
 
-.package-header h3 {
+.contact-page .package-header h3 {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--duck-dark);
@@ -368,27 +364,28 @@ body {
   gap: 10px;
 }
 
-.package-price {
+.contact-page .package-price {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--duck-dark-gold);
 }
 
-.package-features h4 {
+.contact-page .package-features h4 {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--duck-dark);
   margin-bottom: 10px;
 }
 
-.package-features ul {
+.contact-page .package-features ul {
   list-style: none;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+  padding: 0;
 }
 
-.package-features li {
+.contact-page .package-features li {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -399,7 +396,7 @@ body {
 /* ============================================
    SERVICE ADDED NOTIFICATION
    ============================================ */
-.service-added-notification {
+.contact-page .service-added-notification {
   position: fixed;
   top: 20px;
   right: 20px;
@@ -424,29 +421,29 @@ body {
   }
 }
 
-.notification-content {
+.contact-page .notification-content {
   display: flex;
   align-items: flex-start;
   gap: 12px;
 }
 
-.notification-icon {
+.contact-page .notification-icon {
   font-size: 1.5rem;
   color: var(--duck-dark-gold);
   margin-top: 2px;
 }
 
-.notification-text {
+.contact-page .notification-text {
   flex: 1;
 }
 
-.notification-text strong {
+.contact-page .notification-text strong {
   display: block;
   color: var(--duck-dark);
   font-size: 0.95rem;
 }
 
-.notification-price {
+.contact-page .notification-price {
   display: inline-block;
   background: var(--duck-light-cream);
   padding: 2px 12px;
@@ -457,7 +454,7 @@ body {
   margin-top: 4px;
 }
 
-.notification-close {
+.contact-page .notification-close {
   background: none;
   border: none;
   color: var(--duck-text);
@@ -467,7 +464,7 @@ body {
   transition: all 0.3s ease;
 }
 
-.notification-close:hover {
+.contact-page .notification-close:hover {
   color: var(--duck-dark);
   transform: rotate(90deg);
 }
@@ -475,7 +472,7 @@ body {
 /* ============================================
    SNOWFALL
    ============================================ */
-.snowfall {
+.contact-page .snowfall {
   position: fixed;
   top: 0;
   left: 0;
@@ -486,7 +483,7 @@ body {
   overflow: hidden;
 }
 
-.snowflake {
+.contact-page .snowflake {
   position: absolute;
   top: -10px;
   background: #ffffff;
@@ -507,19 +504,19 @@ body {
 /* ============================================
    CONTACT FORM SECTION
    ============================================ */
-.contact-form-section {
+.contact-page .contact-form-section {
   padding: 60px 0 80px;
   background: var(--duck-cream);
 }
 
-.contact-form-wrapper {
+.contact-page .contact-form-wrapper {
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: 40px;
   align-items: start;
 }
 
-.form-container {
+.contact-page .form-container {
   background: var(--duck-white);
   border-radius: 24px;
   padding: 48px;
@@ -527,26 +524,26 @@ body {
   border: 1px solid var(--duck-border);
 }
 
-.form-container.christmas-form {
+.contact-page .form-container.christmas-form {
   border-color: var(--duck-gold);
   box-shadow: 0 20px 60px rgba(255, 202, 65, 0.2);
 }
 
-.form-header {
+.contact-page .form-header {
   margin-bottom: 40px;
   text-align: center;
 }
 
-.form-header .section-title {
+.contact-page .form-header .section-title {
   font-size: clamp(1.8rem, 3vw, 2.5rem);
   margin-bottom: 10px;
 }
 
-.form-header .section-subtitle {
+.contact-page .form-header .section-subtitle {
   margin: 0 auto 16px;
 }
 
-.service-selection-hint {
+.contact-page .service-selection-hint {
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -557,11 +554,11 @@ body {
   color: var(--duck-dark);
 }
 
-.hint-icon {
+.contact-page .hint-icon {
   color: var(--duck-dark-gold);
 }
 
-.btn-service-browse {
+.contact-page .btn-service-browse {
   background: var(--gradient-gold);
   border: none;
   padding: 4px 16px;
@@ -574,7 +571,7 @@ body {
   color: var(--duck-dark);
 }
 
-.btn-service-browse:hover {
+.contact-page .btn-service-browse:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 15px rgba(255, 202, 65, 0.3);
 }
@@ -582,13 +579,13 @@ body {
 /* ============================================
    FORM ELEMENTS
    ============================================ */
-.form-section-header {
+.contact-page .form-section-header {
   margin: 30px 0 20px;
   padding-bottom: 10px;
   border-bottom: 2px solid var(--duck-border);
 }
 
-.form-section-header h3 {
+.contact-page .form-section-header h3 {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--duck-dark);
@@ -597,21 +594,21 @@ body {
   gap: 10px;
 }
 
-.section-icon {
+.contact-page .section-icon {
   color: var(--duck-dark-gold);
 }
 
-.form-row {
+.contact-page .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
-.form-group {
+.contact-page .form-group {
   margin-bottom: 20px;
 }
 
-.form-label {
+.contact-page .form-label {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -621,14 +618,14 @@ body {
   margin-bottom: 6px;
 }
 
-.label-icon {
+.contact-page .label-icon {
   color: var(--duck-dark-gold);
   font-size: 0.85rem;
 }
 
-.form-input,
-.form-select,
-.form-textarea {
+.contact-page .form-input,
+.contact-page .form-select,
+.contact-page .form-textarea {
   width: 100%;
   padding: 12px 16px;
   border: 2px solid var(--duck-border);
@@ -640,21 +637,21 @@ body {
   color: var(--duck-dark);
 }
 
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
+.contact-page .form-input:focus,
+.contact-page .form-select:focus,
+.contact-page .form-textarea:focus {
   outline: none;
   border-color: var(--duck-gold);
   box-shadow: 0 0 0 4px rgba(255, 202, 65, 0.1);
   background: var(--duck-white);
 }
 
-.form-textarea {
+.contact-page .form-textarea {
   resize: vertical;
   min-height: 150px;
 }
 
-.form-hint {
+.contact-page .form-hint {
   display: block;
   font-size: 0.8rem;
   color: var(--duck-text);
@@ -664,26 +661,26 @@ body {
 /* ============================================
    CONTACT METHOD SELECTOR
    ============================================ */
-.contact-method-selector {
+.contact-page .contact-method-selector {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-top: 4px;
 }
 
-.method-option {
+.contact-page .method-option {
   position: relative;
   cursor: pointer;
 }
 
-.method-option input {
+.contact-page .method-option input {
   position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.method-option .option-content {
+.contact-page .method-option .option-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -695,31 +692,31 @@ body {
   text-align: center;
 }
 
-.method-option .option-content .method-icon {
+.contact-page .method-option .option-content .method-icon {
   font-size: 2rem;
   margin-bottom: 6px;
 }
 
-.method-option .option-content .whatsapp-icon {
+.contact-page .method-option .option-content .whatsapp-icon {
   color: #25D366;
 }
 
-.method-option .option-content .email-icon {
+.contact-page .method-option .option-content .email-icon {
   color: #EA4335;
 }
 
-.method-option .option-content span {
+.contact-page .method-option .option-content span {
   font-weight: 600;
   font-size: 0.95rem;
   color: var(--duck-dark);
 }
 
-.method-option .option-content small {
+.contact-page .method-option .option-content small {
   font-size: 0.75rem;
   color: var(--duck-text);
 }
 
-.method-option.selected .option-content {
+.contact-page .method-option.selected .option-content {
   border-color: var(--duck-gold);
   background: var(--duck-light-cream);
   box-shadow: 0 0 0 4px rgba(255, 202, 65, 0.1);
@@ -728,11 +725,11 @@ body {
 /* ============================================
    FORM AGREEMENT
    ============================================ */
-.form-agreement {
+.contact-page .form-agreement {
   margin: 24px 0;
 }
 
-.checkbox-label {
+.contact-page .checkbox-label {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -741,7 +738,7 @@ body {
   color: var(--duck-text);
 }
 
-.checkbox-label input[type="checkbox"] {
+.contact-page .checkbox-label input[type="checkbox"] {
   width: 20px;
   height: 20px;
   min-width: 20px;
@@ -753,11 +750,11 @@ body {
 /* ============================================
    FORM FOOTER
    ============================================ */
-.form-footer {
+.contact-page .form-footer {
   margin-top: 30px;
 }
 
-.submit-btn {
+.contact-page .submit-btn {
   width: 100%;
   padding: 16px 32px;
   border: none;
@@ -778,18 +775,18 @@ body {
   box-shadow: 0 4px 15px rgba(255, 202, 65, 0.4);
 }
 
-.submit-btn:hover {
+.contact-page .submit-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(255, 202, 65, 0.6);
 }
 
-.submit-btn:disabled {
+.contact-page .submit-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
 }
 
-.spinner {
+.contact-page .spinner {
   animation: spin 0.8s ease infinite;
 }
 
@@ -800,7 +797,7 @@ body {
 /* ============================================
    FORM INSTRUCTIONS
    ============================================ */
-.form-instructions {
+.contact-page .form-instructions {
   margin-top: 24px;
   padding: 20px 24px;
   background: var(--duck-light-cream);
@@ -808,19 +805,19 @@ body {
   border: 1px solid var(--duck-border);
 }
 
-.instructions-title {
+.contact-page .instructions-title {
   font-size: 0.95rem;
   color: var(--duck-dark);
   margin-bottom: 8px;
 }
 
-.instructions-list {
+.contact-page .instructions-list {
   list-style: none;
   padding: 0;
   counter-reset: step-counter;
 }
 
-.instructions-list li {
+.contact-page .instructions-list li {
   counter-increment: step-counter;
   padding: 4px 0 4px 32px;
   position: relative;
@@ -828,7 +825,7 @@ body {
   color: var(--duck-text);
 }
 
-.instructions-list li::before {
+.contact-page .instructions-list li::before {
   content: counter(step-counter);
   position: absolute;
   left: 0;
@@ -848,25 +845,25 @@ body {
 /* ============================================
    SUCCESS MESSAGE
    ============================================ */
-.success-message {
+.contact-page .success-message {
   text-align: center;
   padding: 40px 20px;
 }
 
-.success-icon {
+.contact-page .success-icon {
   font-size: 4rem;
   color: var(--duck-dark-gold);
   margin-bottom: 20px;
 }
 
-.success-title {
+.contact-page .success-title {
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--duck-dark);
   margin-bottom: 12px;
 }
 
-.success-text {
+.contact-page .success-text {
   font-size: 1.05rem;
   color: var(--duck-text);
   max-width: 500px;
@@ -874,7 +871,7 @@ body {
   line-height: 1.7;
 }
 
-.selected-service-summary {
+.contact-page .selected-service-summary {
   background: var(--duck-light-cream);
   padding: 20px;
   border-radius: 12px;
@@ -882,14 +879,14 @@ body {
   max-width: 400px;
 }
 
-.selected-service-summary h4 {
+.contact-page .selected-service-summary h4 {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--duck-dark);
   margin-bottom: 8px;
 }
 
-.summary-item {
+.contact-page .summary-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -900,12 +897,12 @@ body {
   color: var(--duck-dark);
 }
 
-.summary-price {
+.contact-page .summary-price {
   font-weight: 700;
   color: var(--duck-dark-gold);
 }
 
-.backup-instructions {
+.contact-page .backup-instructions {
   background: #f8f9fa;
   padding: 16px 20px;
   border-radius: 12px;
@@ -914,20 +911,20 @@ body {
   border: 1px solid var(--duck-border);
 }
 
-.backup-instructions p {
+.contact-page .backup-instructions p {
   font-size: 0.95rem;
   color: var(--duck-dark);
   margin-bottom: 8px;
 }
 
-.instructions-text {
+.contact-page .instructions-text {
   font-size: 0.9rem;
   color: var(--duck-text);
   white-space: pre-line;
   line-height: 1.8;
 }
 
-.success-actions {
+.contact-page .success-actions {
   display: flex;
   gap: 12px;
   justify-content: center;
@@ -935,7 +932,7 @@ body {
   margin-top: 24px;
 }
 
-.success-actions .btn {
+.contact-page .success-actions .btn {
   text-transform: none;
   letter-spacing: 0;
 }
@@ -943,13 +940,13 @@ body {
 /* ============================================
    QUICK CONTACT SIDEBAR
    ============================================ */
-.quick-contact-sidebar {
+.contact-page .quick-contact-sidebar {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.contact-card {
+.contact-page .contact-card {
   background: var(--duck-white);
   border-radius: 16px;
   padding: 28px 24px;
@@ -957,7 +954,7 @@ body {
   border: 1px solid var(--duck-border);
 }
 
-.contact-card h3 {
+.contact-page .contact-card h3 {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--duck-dark);
@@ -967,24 +964,24 @@ body {
   margin-bottom: 8px;
 }
 
-.card-icon {
+.contact-page .card-icon {
   color: var(--duck-dark-gold);
 }
 
-.contact-card p {
+.contact-page .contact-card p {
   color: var(--duck-text);
   font-size: 0.95rem;
   margin-bottom: 16px;
 }
 
-.quick-actions {
+.contact-page .quick-actions {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-bottom: 20px;
 }
 
-.quick-actions .btn {
+.contact-page .quick-actions .btn {
   width: 100%;
   justify-content: center;
   text-transform: none;
@@ -992,35 +989,35 @@ body {
   font-size: 0.95rem;
 }
 
-.contact-info {
+.contact-page .contact-info {
   border-top: 1px solid var(--duck-border);
   padding-top: 16px;
 }
 
-.info-item {
+.contact-page .info-item {
   display: flex;
   gap: 12px;
   padding: 8px 0;
 }
 
-.info-icon {
+.contact-page .info-icon {
   color: var(--duck-dark-gold);
   font-size: 1.1rem;
   width: 24px;
   margin-top: 2px;
 }
 
-.info-item div {
+.contact-page .info-item div {
   display: flex;
   flex-direction: column;
 }
 
-.info-item strong {
+.contact-page .info-item strong {
   font-size: 0.85rem;
   color: var(--duck-dark);
 }
 
-.info-item span:last-child {
+.contact-page .info-item span:last-child {
   font-size: 0.9rem;
   color: var(--duck-text);
 }
@@ -1028,14 +1025,14 @@ body {
 /* ============================================
    BROWSE SERVICES CARD
    ============================================ */
-.browse-services-card {
+.contact-page .browse-services-card {
   background: var(--duck-light-cream);
   border-radius: 16px;
   padding: 24px;
   border: 1px solid var(--duck-border);
 }
 
-.browse-services-card h3 {
+.contact-page .browse-services-card h3 {
   font-size: 1rem;
   font-weight: 700;
   color: var(--duck-dark);
@@ -1045,19 +1042,19 @@ body {
   margin-bottom: 6px;
 }
 
-.browse-services-card p {
+.contact-page .browse-services-card p {
   font-size: 0.9rem;
   color: var(--duck-text);
   margin-bottom: 16px;
 }
 
-.service-categories {
+.contact-page .service-categories {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.service-category-btn {
+.contact-page .service-category-btn {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1073,12 +1070,12 @@ body {
   color: var(--duck-dark);
 }
 
-.btn-icon {
+.contact-page .btn-icon {
   color: var(--duck-dark-gold);
   font-size: 1.1rem;
 }
 
-.service-category-btn:hover {
+.contact-page .service-category-btn:hover {
   border-color: var(--duck-gold);
   transform: translateX(4px);
   box-shadow: 0 4px 15px rgba(255, 202, 65, 0.2);
@@ -1087,25 +1084,25 @@ body {
 /* ============================================
    FAQ SECTION
    ============================================ */
-.faq-section {
+.contact-page .faq-section {
   background: var(--duck-white);
   padding: 80px 0;
 }
 
-.faq-section.christmas-faq {
+.contact-page .faq-section.christmas-faq {
   background: var(--duck-cream);
 }
 
-.faq-section .section-header {
+.contact-page .faq-section .section-header {
   margin-bottom: 50px;
 }
 
-.faq-grid {
+.contact-page .faq-grid {
   max-width: 800px;
   margin: 0 auto;
 }
 
-.faq-item {
+.contact-page .faq-item {
   background: var(--duck-cream);
   border: 1px solid var(--duck-border);
   border-radius: 12px;
@@ -1115,16 +1112,16 @@ body {
   transition: all 0.3s ease;
 }
 
-.faq-item:hover {
+.contact-page .faq-item:hover {
   border-color: var(--duck-gold);
 }
 
-.faq-item.active {
+.contact-page .faq-item.active {
   border-color: var(--duck-gold);
   box-shadow: 0 4px 20px rgba(255, 202, 65, 0.15);
 }
 
-.faq-question {
+.contact-page .faq-question {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1132,35 +1129,35 @@ body {
   gap: 16px;
 }
 
-.question-title {
+.contact-page .question-title {
   font-size: 1rem;
   font-weight: 600;
   color: var(--duck-dark);
   margin: 0;
 }
 
-.faq-chevron {
+.contact-page .faq-chevron {
   color: var(--duck-dark-gold);
   font-size: 0.9rem;
   transition: transform 0.3s ease;
 }
 
-.faq-chevron.active {
+.contact-page .faq-chevron.active {
   transform: rotate(180deg);
 }
 
-.faq-answer {
+.contact-page .faq-answer {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease, padding 0.3s ease;
 }
 
-.faq-answer.show {
+.contact-page .faq-answer.show {
   max-height: 300px;
   padding: 0 24px 20px;
 }
 
-.faq-answer p {
+.contact-page .faq-answer p {
   font-size: 0.95rem;
   color: var(--duck-text);
   line-height: 1.7;
@@ -1172,11 +1169,11 @@ body {
    ============================================ */
 
 @media (max-width: 1024px) {
-  .contact-form-wrapper {
+  .contact-page .contact-form-wrapper {
     grid-template-columns: 1fr;
   }
   
-  .quick-contact-sidebar {
+  .contact-page .quick-contact-sidebar {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
@@ -1184,125 +1181,125 @@ body {
 }
 
 @media (max-width: 768px) {
-  .contact-hero {
+  .contact-page .contact-hero {
     padding: 80px 0 40px;
   }
   
-  .form-container {
+  .contact-page .form-container {
     padding: 24px 20px;
   }
   
-  .form-row {
+  .contact-page .form-row {
     grid-template-columns: 1fr;
     gap: 0;
   }
   
-  .contact-method-selector {
+  .contact-page .contact-method-selector {
     grid-template-columns: 1fr 1fr;
   }
   
-  .quick-contact-sidebar {
+  .contact-page .quick-contact-sidebar {
     grid-template-columns: 1fr;
   }
   
-  .package-features ul {
+  .contact-page .package-features ul {
     grid-template-columns: 1fr;
   }
   
-  .christmas-badge {
+  .contact-page .christmas-badge {
     font-size: 0.95rem;
     padding: 10px 20px;
   }
   
-  .selected-package-badge {
+  .contact-page .selected-package-badge {
     display: block;
     margin-left: 0;
     margin-top: 8px;
   }
   
-  .service-card-header {
+  .contact-page .service-card-header {
     flex-direction: column;
     align-items: flex-start;
   }
   
-  .service-card-actions {
+  .contact-page .service-card-actions {
     width: 100%;
   }
   
-  .btn-service-remove,
-  .btn-service-add {
+  .contact-page .btn-service-remove,
+  .contact-page .btn-service-add {
     flex: 1;
     justify-content: center;
   }
   
-  .faq-question {
+  .contact-page .faq-question {
     padding: 16px 20px;
   }
   
-  .question-title {
+  .contact-page .question-title {
     font-size: 0.9rem;
   }
   
-  .faq-answer.show {
+  .contact-page .faq-answer.show {
     padding: 0 20px 16px;
   }
 }
 
 @media (max-width: 480px) {
-  .contact-hero {
+  .contact-page .contact-hero {
     padding: 60px 0 30px;
   }
   
-  .form-container {
+  .contact-page .form-container {
     padding: 20px 16px;
   }
   
-  .contact-method-selector {
+  .contact-page .contact-method-selector {
     grid-template-columns: 1fr;
   }
   
-  .success-actions {
+  .contact-page .success-actions {
     flex-direction: column;
   }
   
-  .success-actions .btn {
+  .contact-page .success-actions .btn {
     width: 100%;
     justify-content: center;
   }
   
-  .service-card-content {
+  .contact-page .service-card-content {
     flex-direction: column;
   }
   
-  .service-info {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .package-header {
+  .contact-page .service-info {
     flex-direction: column;
     align-items: flex-start;
   }
   
-  .christmas-badge {
+  .contact-page .package-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .contact-page .christmas-badge {
     font-size: 0.85rem;
     padding: 8px 16px;
   }
   
-  .contact-title {
+  .contact-page .contact-title {
     font-size: 1.8rem;
   }
   
-  .contact-subtitle {
+  .contact-page .contact-subtitle {
     font-size: 1rem;
   }
   
-  .submit-btn {
+  .contact-page .submit-btn {
     font-size: 0.95rem;
     padding: 14px 20px;
   }
   
-  .quick-contact-sidebar {
+  .contact-page .quick-contact-sidebar {
     grid-template-columns: 1fr;
   }
 }
