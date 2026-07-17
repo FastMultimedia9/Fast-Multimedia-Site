@@ -26,6 +26,7 @@ a {
   color: inherit;
 }
 
+/* ===== CONTAINERS ===== */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -38,7 +39,7 @@ a {
   padding: 0 40px;
 }
 
-/* ===== UTILITY CLASSES ===== */
+/* ===== UTILITY ===== */
 .text-center {
   text-align: center;
 }
@@ -64,10 +65,6 @@ a {
   text-align: left;
 }
 
-.section-title span {
-  color: #2563EB;
-}
-
 .section-pretitle {
   font-size: 0.85rem;
   font-weight: 600;
@@ -86,6 +83,15 @@ a {
 
 .section-txt.text-left {
   text-align: left;
+}
+
+.page-pretitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #2563EB;
+  margin-bottom: 12px;
 }
 
 .page-title {
@@ -113,6 +119,7 @@ a {
   transition: all 0.3s ease;
   cursor: pointer;
   border: none;
+  text-decoration: none;
 }
 
 .btn-primary {
@@ -290,15 +297,6 @@ a {
   max-width: 580px;
 }
 
-.page-pretitle {
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #2563EB;
-  margin-bottom: 12px;
-}
-
 .solution-section__txt p {
   color: #4B5563;
   line-height: 1.8;
@@ -374,7 +372,13 @@ a {
   transform: translateY(-4px);
 }
 
-/* ===== TEXT IMAGE SECTION (Team/About) ===== */
+.partner-section__item span {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #161B26;
+}
+
+/* ===== TEXT IMAGE SECTION ===== */
 .txtimg-section {
   padding: 100px 0;
   background: #FFFFFF;
@@ -798,7 +802,10 @@ a {
   .partner-section__item {
     padding: 16px 12px;
     min-height: 60px;
-    font-size: 0.9rem;
+  }
+  
+  .partner-section__item span {
+    font-size: 1rem;
   }
   
   .txtimg-section {
@@ -889,9 +896,12 @@ a {
   }
   
   .partner-section__item {
-    font-size: 0.8rem;
     padding: 12px 8px;
     min-height: 50px;
+  }
+  
+  .partner-section__item span {
+    font-size: 0.85rem;
   }
   
   .story-section__head {
