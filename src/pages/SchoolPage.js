@@ -4,15 +4,11 @@ import {
   FaLaptop, FaPalette, FaCode, FaGraduationCap, 
   FaUsers, FaClock, FaCalendarAlt, FaCertificate,
   FaAward, FaStar, FaBookOpen, FaRocket,
-  FaPhone, FaEnvelope, FaMapMarkerAlt, FaMoneyBillWave,
-  FaGift, FaTag, FaPercent, FaShoppingBag,
-  FaCheckCircle, FaArrowRight, FaChevronDown,
-  FaChevronUp, FaLightbulb, FaHeart, FaTrophy,
+  FaPhone, FaEnvelope, FaMoneyBillWave,
+  FaGift, FaCheckCircle, FaArrowRight, FaChevronDown,
+  FaLightbulb, FaHeart, 
   FaUserGraduate, FaBriefcase, FaBuilding, FaUserTie,
-  FaGlobe, FaVideo, FaHeadset, FaLaptopCode,
-  FaPaintBrush, FaLayerGroup, FaFileAlt, FaTools,
-  FaUser, FaPhoneAlt, FaWhatsapp, FaTwitter,
-  FaLinkedin, FaYoutube, FaInstagram, FaFacebook,
+  FaGlobe, FaPaintBrush, FaTools,
   FaEye
 } from 'react-icons/fa';
 import './SchoolPage.css';
@@ -38,7 +34,6 @@ const SchoolPage = () => {
   const [bundlePaymentPlan, setBundlePaymentPlan] = useState('full');
   const [bundleInstallmentMonths, setBundleInstallmentMonths] = useState(3);
 
-  // Get current date for start date (3 months from now)
   const getStartDate = () => {
     const date = new Date();
     date.setMonth(date.getMonth() + 3);
@@ -73,7 +68,7 @@ const SchoolPage = () => {
       actualPrice: 600,
       monthlyInstallment: 220,
       description: 'Learn essential computer skills, Microsoft Office, and internet fundamentals.',
-      longDescription: 'Master the fundamental computer skills needed for modern workplaces. This comprehensive course covers computer basics, Microsoft Office applications, internet navigation, email management, and essential digital literacy skills. Perfect for beginners, students, job seekers, and professionals looking to enhance their office productivity. 100% online delivery with flexible learning schedules.',
+      longDescription: 'Master the fundamental computer skills needed for modern workplaces. This comprehensive course covers computer basics, Microsoft Office applications, internet navigation, email management, and essential digital literacy skills. Perfect for beginners, students, job seekers, and professionals looking to enhance their office productivity.',
       icon: <FaLaptop />,
       image: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -108,7 +103,7 @@ const SchoolPage = () => {
       actualPrice: 750,
       monthlyInstallment: 275,
       description: 'Learn Photoshop, Illustrator, InDesign and master visual communication.',
-      longDescription: 'Unlock your creative potential with our Graphic Design course. You will learn industry-standard software and design principles that will enable you to create stunning visual content for print and digital media. Perfect for aspiring designers, business owners, and creative professionals. 100% online with practical projects and portfolio development.',
+      longDescription: 'Unlock your creative potential with our Graphic Design course. You will learn industry-standard software and design principles that will enable you to create stunning visual content for print and digital media. Perfect for aspiring designers, business owners, and creative professionals.',
       icon: <FaPaintBrush />,
       image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -143,7 +138,7 @@ const SchoolPage = () => {
       actualPrice: 800,
       monthlyInstallment: 290,
       description: 'Master HTML, CSS, JavaScript, and build modern websites.',
-      longDescription: 'Learn to build professional, responsive websites from scratch. This comprehensive web development course takes you from absolute beginner to a confident web developer. You will learn frontend technologies, understand how websites work, and build real-world projects. 100% online with hands-on coding exercises and live project work.',
+      longDescription: 'Learn to build professional, responsive websites from scratch. This comprehensive web development course takes you from absolute beginner to a confident web developer. You will learn frontend technologies, understand how websites work, and build real-world projects.',
       icon: <FaCode />,
       image: 'https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
