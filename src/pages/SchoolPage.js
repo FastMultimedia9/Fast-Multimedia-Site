@@ -4,7 +4,7 @@ import {
   FaLaptop, FaPalette, FaCode, FaNetworkWired, FaHeadset,
   FaUsers, FaClock, FaCalendarAlt, FaCertificate,
   FaStar, FaBookOpen, FaRocket, FaPhone, FaEnvelope, 
-  FaMoneyBillWave, FaGift, FaCheckCircle, FaArrowRight,
+  FaMoneyBillWave, FaCheckCircle, FaArrowRight,
   FaUserGraduate, FaBriefcase, FaBuilding, FaUserTie,
   FaGlobe, FaWhatsapp, FaAward, FaTools, FaEye, FaHeart
 } from 'react-icons/fa';
@@ -63,7 +63,7 @@ const SchoolPage = () => {
       actualPrice: 600,
       monthlyInstallment: 300,
       description: 'Learn essential computer skills, Microsoft Office, and internet fundamentals.',
-      longDescription: 'Master the fundamental computer skills needed for modern workplaces. This comprehensive course covers computer basics, Microsoft Office applications, internet navigation, email management, and essential digital literacy skills. Perfect for beginners, students, job seekers, and professionals looking to enhance their office productivity.',
+      longDescription: 'Master the fundamental computer skills needed for modern workplaces. This comprehensive course covers computer basics, Microsoft Office applications, internet navigation, email management, and essential digital literacy skills.',
       icon: <FaLaptop />,
       image: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -71,17 +71,11 @@ const SchoolPage = () => {
         'Windows operating system navigation',
         'Microsoft Word - document creation and formatting',
         'Microsoft Excel - spreadsheets and basic formulas',
-        'Microsoft PowerPoint - presentations and slideshows',
-        'Internet browsing and online research skills',
-        'Email management (Gmail, Outlook)',
-        'File management and organization',
-        'Basic troubleshooting and computer maintenance',
-        'Internet safety and cybersecurity awareness'
+        'Microsoft PowerPoint - presentations and slideshows'
       ],
       schedule: `Online & In-Person | Start Date: ${startDate}`,
       prerequisites: 'No prior computer experience required - complete beginners welcome!',
       certificate: 'Certificate in Basic I.C.T & Office Skills',
-      instructor: 'Adwoa Mensah - Certified ICT Trainer with 7+ years experience',
       students: 412,
       rating: 4.9,
       targetAudience: 'Students, Job Seekers, Workers, Business Owners',
@@ -99,7 +93,7 @@ const SchoolPage = () => {
       actualPrice: 750,
       monthlyInstallment: 375,
       description: 'Learn Photoshop, Illustrator, InDesign and master visual communication.',
-      longDescription: 'Unlock your creative potential with our Graphic Design course. You will learn industry-standard software and design principles that will enable you to create stunning visual content for print and digital media. Perfect for aspiring designers, business owners, and creative professionals.',
+      longDescription: 'Unlock your creative potential with our Graphic Design course. You will learn industry-standard software and design principles that will enable you to create stunning visual content for print and digital media.',
       icon: <FaPalette />,
       image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -107,17 +101,11 @@ const SchoolPage = () => {
         'Adobe Illustrator: Vector graphics and logo design',
         'Adobe InDesign: Layout design for print',
         'Color theory and typography fundamentals',
-        'Brand identity and logo design principles',
-        'Print production and file preparation',
-        'Digital illustration techniques',
-        'Portfolio development',
-        'Social media graphics design',
-        'Business card and flyer design'
+        'Brand identity and logo design principles'
       ],
       schedule: `Online & In-Person | Start Date: ${startDate}`,
       prerequisites: 'Passion for design, no prior experience needed',
       certificate: 'Certificate in Graphic Design',
-      instructor: 'Abena Osei - Creative Director with 10+ years in branding',
       students: 389,
       rating: 4.8,
       targetAudience: 'Students, Job Seekers, Workers, Business Owners',
@@ -135,7 +123,7 @@ const SchoolPage = () => {
       actualPrice: 800,
       monthlyInstallment: 400,
       description: 'Master HTML, CSS, JavaScript, and build modern websites.',
-      longDescription: 'Learn to build professional, responsive websites from scratch. This comprehensive web development course takes you from absolute beginner to a confident web developer. You will learn frontend technologies, understand how websites work, and build real-world projects.',
+      longDescription: 'Learn to build professional, responsive websites from scratch. This comprehensive web development course takes you from absolute beginner to a confident web developer.',
       icon: <FaCode />,
       image: 'https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -143,17 +131,11 @@ const SchoolPage = () => {
         'CSS3 - Styling and responsive design',
         'JavaScript - Interactivity and DOM manipulation',
         'Responsive web design principles',
-        'Website hosting and deployment',
-        'Basic SEO fundamentals',
-        'Form validation and handling',
-        'Modern CSS frameworks (Bootstrap/Tailwind)',
-        'Version control with Git basics',
-        'Portfolio website project'
+        'Website hosting and deployment'
       ],
       schedule: `Online & In-Person | Start Date: ${startDate}`,
       prerequisites: 'Basic computer knowledge, no prior coding experience required',
       certificate: 'Certificate in Web Development',
-      instructor: 'John Mensah - Senior Full Stack Developer with 8+ years experience',
       students: 356,
       rating: 4.9,
       targetAudience: 'Students, Job Seekers, Workers, Business Owners',
@@ -171,7 +153,7 @@ const SchoolPage = () => {
       actualPrice: 650,
       monthlyInstallment: 325,
       description: 'Learn computer networking fundamentals, setup, and configuration.',
-      longDescription: 'Master the essentials of computer networking. This course covers network fundamentals, IP addressing, network setup, troubleshooting, and security basics. Perfect for IT beginners, system administrators, and anyone looking to understand how networks work.',
+      longDescription: 'Master the essentials of computer networking. This course covers network fundamentals, IP addressing, network setup, troubleshooting, and security basics.',
       icon: <FaNetworkWired />,
       image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -179,17 +161,11 @@ const SchoolPage = () => {
         'IP addressing and subnetting',
         'Network topologies and devices',
         'Router and switch configuration',
-        'Network troubleshooting techniques',
-        'Wireless networking basics',
-        'Network security fundamentals',
-        'Cabling and physical networking',
-        'Internet and WAN technologies',
-        'Network monitoring and management'
+        'Network troubleshooting techniques'
       ],
       schedule: `Online & In-Person | Start Date: ${startDate}`,
       prerequisites: 'Basic computer knowledge, interest in networking',
       certificate: 'Certificate in Networking Basics',
-      instructor: 'Kwame Asare - Network Engineer with 8+ years experience',
       students: 278,
       rating: 4.7,
       targetAudience: 'Students, Job Seekers, IT Beginners, System Administrators',
@@ -207,7 +183,7 @@ const SchoolPage = () => {
       actualPrice: 850,
       monthlyInstallment: 425,
       description: 'Comprehensive IT support training for help desk and system administration.',
-      longDescription: 'Become a complete IT support professional. This intensive course covers hardware, software, networking, security, and customer service skills needed for IT support roles. Prepare for real-world IT support challenges and build a strong foundation for your IT career.',
+      longDescription: 'Become a complete IT support professional. This intensive course covers hardware, software, networking, security, and customer service skills needed for IT support roles.',
       icon: <FaHeadset />,
       image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       features: [
@@ -215,17 +191,11 @@ const SchoolPage = () => {
         'Operating systems installation and management',
         'Software installation and troubleshooting',
         'Network setup and configuration',
-        'IT security fundamentals',
-        'Help desk and customer service skills',
-        'Remote support techniques',
-        'System backup and recovery',
-        'IT documentation and reporting',
-        'Real-world IT support scenarios and projects'
+        'IT security fundamentals'
       ],
       schedule: `Online & In-Person | Start Date: ${startDate}`,
       prerequisites: 'Basic computer knowledge, interest in IT support',
       certificate: 'Certificate in Full I.T Support',
-      instructor: 'Emmanuel Appiah - Senior IT Support Specialist with 10+ years experience',
       students: 345,
       rating: 4.8,
       targetAudience: 'IT Beginners, Career Changers, Help Desk Aspirants, System Administrators',
@@ -296,7 +266,6 @@ const SchoolPage = () => {
 
   return (
     <div className="school-page">
-      {/* Hero Section */}
       <div className="school-hero">
         <div className="container">
           <h1 className="school-hero-title">
@@ -335,7 +304,6 @@ const SchoolPage = () => {
         </div>
       </div>
 
-      {/* Tab Navigation */}
       <div className="school-tabs">
         <div className="container">
           <button 
@@ -360,7 +328,6 @@ const SchoolPage = () => {
       </div>
 
       <div className="container">
-        {/* Courses Tab */}
         {activeTab === 'courses' && (
           <>
             <div className="category-filter">
@@ -449,7 +416,6 @@ const SchoolPage = () => {
           </>
         )}
 
-        {/* Course Details Tab */}
         {activeTab === 'details' && selectedCourse && (
           <div className="course-details">
             <button className="back-btn" onClick={() => setActiveTab('courses')}>
@@ -540,7 +506,7 @@ const SchoolPage = () => {
               <div className="details-section">
                 <h2><FaCheckCircle /> What You'll Learn</h2>
                 <ul className="features-list">
-                  {selectedCourse.features.slice(0, 6).map((feature, idx) => (
+                  {selectedCourse.features.map((feature, idx) => (
                     <li key={idx}><FaCheckCircle className="feature-icon" /> {feature}</li>
                   ))}
                 </ul>
@@ -655,7 +621,6 @@ const SchoolPage = () => {
           </div>
         )}
 
-        {/* About School Tab */}
         {activeTab === 'about' && (
           <div className="about-school">
             <div className="about-hero">
@@ -765,7 +730,6 @@ const SchoolPage = () => {
           </div>
         )}
 
-        {/* Contact / Enroll Tab */}
         {activeTab === 'contact' && (
           <div className="contact-school">
             <div className="contact-header">
@@ -884,7 +848,6 @@ const SchoolPage = () => {
         )}
       </div>
 
-      {/* Footer CTA */}
       <div className="school-footer">
         <div className="container">
           <h2><FaRocket /> Start Your Learning Journey Today</h2>
