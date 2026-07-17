@@ -12,7 +12,8 @@ import {
   FaGlobe, FaVideo, FaHeadset, FaLaptopCode,
   FaPaintBrush, FaLayerGroup, FaFileAlt, FaTools,
   FaUser, FaPhoneAlt, FaWhatsapp, FaTwitter,
-  FaLinkedin, FaYoutube, FaInstagram, FaFacebook
+  FaLinkedin, FaYoutube, FaInstagram, FaFacebook,
+  FaEye
 } from 'react-icons/fa';
 import './SchoolPage.css';
 
@@ -31,7 +32,6 @@ const SchoolPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedPaymentPlan, setSelectedPaymentPlan] = useState('full');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [emailjsLoaded, setEmailjsLoaded] = useState(false);
   
   const [showBundleEnrollment, setShowBundleEnrollment] = useState(false);
   const [selectedBundleCourses, setSelectedBundleCourses] = useState([]);
@@ -210,13 +210,6 @@ const SchoolPage = () => {
     return `GH₵ ${bundlePrice.final}`;
   };
 
-  const getBundleSavings = () => {
-    if (selectedBundleCourses.length >= 2) {
-      return `Save GH₵ ${bundlePrice.discount} (${bundlePrice.discountPercent}% OFF)`;
-    }
-    return null;
-  };
-
   const bundleDiscounts = [
     { courses: 'Any 2 Courses', discount: '10% OFF', price: 'Save up to GH₵ 140' },
     { courses: 'All 3 Courses', discount: '15% OFF', price: 'Save up to GH₵ 322' }
@@ -246,29 +239,9 @@ const SchoolPage = () => {
       const discountAmount = bundlePrice.discount;
       const finalAmount = bundlePrice.final;
       
-      const formData = {
-        name: enquiryName,
-        email: enquiryEmail,
-        phone: enquiryPhone,
-        course: `BUNDLE: ${coursesList}`,
-        bundleCourses: coursesList,
-        numberOfCourses: selectedBundleCourses.length,
-        originalPrice: `GH₵ ${totalOriginal}`,
-        discountAmount: `GH₵ ${discountAmount} (${bundlePrice.discountPercent}% OFF)`,
-        finalPrice: `GH₵ ${finalAmount}`,
-        paymentOption: bundlePaymentPlan === 'full' ? 'Full Payment' : `Installment Plan (${bundleInstallmentMonths} months)`,
-        monthlyInstallment: bundlePaymentPlan === 'installment' ? `GH₵ ${bundleMonthlyInstallment}/month` : 'N/A',
-        message: enquiryMessage || 'No additional message',
-        submissionDate: new Date().toLocaleString('en-GH', { timeZone: 'Africa/Accra' }),
-        startDate: startDate,
-        duration: '3 Months per course',
-        format: '100% Online'
-      };
-
       setIsSubmitting(true);
 
       try {
-        console.log('Bundle enrollment submitted:', formData);
         alert(`✅ Thank you ${enquiryName}!\n\nYour BUNDLE enrollment for ${selectedBundleCourses.length} courses has been received!\n\n📚 Courses: ${coursesList}\n💰 Original Price: GH₵ ${totalOriginal}\n🎉 Discount: ${bundlePrice.discountPercent}% OFF (Save GH₵ ${discountAmount})\n💵 Final Price: GH₵ ${finalAmount}\n💳 Payment Plan: ${bundlePaymentPlan === 'full' ? 'Full Payment' : `Installment - GH₵ ${bundleMonthlyInstallment}/month for ${bundleInstallmentMonths} months`}\n\nWe will contact you within 24 hours with payment instructions and course access details.\n\n📅 Start Date: ${startDate}\n⏱️ Duration: 3 Months per course\n💻 Format: 100% Online`);
         resetBundleForm();
       } catch (error) {
@@ -282,23 +255,9 @@ const SchoolPage = () => {
       const courseValue = selectedCourseForForm || (selectedCourse?.title || 'Not specified');
       const paymentValue = selectedPaymentOption;
       
-      const formData = {
-        name: enquiryName,
-        email: enquiryEmail,
-        phone: enquiryPhone,
-        course: courseValue,
-        paymentOption: paymentValue,
-        message: enquiryMessage || 'No additional message',
-        submissionDate: new Date().toLocaleString('en-GH', { timeZone: 'Africa/Accra' }),
-        startDate: startDate,
-        duration: '3 Months',
-        format: '100% Online'
-      };
-
       setIsSubmitting(true);
 
       try {
-        console.log('Enrollment submitted:', formData);
         alert(`✅ Thank you ${enquiryName}!\n\nYour enrollment request for ${courseValue} has been received.\n\nWe will contact you within 24 hours with payment instructions and course access details.\n\n📅 Start Date: ${startDate}\n⏱️ Duration: 3 Months\n💻 Format: 100% Online`);
         resetSingleForm();
       } catch (error) {
