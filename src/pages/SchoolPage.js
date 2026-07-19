@@ -1,12 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
-  FaGraduationCap, FaLaptop, FaPalette, FaCode, FaNetworkWired, FaHeadset,
-  FaUsers, FaClock, FaCalendarAlt, FaCertificate,
-  FaStar, FaBookOpen, FaRocket, FaPhone, FaEnvelope, 
-  FaMoneyBillWave, FaCheckCircle, FaArrowRight,
-  FaUserGraduate, FaBriefcase, FaBuilding, FaUserTie,
-  FaGlobe, FaWhatsapp, FaAward, FaTools, FaEye, FaHeart
+  FaGraduationCap,
+  FaLaptop, 
+  FaPalette, 
+  FaCode, 
+  FaNetworkWired, 
+  FaHeadset,
+  FaUsers, 
+  FaClock, 
+  FaCalendarAlt, 
+  FaCertificate,
+  FaStar, 
+  FaBookOpen, 
+  FaRocket, 
+  FaPhone, 
+  FaEnvelope, 
+  FaMoneyBillWave, 
+  FaCheckCircle, 
+  FaArrowRight,
+  FaUserGraduate, 
+  FaBriefcase, 
+  FaBuilding, 
+  FaUserTie,
+  FaGlobe, 
+  FaWhatsapp, 
+  FaAward, 
+  FaTools, 
+  FaEye, 
+  FaHeart
 } from 'react-icons/fa';
 import './SchoolPage.css';
 
