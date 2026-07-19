@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
-  FaLaptop, FaPalette, FaCode, FaNetworkWired, FaHeadset,
+  FaGraduationCap, FaLaptop, FaPalette, FaCode, FaNetworkWired, FaHeadset,
   FaUsers, FaClock, FaCalendarAlt, FaCertificate,
   FaStar, FaBookOpen, FaRocket, FaPhone, FaEnvelope, 
   FaMoneyBillWave, FaCheckCircle, FaArrowRight,
