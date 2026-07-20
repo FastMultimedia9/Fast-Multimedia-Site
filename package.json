@@ -52,6 +52,7 @@
     ]
   },
   "devDependencies": {
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "@emailjs/browser": "^3.11.0"
   }
 }
