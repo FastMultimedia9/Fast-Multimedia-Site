@@ -24,7 +24,8 @@ import {
   getStudentByEmail,
   getUserByEmail,
   updateStudent,
-  updateUser
+  updateUser,
+  loginUser
 } from '../services/firebaseService';
 import './StudentLogin.css';
 
@@ -70,7 +71,7 @@ const StudentLogin = () => {
     setUserData(null);
 
     try {
-      // First, check if user exists in the users collection (for all roles)
+      // FIRST: Check if user exists in the users collection (for all roles)
       const userProfile = await getUserByEmail(email);
       
       if (userProfile) {
@@ -78,7 +79,7 @@ const StudentLogin = () => {
         setUserRole(role);
         setUserData(userProfile);
         
-        // If user is admin or staff, skip admission status check
+        // If user is admin or staff - SKIP admission status check entirely
         if (role === 'admin' || role === 'staff') {
           setStatusChecked(true);
           setAdmissionStatus({
@@ -87,23 +88,38 @@ const StudentLogin = () => {
             message: `${role.charAt(0).toUpperCase() + role.slice(1)} account found.`,
             data: userProfile
           });
-          return { exists: true, status: 'approved', data: userProfile };
+          setCheckingStatus(false);
+          return { exists: true, status: 'approved', data: userProfile, role: role };
         }
         
         // If role is student but in users collection, check admission
         if (role === 'student') {
+          // Check if student has admission status
           const result = await getStudentAdmissionStatus(email);
           if (result.exists) {
             setUserRole('student');
             setUserData(result.student);
             setAdmissionStatus(result);
             setStatusChecked(true);
+            setCheckingStatus(false);
             return result;
+          } else {
+            // Student exists but no admission record - still allow login with warning
+            setUserRole('student');
+            setUserData(userProfile);
+            setAdmissionStatus({
+              exists: true,
+              status: 'pending',
+              message: 'Student account found but admission record is incomplete. Please contact support.'
+            });
+            setStatusChecked(true);
+            setCheckingStatus(false);
+            return { exists: true, status: 'pending', data: userProfile };
           }
         }
       }
 
-      // If not found in users collection, check as student
+      // SECOND: If not found in users collection, check as student (for new students)
       const result = await getStudentAdmissionStatus(email);
       console.log('Admission status result:', result);
 
@@ -112,19 +128,21 @@ const StudentLogin = () => {
         setUserData(result.student);
         setAdmissionStatus(result);
         setStatusChecked(true);
+        setCheckingStatus(false);
         return result;
       } else {
-        setError(result.message || 'User not found. Please contact support.');
+        // User not found anywhere - show appropriate error
+        setError('User not found. Please ensure you have completed your application or contact support.');
         setStatusChecked(true);
+        setCheckingStatus(false);
         return null;
       }
     } catch (error) {
       console.error('Error checking user access:', error);
       setError('Error checking user access. Please try again.');
       setStatusChecked(true);
-      return null;
-    } finally {
       setCheckingStatus(false);
+      return null;
     }
   };
 
@@ -153,13 +171,16 @@ const StudentLogin = () => {
         return;
       }
 
-      // If user is admin or staff, skip admission status validation
-      if (userRole === 'admin' || userRole === 'staff') {
-        // Proceed with password validation
+      // Get the role from the access result
+      const role = accessResult.role || userRole || 'student';
+      
+      // If user is admin or staff - SKIP admission status validation entirely
+      if (role === 'admin' || role === 'staff') {
+        // Proceed directly to password validation
         setAdmissionStatus(accessResult);
         // Continue to password validation below
-      } else if (userRole === 'student') {
-        // Check student admission status
+      } else if (role === 'student') {
+        // Check student admission status - ONLY for students
         if (accessResult.status === 'pending') {
           setError('Your application is pending review. Please wait for approval before logging in.');
           return;
@@ -180,10 +201,13 @@ const StudentLogin = () => {
       }
     }
 
-    // Now validate password
+    // Now validate password - this runs for ALL roles (admin, staff, student)
     setIsLoading(true);
 
     try {
+      // Get the role from state
+      const role = userRole || 'student';
+      
       // Check if using default password
       if (password === DEFAULT_PASSWORD) {
         // User is using default password - force password change
@@ -198,7 +222,6 @@ const StudentLogin = () => {
       // IMPORTANT: In production, replace this with actual Firebase Auth
       if (password.length >= 6) {
         // Login successful - redirect based on role
-        const role = userRole || 'student';
         redirectBasedOnRole(role);
       } else {
         setError('Invalid password. Please try again.');
@@ -273,19 +296,25 @@ const StudentLogin = () => {
     setIsPasswordUpdating(true);
 
     try {
-      // Update password in Firebase
-      const student = await getStudentByEmail(email);
-      if (student) {
-        await updateStudent(student.id, {
-          passwordUpdated: true,
-          password: newPassword, // In production, hash this password
-          updatedAt: new Date().toISOString()
-        });
-      } else {
-        // Try updating user profile
+      // Get the role
+      const role = userRole || 'student';
+      
+      // Update password based on role
+      if (role === 'admin' || role === 'staff') {
+        // Update user profile
         const user = await getUserByEmail(email);
         if (user) {
           await updateUser(user.id, {
+            passwordUpdated: true,
+            password: newPassword, // In production, hash this password
+            updatedAt: new Date().toISOString()
+          });
+        }
+      } else {
+        // Update student
+        const student = await getStudentByEmail(email);
+        if (student) {
+          await updateStudent(student.id, {
             passwordUpdated: true,
             password: newPassword, // In production, hash this password
             updatedAt: new Date().toISOString()
@@ -301,7 +330,7 @@ const StudentLogin = () => {
         // After success, redirect after 2 seconds
         setTimeout(() => {
           setShowPasswordChange(false);
-          redirectBasedOnRole(userRole || 'student');
+          redirectBasedOnRole(role);
         }, 2000);
       }, 1500);
     } catch (error) {
@@ -486,7 +515,6 @@ const StudentLogin = () => {
                     </ul>
                   </div>
 
-                  {/* FIXED: Password Change Submit Button */}
                   <button 
                     type="submit" 
                     className="login-btn"
@@ -575,7 +603,6 @@ const StudentLogin = () => {
                   </Link>
                 </div>
 
-                {/* FIXED: Login Submit Button */}
                 <button 
                   type="submit" 
                   className="login-btn"
