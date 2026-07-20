@@ -54,7 +54,8 @@ import NewPostPage from './pages/NewPostPage';
 
 // School Pages
 import SchoolPage from './pages/SchoolPage';
-import Admissions from './pages/Admissions'; // <-- ADD THIS IMPORT
+import Admissions from './pages/Admissions';
+import ApplicationForm from './pages/ApplicationForm';
 
 // Service Detail Page Component
 import ServiceDetailPage from './components/ServiceDetailPage';
@@ -125,7 +126,6 @@ const ProtectedRoute = ({ children, adminOnly = false, requireAuth = true }) => 
   // If authentication is required but user is not authenticated
   if (requireAuth && !authState.isAuthenticated) {
     console.log('🔒 Redirecting to login - User not authenticated');
-    // Save the attempted location
     localStorage.setItem('redirectAfterLogin', location.pathname);
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
@@ -207,8 +207,9 @@ function AppContent() {
           <Route path="/school/gallery" element={<SchoolPage />} />
           <Route path="/school/contact" element={<SchoolPage />} />
           
-          {/* ===== ADMISSIONS PAGE ===== */}
+          {/* ===== ADMISSIONS & APPLICATION FORM PAGES ===== */}
           <Route path="/school/admissions" element={<Admissions />} />
+          <Route path="/school/application-form" element={<ApplicationForm />} />
           
           {/* ===== BLOG PAGES (With Lazy Loading) ===== */}
           <Route path="/blog" element={

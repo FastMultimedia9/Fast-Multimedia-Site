@@ -19,9 +19,6 @@ import {
   FaAward,
   FaClipboardList,
   FaHandsHelping,
-  FaFilePdf,
-  FaPrint,
-  FaDownload,
   FaInfoCircle,
   FaQuestionCircle,
   FaUniversity,
@@ -32,55 +29,35 @@ import {
   FaShoppingCart,
   FaCreditCard
 } from 'react-icons/fa';
+import { 
+  generateSerialNumber, 
+  verifySerial, 
+  savePayment, 
+  createAdmission,
+  sendNotification 
+} from '../services/firebaseService';
+import { initializePayment } from '../services/paystackService';
 import './Admissions.css';
 
 const Admissions = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
-  const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [showSerialVerification, setShowSerialVerification] = useState(false);
   const [serialNumber, setSerialNumber] = useState('');
   const [isSerialValid, setIsSerialValid] = useState(false);
   const [serialError, setSerialError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    dateOfBirth: '',
-    gender: '',
-    nationality: '',
-    address: '',
-    course: '',
-    educationLevel: '',
-    previousSchool: '',
-    message: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedCourseForPayment, setSelectedCourseForPayment] = useState('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentEmail, setPaymentEmail] = useState('');
+  const [paymentName, setPaymentName] = useState('');
+  const [paymentPhone, setPaymentPhone] = useState('');
+  const [paymentDateOfBirth, setPaymentDateOfBirth] = useState('');
+  const [paymentGender, setPaymentGender] = useState('');
 
   const whatsappNumber = '233505159131';
   const displayWhatsappNumber = '+233 50 515 9131';
-
-  // Serial numbers stored in localStorage (In production, this would be in a database)
-  const [serialNumbers, setSerialNumbers] = useState(() => {
-    const saved = localStorage.getItem('admissionSerialNumbers');
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    // Generate some initial serial numbers
-    const initialSerials = [
-      { serial: 'FM-ADM-2026-001', isUsed: false, purchasedBy: null, purchaseDate: null },
-      { serial: 'FM-ADM-2026-002', isUsed: false, purchasedBy: null, purchaseDate: null },
-      { serial: 'FM-ADM-2026-003', isUsed: false, purchasedBy: null, purchaseDate: null },
-      { serial: 'FM-ADM-2026-004', isUsed: false, purchasedBy: null, purchaseDate: null },
-      { serial: 'FM-ADM-2026-005', isUsed: false, purchasedBy: null, purchaseDate: null },
-    ];
-    localStorage.setItem('admissionSerialNumbers', JSON.stringify(initialSerials));
-    return initialSerials;
-  });
 
   const courses = [
     'Basic I.C.T & Office - GH₵ 600',
@@ -89,9 +66,6 @@ const Admissions = () => {
     'Networking Basics - GH₵ 650',
     'Full I.T Support - GH₵ 850'
   ];
-
-  // Paystack configuration
-  const PAYSTACK_PUBLIC_KEY = 'pk_test_your_public_key_here'; // Replace with your actual public key
 
   useEffect(() => {
     // Load Paystack script
@@ -104,11 +78,6 @@ const Admissions = () => {
       document.body.removeChild(script);
     };
   }, []);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
 
   const getNextIntakeDate = () => {
     const date = new Date();
@@ -134,139 +103,132 @@ const Admissions = () => {
     window.open(whatsappUrl, '_blank');
   };
 
-  // Verify Serial Number
-  const verifySerialNumber = () => {
-    setIsVerifying(true);
-    setSerialError('');
-
-    // Simulate API call
-    setTimeout(() => {
-      const found = serialNumbers.find(
-        s => s.serial === serialNumber.toUpperCase() && !s.isUsed
-      );
-
-      if (found) {
-        setIsSerialValid(true);
-        setSerialError('');
-        // Mark as used
-        const updatedSerials = serialNumbers.map(s => 
-          s.serial === serialNumber.toUpperCase() 
-            ? { ...s, isUsed: true, purchaseDate: new Date().toISOString() }
-            : s
-        );
-        setSerialNumbers(updatedSerials);
-        localStorage.setItem('admissionSerialNumbers', JSON.stringify(updatedSerials));
-        setShowSerialVerification(false);
-        setShowApplicationForm(true);
-      } else {
-        setIsSerialValid(false);
-        setSerialError('Invalid or already used serial number. Please check and try again.');
-      }
-      setIsVerifying(false);
-    }, 1000);
-  };
-
   // Paystack Payment Handler
-  const handlePaystackPayment = () => {
-    if (!selectedCourseForPayment) {
-      alert('Please select a course first.');
+  const handlePaystackPayment = async () => {
+    if (!paymentEmail || !paymentName || !paymentPhone) {
+      alert('Please fill in all required fields (Name, Email, Phone).');
       return;
     }
 
     setIsProcessingPayment(true);
 
-    // Extract price from course string
-    const priceMatch = selectedCourseForPayment.match(/GH₵\s*(\d+)/);
-    const amount = priceMatch ? parseInt(priceMatch[1]) * 100 : 60000; // Convert to pesewas
+    try {
+      const response = await initializePayment(
+        paymentEmail,
+        100, // GH₵ 100
+        {
+          name: paymentName,
+          phone: paymentPhone,
+          course: selectedCourseForPayment || 'Not specified',
+          type: 'admission_form',
+          dateOfBirth: paymentDateOfBirth,
+          gender: paymentGender
+        }
+      );
 
-    const handler = window.PaystackPop.setup({
-      key: PAYSTACK_PUBLIC_KEY,
-      email: 'applicant@email.com', // You can collect this in the payment modal
-      amount: amount,
-      currency: 'GHS',
-      ref: 'ADM-' + Math.floor((Math.random() * 1000000000) + 1),
-      callback: function(response) {
-        // Payment successful
-        handlePaymentSuccess(response);
-      },
-      onClose: function() {
-        setIsProcessingPayment(false);
-        alert('Payment window closed. You can try again when ready.');
-      }
-    });
-
-    handler.openIframe();
+      // Payment successful
+      await handlePaymentSuccess(response);
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Payment was cancelled or failed. Please try again.');
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
-  const handlePaymentSuccess = (response) => {
-    setIsProcessingPayment(false);
-    // Generate a new serial number for the applicant
-    const newSerial = `FM-ADM-${new Date().getFullYear()}-${String(serialNumbers.length + 1).padStart(3, '0')}`;
-    
-    // Add the new serial number
-    const updatedSerials = [
-      ...serialNumbers,
-      {
-        serial: newSerial,
-        isUsed: false,
-        purchasedBy: 'Applicant',
-        purchaseDate: new Date().toISOString(),
-        transactionRef: response.reference
-      }
-    ];
-    
-    setSerialNumbers(updatedSerials);
-    localStorage.setItem('admissionSerialNumbers', JSON.stringify(updatedSerials));
-    
-    // Show success message with serial number
-    alert(`✅ Payment Successful!\n\nYour Admission Serial Number is: ${newSerial}\n\nPlease keep this serial number safe. You will need it to access the application form.`);
-    
-    // Automatically fill the serial number field
-    setSerialNumber(newSerial);
-    setShowPaymentModal(false);
-    setShowSerialVerification(true);
+  const handlePaymentSuccess = async (response) => {
+    try {
+      // Save payment record
+      await savePayment({
+        reference: response.reference,
+        amount: 10000, // GH₵ 100 in pesewas
+        email: paymentEmail,
+        course: selectedCourseForPayment,
+        name: paymentName,
+        phone: paymentPhone,
+        dateOfBirth: paymentDateOfBirth,
+        gender: paymentGender,
+        paymentType: 'admission_form',
+        status: 'completed'
+      });
+
+      // Generate new serial number
+      const newSerial = await generateSerialNumber(selectedCourseForPayment, paymentName);
+      
+      // Create admission record
+      await createAdmission({
+        admissionId: newSerial,
+        serialNumber: newSerial,
+        fullName: paymentName,
+        email: paymentEmail,
+        phone: paymentPhone,
+        dateOfBirth: paymentDateOfBirth,
+        gender: paymentGender,
+        course: selectedCourseForPayment,
+        status: 'pending',
+        paymentReference: response.reference,
+        applicationDate: new Date().toISOString()
+      });
+
+      // Send notification
+      await sendNotification({
+        userId: paymentEmail,
+        title: 'Admission Form Purchased',
+        message: `You have successfully purchased the admission form. Your serial number is: ${newSerial}`,
+        type: 'admission',
+        link: '/school/application-form'
+      });
+
+      // Show success message with serial number
+      alert(`✅ Payment Successful!\n\nYour Admission Serial Number is: ${newSerial}\n\nPlease keep this serial number safe. You will need it to access the application form.\n\nWe have also sent you an email with this information.`);
+      
+      // Navigate to application form with serial number
+      navigate('/school/application-form', { state: { serialNumber: newSerial } });
+      setShowPaymentModal(false);
+      resetPaymentForm();
+    } catch (error) {
+      console.error('Payment processing error:', error);
+      alert('There was an error processing your payment. Please contact support.');
+    }
   };
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const resetPaymentForm = () => {
+    setPaymentEmail('');
+    setPaymentName('');
+    setPaymentPhone('');
+    setPaymentDateOfBirth('');
+    setPaymentGender('');
+    setSelectedCourseForPayment('');
+  };
+
+  // Verify Serial Number
+  const verifySerialNumber = async () => {
+    setIsVerifying(true);
+    setSerialError('');
 
     try {
-      const message = `ADMISSION APPLICATION\n\nSerial Number: ${serialNumber}\nName: ${formData.fullName}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nDate of Birth: ${formData.dateOfBirth}\nGender: ${formData.gender}\nNationality: ${formData.nationality}\nAddress: ${formData.address}\nCourse: ${formData.course}\nEducation Level: ${formData.educationLevel}\nPrevious School: ${formData.previousSchool}\nMessage: ${formData.message || 'No additional message'}`;
+      const result = await verifySerial(serialNumber.toUpperCase());
       
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-      
-      alert(`✅ Thank you ${formData.fullName}!\n\nYour admission application has been submitted successfully.\n\nWe will contact you within 24 hours via WhatsApp or email.\n\n📅 Next intake: ${getNextIntakeDate()}\n📧 Check your email for confirmation.`);
-      
-      // Reset form
-      setFormData({
-        fullName: '',
-        email: '',
-        phone: '',
-        dateOfBirth: '',
-        gender: '',
-        nationality: '',
-        address: '',
-        course: '',
-        educationLevel: '',
-        previousSchool: '',
-        message: ''
-      });
-      setSerialNumber('');
-      setIsSerialValid(false);
-      setShowApplicationForm(false);
+      if (result.valid) {
+        // Navigate to application form
+        navigate('/school/application-form', { state: { serialNumber: serialNumber.toUpperCase() } });
+        setShowSerialVerification(false);
+        setSerialNumber('');
+      } else {
+        setIsSerialValid(false);
+        setSerialError('Invalid or already used serial number. Please check and try again.');
+      }
     } catch (error) {
-      alert('Your application has been received. We will contact you within 24 hours.');
+      console.error('Verification error:', error);
+      setSerialError('Error verifying serial number. Please try again.');
     } finally {
-      setIsSubmitting(false);
+      setIsVerifying(false);
     }
   };
 
   // Buy Form Button Handler
   const handleBuyForm = () => {
-    setSelectedCourseForPayment('');
+    resetPaymentForm();
     setShowPaymentModal(true);
   };
 
@@ -427,7 +389,7 @@ const Admissions = () => {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs - Same as before */}
       <div className="admissions-tabs">
         <div className="container">
           <button 
@@ -463,6 +425,7 @@ const Admissions = () => {
         </div>
       </div>
 
+      {/* Tab Content - Same as before */}
       <div className="container">
         {/* Overview Tab */}
         {activeTab === 'overview' && (
@@ -641,7 +604,63 @@ const Admissions = () => {
                 <span className="amount-label">Amount:</span>
                 <span className="amount-value">GH₵ 100.00</span>
               </div>
+
+              <div className="form-group">
+                <label>Full Name *</label>
+                <input
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={paymentName}
+                  onChange={(e) => setPaymentName(e.target.value)}
+                  required
+                />
+              </div>
               
+              <div className="form-group">
+                <label>Email Address *</label>
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={paymentEmail}
+                  onChange={(e) => setPaymentEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Phone Number *</label>
+                <input
+                  type="tel"
+                  placeholder="024XXXXXXX"
+                  value={paymentPhone}
+                  onChange={(e) => setPaymentPhone(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Date of Birth</label>
+                  <input
+                    type="date"
+                    value={paymentDateOfBirth}
+                    onChange={(e) => setPaymentDateOfBirth(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Gender</label>
+                  <select
+                    value={paymentGender}
+                    onChange={(e) => setPaymentGender(e.target.value)}
+                  >
+                    <option value="">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="form-group">
                 <label>Select Course (Optional)</label>
                 <select
@@ -663,7 +682,7 @@ const Admissions = () => {
             <button 
               className="pay-now-btn"
               onClick={handlePaystackPayment}
-              disabled={isProcessingPayment}
+              disabled={isProcessingPayment || !paymentEmail || !paymentName || !paymentPhone}
             >
               {isProcessingPayment ? (
                 'Processing...'
@@ -685,7 +704,7 @@ const Admissions = () => {
       )}
 
       {/* Serial Number Verification Modal */}
-      {showSerialVerification && !showApplicationForm && (
+      {showSerialVerification && (
         <div className="modal-overlay" onClick={() => setShowSerialVerification(false)}>
           <div className="modal-content verify-modal" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowSerialVerification(false)}>
@@ -729,176 +748,6 @@ const Admissions = () => {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Application Form Modal */}
-      {showApplicationForm && isSerialValid && (
-        <div className="modal-overlay" onClick={() => setShowApplicationForm(false)}>
-          <div className="modal-content form-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowApplicationForm(false)}>
-              ×
-            </button>
-            
-            <h2 className="modal-title">
-              <FaFileAlt /> Application Form
-            </h2>
-            <div className="serial-badge">
-              <FaKey /> Serial: {serialNumber}
-            </div>
-            <p className="modal-subtitle">Fill in your details to complete your application</p>
-
-            <form className="application-form" onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>Full Name *</label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Enter your full name"
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Email Address *</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="your@email.com"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Phone Number *</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="024XXXXXXX"
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Date of Birth</label>
-                  <input
-                    type="date"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Gender</label>
-                  <select
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Nationality</label>
-                <input
-                  type="text"
-                  name="nationality"
-                  value={formData.nationality}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Ghanaian"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Address</label>
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  placeholder="Your home address"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Select Course *</label>
-                <select
-                  name="course"
-                  value={formData.course}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Choose a course</option>
-                  {courses.map((course) => (
-                    <option key={course} value={course}>{course}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Highest Education Level</label>
-                <select
-                  name="educationLevel"
-                  value={formData.educationLevel}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select Education Level</option>
-                  <option value="JHS">JHS</option>
-                  <option value="SHS">SHS</option>
-                  <option value="Diploma">Diploma</option>
-                  <option value="Degree">Degree</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Previous School (if any)</label>
-                <input
-                  type="text"
-                  name="previousSchool"
-                  value={formData.previousSchool}
-                  onChange={handleInputChange}
-                  placeholder="Name of previous school"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Additional Information</label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  rows="4"
-                  placeholder="Any additional information or questions"
-                />
-              </div>
-
-              <div className="form-note">
-                <FaInfoCircle /> We'll contact you via WhatsApp within 24 hours
-              </div>
-
-              <button 
-                type="submit" 
-                className="submit-btn"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Application'}
-              </button>
-            </form>
           </div>
         </div>
       )}
