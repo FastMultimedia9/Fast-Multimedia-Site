@@ -529,3 +529,54 @@
     width: 20px;
   }
 }
+
+
+.pre-filled {
+  border-color: #4CAF50 !important;
+  background-color: #f0fff4 !important;
+}
+
+.pre-filled-hint {
+  color: #4CAF50;
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
+}
+
+.serial-owner-badge {
+  display: inline-block;
+  margin-left: 15px;
+  padding: 4px 12px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.serial-owner-badge svg {
+  margin-right: 6px;
+}
+
+.loading-data {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  background: #e3f2fd;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  color: #1565c0;
+}
+
+.loading-data .spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.form-group .pre-filled + .pre-filled-hint {
+  display: block;
+}

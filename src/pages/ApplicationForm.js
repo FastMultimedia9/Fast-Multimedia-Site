@@ -21,7 +21,8 @@ import {
   FaHome,
   FaBuilding,
   FaUserTie,
-  FaUsers
+  FaUsers,
+  FaSpinner
 } from 'react-icons/fa';
 import { 
   verifySerial, 
@@ -29,7 +30,9 @@ import {
   saveApplication, 
   createStudent,
   sendNotification,
-  updateApplicationStatus 
+  updateApplicationStatus,
+  getAdmissionBySerial,
+  getStudentByEmail
 } from '../services/firebaseService';
 import './ApplicationForm.css';
 
@@ -40,6 +43,8 @@ const ApplicationForm = () => {
   const [isSerialValid, setIsSerialValid] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [serialError, setSerialError] = useState('');
+  const [serialData, setSerialData] = useState(null);
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -105,6 +110,8 @@ const ApplicationForm = () => {
       const result = await verifySerial(serial);
       if (result.valid) {
         setIsSerialValid(true);
+        // Fetch admission data for this serial
+        await fetchAdmissionData(serial);
         setFormStep(2);
       } else {
         setSerialError('Invalid serial number. Please check and try again.');
@@ -112,6 +119,69 @@ const ApplicationForm = () => {
     } catch (error) {
       console.error('Auto-verify error:', error);
       setSerialError('Error verifying serial number. Please try again.');
+    }
+  };
+
+  // Fetch admission data for the serial number
+  const fetchAdmissionData = async (serial) => {
+    setIsLoadingData(true);
+    try {
+      // Get admission record by serial
+      const admission = await getAdmissionBySerial(serial);
+      
+      if (admission) {
+        console.log('Found admission data:', admission);
+        setSerialData(admission);
+        
+        // Populate form with admission data
+        setFormData(prev => ({
+          ...prev,
+          fullName: admission.fullName || '',
+          email: admission.email || '',
+          phone: admission.phone || '',
+          dateOfBirth: admission.dateOfBirth || '',
+          gender: admission.gender || '',
+          course: admission.course || '',
+          // Also try to get additional data if available
+          address: admission.address || prev.address,
+          city: admission.city || prev.city,
+          region: admission.region || prev.region,
+          guardianName: admission.guardianName || prev.guardianName,
+          guardianPhone: admission.guardianPhone || prev.guardianPhone,
+          guardianEmail: admission.guardianEmail || prev.guardianEmail,
+        }));
+        
+        // Check if student already exists with this email
+        if (admission.email) {
+          try {
+            const existingStudent = await getStudentByEmail(admission.email);
+            if (existingStudent) {
+              console.log('Found existing student:', existingStudent);
+              // Populate additional fields from student data
+              setFormData(prev => ({
+                ...prev,
+                nationality: existingStudent.nationality || prev.nationality,
+                address: existingStudent.address || prev.address,
+                city: existingStudent.city || prev.city,
+                region: existingStudent.region || prev.region,
+                educationLevel: existingStudent.educationLevel || prev.educationLevel,
+                previousSchool: existingStudent.previousSchool || prev.previousSchool,
+                preferredStudyMode: existingStudent.preferredStudyMode || prev.preferredStudyMode,
+                hasLaptop: existingStudent.hasLaptop || prev.hasLaptop,
+                internetAccess: existingStudent.internetAccess || prev.internetAccess,
+              }));
+            }
+          } catch (studentError) {
+            console.log('No existing student found:', studentError);
+          }
+        }
+      } else {
+        console.log('No admission data found for serial:', serial);
+      }
+    } catch (error) {
+      console.error('Error fetching admission data:', error);
+    } finally {
+      setIsLoadingData(false);
     }
   };
 
@@ -129,6 +199,8 @@ const ApplicationForm = () => {
       
       if (result.valid) {
         setIsSerialValid(true);
+        // Fetch admission data
+        await fetchAdmissionData(serialNumber.toUpperCase());
         setFormStep(2);
         setSerialError('');
       } else {
@@ -170,7 +242,8 @@ const ApplicationForm = () => {
         internetAccess: formData.internetAccess,
         enrolledCourses: [formData.course],
         status: 'pending',
-        applicationStatus: 'applied'
+        applicationStatus: 'applied',
+        serialNumber: serialNumber
       };
 
       // Create student record
@@ -306,7 +379,17 @@ const ApplicationForm = () => {
           <div className="form-card">
             <div className="form-success-badge">
               <FaCheckCircle /> Serial Verified: {serialNumber}
+              {serialData && serialData.fullName && (
+                <span className="serial-owner-badge">
+                  <FaUser /> Registered to: {serialData.fullName}
+                </span>
+              )}
             </div>
+            {isLoadingData && (
+              <div className="loading-data">
+                <FaSpinner className="spinner" /> Loading your information...
+              </div>
+            )}
             <h2>Fill Your Application</h2>
             <p className="form-description">
               Please fill in all required fields. We'll contact you within 24 hours.
@@ -326,7 +409,9 @@ const ApplicationForm = () => {
                       onChange={handleInputChange}
                       required
                       placeholder="Enter your full name"
+                      className={formData.fullName ? 'pre-filled' : ''}
                     />
+                    {formData.fullName && <small className="pre-filled-hint">✓ Pre-filled from your purchase</small>}
                   </div>
                   <div className="form-group">
                     <label>Email Address *</label>
@@ -337,7 +422,9 @@ const ApplicationForm = () => {
                       onChange={handleInputChange}
                       required
                       placeholder="your@email.com"
+                      className={formData.email ? 'pre-filled' : ''}
                     />
+                    {formData.email && <small className="pre-filled-hint">✓ Pre-filled from your purchase</small>}
                   </div>
                   <div className="form-group">
                     <label>Phone Number *</label>
@@ -348,7 +435,9 @@ const ApplicationForm = () => {
                       onChange={handleInputChange}
                       required
                       placeholder="024XXXXXXX"
+                      className={formData.phone ? 'pre-filled' : ''}
                     />
+                    {formData.phone && <small className="pre-filled-hint">✓ Pre-filled from your purchase</small>}
                   </div>
                   <div className="form-group">
                     <label>Date of Birth</label>
@@ -357,6 +446,7 @@ const ApplicationForm = () => {
                       name="dateOfBirth"
                       value={formData.dateOfBirth}
                       onChange={handleInputChange}
+                      className={formData.dateOfBirth ? 'pre-filled' : ''}
                     />
                   </div>
                   <div className="form-group">
@@ -365,6 +455,7 @@ const ApplicationForm = () => {
                       name="gender"
                       value={formData.gender}
                       onChange={handleInputChange}
+                      className={formData.gender ? 'pre-filled' : ''}
                     >
                       <option value="">Select Gender</option>
                       {genders.map((gender) => (
@@ -493,12 +584,14 @@ const ApplicationForm = () => {
                       value={formData.course}
                       onChange={handleInputChange}
                       required
+                      className={formData.course ? 'pre-filled' : ''}
                     >
                       <option value="">Choose a course</option>
                       {courses.map((course) => (
                         <option key={course} value={course}>{course}</option>
                       ))}
                     </select>
+                    {formData.course && <small className="pre-filled-hint">✓ Pre-filled from your purchase</small>}
                   </div>
                   <div className="form-group">
                     <label>Highest Education Level</label>
