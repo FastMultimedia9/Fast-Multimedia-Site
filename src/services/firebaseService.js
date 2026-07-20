@@ -331,7 +331,7 @@ export const deleteStaff = async (staffId) => {
 // ADMISSION MANAGEMENT
 // ============================================
 
-// Create admission record
+// CREATE ADMISSION - THIS IS THE KEY EXPORT THAT WAS MISSING
 export const createAdmission = async (admissionData) => {
   try {
     const admissionId = admissionData.admissionId || `ADM-${Date.now()}`;
@@ -483,6 +483,9 @@ export const createPayment = async (paymentData) => {
   }
 };
 
+// SAVE PAYMENT - Alias for createPayment (used by Admissions.js)
+export const savePayment = createPayment;
+
 // Get payment by ID
 export const getPayment = async (paymentId) => {
   try {
@@ -576,13 +579,6 @@ export const updatePaymentStatus = async (paymentId, status, receipt = null) => 
     throw error;
   }
 };
-
-// ============================================
-// SAVE PAYMENT (Alias for createPayment)
-// ============================================
-
-// Save payment (alias for createPayment for backward compatibility)
-export const savePayment = createPayment;
 
 // ============================================
 // COURSE MANAGEMENT
@@ -1211,7 +1207,7 @@ export default {
   deleteStaff,
   
   // Admission functions
-  createAdmission,
+  createAdmission,  // <-- THIS IS NOW PROPERLY EXPORTED
   getAdmission,
   getAdmissionBySerial,
   getAllAdmissions,
@@ -1219,7 +1215,7 @@ export default {
   
   // Payment functions
   createPayment,
-  savePayment,
+  savePayment,  // <-- THIS IS ALSO EXPORTED FOR BACKWARD COMPATIBILITY
   getPayment,
   getPaymentsByStudent,
   getAllPayments,
