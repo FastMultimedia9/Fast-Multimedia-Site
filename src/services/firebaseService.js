@@ -578,6 +578,13 @@ export const updatePaymentStatus = async (paymentId, status, receipt = null) => 
 };
 
 // ============================================
+// SAVE PAYMENT (Alias for createPayment)
+// ============================================
+
+// Save payment (alias for createPayment for backward compatibility)
+export const savePayment = createPayment;
+
+// ============================================
 // COURSE MANAGEMENT
 // ============================================
 
@@ -1179,13 +1186,6 @@ export const getDashboardStats = async () => {
     throw error;
   }
 };
-
-// ============================================
-// SAVE PAYMENT (Alias for createPayment)
-// ============================================
-
-// Save payment (alias for createPayment for backward compatibility)
-export const savePayment = createPayment;
 
 // ============================================
 // EXPORT ALL FUNCTIONS
