@@ -1,146 +1,1260 @@
-// src/services/emailService.js
-import emailjs from '@emailjs/browser';
+import { 
+  db, 
+  auth, 
+  storage,
+  COLLECTIONS,
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp,
+  increment,
+  arrayUnion,
+  arrayRemove,
+  onSnapshot,
+  addDoc,
+  writeBatch,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject
+} from '../firebase';
 
-// Get configuration from environment variables
-const PUBLIC_KEY = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'a48f87f647d099b3e988739f2e33262f';
-const SERVICE_ID = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_25rh2nj';
-const TEMPLATE_ID = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_kjuy3g3';
+// ============================================
+// STUDENT MANAGEMENT
+// ============================================
 
-// Initialize EmailJS with Public API Key
-emailjs.init(PUBLIC_KEY);
-
-/**
- * Send serial number email to applicant
- * @param {string} email - Recipient's email address
- * @param {string} name - Applicant's full name
- * @param {string} serial - Generated serial number
- * @param {string} course - Selected course (optional)
- * @returns {Promise} EmailJS response
- */
-export const sendSerialEmail = async (email, name, serial, course) => {
+// Create a new student
+export const createStudent = async (studentData) => {
   try {
-    // Validate inputs
-    if (!email || !name || !serial) {
-      throw new Error('Missing required fields: email, name, or serial number');
+    const studentId = studentData.studentId || `STU-${Date.now()}`;
+    const studentRef = doc(db, COLLECTIONS.STUDENTS, studentId);
+    
+    await setDoc(studentRef, {
+      ...studentData,
+      studentId: studentId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      status: 'active',
+      enrolledCourses: studentData.enrolledCourses || [],
+      paymentHistory: studentData.paymentHistory || [],
+      attendance: studentData.attendance || { total: 0, present: 0, absent: 0 },
+      grades: studentData.grades || {}
+    });
+    
+    return studentId;
+  } catch (error) {
+    console.error('Error creating student:', error);
+    throw error;
+  }
+};
+
+// Get student by ID
+export const getStudent = async (studentId) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.STUDENTS, studentId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
     }
+    return null;
+  } catch (error) {
+    console.error('Error getting student:', error);
+    throw error;
+  }
+};
 
-    // Prepare template parameters
-    const templateParams = {
-      to_email: email,
-      to_name: name,
-      serial_number: serial,
-      course: course || 'Not specified',
-      application_link: `${window.location.origin}/school/application-form`,
-      current_year: new Date().getFullYear(),
-      whatsapp_number: '+233 50 515 9131',
-      support_email: 'fasttech227@gmail.com'
+// Get student by email
+export const getStudentByEmail = async (email) => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.STUDENTS),
+      where('email', '==', email)
+    );
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) return null;
+    
+    const doc = snapshot.docs[0];
+    return { id: doc.id, ...doc.data() };
+  } catch (error) {
+    console.error('Error getting student by email:', error);
+    throw error;
+  }
+};
+
+// Get all students with filters
+export const getAllStudents = async (filters = {}) => {
+  try {
+    let q = collection(db, COLLECTIONS.STUDENTS);
+    const constraints = [];
+    
+    if (filters.status) {
+      constraints.push(where('status', '==', filters.status));
+    }
+    
+    if (filters.course) {
+      constraints.push(where('enrolledCourses', 'array-contains', filters.course));
+    }
+    
+    if (filters.class) {
+      constraints.push(where('class', '==', filters.class));
+    }
+    
+    constraints.push(orderBy('createdAt', 'desc'));
+    
+    const qRef = query(collection(db, COLLECTIONS.STUDENTS), ...constraints);
+    const snapshot = await getDocs(qRef);
+    
+    const students = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (filters.search && !data.fullName.toLowerCase().includes(filters.search.toLowerCase())) {
+        return;
+      }
+      students.push({ id: doc.id, ...data });
+    });
+    
+    return students;
+  } catch (error) {
+    console.error('Error getting all students:', error);
+    throw error;
+  }
+};
+
+// Update student
+export const updateStudent = async (studentId, updateData) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.STUDENTS, studentId);
+    await updateDoc(docRef, {
+      ...updateData,
+      updatedAt: serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating student:', error);
+    throw error;
+  }
+};
+
+// Delete student
+export const deleteStudent = async (studentId) => {
+  try {
+    await deleteDoc(doc(db, COLLECTIONS.STUDENTS, studentId));
+    return true;
+  } catch (error) {
+    console.error('Error deleting student:', error);
+    throw error;
+  }
+};
+
+// Enroll student in course
+export const enrollStudentInCourse = async (studentId, courseId, classId = null) => {
+  try {
+    const studentRef = doc(db, COLLECTIONS.STUDENTS, studentId);
+    await updateDoc(studentRef, {
+      enrolledCourses: arrayUnion(courseId),
+      class: classId || null,
+      enrollmentDate: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    console.error('Error enrolling student:', error);
+    throw error;
+  }
+};
+
+// Get student attendance
+export const getStudentAttendance = async (studentId, month = null) => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.ATTENDANCE),
+      where('studentId', '==', studentId)
+    );
+    
+    const snapshot = await getDocs(q);
+    const records = [];
+    snapshot.forEach(doc => {
+      records.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return records;
+  } catch (error) {
+    console.error('Error getting student attendance:', error);
+    throw error;
+  }
+};
+
+// Get student grades
+export const getStudentGrades = async (studentId) => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.GRADES),
+      where('studentId', '==', studentId)
+    );
+    
+    const snapshot = await getDocs(q);
+    const grades = [];
+    snapshot.forEach(doc => {
+      grades.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return grades;
+  } catch (error) {
+    console.error('Error getting student grades:', error);
+    throw error;
+  }
+};
+
+// ============================================
+// STAFF MANAGEMENT
+// ============================================
+
+// Create a new staff member
+export const createStaff = async (staffData) => {
+  try {
+    const staffId = staffData.staffId || `STF-${Date.now()}`;
+    const staffRef = doc(db, COLLECTIONS.STAFF, staffId);
+    
+    await setDoc(staffRef, {
+      ...staffData,
+      staffId: staffId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      status: staffData.status || 'active',
+      assignedCourses: staffData.assignedCourses || [],
+      departments: staffData.departments || []
+    });
+    
+    return staffId;
+  } catch (error) {
+    console.error('Error creating staff:', error);
+    throw error;
+  }
+};
+
+// Get staff by ID
+export const getStaff = async (staffId) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.STAFF, staffId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting staff:', error);
+    throw error;
+  }
+};
+
+// Get all staff
+export const getAllStaff = async (filters = {}) => {
+  try {
+    let q = collection(db, COLLECTIONS.STAFF);
+    const constraints = [];
+    
+    if (filters.status) {
+      constraints.push(where('status', '==', filters.status));
+    }
+    
+    if (filters.department) {
+      constraints.push(where('departments', 'array-contains', filters.department));
+    }
+    
+    if (filters.role) {
+      constraints.push(where('role', '==', filters.role));
+    }
+    
+    constraints.push(orderBy('createdAt', 'desc'));
+    
+    const qRef = query(collection(db, COLLECTIONS.STAFF), ...constraints);
+    const snapshot = await getDocs(qRef);
+    
+    const staff = [];
+    snapshot.forEach(doc => {
+      staff.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return staff;
+  } catch (error) {
+    console.error('Error getting all staff:', error);
+    throw error;
+  }
+};
+
+// Update staff
+export const updateStaff = async (staffId, updateData) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.STAFF, staffId);
+    await updateDoc(docRef, {
+      ...updateData,
+      updatedAt: serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating staff:', error);
+    throw error;
+  }
+};
+
+// Delete staff
+export const deleteStaff = async (staffId) => {
+  try {
+    await deleteDoc(doc(db, COLLECTIONS.STAFF, staffId));
+    return true;
+  } catch (error) {
+    console.error('Error deleting staff:', error);
+    throw error;
+  }
+};
+
+// ============================================
+// ADMISSION MANAGEMENT
+// ============================================
+
+// CREATE ADMISSION - THIS IS THE MISSING EXPORT
+export const createAdmission = async (admissionData) => {
+  try {
+    const admissionId = admissionData.admissionId || `ADM-${Date.now()}`;
+    const admissionRef = doc(db, COLLECTIONS.ADMISSIONS, admissionId);
+    
+    await setDoc(admissionRef, {
+      ...admissionData,
+      admissionId: admissionId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      status: admissionData.status || 'pending',
+      documents: admissionData.documents || [],
+      notes: admissionData.notes || []
+    });
+    
+    return admissionId;
+  } catch (error) {
+    console.error('Error creating admission:', error);
+    throw error;
+  }
+};
+
+// Get admission by ID
+export const getAdmission = async (admissionId) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.ADMISSIONS, admissionId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting admission:', error);
+    throw error;
+  }
+};
+
+// Get admission by serial number
+export const getAdmissionBySerial = async (serialNumber) => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.ADMISSIONS),
+      where('serialNumber', '==', serialNumber)
+    );
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) return null;
+    
+    const doc = snapshot.docs[0];
+    return { id: doc.id, ...doc.data() };
+  } catch (error) {
+    console.error('Error getting admission by serial:', error);
+    throw error;
+  }
+};
+
+// Get all admissions with filters
+export const getAllAdmissions = async (filters = {}) => {
+  try {
+    let q = collection(db, COLLECTIONS.ADMISSIONS);
+    const constraints = [];
+    
+    if (filters.status) {
+      constraints.push(where('status', '==', filters.status));
+    }
+    
+    if (filters.course) {
+      constraints.push(where('course', '==', filters.course));
+    }
+    
+    if (filters.year) {
+      constraints.push(where('year', '==', filters.year));
+    }
+    
+    constraints.push(orderBy('createdAt', 'desc'));
+    
+    const qRef = query(collection(db, COLLECTIONS.ADMISSIONS), ...constraints);
+    const snapshot = await getDocs(qRef);
+    
+    const admissions = [];
+    snapshot.forEach(doc => {
+      admissions.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return admissions;
+  } catch (error) {
+    console.error('Error getting all admissions:', error);
+    throw error;
+  }
+};
+
+// Update admission status
+export const updateAdmissionStatus = async (admissionId, status, notes = null) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.ADMISSIONS, admissionId);
+    const updateData = { 
+      status: status,
+      updatedAt: serverTimestamp()
     };
+    
+    if (notes) {
+      updateData.notes = arrayUnion({
+        text: notes,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    await updateDoc(docRef, updateData);
+    return true;
+  } catch (error) {
+    console.error('Error updating admission status:', error);
+    throw error;
+  }
+};
 
-    console.log('Sending email with params:', {
-      to_email: email,
-      to_name: name,
-      serial_number: serial
+// ============================================
+// PAYMENT MANAGEMENT
+// ============================================
+
+// Create payment record
+export const createPayment = async (paymentData) => {
+  try {
+    const paymentId = paymentData.paymentId || `PAY-${Date.now()}`;
+    const paymentRef = doc(db, COLLECTIONS.PAYMENTS, paymentId);
+    
+    await setDoc(paymentRef, {
+      ...paymentData,
+      paymentId: paymentId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      status: paymentData.status || 'pending',
+      receipt: paymentData.receipt || null
+    });
+    
+    if (paymentData.studentId) {
+      const studentRef = doc(db, COLLECTIONS.STUDENTS, paymentData.studentId);
+      await updateDoc(studentRef, {
+        paymentHistory: arrayUnion(paymentId),
+        updatedAt: serverTimestamp()
+      });
+    }
+    
+    return paymentId;
+  } catch (error) {
+    console.error('Error creating payment:', error);
+    throw error;
+  }
+};
+
+// SAVE PAYMENT - Alias for createPayment (used by Admissions.js)
+export const savePayment = createPayment;
+
+// Get payment by ID
+export const getPayment = async (paymentId) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.PAYMENTS, paymentId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting payment:', error);
+    throw error;
+  }
+};
+
+// Get payments by student
+export const getPaymentsByStudent = async (studentId) => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.PAYMENTS),
+      where('studentId', '==', studentId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    const snapshot = await getDocs(q);
+    const payments = [];
+    snapshot.forEach(doc => {
+      payments.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return payments;
+  } catch (error) {
+    console.error('Error getting payments by student:', error);
+    throw error;
+  }
+};
+
+// Get all payments with filters
+export const getAllPayments = async (filters = {}) => {
+  try {
+    let q = collection(db, COLLECTIONS.PAYMENTS);
+    const constraints = [];
+    
+    if (filters.status) {
+      constraints.push(where('status', '==', filters.status));
+    }
+    
+    if (filters.paymentType) {
+      constraints.push(where('paymentType', '==', filters.paymentType));
+    }
+    
+    constraints.push(orderBy('createdAt', 'desc'));
+    
+    const qRef = query(collection(db, COLLECTIONS.PAYMENTS), ...constraints);
+    const snapshot = await getDocs(qRef);
+    
+    const payments = [];
+    snapshot.forEach(doc => {
+      payments.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return payments;
+  } catch (error) {
+    console.error('Error getting all payments:', error);
+    throw error;
+  }
+};
+
+// Update payment status
+export const updatePaymentStatus = async (paymentId, status, receipt = null) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.PAYMENTS, paymentId);
+    const updateData = { 
+      status: status,
+      updatedAt: serverTimestamp()
+    };
+    
+    if (receipt) {
+      updateData.receipt = receipt;
+    }
+    
+    if (status === 'completed') {
+      updateData.completedAt = serverTimestamp();
+    }
+    
+    await updateDoc(docRef, updateData);
+    return true;
+  } catch (error) {
+    console.error('Error updating payment status:', error);
+    throw error;
+  }
+};
+
+// ============================================
+// COURSE MANAGEMENT
+// ============================================
+
+// Create course
+export const createCourse = async (courseData) => {
+  try {
+    const courseId = courseData.courseId || `CRS-${Date.now()}`;
+    const courseRef = doc(db, COLLECTIONS.COURSES, courseId);
+    
+    await setDoc(courseRef, {
+      ...courseData,
+      courseId: courseId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      status: courseData.status || 'active',
+      enrolledStudents: courseData.enrolledStudents || 0,
+      maxStudents: courseData.maxStudents || 50
+    });
+    
+    return courseId;
+  } catch (error) {
+    console.error('Error creating course:', error);
+    throw error;
+  }
+};
+
+// Get all courses
+export const getAllCourses = async (filters = {}) => {
+  try {
+    let q = collection(db, COLLECTIONS.COURSES);
+    const constraints = [];
+    
+    if (filters.status) {
+      constraints.push(where('status', '==', filters.status));
+    }
+    
+    if (filters.department) {
+      constraints.push(where('department', '==', filters.department));
+    }
+    
+    constraints.push(orderBy('createdAt', 'desc'));
+    
+    const qRef = query(collection(db, COLLECTIONS.COURSES), ...constraints);
+    const snapshot = await getDocs(qRef);
+    
+    const courses = [];
+    snapshot.forEach(doc => {
+      courses.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return courses;
+  } catch (error) {
+    console.error('Error getting all courses:', error);
+    throw error;
+  }
+};
+
+// Update course
+export const updateCourse = async (courseId, updateData) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.COURSES, courseId);
+    await updateDoc(docRef, {
+      ...updateData,
+      updatedAt: serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating course:', error);
+    throw error;
+  }
+};
+
+// ============================================
+// CLASS MANAGEMENT
+// ============================================
+
+// Create class
+export const createClass = async (classData) => {
+  try {
+    const classId = classData.classId || `CLS-${Date.now()}`;
+    const classRef = doc(db, COLLECTIONS.CLASSES, classId);
+    
+    await setDoc(classRef, {
+      ...classData,
+      classId: classId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      status: classData.status || 'active',
+      students: classData.students || [],
+      schedule: classData.schedule || {}
+    });
+    
+    return classId;
+  } catch (error) {
+    console.error('Error creating class:', error);
+    throw error;
+  }
+};
+
+// Get all classes
+export const getAllClasses = async (filters = {}) => {
+  try {
+    let q = collection(db, COLLECTIONS.CLASSES);
+    const constraints = [];
+    
+    if (filters.status) {
+      constraints.push(where('status', '==', filters.status));
+    }
+    
+    if (filters.courseId) {
+      constraints.push(where('courseId', '==', filters.courseId));
+    }
+    
+    if (filters.teacherId) {
+      constraints.push(where('teacherId', '==', filters.teacherId));
+    }
+    
+    constraints.push(orderBy('createdAt', 'desc'));
+    
+    const qRef = query(collection(db, COLLECTIONS.CLASSES), ...constraints);
+    const snapshot = await getDocs(qRef);
+    
+    const classes = [];
+    snapshot.forEach(doc => {
+      classes.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return classes;
+  } catch (error) {
+    console.error('Error getting all classes:', error);
+    throw error;
+  }
+};
+
+// ============================================
+// SERIAL NUMBER MANAGEMENT
+// ============================================
+
+// Generate serial number for admission
+export const generateSerialNumber = async (course = null, studentName = null) => {
+  try {
+    const year = new Date().getFullYear();
+    const count = await getSerialCount();
+    const serial = `FM-ADM-${year}-${String(count + 1).padStart(3, '0')}`;
+    
+    await setDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, serial), {
+      serial: serial,
+      course: course || '',
+      studentName: studentName || '',
+      isUsed: false,
+      generatedAt: serverTimestamp(),
+      status: 'available',
+      createdAt: new Date().toISOString()
+    });
+    
+    return serial;
+  } catch (error) {
+    console.error('Error generating serial number:', error);
+    throw error;
+  }
+};
+
+// Get serial count
+export const getSerialCount = async () => {
+  try {
+    const snapshot = await getDocs(collection(db, COLLECTIONS.SERIAL_NUMBERS));
+    return snapshot.size;
+  } catch (error) {
+    console.error('Error getting serial count:', error);
+    return 0;
+  }
+};
+
+// Verify serial number
+export const verifySerial = async (serialNumber) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.SERIAL_NUMBERS, serialNumber);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return {
+        valid: !data.isUsed,
+        data: data
+      };
+    }
+    
+    return {
+      valid: false,
+      data: null,
+      error: 'Serial number not found'
+    };
+  } catch (error) {
+    console.error('Error verifying serial:', error);
+    return {
+      valid: false,
+      data: null,
+      error: error.message
+    };
+  }
+};
+
+// Mark serial as used
+export const markSerialAsUsed = async (serialNumber, applicantEmail, studentId = null) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.SERIAL_NUMBERS, serialNumber);
+    await updateDoc(docRef, {
+      isUsed: true,
+      usedBy: applicantEmail,
+      studentId: studentId,
+      usedAt: serverTimestamp(),
+      status: 'used'
+    });
+    return true;
+  } catch (error) {
+    console.error('Error marking serial as used:', error);
+    throw error;
+  }
+};
+
+// Get all serials
+export const getAllSerials = async (filters = {}) => {
+  try {
+    let q = collection(db, COLLECTIONS.SERIAL_NUMBERS);
+    const constraints = [];
+    
+    if (filters.isUsed !== undefined) {
+      constraints.push(where('isUsed', '==', filters.isUsed));
+    }
+    
+    if (filters.status) {
+      constraints.push(where('status', '==', filters.status));
+    }
+    
+    constraints.push(orderBy('createdAt', 'desc'));
+    
+    const qRef = query(collection(db, COLLECTIONS.SERIAL_NUMBERS), ...constraints);
+    const snapshot = await getDocs(qRef);
+    
+    const serials = [];
+    snapshot.forEach(doc => {
+      serials.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return serials;
+  } catch (error) {
+    console.error('Error getting all serials:', error);
+    throw error;
+  }
+};
+
+// ============================================
+// APPLICATION MANAGEMENT
+// ============================================
+
+// Save application
+export const saveApplication = async (applicationData) => {
+  try {
+    const docRef = await addDoc(collection(db, COLLECTIONS.APPLICATIONS), {
+      ...applicationData,
+      submittedAt: serverTimestamp(),
+      status: applicationData.status || 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: serverTimestamp()
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error saving application:', error);
+    throw error;
+  }
+};
+
+// Get application by serial
+export const getApplicationBySerial = async (serialNumber) => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.APPLICATIONS),
+      where('serialNumber', '==', serialNumber)
+    );
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) return null;
+    
+    const doc = snapshot.docs[0];
+    return { id: doc.id, ...doc.data() };
+  } catch (error) {
+    console.error('Error getting application:', error);
+    return null;
+  }
+};
+
+// Get all applications
+export const getAllApplications = async (filters = {}) => {
+  try {
+    let q = collection(db, COLLECTIONS.APPLICATIONS);
+    const constraints = [];
+    
+    if (filters.status) {
+      constraints.push(where('status', '==', filters.status));
+    }
+    
+    if (filters.course) {
+      constraints.push(where('course', '==', filters.course));
+    }
+    
+    constraints.push(orderBy('createdAt', 'desc'));
+    
+    const qRef = query(collection(db, COLLECTIONS.APPLICATIONS), ...constraints);
+    const snapshot = await getDocs(qRef);
+    
+    const applications = [];
+    snapshot.forEach(doc => {
+      applications.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return applications;
+  } catch (error) {
+    console.error('Error getting all applications:', error);
+    throw error;
+  }
+};
+
+// Update application status
+export const updateApplicationStatus = async (applicationId, status, notes = null) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.APPLICATIONS, applicationId);
+    const updateData = { 
+      status: status,
+      updatedAt: serverTimestamp()
+    };
+    
+    if (notes) {
+      updateData.notes = arrayUnion({
+        text: notes,
+        timestamp: new Date().toISOString(),
+        type: 'status_update'
+      });
+    }
+    
+    await updateDoc(docRef, updateData);
+    return true;
+  } catch (error) {
+    console.error('Error updating application status:', error);
+    throw error;
+  }
+};
+
+// ============================================
+// DEPARTMENT MANAGEMENT
+// ============================================
+
+// Create department
+export const createDepartment = async (departmentData) => {
+  try {
+    const departmentId = departmentData.departmentId || `DEPT-${Date.now()}`;
+    const deptRef = doc(db, COLLECTIONS.DEPARTMENTS, departmentId);
+    
+    await setDoc(deptRef, {
+      ...departmentData,
+      departmentId: departmentId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      staff: departmentData.staff || [],
+      courses: departmentData.courses || [],
+      status: departmentData.status || 'active'
+    });
+    
+    return departmentId;
+  } catch (error) {
+    console.error('Error creating department:', error);
+    throw error;
+  }
+};
+
+// Get all departments
+export const getAllDepartments = async () => {
+  try {
+    const snapshot = await getDocs(collection(db, COLLECTIONS.DEPARTMENTS));
+    const departments = [];
+    snapshot.forEach(doc => {
+      departments.push({ id: doc.id, ...doc.data() });
+    });
+    return departments;
+  } catch (error) {
+    console.error('Error getting all departments:', error);
+    throw error;
+  }
+};
+
+// ============================================
+// NOTIFICATION MANAGEMENT
+// ============================================
+
+// Send notification
+export const sendNotification = async (notificationData) => {
+  try {
+    const docRef = await addDoc(collection(db, COLLECTIONS.NOTIFICATIONS), {
+      ...notificationData,
+      createdAt: serverTimestamp(),
+      read: false,
+      readBy: []
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error sending notification:', error);
+    throw error;
+  }
+};
+
+// Get notifications by user
+export const getNotificationsByUser = async (userId, limit = 50) => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.NOTIFICATIONS),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+      limit(limit)
+    );
+    
+    const snapshot = await getDocs(q);
+    const notifications = [];
+    snapshot.forEach(doc => {
+      notifications.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return notifications;
+  } catch (error) {
+    console.error('Error getting notifications:', error);
+    throw error;
+  }
+};
+
+// Mark notification as read
+export const markNotificationAsRead = async (notificationId, userId) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.NOTIFICATIONS, notificationId);
+    await updateDoc(docRef, {
+      read: true,
+      readBy: arrayUnion(userId)
+    });
+    return true;
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+    throw error;
+  }
+};
+
+// ============================================
+// AUTHENTICATION FUNCTIONS
+// ============================================
+
+// Register user
+export const registerUser = async (email, password, userData) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    await updateProfile(user, {
+      displayName: userData.fullName || ''
+    });
+    
+    await sendEmailVerification(user);
+    
+    const userRef = doc(db, 'users', user.uid);
+    await setDoc(userRef, {
+      uid: user.uid,
+      email: email,
+      ...userData,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      emailVerified: false
+    });
+    
+    return user;
+  } catch (error) {
+    console.error('Error registering user:', error);
+    throw error;
+  }
+};
+
+// Login user
+export const loginUser = async (email, password) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  } catch (error) {
+    console.error('Error logging in:', error);
+    throw error;
+  }
+};
+
+// Logout user
+export const logoutUser = async () => {
+  try {
+    await signOut(auth);
+    return true;
+  } catch (error) {
+    console.error('Error logging out:', error);
+    throw error;
+  }
+};
+
+// Reset password
+export const resetPassword = async (email) => {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    return true;
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    throw error;
+  }
+};
+
+// Get current user
+export const getCurrentUser = () => {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe();
+      resolve(user);
+    }, reject);
+  });
+};
+
+// Get user profile
+export const getUserProfile = async (uid) => {
+  try {
+    const docRef = doc(db, 'users', uid);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    throw error;
+  }
+};
+
+// Update user profile
+export const updateUserProfile = async (uid, updateData) => {
+  try {
+    const docRef = doc(db, 'users', uid);
+    await updateDoc(docRef, {
+      ...updateData,
+      updatedAt: serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    throw error;
+  }
+};
+
+// ============================================
+// DASHBOARD STATISTICS
+// ============================================
+
+// Get dashboard statistics
+export const getDashboardStats = async () => {
+  try {
+    const [students, staff, courses, payments, applications, serials] = await Promise.all([
+      getDocs(collection(db, COLLECTIONS.STUDENTS)),
+      getDocs(collection(db, COLLECTIONS.STAFF)),
+      getDocs(collection(db, COLLECTIONS.COURSES)),
+      getDocs(collection(db, COLLECTIONS.PAYMENTS)),
+      getDocs(collection(db, COLLECTIONS.APPLICATIONS)),
+      getDocs(collection(db, COLLECTIONS.SERIAL_NUMBERS))
+    ]);
+
+    let totalRevenue = 0;
+    let pendingPayments = 0;
+    payments.forEach(doc => {
+      const data = doc.data();
+      if (data.status === 'completed') {
+        totalRevenue += data.amount || 0;
+      } else if (data.status === 'pending') {
+        pendingPayments += data.amount || 0;
+      }
     });
 
-    // Send email using EmailJS
-    const result = await emailjs.send(
-      SERVICE_ID,
-      TEMPLATE_ID,
-      templateParams
-    );
-
-    console.log('Email sent successfully:', result);
-    return { success: true, result };
-
-  } catch (error) {
-    console.error('Error sending serial email:', error);
-    
-    // Return error with details
-    return { 
-      success: false, 
-      error: error.message || 'Failed to send email',
-      details: error
+    return {
+      totalStudents: students.size,
+      totalStaff: staff.size,
+      totalCourses: courses.size,
+      totalRevenue: totalRevenue,
+      pendingPayments: pendingPayments,
+      totalApplications: applications.size,
+      totalSerials: serials.size,
+      usedSerials: serials.docs.filter(doc => doc.data().isUsed).length,
+      availableSerials: serials.docs.filter(doc => !doc.data().isUsed).length
     };
+  } catch (error) {
+    console.error('Error getting dashboard stats:', error);
+    throw error;
   }
 };
 
-/**
- * Resend serial number email
- * @param {string} email - Recipient's email address
- * @param {string} serial - Existing serial number
- * @param {string} name - Applicant's full name
- * @returns {Promise} EmailJS response
- */
-export const resendSerialEmail = async (email, serial, name) => {
-  try {
-    const templateParams = {
-      to_email: email,
-      to_name: name || 'Applicant',
-      serial_number: serial,
-      application_link: `${window.location.origin}/school/application-form`,
-      resend: true,
-      current_year: new Date().getFullYear(),
-      whatsapp_number: '+233 50 515 9131',
-      support_email: 'fasttech227@gmail.com'
-    };
+// ============================================
+// EXPORT ALL FUNCTIONS (DEFAULT EXPORT)
+// ============================================
 
-    const result = await emailjs.send(
-      SERVICE_ID,
-      TEMPLATE_ID,
-      templateParams
-    );
-
-    return { success: true, result };
-
-  } catch (error) {
-    console.error('Error resending email:', error);
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Test email connection
- * @param {string} email - Test recipient email
- * @returns {Promise} Test result
- */
-export const testEmailConnection = async (email) => {
-  try {
-    const testParams = {
-      to_email: email || 'test@example.com',
-      to_name: 'Test User',
-      serial_number: 'TEST-123-456',
-      course: 'Test Course',
-      application_link: `${window.location.origin}/school/application-form`,
-      current_year: new Date().getFullYear(),
-      whatsapp_number: '+233 50 515 9131',
-      support_email: 'fasttech227@gmail.com'
-    };
-
-    const result = await emailjs.send(
-      SERVICE_ID,
-      TEMPLATE_ID,
-      testParams
-    );
-
-    return { success: true, message: 'Email test successful', result };
-  } catch (error) {
-    console.error('Email test failed:', error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Export configuration for debugging
-export const emailConfig = {
-  publicKey: PUBLIC_KEY,
-  serviceId: SERVICE_ID,
-  templateId: TEMPLATE_ID,
-  isInitialized: true
-};
-
-// Default export
 export default {
-  sendSerialEmail,
-  resendSerialEmail,
-  testEmailConnection,
-  emailConfig
+  // Student functions
+  createStudent,
+  getStudent,
+  getStudentByEmail,
+  getAllStudents,
+  updateStudent,
+  deleteStudent,
+  enrollStudentInCourse,
+  getStudentAttendance,
+  getStudentGrades,
+  
+  // Staff functions
+  createStaff,
+  getStaff,
+  getAllStaff,
+  updateStaff,
+  deleteStaff,
+  
+  // Admission functions
+  createAdmission,
+  getAdmission,
+  getAdmissionBySerial,
+  getAllAdmissions,
+  updateAdmissionStatus,
+  
+  // Payment functions
+  createPayment,
+  savePayment,
+  getPayment,
+  getPaymentsByStudent,
+  getAllPayments,
+  updatePaymentStatus,
+  
+  // Course functions
+  createCourse,
+  getAllCourses,
+  updateCourse,
+  
+  // Class functions
+  createClass,
+  getAllClasses,
+  
+  // Serial number functions
+  generateSerialNumber,
+  getSerialCount,
+  verifySerial,
+  markSerialAsUsed,
+  getAllSerials,
+  
+  // Application functions
+  saveApplication,
+  getApplicationBySerial,
+  getAllApplications,
+  updateApplicationStatus,
+  
+  // Department functions
+  createDepartment,
+  getAllDepartments,
+  
+  // Notification functions
+  sendNotification,
+  getNotificationsByUser,
+  markNotificationAsRead,
+  
+  // Auth functions
+  registerUser,
+  loginUser,
+  logoutUser,
+  resetPassword,
+  getCurrentUser,
+  getUserProfile,
+  updateUserProfile,
+  
+  // Dashboard
+  getDashboardStats
 };
