@@ -39,7 +39,7 @@ import {
   markSerialAsUsed
 } from '../services/firebaseService';
 import { initializePayment } from '../services/paystackService';
-import { sendSerialEmail } from '../services/emailService';
+import { sendSerialEmail, testEmailConnection } from '../services/emailService';
 import './Admissions.css';
 
 const Admissions = () => {
@@ -62,6 +62,8 @@ const Admissions = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [generatedSerial, setGeneratedSerial] = useState('');
   const [isEmailSending, setIsEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState('');
 
   const whatsappNumber = '233505159131';
   const displayWhatsappNumber = '+233 50 515 9131';
@@ -84,6 +86,20 @@ const Admissions = () => {
     return () => {
       document.body.removeChild(script);
     };
+  }, []);
+
+  // Test EmailJS connection on component mount (optional)
+  useEffect(() => {
+    const testEmail = async () => {
+      try {
+        const result = await testEmailConnection('test@example.com');
+        console.log('EmailJS test result:', result);
+      } catch (error) {
+        console.error('EmailJS test failed:', error);
+      }
+    };
+    // Uncomment to test email connection
+    // testEmail();
   }, []);
 
   const getNextIntakeDate = () => {
@@ -137,11 +153,24 @@ const Admissions = () => {
   // Send serial number email
   const sendSerialEmailToUser = async (email, name, serial, course) => {
     setIsEmailSending(true);
+    setEmailSent(false);
+    setEmailError('');
+    
     try {
-      await sendSerialEmail(email, name, serial, course);
-      return true;
+      const result = await sendSerialEmail(email, name, serial, course);
+      
+      if (result.success) {
+        setEmailSent(true);
+        console.log('Email sent successfully:', result);
+        return true;
+      } else {
+        setEmailError(result.error || 'Failed to send email');
+        console.error('Email sending failed:', result.error);
+        return false;
+      }
     } catch (error) {
       console.error('Error sending serial email:', error);
+      setEmailError(error.message || 'An error occurred while sending email');
       return false;
     } finally {
       setIsEmailSending(false);
@@ -221,7 +250,7 @@ const Admissions = () => {
       });
 
       // Send email with serial number
-      const emailSent = await sendSerialEmailToUser(
+      const emailResult = await sendSerialEmailToUser(
         paymentEmail,
         paymentName,
         serial,
@@ -289,6 +318,8 @@ const Admissions = () => {
     resetPaymentForm();
     setPaymentError('');
     setShowSuccessModal(false);
+    setEmailSent(false);
+    setEmailError('');
     setShowPaymentModal(true);
   };
 
@@ -808,6 +839,10 @@ const Admissions = () => {
                   <>
                     <FaSpinner className="spinner" /> Sending email...
                   </>
+                ) : emailSent ? (
+                  '✓ Email sent with serial number'
+                ) : emailError ? (
+                  <span className="email-error">⚠️ {emailError}</span>
                 ) : (
                   '✓ Email sent with serial number'
                 )}
