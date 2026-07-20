@@ -124,7 +124,6 @@ export const getAllStudents = async (filters = {}) => {
     const students = [];
     snapshot.forEach(doc => {
       const data = doc.data();
-      // Client-side search filter
       if (filters.search && !data.fullName.toLowerCase().includes(filters.search.toLowerCase())) {
         return;
       }
@@ -331,7 +330,6 @@ export const deleteStaff = async (staffId) => {
 // ADMISSION MANAGEMENT
 // ============================================
 
-// CREATE ADMISSION - THIS IS THE MISSING EXPORT
 export const createAdmission = async (admissionData) => {
   try {
     const admissionId = admissionData.admissionId || `ADM-${Date.now()}`;
@@ -467,7 +465,6 @@ export const createPayment = async (paymentData) => {
       receipt: paymentData.receipt || null
     });
     
-    // Update student payment history
     if (paymentData.studentId) {
       const studentRef = doc(db, COLLECTIONS.STUDENTS, paymentData.studentId);
       await updateDoc(studentRef, {
@@ -483,7 +480,6 @@ export const createPayment = async (paymentData) => {
   }
 };
 
-// SAVE PAYMENT - Alias for createPayment (used by Admissions.js)
 export const savePayment = createPayment;
 
 // Get payment by ID
@@ -716,12 +712,84 @@ export const getAllClasses = async (filters = {}) => {
 };
 
 // ============================================
-// SERIAL NUMBER MANAGEMENT
+// SERIAL NUMBER MANAGEMENT - WITH NAME HASHES
 // ============================================
 
-// Generate serial number for admission
+// Generate serial number with name hash
 export const generateSerialNumber = async (course = null, studentName = null) => {
   try {
+    const year = new Date().getFullYear();
+    
+    // Create a name hash from the student's name
+    let nameHash = 'GEN';
+    if (studentName) {
+      // Remove special characters, take first 6 letters
+      nameHash = studentName
+        .toUpperCase()
+        .replace(/[^A-Z]/g, '') // Remove special characters
+        .substring(0, 6);
+      
+      // If name hash is too short, pad with random
+      if (nameHash.length < 3) {
+        const pad = Math.random().toString(36).substring(2, 5).toUpperCase();
+        nameHash = nameHash + pad;
+      }
+    }
+    
+    // Generate a random 6-character alphanumeric string
+    const randomPart = Math.random()
+      .toString(36)
+      .substring(2, 8)
+      .toUpperCase();
+    
+    // Create the serial number with name hash
+    const serial = `FM-ADM-${year}-${nameHash}-${randomPart}`;
+    
+    // Verify uniqueness
+    const existing = await verifySerial(serial);
+    if (existing.valid && existing.data) {
+      // Serial exists, regenerate with different random
+      const newRandom = Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase();
+      const newSerial = `FM-ADM-${year}-${nameHash}-${newRandom}`;
+      
+      await setDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, newSerial), {
+        serial: newSerial,
+        course: course || '',
+        studentName: studentName || '',
+        isUsed: false,
+        generatedAt: serverTimestamp(),
+        status: 'available',
+        createdAt: new Date().toISOString(),
+        ownerName: studentName || '',
+        courseName: course || '',
+        nameHash: nameHash
+      });
+      
+      console.log('✅ Serial generated (regenerated):', newSerial);
+      return newSerial;
+    }
+    
+    await setDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, serial), {
+      serial: serial,
+      course: course || '',
+      studentName: studentName || '',
+      isUsed: false,
+      generatedAt: serverTimestamp(),
+      status: 'available',
+      createdAt: new Date().toISOString(),
+      ownerName: studentName || '',
+      courseName: course || '',
+      nameHash: nameHash
+    });
+    
+    console.log('✅ Serial generated:', serial);
+    return serial;
+  } catch (error) {
+    console.error('Error generating serial number:', error);
+    // Fallback to simple generation
     const year = new Date().getFullYear();
     const count = await getSerialCount();
     const serial = `FM-ADM-${year}-${String(count + 1).padStart(3, '0')}`;
@@ -733,13 +801,12 @@ export const generateSerialNumber = async (course = null, studentName = null) =>
       isUsed: false,
       generatedAt: serverTimestamp(),
       status: 'available',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      ownerName: studentName || '',
+      courseName: course || ''
     });
     
     return serial;
-  } catch (error) {
-    console.error('Error generating serial number:', error);
-    throw error;
   }
 };
 
@@ -757,28 +824,75 @@ export const getSerialCount = async () => {
 // Verify serial number
 export const verifySerial = async (serialNumber) => {
   try {
+    if (!serialNumber) {
+      return {
+        valid: false,
+        data: null,
+        error: 'Serial number is required'
+      };
+    }
+    
+    console.log('🔍 Verifying serial:', serialNumber);
+    
+    // Try direct lookup
     const docRef = doc(db, COLLECTIONS.SERIAL_NUMBERS, serialNumber);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
       const data = docSnap.data();
+      console.log('📋 Serial found:', data);
+      
+      if (data.isUsed === true) {
+        return {
+          valid: false,
+          data: data,
+          error: 'This serial number has already been used'
+        };
+      }
+      
       return {
-        valid: !data.isUsed,
-        data: data
+        valid: true,
+        data: data,
+        error: null
       };
     }
     
+    // If not found, try query
+    const q = query(
+      collection(db, COLLECTIONS.SERIAL_NUMBERS),
+      where('serial', '==', serialNumber)
+    );
+    const snapshot = await getDocs(q);
+    
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      const data = doc.data();
+      if (data.isUsed === true) {
+        return {
+          valid: false,
+          data: data,
+          error: 'This serial number has already been used'
+        };
+      }
+      return {
+        valid: true,
+        data: data,
+        error: null
+      };
+    }
+    
+    console.log('❌ Serial not found:', serialNumber);
     return {
       valid: false,
       data: null,
-      error: 'Serial number not found'
+      error: 'Invalid serial number. Please check and try again.'
     };
   } catch (error) {
     console.error('Error verifying serial:', error);
     return {
       valid: false,
       data: null,
-      error: error.message
+      error: 'Error verifying serial number. Please try again.'
     };
   }
 };
@@ -1038,15 +1152,12 @@ export const registerUser = async (email, password, userData) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
-    // Update profile
     await updateProfile(user, {
       displayName: userData.fullName || ''
     });
     
-    // Send email verification
     await sendEmailVerification(user);
     
-    // Save user data to Firestore
     const userRef = doc(db, 'users', user.uid);
     await setDoc(userRef, {
       uid: user.uid,
@@ -1154,7 +1265,6 @@ export const getDashboardStats = async () => {
       getDocs(collection(db, COLLECTIONS.SERIAL_NUMBERS))
     ]);
 
-    // Calculate payment totals
     let totalRevenue = 0;
     let pendingPayments = 0;
     payments.forEach(doc => {
@@ -1207,7 +1317,7 @@ export default {
   deleteStaff,
   
   // Admission functions
-  createAdmission,  // <-- THIS IS NOW PROPERLY EXPORTED
+  createAdmission,
   getAdmission,
   getAdmissionBySerial,
   getAllAdmissions,
@@ -1215,7 +1325,7 @@ export default {
   
   // Payment functions
   createPayment,
-  savePayment,  // <-- THIS IS ALSO EXPORTED FOR BACKWARD COMPATIBILITY
+  savePayment,
   getPayment,
   getPaymentsByStudent,
   getAllPayments,
@@ -1262,8 +1372,5 @@ export default {
   updateUserProfile,
   
   // Dashboard
-  
-
-  
   getDashboardStats
 };

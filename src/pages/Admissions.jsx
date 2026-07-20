@@ -80,7 +80,6 @@ const Admissions = () => {
   ];
 
   useEffect(() => {
-    // Load Paystack script
     const script = document.createElement('script');
     script.src = 'https://js.paystack.co/v1/inline.js';
     script.async = true;
@@ -116,147 +115,17 @@ const Admissions = () => {
   };
 
   // ============================================
-  // SECURE SERIAL NUMBER GENERATION
+  // GENERATE SERIAL - USING FIREBASE SERVICE
   // ============================================
   
-  /**
-   * Generate a secure serial number that includes the buyer's name
-   * Format: FM-ADM-{YEAR}-{NAME_HASH}-{RANDOM}
-   * Example: FM-ADM-2026-JOHNDOE-A7F3B9
-   */
-  const generateSecureSerial = async (fullName, course) => {
-    try {
-      // Get the current year
-      const year = new Date().getFullYear();
-      
-      // Create a name hash (first 6 characters of sanitized name)
-      const sanitizedName = fullName
-        .toUpperCase()
-        .replace(/[^A-Z]/g, '') // Remove special characters
-        .substring(0, 6); // Take first 6 letters
-      
-      // Generate a random 6-character alphanumeric string
-      const randomPart = Math.random()
-        .toString(36)
-        .substring(2, 8)
-        .toUpperCase();
-      
-      // Get the count for uniqueness
-      const count = await getSerialCount();
-      const countPart = String(count + 1).padStart(3, '0');
-      
-      // Create the serial number
-      const serial = `FM-ADM-${year}-${sanitizedName}-${randomPart}`;
-      
-      // Verify it's unique (check against existing serials)
-      const existing = await verifySerial(serial);
-      if (existing.valid) {
-        // If somehow the serial exists, regenerate with a different random
-        const newRandom = Math.random()
-          .toString(36)
-          .substring(2, 8)
-          .toUpperCase();
-        return `FM-ADM-${year}-${sanitizedName}-${newRandom}`;
-      }
-      
-      return serial;
-    } catch (error) {
-      console.error('Error generating secure serial:', error);
-      // Fallback to basic generation if there's an error
-      const year = new Date().getFullYear();
-      const count = await getSerialCount();
-      return `FM-ADM-${year}-${String(count + 1).padStart(3, '0')}`;
-    }
-  };
-
-  /**
-   * Alternative: Generate serial with name embedded
-   * Format: FM-ADM-{YEAR}-{NAME_INITIALS}-{TIMESTAMP}
-   */
-  const generateNameBasedSerial = async (fullName, course) => {
-    try {
-      const year = new Date().getFullYear();
-      
-      // Get initials from name
-      const nameParts = fullName.trim().split(' ');
-      let initials = '';
-      if (nameParts.length === 1) {
-        initials = nameParts[0].substring(0, 3).toUpperCase();
-      } else {
-        initials = nameParts
-          .map(part => part.charAt(0))
-          .join('')
-          .toUpperCase()
-          .substring(0, 4);
-      }
-      
-      // Get timestamp component
-      const timestamp = Date.now().toString(36).toUpperCase().substring(-4);
-      
-      // Get count for uniqueness
-      const count = await getSerialCount();
-      const countPart = String(count + 1).padStart(3, '0');
-      
-      // Create serial: FM-ADM-2026-JD-3F2A
-      const serial = `FM-ADM-${year}-${initials}-${timestamp}`;
-      
-      return serial;
-    } catch (error) {
-      console.error('Error generating name-based serial:', error);
-      const year = new Date().getFullYear();
-      const count = await getSerialCount();
-      return `FM-ADM-${year}-${String(count + 1).padStart(3, '0')}`;
-    }
-  };
-
-  /**
-   * Generate serial with course code
-   * Format: FM-ADM-{YEAR}-{COURSE_CODE}-{NAME_HASH}
-   */
-  const generateCourseBasedSerial = async (fullName, course) => {
-    try {
-      const year = new Date().getFullYear();
-      
-      // Get course code
-      let courseCode = 'GEN';
-      if (course) {
-        if (course.includes('I.C.T')) courseCode = 'ICT';
-        else if (course.includes('Graphic')) courseCode = 'GRD';
-        else if (course.includes('Web')) courseCode = 'WEB';
-        else if (course.includes('Networking')) courseCode = 'NET';
-        else if (course.includes('I.T Support')) courseCode = 'ITS';
-      }
-      
-      // Get name hash
-      const nameHash = fullName
-        .toUpperCase()
-        .replace(/[^A-Z]/g, '')
-        .substring(0, 4);
-      
-      // Get random 4-character string
-      const random = Math.random()
-        .toString(36)
-        .substring(2, 6)
-        .toUpperCase();
-      
-      // Create serial: FM-ADM-2026-WEB-JOHN-3F2A
-      const serial = `FM-ADM-${year}-${courseCode}-${nameHash}-${random}`;
-      
-      return serial;
-    } catch (error) {
-      console.error('Error generating course-based serial:', error);
-      const year = new Date().getFullYear();
-      const count = await getSerialCount();
-      return `FM-ADM-${year}-${String(count + 1).padStart(3, '0')}`;
-    }
-  };
-
-  // Generate serial number function - using the secure method
   const generateSerial = async () => {
     try {
-      // Use the secure serial generation with buyer's name
-      const serial = await generateSecureSerial(paymentName, selectedCourseForPayment);
-      console.log('Generated secure serial:', serial);
+      // Use the firebaseService generateSerialNumber with name and course
+      const serial = await generateSerialNumber(
+        selectedCourseForPayment, 
+        paymentName
+      );
+      console.log('✅ Generated serial:', serial);
       return serial;
     } catch (error) {
       console.error('Error generating serial:', error);
@@ -330,7 +199,6 @@ const Admissions = () => {
         }
       );
 
-      // Payment successful
       await handlePaymentSuccess(response, newSerial);
     } catch (error) {
       console.error('Payment error:', error);
@@ -355,7 +223,7 @@ const Admissions = () => {
         paymentType: 'admission_form',
         status: 'completed',
         serialNumber: serial,
-        serialOwner: paymentName // Track who the serial belongs to
+        serialOwner: paymentName
       });
 
       // Create admission record
@@ -371,7 +239,7 @@ const Admissions = () => {
         status: 'pending',
         paymentReference: response.reference,
         applicationDate: new Date().toISOString(),
-        serialOwner: paymentName // Track serial owner
+        serialOwner: paymentName
       });
 
       // Send email with serial number
@@ -396,10 +264,7 @@ const Admissions = () => {
         console.warn('Notification error (non-critical):', notifError);
       }
 
-      // Show success modal with serial number
       setShowSuccessModal(true);
-      
-      // Reset form
       resetPaymentForm();
     } catch (error) {
       console.error('Payment processing error:', error);
@@ -426,14 +291,12 @@ const Admissions = () => {
       const result = await verifySerial(serialNumber.toUpperCase());
       
       if (result.valid) {
-        // Check if the serial is registered to the current user
-        // You can add additional validation here
         navigate('/school/application-form', { state: { serialNumber: serialNumber.toUpperCase() } });
         setShowSerialVerification(false);
         setSerialNumber('');
       } else {
         setIsSerialValid(false);
-        setSerialError('Invalid or already used serial number. Please check and try again.');
+        setSerialError(result.error || 'Invalid or already used serial number. Please check and try again.');
       }
     } catch (error) {
       console.error('Verification error:', error);
@@ -571,7 +434,6 @@ const Admissions = () => {
 
   return (
     <div className="admissions-page">
-      {/* Hero Section */}
       <div className="admissions-hero">
         <div className="container">
           <h1 className="hero-title">
@@ -610,7 +472,6 @@ const Admissions = () => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="admissions-tabs">
         <div className="container">
           <button 
@@ -647,7 +508,6 @@ const Admissions = () => {
       </div>
 
       <div className="container">
-        {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div className="tab-content overview-tab">
             <div className="overview-grid">
@@ -698,7 +558,6 @@ const Admissions = () => {
           </div>
         )}
 
-        {/* Requirements Tab */}
         {activeTab === 'requirements' && (
           <div className="tab-content requirements-tab">
             <h2>Admission Requirements</h2>
@@ -725,7 +584,6 @@ const Admissions = () => {
           </div>
         )}
 
-        {/* Process Tab */}
         {activeTab === 'process' && (
           <div className="tab-content process-tab">
             <h2>How to Apply</h2>
@@ -751,7 +609,6 @@ const Admissions = () => {
           </div>
         )}
 
-        {/* Fees Tab */}
         {activeTab === 'fees' && (
           <div className="tab-content fees-tab">
             <h2>Tuition & Fees</h2>
@@ -787,7 +644,6 @@ const Admissions = () => {
           </div>
         )}
 
-        {/* FAQ Tab */}
         {activeTab === 'faq' && (
           <div className="tab-content faq-tab">
             <h2>Frequently Asked Questions</h2>
@@ -1042,7 +898,7 @@ const Admissions = () => {
                   type="text"
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value.toUpperCase())}
-                  placeholder="e.g., FM-ADM-2026-JD-3F2A"
+                  placeholder="e.g., FM-ADM-2026-JOHNDOE-A7F3B9"
                   className={serialError ? 'error' : ''}
                 />
                 {serialError && <span className="error-message">{serialError}</span>}
@@ -1079,7 +935,6 @@ const Admissions = () => {
         </div>
       )}
 
-      {/* Footer CTA */}
       <div className="admissions-footer">
         <div className="container">
           <div className="footer-content">
