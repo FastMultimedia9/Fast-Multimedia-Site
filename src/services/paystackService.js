@@ -1,4 +1,7 @@
-// paystackService.js
+// src/services/paystackService.js
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { db } from '../firebase'; // Make sure this path points to your firebase config file
+
 const PAYSTACK_PUBLIC_KEY = process.env.REACT_APP_PAYSTACK_PUBLIC_KEY || 'pk_test_your_public_key_here';
 const PAYSTACK_SECRET_KEY = process.env.REACT_APP_PAYSTACK_SECRET_KEY || 'sk_test_your_secret_key_here';
 
@@ -94,22 +97,28 @@ const sendSerialEmail = async (response, metadata, email) => {
     };
     
     // Store the serial number in Firebase
-    await storeSerialNumber(serial, metadata, email);
+    await storeSerialNumber(serial, metadata, email, response.reference);
     
     // You can also use a third-party email service if needed
     console.log('Serial number generated:', serial);
     console.log('Email should be sent to:', email);
     
+    return serial;
+    
   } catch (error) {
     console.error('Error sending serial email:', error);
+    throw error;
   }
 };
 
 // Store serial number in Firebase
-const storeSerialNumber = async (serial, metadata, email) => {
+const storeSerialNumber = async (serial, metadata, email, reference) => {
   try {
-    const db = getFirestore();
-    await setDoc(doc(db, 'serialNumbers', serial), {
+    // Initialize Firestore using the imported db
+    const firestore = getFirestore();
+    
+    // Use setDoc with proper document reference
+    await setDoc(doc(firestore, 'serialNumbers', serial), {
       serial: serial,
       course: metadata.course || '',
       studentName: metadata.name || '',
@@ -118,9 +127,13 @@ const storeSerialNumber = async (serial, metadata, email) => {
       isUsed: false,
       generatedAt: new Date().toISOString(),
       status: 'available',
-      paymentReference: metadata.reference || ''
+      paymentReference: reference || metadata.reference || '',
+      amount: metadata.amount || 100
     });
+    
+    console.log('Serial number stored successfully in Firebase');
     return serial;
+    
   } catch (error) {
     console.error('Error storing serial number:', error);
     throw error;
@@ -137,10 +150,72 @@ export const verifyPaymentAndGetSerial = async (reference) => {
         'Content-Type': 'application/json'
       }
     });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
     const data = await response.json();
+    
+    if (!data.status) {
+      throw new Error(data.message || 'Payment verification failed');
+    }
+    
     return data;
+    
   } catch (error) {
     console.error('Payment verification error:', error);
     throw error;
   }
+};
+
+// Helper function to check if serial number exists
+export const checkSerialNumber = async (serial) => {
+  try {
+    const firestore = getFirestore();
+    const docRef = doc(firestore, 'serialNumbers', serial);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return {
+        exists: true,
+        data: docSnap.data()
+      };
+    } else {
+      return {
+        exists: false,
+        data: null
+      };
+    }
+  } catch (error) {
+    console.error('Error checking serial number:', error);
+    throw error;
+  }
+};
+
+// Helper function to mark serial number as used
+export const markSerialNumberAsUsed = async (serial) => {
+  try {
+    const firestore = getFirestore();
+    const docRef = doc(firestore, 'serialNumbers', serial);
+    
+    await setDoc(docRef, {
+      isUsed: true,
+      usedAt: new Date().toISOString(),
+      status: 'used'
+    }, { merge: true });
+    
+    return true;
+  } catch (error) {
+    console.error('Error marking serial number as used:', error);
+    throw error;
+  }
+};
+
+// Export default object with all functions
+export default {
+  initializePayment,
+  verifyPaymentAndGetSerial,
+  checkSerialNumber,
+  markSerialNumberAsUsed
 };
