@@ -331,7 +331,7 @@ export const deleteStaff = async (staffId) => {
 // ADMISSION MANAGEMENT
 // ============================================
 
-// CREATE ADMISSION - THIS IS THE KEY EXPORT THAT WAS MISSING
+// CREATE ADMISSION - THIS IS THE MISSING EXPORT
 export const createAdmission = async (admissionData) => {
   try {
     const admissionId = admissionData.admissionId || `ADM-${Date.now()}`;
@@ -1262,5 +1262,6 @@ export default {
   updateUserProfile,
   
   // Dashboard
+   createAdmission,
   getDashboardStats
 };
