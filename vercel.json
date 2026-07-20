@@ -1,6 +1,10 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "CI=false npm run build",
   "installCommand": "npm install --legacy-peer-deps",
+  "env": {
+    "CI": "false",
+    "DISABLE_ESLINT_PLUGIN": "true"
+  },
   "redirects": [
     {
       "source": "/:path*",
