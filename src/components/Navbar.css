@@ -1041,3 +1041,51 @@
     background: rgba(255, 255, 255, 0.05);
   }
 }
+
+
+/* ============================================ */
+/* STUDENT PORTAL - ADDITIONAL STYLES */
+/* ============================================ */
+
+/* Highlight Student Portal link with a special style */
+.dropdown-item.student-portal {
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.05), rgba(88, 86, 214, 0.05));
+  border-left: 3px solid var(--primary);
+}
+
+.dropdown-item.student-portal:hover {
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.12), rgba(88, 86, 214, 0.12));
+}
+
+/* Student Portal icon animation */
+.dropdown-item .dropdown-icon[role="img"] {
+  transition: transform 0.3s ease;
+}
+
+.dropdown-item:hover .dropdown-icon[role="img"] {
+  transform: scale(1.2) rotate(-5deg);
+}
+
+/* Mobile Student Portal link special style */
+.mobile-school-link.student-portal {
+  border-left-color: var(--primary);
+  background: rgba(0, 122, 255, 0.03);
+}
+
+.mobile-school-link.student-portal:hover {
+  background: rgba(0, 122, 255, 0.08);
+}
+
+/* Badge for Student Portal (optional) */
+.student-portal-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #007AFF, #5856D6);
+  color: white;
+  padding: 1px 8px;
+  border-radius: 10px;
+  margin-left: 4px;
+  letter-spacing: 0.5px;
+}
