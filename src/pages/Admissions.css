@@ -836,3 +836,259 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Payment Modal Styles */
+.payment-modal {
+  max-width: 500px;
+}
+
+.payment-details {
+  padding: 20px 0;
+}
+
+.payment-amount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #fef3d8;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.amount-label {
+  font-weight: 600;
+  color: #161b26;
+  font-size: 1.1rem;
+}
+
+.amount-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ff8b20;
+}
+
+.payment-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #f0f7ff;
+  border-radius: 8px;
+  color: #0066cc;
+  font-size: 0.9rem;
+  margin-top: 16px;
+}
+
+.pay-now-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%);
+  border: none;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #161b26;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.pay-now-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 202, 65, 0.4);
+}
+
+.pay-now-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-payment-btn {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 2px solid #ffe39b;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #585a61;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+.cancel-payment-btn:hover {
+  background: #fef3d8;
+}
+
+/* Verification Modal Styles */
+.verify-modal {
+  max-width: 500px;
+}
+
+.verify-form {
+  padding: 10px 0;
+}
+
+.verify-form .form-group input {
+  padding: 12px 16px;
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+
+.verify-form .form-group input.error {
+  border-color: #ff4444;
+}
+
+.error-message {
+  color: #ff4444;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.verify-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.verify-btn {
+  padding: 14px;
+  background: linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%);
+  border: none;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #161b26;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.verify-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 202, 65, 0.4);
+}
+
+.verify-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.buy-form-btn {
+  padding: 12px;
+  background: transparent;
+  border: 2px solid #ffe39b;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #585a61;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.buy-form-btn:hover {
+  background: #fef3d8;
+}
+
+/* Form Modal Styles */
+.form-modal {
+  max-width: 700px;
+}
+
+.serial-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #fef3d8;
+  border-radius: 30px;
+  font-weight: 700;
+  color: #161b26;
+  margin: 10px 0 16px;
+  border: 2px solid #ffca41;
+}
+
+/* CTA Buttons */
+.cta-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.verify-btn {
+  padding: 12px 32px;
+  background: #161b26;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.verify-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.btn-whatsapp {
+  padding: 12px 28px;
+  background: #25D366;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+}
+
+/* Responsive for Modals */
+@media (max-width: 768px) {
+  .payment-modal,
+  .verify-modal,
+  .form-modal {
+    padding: 20px;
+  }
+  
+  .payment-amount {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .cta-buttons button {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+  }
+}
