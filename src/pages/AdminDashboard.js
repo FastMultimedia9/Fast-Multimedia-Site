@@ -39,14 +39,15 @@ import {
   FaExclamationTriangle,
   FaInfoCircle,
   FaShieldAlt,
-  FaDashboard,
+  FaHome, // <-- REPLACED FaDashboard with FaHome
   FaUsersCog,
   FaCreditCard,
   FaIdCard,
   FaChalkboardTeacher,
   FaFolderOpen,
   FaUpload,
-  FaDownload as FaDownloadIcon
+  FaDownload as FaDownloadIcon,
+  FaChartPie // <-- Alternative for dashboard
 } from 'react-icons/fa';
 import {
   getAllStudents,
@@ -158,7 +159,6 @@ const AdminDashboard = () => {
       await updateStudent(studentId, { admissionStatus: status });
       await updateAdmissionStatus(studentId, status);
       
-      // Send notification
       await sendNotification({
         userId: studentId,
         title: 'Admission Status Updated',
@@ -875,6 +875,18 @@ const AdminDashboard = () => {
     </div>
   );
 
+  // Sidebar navigation items
+  const navItems = [
+    { id: 'dashboard', icon: <FaHome />, label: 'Dashboard' },
+    { id: 'students', icon: <FaUsers />, label: 'Students' },
+    { id: 'admissions', icon: <FaClipboardList />, label: 'Admissions' },
+    { id: 'payments', icon: <FaCreditCard />, label: 'Payments' },
+    { id: 'staff', icon: <FaUserTie />, label: 'Staff' },
+    { id: 'courses', icon: <FaBookOpen />, label: 'Courses' },
+    { id: 'serials', icon: <FaFileAlt />, label: 'Serials' },
+    { id: 'reports', icon: <FaChartLine />, label: 'Reports' }
+  ];
+
   return (
     <div className="admin-dashboard">
       {/* Notification */}
@@ -891,54 +903,15 @@ const AdminDashboard = () => {
           <h2>Admin Panel</h2>
         </div>
         <nav className="sidebar-nav">
-          <button 
-            className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dashboard')}
-          >
-            <FaDashboard /> Dashboard
-          </button>
-          <button 
-            className={`nav-item ${activeTab === 'students' ? 'active' : ''}`}
-            onClick={() => setActiveTab('students')}
-          >
-            <FaUsers /> Students
-          </button>
-          <button 
-            className={`nav-item ${activeTab === 'admissions' ? 'active' : ''}`}
-            onClick={() => setActiveTab('admissions')}
-          >
-            <FaClipboardList /> Admissions
-          </button>
-          <button 
-            className={`nav-item ${activeTab === 'payments' ? 'active' : ''}`}
-            onClick={() => setActiveTab('payments')}
-          >
-            <FaCreditCard /> Payments
-          </button>
-          <button 
-            className={`nav-item ${activeTab === 'staff' ? 'active' : ''}`}
-            onClick={() => setActiveTab('staff')}
-          >
-            <FaUserTie /> Staff
-          </button>
-          <button 
-            className={`nav-item ${activeTab === 'courses' ? 'active' : ''}`}
-            onClick={() => setActiveTab('courses')}
-          >
-            <FaBookOpen /> Courses
-          </button>
-          <button 
-            className={`nav-item ${activeTab === 'serials' ? 'active' : ''}`}
-            onClick={() => setActiveTab('serials')}
-          >
-            <FaFileAlt /> Serials
-          </button>
-          <button 
-            className={`nav-item ${activeTab === 'reports' ? 'active' : ''}`}
-            onClick={() => setActiveTab('reports')}
-          >
-            <FaChartLine /> Reports
-          </button>
+          {navItems.map((item) => (
+            <button 
+              key={item.id}
+              className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(item.id)}
+            >
+              {item.icon} {item.label}
+            </button>
+          ))}
         </nav>
         <div className="sidebar-footer">
           <button className="nav-item logout" onClick={() => navigate('/admin/login')}>
