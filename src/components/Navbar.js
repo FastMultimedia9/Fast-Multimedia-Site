@@ -94,11 +94,11 @@ const Navbar = () => {
 
   // School menu items
   const schoolMenuItems = [
-    { name: 'School Home', path: '/school', icon: '🏫' },
-    { name: 'About School', path: '/school/about', icon: '📚' },
-    { name: 'Admissions', path: '/school/admissions', icon: '📝' },
-    { name: 'Courses', path: '/school/courses', icon: '📖' },
-    { name: 'Contact School', path: '/school/contact', icon: '📞' }
+   
+   
+    { name: 'Admissions', path: '/school/admissions', icon: '📝' }
+    
+   
   ];
 
   // Group school items for mobile
@@ -330,20 +330,7 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="auth-buttons">
-              <Link 
-                to="/login" 
-                className="btn btn-login"
-                onClick={() => handleNavigation('/login')}
-              >
-                Sign In
-              </Link>
-              <Link 
-                to="/contact" 
-                className="btn btn-primary"
-                onClick={() => handleNavigation('/contact')}
-              >
-                Get Started
-              </Link>
+             
             </div>
           )}
         </div>
