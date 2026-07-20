@@ -389,7 +389,7 @@ const Admissions = () => {
         </div>
       </div>
 
-      {/* Tabs - Same as before */}
+      {/* Tabs */}
       <div className="admissions-tabs">
         <div className="container">
           <button 
@@ -425,7 +425,6 @@ const Admissions = () => {
         </div>
       </div>
 
-      {/* Tab Content - Same as before */}
       <div className="container">
         {/* Overview Tab */}
         {activeTab === 'overview' && (
