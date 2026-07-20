@@ -92,10 +92,11 @@ const Navbar = () => {
     navigate('/');
   };
 
-  // School menu items - FIXED
+  // School menu items - WITH STUDENT PORTAL LINKING TO LOGIN
   const schoolMenuItems = [
     { name: 'School Home', path: '/school', icon: '🏫' },
-    { name: 'Admissions', path: '/school/admissions', icon: '📝' }
+    { name: 'Admissions', path: '/school/admissions', icon: '📝' },
+    { name: 'Student Portal', path: '/student/login', icon: '👨‍🎓' }
   ];
 
   // Group school items for mobile

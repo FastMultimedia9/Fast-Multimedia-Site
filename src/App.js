@@ -57,6 +57,10 @@ import SchoolPage from './pages/SchoolPage';
 import Admissions from './pages/Admissions';
 import ApplicationForm from './pages/ApplicationForm';
 
+// Student Portal Pages
+import StudentPortal from './pages/StudentPortal';
+import StudentLogin from './pages/StudentLogin';
+
 // Service Detail Page Component
 import ServiceDetailPage from './components/ServiceDetailPage';
 
@@ -127,7 +131,7 @@ const ProtectedRoute = ({ children, adminOnly = false, requireAuth = true }) => 
   if (requireAuth && !authState.isAuthenticated) {
     console.log('🔒 Redirecting to login - User not authenticated');
     localStorage.setItem('redirectAfterLogin', location.pathname);
-    return <Navigate to="/login" replace state={{ from: location }} />;
+    return <Navigate to="/student/login" replace state={{ from: location }} />;
   }
 
   // If admin access is required but user is not admin
@@ -137,9 +141,9 @@ const ProtectedRoute = ({ children, adminOnly = false, requireAuth = true }) => 
   }
 
   // If user is authenticated but trying to access login page
-  if (!requireAuth && authState.isAuthenticated && location.pathname === '/login') {
-    console.log('📍 User already logged in, redirecting to blog');
-    return <Navigate to="/blog" replace />;
+  if (!requireAuth && authState.isAuthenticated && location.pathname === '/student/login') {
+    console.log('📍 User already logged in, redirecting to student portal');
+    return <Navigate to="/student/portal" replace />;
   }
 
   return children;
@@ -210,6 +214,17 @@ function AppContent() {
           {/* ===== ADMISSIONS & APPLICATION FORM PAGES ===== */}
           <Route path="/school/admissions" element={<Admissions />} />
           <Route path="/school/application-form" element={<ApplicationForm />} />
+          
+          {/* ===== STUDENT PORTAL PAGES ===== */}
+          <Route path="/student/login" element={<StudentLogin />} />
+          <Route 
+            path="/student/portal" 
+            element={
+              <ProtectedRoute>
+                <StudentPortal />
+              </ProtectedRoute>
+            } 
+          />
           
           {/* ===== BLOG PAGES (With Lazy Loading) ===== */}
           <Route path="/blog" element={
@@ -375,6 +390,7 @@ function AppContent() {
                     <li><a href="/blog">Browse the Blog</a></li>
                     <li><a href="/school">Visit School Page</a></li>
                     <li><a href="/school/admissions">View Admissions</a></li>
+                    <li><a href="/student/login">Student Login</a></li>
                     <li><a href="/test">Test Database Connection</a></li>
                     <li><a href="/login">Login</a></li>
                     <li><a href="/admin/login">Admin Login</a></li>
