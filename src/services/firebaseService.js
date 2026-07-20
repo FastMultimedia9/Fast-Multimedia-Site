@@ -1181,6 +1181,13 @@ export const getDashboardStats = async () => {
 };
 
 // ============================================
+// SAVE PAYMENT (Alias for createPayment)
+// ============================================
+
+// Save payment (alias for createPayment for backward compatibility)
+export const savePayment = createPayment;
+
+// ============================================
 // EXPORT ALL FUNCTIONS
 // ============================================
 
@@ -1212,6 +1219,7 @@ export default {
   
   // Payment functions
   createPayment,
+  savePayment,
   getPayment,
   getPaymentsByStudent,
   getAllPayments,
