@@ -486,6 +486,7 @@ const StudentLogin = () => {
                     </ul>
                   </div>
 
+                  {/* FIXED: Password Change Submit Button */}
                   <button 
                     type="submit" 
                     className="login-btn"
@@ -574,13 +575,16 @@ const StudentLogin = () => {
                   </Link>
                 </div>
 
+                {/* FIXED: Login Submit Button */}
                 <button 
                   type="submit" 
                   className="login-btn"
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <FaSpinner className="spinner" /> Checking...
+                    <>
+                      <FaSpinner className="spinner" /> Checking...
+                    </>
                   ) : (
                     <>
                       Login <FaArrowRight />
