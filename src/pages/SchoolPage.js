@@ -28,7 +28,8 @@ import {
   FaAward, 
   FaTools, 
   FaEye, 
-  FaHeart
+  FaHeart,
+  FaShoppingCart
 } from 'react-icons/fa';
 import './SchoolPage.css';
 
@@ -37,16 +38,8 @@ const SchoolPage = () => {
   const location = useLocation();
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [activeTab, setActiveTab] = useState('courses');
-  const [enquiryName, setEnquiryName] = useState('');
-  const [enquiryEmail, setEnquiryEmail] = useState('');
-  const [enquiryPhone, setEnquiryPhone] = useState('');
-  const [enquiryMessage, setEnquiryMessage] = useState('');
-  const [selectedCourseForForm, setSelectedCourseForForm] = useState('');
-  const [selectedPaymentOption, setSelectedPaymentOption] = useState('Full Payment');
-  const [showEnquiryForm, setShowEnquiryForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedPaymentPlan, setSelectedPaymentPlan] = useState('full');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const whatsappNumber = '233505159131';
   const displayWhatsappNumber = '+233 50 515 9131';
@@ -239,40 +232,6 @@ const SchoolPage = () => {
     }
   }, []);
 
-  const handleEnquirySubmit = async (e) => {
-    e.preventDefault();
-    
-    const courseValue = selectedCourseForForm || (selectedCourse?.title || 'Not specified');
-    const paymentValue = selectedPaymentOption;
-    
-    setIsSubmitting(true);
-
-    try {
-      const message = `ENROLLMENT REQUEST\n\nName: ${enquiryName}\nEmail: ${enquiryEmail}\nPhone: ${enquiryPhone}\nCourse: ${courseValue}\nPayment Option: ${paymentValue}\n\nStart Date: ${startDate}\nDuration: 2 Months\nDelivery: Online & In-Person\n\nMessage: ${enquiryMessage || 'No additional message'}`;
-      
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-      
-      alert(`✅ Thank you ${enquiryName}!\n\nYour enrollment request for ${courseValue} has been prepared!\n\nWe will contact you via WhatsApp shortly.\n\n📅 Start Date: ${startDate}\n⏱️ Duration: 2 Months\n💻 Delivery: Online & In-Person`);
-      resetSingleForm();
-    } catch (error) {
-      alert('Your enrollment request has been saved. We will contact you within 24 hours.');
-      resetSingleForm();
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const resetSingleForm = () => {
-    setEnquiryName('');
-    setEnquiryEmail('');
-    setEnquiryPhone('');
-    setEnquiryMessage('');
-    setSelectedCourseForForm('');
-    setSelectedPaymentOption('Full Payment');
-    setShowEnquiryForm(false);
-  };
-
   const getPriceDisplay = () => {
     if (selectedPaymentPlan === 'installment') {
       return selectedCourse?.installmentPrice;
@@ -284,6 +243,11 @@ const SchoolPage = () => {
     const message = `Hi Fast Multimedia Institute! I'm interested in learning more about your courses.`;
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  // Redirect to Admissions page (Buy Form)
+  const redirectToAdmissions = () => {
+    navigate('/school/admissions');
   };
 
   return (
@@ -512,14 +476,12 @@ const SchoolPage = () => {
                   </div>
                 </div>
 
+                {/* ENROLL NOW - Redirects to Admissions Buy Form */}
                 <button 
                   className="enquire-btn"
-                  onClick={() => {
-                    setSelectedCourseForForm(selectedCourse.title);
-                    setShowEnquiryForm(true);
-                  }}
+                  onClick={redirectToAdmissions}
                 >
-                  Enroll Now - {getPriceDisplay()}
+                  <FaShoppingCart /> Enroll Now - {getPriceDisplay()}
                 </button>
               </div>
             </div>
@@ -568,77 +530,16 @@ const SchoolPage = () => {
               </div>
             </div>
 
+            {/* ENROLL NOW SECTION - Redirects to Admissions Buy Form */}
             <div className="enquiry-section">
               <h2>Ready to Enroll?</h2>
               <p>Start Date: {startDate} | 2 Months | Online & In-Person</p>
-              {!showEnquiryForm ? (
-                <button 
-                  className="enquire-btn"
-                  onClick={() => {
-                    setSelectedCourseForForm(selectedCourse.title);
-                    setShowEnquiryForm(true);
-                  }}
-                >
-                  Enroll Now - {getPriceDisplay()}
-                </button>
-              ) : (
-                <form className="enquiry-form" onSubmit={handleEnquirySubmit}>
-                  <input
-                    type="text"
-                    placeholder="Your Full Name *"
-                    value={enquiryName}
-                    onChange={(e) => setEnquiryName(e.target.value)}
-                    required
-                  />
-                  <input
-                    type="email"
-                    placeholder="Your Email Address *"
-                    value={enquiryEmail}
-                    onChange={(e) => setEnquiryEmail(e.target.value)}
-                    required
-                  />
-                  <input
-                    type="tel"
-                    placeholder="Phone Number *"
-                    value={enquiryPhone}
-                    onChange={(e) => setEnquiryPhone(e.target.value)}
-                    required
-                  />
-                  <select 
-                    value={selectedCourseForForm}
-                    onChange={(e) => setSelectedCourseForForm(e.target.value)}
-                    required
-                  >
-                    <option value="">Select Course *</option>
-                    {courses.map(course => (
-                      <option key={course.id} value={course.title}>{course.title} - {course.fullPrice}</option>
-                    ))}
-                  </select>
-                  <select 
-                    value={selectedPaymentOption}
-                    onChange={(e) => setSelectedPaymentOption(e.target.value)}
-                  >
-                    <option>Full Payment</option>
-                    <option>Installment Plan (2 months)</option>
-                  </select>
-                  <textarea
-                    placeholder="Additional Information (Occupation, Experience Level, etc.)"
-                    value={enquiryMessage}
-                    onChange={(e) => setEnquiryMessage(e.target.value)}
-                    rows="3"
-                  />
-                  <button type="submit" className="submit-btn" disabled={isSubmitting}>
-                    {isSubmitting ? 'Sending...' : 'Submit Enrollment →'}
-                  </button>
-                  <button 
-                    type="button" 
-                    className="cancel-btn"
-                    onClick={() => setShowEnquiryForm(false)}
-                  >
-                    Cancel
-                  </button>
-                </form>
-              )}
+              <button 
+                className="enquire-btn"
+                onClick={redirectToAdmissions}
+              >
+                <FaShoppingCart /> Buy Form (GH₵ 100)
+              </button>
             </div>
           </div>
         )}
@@ -808,32 +709,35 @@ const SchoolPage = () => {
               <div className="contact-form">
                 <h2>Course Enrollment</h2>
                 
-                <form onSubmit={handleEnquirySubmit}>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  redirectToAdmissions();
+                }}>
                   <input
                     type="text"
                     placeholder="Full Name *"
-                    value={enquiryName}
-                    onChange={(e) => setEnquiryName(e.target.value)}
+                    value=""
+                    onChange={() => {}}
                     required
                   />
                   <input
                     type="email"
                     placeholder="Email Address *"
-                    value={enquiryEmail}
-                    onChange={(e) => setEnquiryEmail(e.target.value)}
+                    value=""
+                    onChange={() => {}}
                     required
                   />
                   <input
                     type="tel"
                     placeholder="Phone Number *"
-                    value={enquiryPhone}
-                    onChange={(e) => setEnquiryPhone(e.target.value)}
+                    value=""
+                    onChange={() => {}}
                     required
                   />
                   
                   <select 
-                    value={selectedCourseForForm}
-                    onChange={(e) => setSelectedCourseForForm(e.target.value)}
+                    value=""
+                    onChange={() => {}}
                     required
                   >
                     <option value="">Select Course *</option>
@@ -842,8 +746,8 @@ const SchoolPage = () => {
                     ))}
                   </select>
                   <select 
-                    value={selectedPaymentOption}
-                    onChange={(e) => setSelectedPaymentOption(e.target.value)}
+                    value=""
+                    onChange={() => {}}
                   >
                     <option>Full Payment</option>
                     <option>Installment Plan (2 months)</option>
@@ -851,16 +755,19 @@ const SchoolPage = () => {
                   
                   <textarea
                     placeholder="Additional Information (Occupation, Experience Level, etc.)"
-                    value={enquiryMessage}
-                    onChange={(e) => setEnquiryMessage(e.target.value)}
+                    value=""
+                    onChange={() => {}}
                     rows="4"
                   />
                   <button 
                     type="submit" 
-                    className="send-btn" 
-                    disabled={isSubmitting}
+                    className="send-btn"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      redirectToAdmissions();
+                    }}
                   >
-                    {isSubmitting ? 'Sending...' : 'Submit Enrollment →'}
+                    <FaShoppingCart /> Buy Form (GH₵ 100)
                   </button>
                 </form>
                 <p className="form-note"><FaWhatsapp /> We'll contact you via WhatsApp within 24 hours with payment instructions and course access details.</p>
@@ -886,12 +793,9 @@ const SchoolPage = () => {
             </button>
             <button 
               className="footer-btn secondary"
-              onClick={() => {
-                setActiveTab('contact');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
+              onClick={redirectToAdmissions}
             >
-              <FaEnvelope /> Enroll Now
+              <FaShoppingCart /> Buy Form (GH₵ 100)
             </button>
             <button 
               className="footer-btn whatsapp"
