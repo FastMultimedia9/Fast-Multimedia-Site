@@ -1,6 +1,16 @@
 // src/services/paystackService.js
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase'; // Make sure this path points to your firebase config file
+import { 
+  db, 
+  COLLECTIONS,
+  doc, 
+  setDoc, 
+  getDoc, 
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs
+} from '../firebase';
 
 const PAYSTACK_PUBLIC_KEY = process.env.REACT_APP_PAYSTACK_PUBLIC_KEY || 'pk_test_your_public_key_here';
 const PAYSTACK_SECRET_KEY = process.env.REACT_APP_PAYSTACK_SECRET_KEY || 'sk_test_your_secret_key_here';
@@ -19,7 +29,6 @@ export const initializePayment = (email, amount, metadata = {}) => {
       amount: amount * 100,
       currency: 'GHS',
       ref: `ADM-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      // Add customer details for receipt
       customer: {
         email: email,
         name: metadata.name || 'Applicant',
@@ -64,42 +73,9 @@ const sendSerialEmail = async (response, metadata, email) => {
     // Generate serial number
     const serial = `FM-ADM-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
     
-    // Send email via Paystack's transaction notification
-    const emailData = {
-      subject: 'Your Admission Serial Number - Fast Multimedia Institute',
-      message: `
-        Dear ${metadata.name || 'Applicant'},
-        
-        Thank you for purchasing the admission form from Fast Multimedia Institute.
-        
-        Your Admission Serial Number is: ${serial}
-        
-        Please keep this serial number safe. You will need it to access the application form.
-        
-        Transaction Details:
-        - Reference: ${response.reference}
-        - Amount: GH₵ 100.00
-        - Date: ${new Date().toLocaleDateString()}
-        - Course: ${metadata.course || 'Not specified'}
-        
-        To complete your application, please visit:
-        ${window.location.origin}/school/application-form
-        
-        You will need to enter your serial number to access the form.
-        
-        If you have any questions, please contact us:
-        - WhatsApp: +233 50 515 9131
-        - Email: fasttech227@gmail.com
-        
-        Best regards,
-        Fast Multimedia Institute
-      `
-    };
-    
     // Store the serial number in Firebase
     await storeSerialNumber(serial, metadata, email, response.reference);
     
-    // You can also use a third-party email service if needed
     console.log('Serial number generated:', serial);
     console.log('Email should be sent to:', email);
     
@@ -114,11 +90,8 @@ const sendSerialEmail = async (response, metadata, email) => {
 // Store serial number in Firebase
 const storeSerialNumber = async (serial, metadata, email, reference) => {
   try {
-    // Initialize Firestore using the imported db
-    const firestore = getFirestore();
-    
-    // Use setDoc with proper document reference
-    await setDoc(doc(firestore, 'serialNumbers', serial), {
+    // Use the imported db directly - NO getFirestore() needed
+    await setDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, serial), {
       serial: serial,
       course: metadata.course || '',
       studentName: metadata.name || '',
@@ -172,8 +145,7 @@ export const verifyPaymentAndGetSerial = async (reference) => {
 // Helper function to check if serial number exists
 export const checkSerialNumber = async (serial) => {
   try {
-    const firestore = getFirestore();
-    const docRef = doc(firestore, 'serialNumbers', serial);
+    const docRef = doc(db, COLLECTIONS.SERIAL_NUMBERS, serial);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
@@ -196,18 +168,39 @@ export const checkSerialNumber = async (serial) => {
 // Helper function to mark serial number as used
 export const markSerialNumberAsUsed = async (serial) => {
   try {
-    const firestore = getFirestore();
-    const docRef = doc(firestore, 'serialNumbers', serial);
+    const docRef = doc(db, COLLECTIONS.SERIAL_NUMBERS, serial);
     
-    await setDoc(docRef, {
+    await updateDoc(docRef, {
       isUsed: true,
       usedAt: new Date().toISOString(),
       status: 'used'
-    }, { merge: true });
+    });
     
     return true;
   } catch (error) {
     console.error('Error marking serial number as used:', error);
+    throw error;
+  }
+};
+
+// Get serial number by email
+export const getSerialNumberByEmail = async (email) => {
+  try {
+    const serialNumbersRef = collection(db, COLLECTIONS.SERIAL_NUMBERS);
+    const q = query(serialNumbersRef, where('email', '==', email));
+    const querySnapshot = await getDocs(q);
+    
+    const serials = [];
+    querySnapshot.forEach((doc) => {
+      serials.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    return serials;
+  } catch (error) {
+    console.error('Error getting serial numbers by email:', error);
     throw error;
   }
 };
@@ -217,5 +210,6 @@ export default {
   initializePayment,
   verifyPaymentAndGetSerial,
   checkSerialNumber,
-  markSerialNumberAsUsed
+  markSerialNumberAsUsed,
+  getSerialNumberByEmail
 };
