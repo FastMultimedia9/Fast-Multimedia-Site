@@ -24,7 +24,7 @@ export const sendSerialEmail = async (email, name, serial, course) => {
       throw new Error('Missing required fields: email, name, or serial number');
     }
 
-    // Prepare template parameters
+    // Prepare template parameters - MAKE SURE THESE MATCH YOUR EMAILJS TEMPLATE
     const templateParams = {
       to_email: email,
       to_name: name,
@@ -33,14 +33,16 @@ export const sendSerialEmail = async (email, name, serial, course) => {
       application_link: `${window.location.origin}/school/application-form`,
       current_year: new Date().getFullYear(),
       whatsapp_number: '+233 50 515 9131',
-      support_email: 'fasttech227@gmail.com'
+      support_email: 'fasttech227@gmail.com',
+      // Add these if your template expects them
+      from_name: 'Fast Multimedia Institute',
+      reply_to: 'fasttech227@gmail.com'
     };
 
-    console.log('Sending email with params:', {
-      to_email: email,
-      to_name: name,
-      serial_number: serial
-    });
+    console.log('Sending email with params:', templateParams);
+    console.log('Using Service ID:', SERVICE_ID);
+    console.log('Using Template ID:', TEMPLATE_ID);
+    console.log('Using Public Key:', PUBLIC_KEY.substring(0, 10) + '...');
 
     // Send email using EmailJS
     const result = await emailjs.send(
@@ -53,13 +55,27 @@ export const sendSerialEmail = async (email, name, serial, course) => {
     return { success: true, result };
 
   } catch (error) {
-    console.error('Error sending serial email:', error);
+    console.error('Error sending serial email - Full error:', error);
+    
+    // Check for specific error types
+    let errorMessage = error.message || 'Failed to send email';
+    
+    if (error.text) {
+      try {
+        const errorData = JSON.parse(error.text);
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        // If not JSON, use the text directly
+        errorMessage = error.text || errorMessage;
+      }
+    }
     
     // Return error with details
     return { 
       success: false, 
-      error: error.message || 'Failed to send email',
-      details: error
+      error: errorMessage,
+      details: error,
+      status: error.status || 400
     };
   }
 };
@@ -81,7 +97,9 @@ export const resendSerialEmail = async (email, serial, name) => {
       resend: true,
       current_year: new Date().getFullYear(),
       whatsapp_number: '+233 50 515 9131',
-      support_email: 'fasttech227@gmail.com'
+      support_email: 'fasttech227@gmail.com',
+      from_name: 'Fast Multimedia Institute',
+      reply_to: 'fasttech227@gmail.com'
     };
 
     const result = await emailjs.send(
@@ -94,7 +112,18 @@ export const resendSerialEmail = async (email, serial, name) => {
 
   } catch (error) {
     console.error('Error resending email:', error);
-    return { success: false, error: error.message };
+    
+    let errorMessage = error.message || 'Failed to resend email';
+    if (error.text) {
+      try {
+        const errorData = JSON.parse(error.text);
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        errorMessage = error.text || errorMessage;
+      }
+    }
+    
+    return { success: false, error: errorMessage, details: error };
   }
 };
 
@@ -113,7 +142,9 @@ export const testEmailConnection = async (email) => {
       application_link: `${window.location.origin}/school/application-form`,
       current_year: new Date().getFullYear(),
       whatsapp_number: '+233 50 515 9131',
-      support_email: 'fasttech227@gmail.com'
+      support_email: 'fasttech227@gmail.com',
+      from_name: 'Fast Multimedia Institute',
+      reply_to: 'fasttech227@gmail.com'
     };
 
     const result = await emailjs.send(
@@ -125,7 +156,18 @@ export const testEmailConnection = async (email) => {
     return { success: true, message: 'Email test successful', result };
   } catch (error) {
     console.error('Email test failed:', error);
-    return { success: false, error: error.message };
+    
+    let errorMessage = error.message || 'Test failed';
+    if (error.text) {
+      try {
+        const errorData = JSON.parse(error.text);
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        errorMessage = error.text || errorMessage;
+      }
+    }
+    
+    return { success: false, error: errorMessage, details: error };
   }
 };
 
@@ -134,10 +176,13 @@ export const emailConfig = {
   publicKey: PUBLIC_KEY,
   serviceId: SERVICE_ID,
   templateId: TEMPLATE_ID,
-  isInitialized: true
+  isInitialized: true,
+  // Mask sensitive data
+  publicKeyMasked: PUBLIC_KEY.substring(0, 10) + '...',
+  serviceIdMasked: SERVICE_ID.substring(0, 10) + '...'
 };
 
-// Create a named object for default export (fixes no-anonymous-default-export ESLint warning)
+// Create a named object for default export
 const emailService = {
   sendSerialEmail,
   resendSerialEmail,
@@ -145,5 +190,4 @@ const emailService = {
   emailConfig
 };
 
-// Default export - using named variable to avoid ESLint warning
 export default emailService;

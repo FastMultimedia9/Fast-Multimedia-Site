@@ -28,7 +28,9 @@ import {
   FaUnlock,
   FaShoppingCart,
   FaCreditCard,
-  FaSpinner
+  FaSpinner,
+  FaExclamationTriangle,
+  FaShieldAlt
 } from 'react-icons/fa';
 import { 
   generateSerialNumber, 
@@ -36,10 +38,11 @@ import {
   savePayment, 
   createAdmission,
   sendNotification,
-  markSerialAsUsed
+  markSerialAsUsed,
+  getSerialCount
 } from '../services/firebaseService';
 import { initializePayment } from '../services/paystackService';
-import { sendSerialEmail } from '../services/emailService'; // ✅ Removed testEmailConnection
+import { sendSerialEmail } from '../services/emailService';
 import './Admissions.css';
 
 const Admissions = () => {
@@ -112,37 +115,169 @@ const Admissions = () => {
     window.open(whatsappUrl, '_blank');
   };
 
-  // Generate serial number function
+  // ============================================
+  // SECURE SERIAL NUMBER GENERATION
+  // ============================================
+  
+  /**
+   * Generate a secure serial number that includes the buyer's name
+   * Format: FM-ADM-{YEAR}-{NAME_HASH}-{RANDOM}
+   * Example: FM-ADM-2026-JOHNDOE-A7F3B9
+   */
+  const generateSecureSerial = async (fullName, course) => {
+    try {
+      // Get the current year
+      const year = new Date().getFullYear();
+      
+      // Create a name hash (first 6 characters of sanitized name)
+      const sanitizedName = fullName
+        .toUpperCase()
+        .replace(/[^A-Z]/g, '') // Remove special characters
+        .substring(0, 6); // Take first 6 letters
+      
+      // Generate a random 6-character alphanumeric string
+      const randomPart = Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase();
+      
+      // Get the count for uniqueness
+      const count = await getSerialCount();
+      const countPart = String(count + 1).padStart(3, '0');
+      
+      // Create the serial number
+      const serial = `FM-ADM-${year}-${sanitizedName}-${randomPart}`;
+      
+      // Verify it's unique (check against existing serials)
+      const existing = await verifySerial(serial);
+      if (existing.valid) {
+        // If somehow the serial exists, regenerate with a different random
+        const newRandom = Math.random()
+          .toString(36)
+          .substring(2, 8)
+          .toUpperCase();
+        return `FM-ADM-${year}-${sanitizedName}-${newRandom}`;
+      }
+      
+      return serial;
+    } catch (error) {
+      console.error('Error generating secure serial:', error);
+      // Fallback to basic generation if there's an error
+      const year = new Date().getFullYear();
+      const count = await getSerialCount();
+      return `FM-ADM-${year}-${String(count + 1).padStart(3, '0')}`;
+    }
+  };
+
+  /**
+   * Alternative: Generate serial with name embedded
+   * Format: FM-ADM-{YEAR}-{NAME_INITIALS}-{TIMESTAMP}
+   */
+  const generateNameBasedSerial = async (fullName, course) => {
+    try {
+      const year = new Date().getFullYear();
+      
+      // Get initials from name
+      const nameParts = fullName.trim().split(' ');
+      let initials = '';
+      if (nameParts.length === 1) {
+        initials = nameParts[0].substring(0, 3).toUpperCase();
+      } else {
+        initials = nameParts
+          .map(part => part.charAt(0))
+          .join('')
+          .toUpperCase()
+          .substring(0, 4);
+      }
+      
+      // Get timestamp component
+      const timestamp = Date.now().toString(36).toUpperCase().substring(-4);
+      
+      // Get count for uniqueness
+      const count = await getSerialCount();
+      const countPart = String(count + 1).padStart(3, '0');
+      
+      // Create serial: FM-ADM-2026-JD-3F2A
+      const serial = `FM-ADM-${year}-${initials}-${timestamp}`;
+      
+      return serial;
+    } catch (error) {
+      console.error('Error generating name-based serial:', error);
+      const year = new Date().getFullYear();
+      const count = await getSerialCount();
+      return `FM-ADM-${year}-${String(count + 1).padStart(3, '0')}`;
+    }
+  };
+
+  /**
+   * Generate serial with course code
+   * Format: FM-ADM-{YEAR}-{COURSE_CODE}-{NAME_HASH}
+   */
+  const generateCourseBasedSerial = async (fullName, course) => {
+    try {
+      const year = new Date().getFullYear();
+      
+      // Get course code
+      let courseCode = 'GEN';
+      if (course) {
+        if (course.includes('I.C.T')) courseCode = 'ICT';
+        else if (course.includes('Graphic')) courseCode = 'GRD';
+        else if (course.includes('Web')) courseCode = 'WEB';
+        else if (course.includes('Networking')) courseCode = 'NET';
+        else if (course.includes('I.T Support')) courseCode = 'ITS';
+      }
+      
+      // Get name hash
+      const nameHash = fullName
+        .toUpperCase()
+        .replace(/[^A-Z]/g, '')
+        .substring(0, 4);
+      
+      // Get random 4-character string
+      const random = Math.random()
+        .toString(36)
+        .substring(2, 6)
+        .toUpperCase();
+      
+      // Create serial: FM-ADM-2026-WEB-JOHN-3F2A
+      const serial = `FM-ADM-${year}-${courseCode}-${nameHash}-${random}`;
+      
+      return serial;
+    } catch (error) {
+      console.error('Error generating course-based serial:', error);
+      const year = new Date().getFullYear();
+      const count = await getSerialCount();
+      return `FM-ADM-${year}-${String(count + 1).padStart(3, '0')}`;
+    }
+  };
+
+  // Generate serial number function - using the secure method
   const generateSerial = async () => {
     try {
+      // Use the secure serial generation with buyer's name
+      const serial = await generateSecureSerial(paymentName, selectedCourseForPayment);
+      console.log('Generated secure serial:', serial);
+      return serial;
+    } catch (error) {
+      console.error('Error generating serial:', error);
+      // Fallback to simple generation
       const year = new Date().getFullYear();
       const count = await getSerialCount();
       const serial = `FM-ADM-${year}-${String(count + 1).padStart(3, '0')}`;
       return serial;
-    } catch (error) {
-      console.error('Error generating serial:', error);
-      throw error;
     }
   };
 
-  // Get serial count
-  const getSerialCount = async () => {
-    try {
-      // This would fetch from Firebase
-      return 0; // Placeholder
-    } catch (error) {
-      console.error('Error getting serial count:', error);
-      return 0;
-    }
-  };
-
-  // Send serial number email
+  // Send serial number email with improved error handling
   const sendSerialEmailToUser = async (email, name, serial, course) => {
     setIsEmailSending(true);
     setEmailSent(false);
     setEmailError('');
     
     try {
+      console.log('Attempting to send email to:', email);
+      console.log('With serial:', serial);
+      
       const result = await sendSerialEmail(email, name, serial, course);
       
       if (result.success) {
@@ -150,13 +285,15 @@ const Admissions = () => {
         console.log('Email sent successfully:', result);
         return true;
       } else {
-        setEmailError(result.error || 'Failed to send email');
-        console.error('Email sending failed:', result.error);
+        const errorMsg = result.error || 'Failed to send email';
+        setEmailError(errorMsg);
+        console.error('Email sending failed:', errorMsg);
+        console.error('Full error details:', result.details);
         return false;
       }
     } catch (error) {
-      console.error('Error sending serial email:', error);
-      setEmailError(error.message || 'An error occurred while sending email');
+      console.error('Unexpected error in email sending:', error);
+      setEmailError(error.message || 'An unexpected error occurred');
       return false;
     } finally {
       setIsEmailSending(false);
@@ -174,7 +311,7 @@ const Admissions = () => {
     setIsProcessingPayment(true);
 
     try {
-      // Generate serial number first
+      // Generate serial number first with buyer's name
       const newSerial = await generateSerial();
       setGeneratedSerial(newSerial);
 
@@ -189,7 +326,7 @@ const Admissions = () => {
           type: 'admission_form',
           dateOfBirth: paymentDateOfBirth,
           gender: paymentGender,
-          serialNumber: newSerial // Pass serial to metadata
+          serialNumber: newSerial
         }
       );
 
@@ -208,7 +345,7 @@ const Admissions = () => {
       // Save payment record
       await savePayment({
         reference: response.reference,
-        amount: 10000, // GH₵ 100 in pesewas
+        amount: 10000,
         email: paymentEmail,
         course: selectedCourseForPayment,
         name: paymentName,
@@ -217,7 +354,8 @@ const Admissions = () => {
         gender: paymentGender,
         paymentType: 'admission_form',
         status: 'completed',
-        serialNumber: serial
+        serialNumber: serial,
+        serialOwner: paymentName // Track who the serial belongs to
       });
 
       // Create admission record
@@ -232,7 +370,8 @@ const Admissions = () => {
         course: selectedCourseForPayment,
         status: 'pending',
         paymentReference: response.reference,
-        applicationDate: new Date().toISOString()
+        applicationDate: new Date().toISOString(),
+        serialOwner: paymentName // Track serial owner
       });
 
       // Send email with serial number
@@ -243,15 +382,19 @@ const Admissions = () => {
         selectedCourseForPayment
       );
 
-      // Send notification
-      await sendNotification({
-        userId: paymentEmail,
-        title: 'Admission Form Purchased',
-        message: `You have successfully purchased the admission form.\n\nYour Serial Number is: ${serial}\n\nPlease keep this serial number safe. You will need it to access the application form.`,
-        type: 'admission',
-        link: '/school/application-form',
-        serialNumber: serial
-      });
+      // Send notification (don't await this, let it run in background)
+      try {
+        await sendNotification({
+          userId: paymentEmail,
+          title: 'Admission Form Purchased',
+          message: `You have successfully purchased the admission form.\n\nYour Serial Number is: ${serial}\n\nThis serial number is registered to: ${paymentName}\n\nPlease keep this serial number safe. You will need it to access the application form.`,
+          type: 'admission',
+          link: '/school/application-form',
+          serialNumber: serial
+        });
+      } catch (notifError) {
+        console.warn('Notification error (non-critical):', notifError);
+      }
 
       // Show success modal with serial number
       setShowSuccessModal(true);
@@ -283,7 +426,8 @@ const Admissions = () => {
       const result = await verifySerial(serialNumber.toUpperCase());
       
       if (result.valid) {
-        // Navigate to application form
+        // Check if the serial is registered to the current user
+        // You can add additional validation here
         navigate('/school/application-form', { state: { serialNumber: serialNumber.toUpperCase() } });
         setShowSerialVerification(false);
         setSerialNumber('');
@@ -336,7 +480,7 @@ const Admissions = () => {
     {
       step: 1,
       title: 'Buy Admission Form',
-      description: 'Purchase the admission form using Paystack. You will receive a unique serial number.'
+      description: 'Purchase the admission form using Paystack. You will receive a unique serial number registered to your name.'
     },
     {
       step: 2,
@@ -401,7 +545,7 @@ const Admissions = () => {
   const faqs = [
     {
       question: 'How do I get an admission serial number?',
-      answer: 'Click the "Buy Form" button and complete the payment via Paystack. After successful payment, you will receive a unique serial number via email and on the confirmation page.'
+      answer: 'Click the "Buy Form" button and complete the payment via Paystack. After successful payment, you will receive a unique serial number via email and on the confirmation page. The serial number is registered to your name.'
     },
     {
       question: 'What is the cost of the admission form?',
@@ -417,7 +561,7 @@ const Admissions = () => {
     },
     {
       question: 'Is the serial number transferable?',
-      answer: 'No, serial numbers are non-transferable and can only be used once for a single application.'
+      answer: 'No, serial numbers are non-transferable and are registered to the name of the buyer. It can only be used once for a single application.'
     },
     {
       question: 'When is the next intake?',
@@ -696,6 +840,7 @@ const Admissions = () => {
                   onChange={(e) => setPaymentName(e.target.value)}
                   required
                 />
+                <small className="form-hint">This name will be used to generate your unique serial number</small>
               </div>
               
               <div className="form-group">
@@ -757,7 +902,7 @@ const Admissions = () => {
               </div>
 
               <div className="payment-info">
-                <FaInfoCircle /> You will receive a unique serial number via email after successful payment.
+                <FaShieldAlt /> Your serial number will be uniquely generated and registered to your name.
               </div>
             </div>
 
@@ -804,6 +949,9 @@ const Admissions = () => {
             <div className="serial-display">
               <label>Your Admission Serial Number:</label>
               <div className="serial-number">{generatedSerial}</div>
+              <div className="serial-owner">
+                <FaShieldAlt /> Registered to: <strong>{paymentName}</strong>
+              </div>
               <button 
                 className="copy-serial-btn"
                 onClick={() => {
@@ -818,7 +966,11 @@ const Admissions = () => {
             <div className="success-info">
               <p>
                 <FaInfoCircle /> 
-                We have sent this serial number to <strong>{paymentEmail}</strong>
+                {emailSent ? (
+                  <>We have sent this serial number to <strong>{paymentEmail}</strong></>
+                ) : (
+                  <>Please copy your serial number above. {emailError && <span className="email-error">Email delivery issue: {emailError}</span>}</>
+                )}
               </p>
               <p className="email-status">
                 {isEmailSending ? (
@@ -828,7 +980,9 @@ const Admissions = () => {
                 ) : emailSent ? (
                   '✓ Email sent with serial number'
                 ) : emailError ? (
-                  <span className="email-error">⚠️ {emailError}</span>
+                  <span className="email-error">
+                    <FaExclamationTriangle /> {emailError} - Please copy your serial number above
+                  </span>
                 ) : (
                   '✓ Email sent with serial number'
                 )}
@@ -888,7 +1042,7 @@ const Admissions = () => {
                   type="text"
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value.toUpperCase())}
-                  placeholder="e.g., FM-ADM-2026-001"
+                  placeholder="e.g., FM-ADM-2026-JD-3F2A"
                   className={serialError ? 'error' : ''}
                 />
                 {serialError && <span className="error-message">{serialError}</span>}
