@@ -17,6 +17,7 @@ import ContactPage from './pages/ContactPage';
 
 // Admin Pages
 import AdminPanel from './pages/AdminPanel';
+import AdminDashboard from './pages/AdminDashboard';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 
@@ -131,19 +132,19 @@ const ProtectedRoute = ({ children, adminOnly = false, requireAuth = true }) => 
   if (requireAuth && !authState.isAuthenticated) {
     console.log('🔒 Redirecting to login - User not authenticated');
     localStorage.setItem('redirectAfterLogin', location.pathname);
-    return <Navigate to="/student/login" replace state={{ from: location }} />;
+    return <Navigate to="/admin/login" replace state={{ from: location }} />;
   }
 
   // If admin access is required but user is not admin
   if (adminOnly && authState.userRole !== 'admin') {
-    console.log('🚫 Redirecting to blog - User not admin');
-    return <Navigate to="/blog" replace />;
+    console.log('🚫 Redirecting to home - User not admin');
+    return <Navigate to="/" replace />;
   }
 
   // If user is authenticated but trying to access login page
-  if (!requireAuth && authState.isAuthenticated && location.pathname === '/student/login') {
-    console.log('📍 User already logged in, redirecting to student portal');
-    return <Navigate to="/student/portal" replace />;
+  if (!requireAuth && authState.isAuthenticated && (location.pathname === '/admin/login' || location.pathname === '/login')) {
+    console.log('📍 User already logged in, redirecting to admin dashboard');
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   return children;
@@ -226,6 +227,24 @@ function AppContent() {
             } 
           />
           
+          {/* ===== ADMIN DASHBOARD PAGES ===== */}
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
           {/* ===== BLOG PAGES (With Lazy Loading) ===== */}
           <Route path="/blog" element={
             <Suspense fallback={<BlogSkeleton />}>
@@ -250,7 +269,11 @@ function AppContent() {
           />
           <Route 
             path="/admin/login" 
-            element={<LoginPage />}
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <LoginPage />
+              </ProtectedRoute>
+            } 
           />
           <Route path="/register" element={<RegisterPage />} />
           
@@ -276,27 +299,7 @@ function AppContent() {
             } 
           />
           
-          {/* ===== ADMIN PAGES (ADMIN ONLY) ===== */}
-          <Route 
-            path="/admin" 
-            element={
-              <ProtectedRoute adminOnly={true}>
-                <Suspense fallback={<RouteLoading />}>
-                  <LazyAdminPanel />
-                </Suspense>
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin/dashboard" 
-            element={
-              <ProtectedRoute adminOnly={true}>
-                <Suspense fallback={<RouteLoading />}>
-                  <LazyAdminPanel />
-                </Suspense>
-              </ProtectedRoute>
-            } 
-          />
+          {/* ===== LEGACY ADMIN PAGES (Keep for backward compatibility) ===== */}
           <Route 
             path="/admin/blog" 
             element={
@@ -391,9 +394,10 @@ function AppContent() {
                     <li><a href="/school">Visit School Page</a></li>
                     <li><a href="/school/admissions">View Admissions</a></li>
                     <li><a href="/student/login">Student Login</a></li>
+                    <li><a href="/admin/login">Admin Login</a></li>
+                    <li><a href="/admin/dashboard">Admin Dashboard</a></li>
                     <li><a href="/test">Test Database Connection</a></li>
                     <li><a href="/login">Login</a></li>
-                    <li><a href="/admin/login">Admin Login</a></li>
                     <li><a href="/admin/posts/new">Create New Post</a></li>
                   </ul>
                 </div>

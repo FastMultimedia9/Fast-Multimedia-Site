@@ -1398,6 +1398,46 @@ export const updateUserProfile = async (uid, updateData) => {
   }
 };
 
+
+
+// ============================================
+// USER MANAGEMENT (for all roles)
+// ============================================
+
+// Get user by email (for admins, staff, and students)
+export const getUserByEmail = async (email) => {
+  try {
+    const q = query(
+      collection(db, 'users'),
+      where('email', '==', email)
+    );
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) return null;
+    
+    const doc = snapshot.docs[0];
+    return { id: doc.id, ...doc.data() };
+  } catch (error) {
+    console.error('Error getting user by email:', error);
+    throw error;
+  }
+};
+
+// Update user
+export const updateUser = async (userId, updateData) => {
+  try {
+    const docRef = doc(db, 'users', userId);
+    await updateDoc(docRef, {
+      ...updateData,
+      updatedAt: serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating user:', error);
+    throw error;
+  }
+};
+
 // ============================================
 // DASHBOARD STATISTICS
 // ============================================

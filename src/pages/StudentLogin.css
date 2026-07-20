@@ -290,4 +290,57 @@
   animation: slideIn 0.4s ease;
 }
 
-/* ... rest of existing styles ... */
+/* User Role Badge */
+.user-role-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  background: #f0f7ff;
+  border: 2px solid #007AFF;
+  animation: slideIn 0.4s ease;
+}
+
+.user-role-badge.admin {
+  background: #ffebee;
+  border-color: #FF3B30;
+}
+
+.user-role-badge.staff {
+  background: #e8f5e9;
+  border-color: #34C759;
+}
+
+.user-role-badge.student {
+  background: #e3f2fd;
+  border-color: #007AFF;
+}
+
+.role-icon {
+  font-size: 24px;
+}
+
+.user-role-badge.admin .role-icon {
+  color: #FF3B30;
+}
+
+.user-role-badge.staff .role-icon {
+  color: #34C759;
+}
+
+.user-role-badge.student .role-icon {
+  color: #007AFF;
+}
+
+.role-content h4 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+
+.role-content p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.8;
+}
