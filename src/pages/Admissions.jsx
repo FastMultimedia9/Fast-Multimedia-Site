@@ -39,7 +39,7 @@ import {
   markSerialAsUsed
 } from '../services/firebaseService';
 import { initializePayment } from '../services/paystackService';
-import { sendSerialEmail, testEmailConnection } from '../services/emailService';
+import { sendSerialEmail } from '../services/emailService'; // Removed testEmailConnection
 import './Admissions.css';
 
 const Admissions = () => {
@@ -86,20 +86,6 @@ const Admissions = () => {
     return () => {
       document.body.removeChild(script);
     };
-  }, []);
-
-  // Test EmailJS connection on component mount (optional)
-  useEffect(() => {
-    const testEmail = async () => {
-      try {
-        const result = await testEmailConnection('test@example.com');
-        console.log('EmailJS test result:', result);
-      } catch (error) {
-        console.error('EmailJS test failed:', error);
-      }
-    };
-    // Uncomment to test email connection
-    // testEmail();
   }, []);
 
   const getNextIntakeDate = () => {
