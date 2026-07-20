@@ -53,7 +53,9 @@ export const createStudent = async (studentData) => {
       enrolledCourses: studentData.enrolledCourses || [],
       paymentHistory: studentData.paymentHistory || [],
       attendance: studentData.attendance || { total: 0, present: 0, absent: 0 },
-      grades: studentData.grades || {}
+      grades: studentData.grades || {},
+      admissionStatus: studentData.admissionStatus || 'pending',
+      passwordUpdated: studentData.passwordUpdated || false
     });
     
     return studentId;
@@ -114,6 +116,10 @@ export const getAllStudents = async (filters = {}) => {
     
     if (filters.class) {
       constraints.push(where('class', '==', filters.class));
+    }
+    
+    if (filters.admissionStatus) {
+      constraints.push(where('admissionStatus', '==', filters.admissionStatus));
     }
     
     constraints.push(orderBy('createdAt', 'desc'));
@@ -368,6 +374,25 @@ export const getAdmission = async (admissionId) => {
   }
 };
 
+// Get admission by email
+export const getAdmissionByEmail = async (email) => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.ADMISSIONS),
+      where('email', '==', email)
+    );
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) return null;
+    
+    const doc = snapshot.docs[0];
+    return { id: doc.id, ...doc.data() };
+  } catch (error) {
+    console.error('Error getting admission by email:', error);
+    throw error;
+  }
+};
+
 // Get admission by serial number
 export const getAdmissionBySerial = async (serialNumber) => {
   try {
@@ -442,6 +467,130 @@ export const updateAdmissionStatus = async (admissionId, status, notes = null) =
     return true;
   } catch (error) {
     console.error('Error updating admission status:', error);
+    throw error;
+  }
+};
+
+// ============================================
+// ADMISSION STATUS CHECK FUNCTIONS (NEW)
+// ============================================
+
+// Get student admission status by email
+export const getStudentAdmissionStatus = async (email) => {
+  try {
+    // Check if student exists
+    const student = await getStudentByEmail(email);
+    if (!student) {
+      return {
+        exists: false,
+        status: null,
+        message: 'Student not found. Please ensure you have completed your application.'
+      };
+    }
+
+    // Check admission status
+    const admission = await getAdmissionByEmail(email);
+    if (!admission) {
+      return {
+        exists: true,
+        status: student.admissionStatus || 'pending',
+        message: 'Your application is pending review. Please wait for approval.',
+        student: student
+      };
+    }
+
+    const status = admission.status || student.admissionStatus || 'pending';
+    const statusMessages = {
+      pending: 'Your application is pending review. Please wait for approval.',
+      approved: 'Your application has been approved! You can now log in.',
+      rejected: 'Your application was not approved. Please contact admissions for more information.',
+      enrolled: 'You are enrolled! Welcome to Fast Multimedia Institute.'
+    };
+
+    return {
+      exists: true,
+      status: status,
+      message: statusMessages[status] || 'Application status unknown.',
+      data: admission,
+      student: student
+    };
+  } catch (error) {
+    console.error('Error checking admission status:', error);
+    return {
+      exists: false,
+      status: null,
+      error: error.message,
+      message: 'Error checking admission status. Please try again.'
+    };
+  }
+};
+
+// Get student with admission status
+export const getStudentWithAdmissionStatus = async (email) => {
+  try {
+    const student = await getStudentByEmail(email);
+    if (!student) {
+      return null;
+    }
+
+    const admission = await getAdmissionByEmail(email);
+    
+    return {
+      ...student,
+      admission: admission || null,
+      admissionStatus: admission?.status || student.admissionStatus || 'pending'
+    };
+  } catch (error) {
+    console.error('Error getting student with admission status:', error);
+    throw error;
+  }
+};
+
+// Update student admission status
+export const updateStudentAdmissionStatus = async (email, status, notes = null) => {
+  try {
+    // Find student by email
+    const student = await getStudentByEmail(email);
+    if (!student) {
+      throw new Error('Student not found');
+    }
+
+    // Update student status
+    await updateStudent(student.id, {
+      admissionStatus: status,
+      updatedAt: serverTimestamp()
+    });
+
+    // Update admission record
+    const admission = await getAdmissionByEmail(email);
+    if (admission) {
+      await updateAdmissionStatus(admission.id, status, notes);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error updating admission status:', error);
+    throw error;
+  }
+};
+
+// Get all students by admission status
+export const getStudentsByAdmissionStatus = async (status) => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.STUDENTS),
+      where('admissionStatus', '==', status)
+    );
+    const snapshot = await getDocs(q);
+    
+    const students = [];
+    snapshot.forEach(doc => {
+      students.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return students;
+  } catch (error) {
+    console.error('Error getting students by admission status:', error);
     throw error;
   }
 };
@@ -1285,7 +1434,12 @@ export const getDashboardStats = async () => {
       totalApplications: applications.size,
       totalSerials: serials.size,
       usedSerials: serials.docs.filter(doc => doc.data().isUsed).length,
-      availableSerials: serials.docs.filter(doc => !doc.data().isUsed).length
+      availableSerials: serials.docs.filter(doc => !doc.data().isUsed).length,
+      // New: Admission status breakdown
+      pendingStudents: students.docs.filter(doc => doc.data().admissionStatus === 'pending').length,
+      approvedStudents: students.docs.filter(doc => doc.data().admissionStatus === 'approved').length,
+      enrolledStudents: students.docs.filter(doc => doc.data().admissionStatus === 'enrolled').length,
+      rejectedStudents: students.docs.filter(doc => doc.data().admissionStatus === 'rejected').length
     };
   } catch (error) {
     console.error('Error getting dashboard stats:', error);
@@ -1319,9 +1473,16 @@ export default {
   // Admission functions
   createAdmission,
   getAdmission,
+  getAdmissionByEmail,
   getAdmissionBySerial,
   getAllAdmissions,
   updateAdmissionStatus,
+  
+  // Admission Status functions (NEW)
+  getStudentAdmissionStatus,
+  getStudentWithAdmissionStatus,
+  updateStudentAdmissionStatus,
+  getStudentsByAdmissionStatus,
   
   // Payment functions
   createPayment,

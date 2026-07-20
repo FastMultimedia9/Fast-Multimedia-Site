@@ -96,11 +96,9 @@ const ApplicationForm = () => {
   const studyModes = ['online', 'in-person', 'hybrid'];
 
   useEffect(() => {
-    // Check if serial number was passed from admissions page
     const state = location.state;
     if (state && state.serialNumber) {
       setSerialNumber(state.serialNumber);
-      // Auto-verify the serial
       handleAutoVerify(state.serialNumber);
     }
   }, [location]);
@@ -110,7 +108,6 @@ const ApplicationForm = () => {
       const result = await verifySerial(serial);
       if (result.valid) {
         setIsSerialValid(true);
-        // Fetch admission data for this serial
         await fetchAdmissionData(serial);
         setFormStep(2);
       } else {
@@ -122,18 +119,15 @@ const ApplicationForm = () => {
     }
   };
 
-  // Fetch admission data for the serial number
   const fetchAdmissionData = async (serial) => {
     setIsLoadingData(true);
     try {
-      // Get admission record by serial
       const admission = await getAdmissionBySerial(serial);
       
       if (admission) {
         console.log('Found admission data:', admission);
         setSerialData(admission);
         
-        // Populate form with admission data
         setFormData(prev => ({
           ...prev,
           fullName: admission.fullName || '',
@@ -142,7 +136,6 @@ const ApplicationForm = () => {
           dateOfBirth: admission.dateOfBirth || '',
           gender: admission.gender || '',
           course: admission.course || '',
-          // Also try to get additional data if available
           address: admission.address || prev.address,
           city: admission.city || prev.city,
           region: admission.region || prev.region,
@@ -151,13 +144,11 @@ const ApplicationForm = () => {
           guardianEmail: admission.guardianEmail || prev.guardianEmail,
         }));
         
-        // Check if student already exists with this email
         if (admission.email) {
           try {
             const existingStudent = await getStudentByEmail(admission.email);
             if (existingStudent) {
               console.log('Found existing student:', existingStudent);
-              // Populate additional fields from student data
               setFormData(prev => ({
                 ...prev,
                 nationality: existingStudent.nationality || prev.nationality,
@@ -199,7 +190,6 @@ const ApplicationForm = () => {
       
       if (result.valid) {
         setIsSerialValid(true);
-        // Fetch admission data
         await fetchAdmissionData(serialNumber.toUpperCase());
         setFormStep(2);
         setSerialError('');
@@ -215,6 +205,9 @@ const ApplicationForm = () => {
     }
   };
 
+  // ============================================
+  // FIXED: handleSubmit - ONLY saves to database, NO WhatsApp
+  // ============================================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -243,13 +236,15 @@ const ApplicationForm = () => {
         enrolledCourses: [formData.course],
         status: 'pending',
         applicationStatus: 'applied',
-        serialNumber: serialNumber
+        serialNumber: serialNumber,
+        applicationDate: new Date().toISOString()
       };
 
-      // Create student record
+      // Create student record in Firebase
       const studentId = await createStudent(studentData);
+      console.log('✅ Student created with ID:', studentId);
 
-      // Save application
+      // Save application to Firebase
       const appId = await saveApplication({
         ...formData,
         serialNumber: serialNumber,
@@ -260,14 +255,17 @@ const ApplicationForm = () => {
       });
 
       setApplicationId(appId);
+      console.log('✅ Application saved with ID:', appId);
 
       // Mark serial as used
       await markSerialAsUsed(serialNumber, formData.email, studentId);
+      console.log('✅ Serial marked as used');
 
       // Update application status
       await updateApplicationStatus(appId, 'submitted', 'Application submitted successfully');
+      console.log('✅ Application status updated');
 
-      // Send notification
+      // Send notification (optional - keep this)
       await sendNotification({
         userId: formData.email,
         title: 'Application Submitted',
@@ -276,16 +274,15 @@ const ApplicationForm = () => {
         link: '/school/application-status'
       });
 
-      // Send to WhatsApp
-      const message = `ADMISSION APPLICATION\n\nSerial Number: ${serialNumber}\nApplication ID: ${appId}\nStudent ID: ${studentId}\n\nPersonal Information:\nName: ${formData.fullName}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nDate of Birth: ${formData.dateOfBirth || 'Not provided'}\nGender: ${formData.gender || 'Not provided'}\nNationality: ${formData.nationality || 'Not provided'}\n\nAddress:\nAddress: ${formData.address || 'Not provided'}\nCity: ${formData.city || 'Not provided'}\nRegion: ${formData.region || 'Not provided'}\n\nAcademic Information:\nCourse: ${formData.course}\nEducation Level: ${formData.educationLevel || 'Not provided'}\nPrevious School: ${formData.previousSchool || 'Not provided'}\nYears Completed: ${formData.yearsCompleted || 'Not provided'}\n\nAdditional Information:\nHow did you hear about us? ${formData.hearAbout || 'Not provided'}\nPreferred Study Mode: ${formData.preferredStudyMode || 'Not provided'}\nHas Laptop: ${formData.hasLaptop || 'Not provided'}\nInternet Access: ${formData.internetAccess || 'Not provided'}\n\nMessage: ${formData.message || 'No additional message'}`;
-    
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
+      // ✅ REMOVED: WhatsApp redirection
+      // ✅ REMOVED: window.open(whatsappUrl, '_blank');
       
+      // Show success message
       setSubmissionSuccess(true);
       setFormStep(3);
+      
     } catch (error) {
-      console.error('Submission error:', error);
+      console.error('❌ Submission error:', error);
       alert('There was an error submitting your application. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -304,7 +301,6 @@ const ApplicationForm = () => {
 
   return (
     <div className="application-form-page">
-      {/* Header */}
       <div className="form-header">
         <div className="container">
           <h1>
@@ -332,7 +328,6 @@ const ApplicationForm = () => {
       </div>
 
       <div className="container">
-        {/* Step 1: Serial Verification */}
         {formStep === 1 && (
           <div className="form-card verify-card">
             <div className="verify-icon">
@@ -374,7 +369,6 @@ const ApplicationForm = () => {
           </div>
         )}
 
-        {/* Step 2: Application Form */}
         {formStep === 2 && (
           <div className="form-card">
             <div className="form-success-badge">
@@ -759,7 +753,6 @@ const ApplicationForm = () => {
           </div>
         )}
 
-        {/* Step 3: Success */}
         {formStep === 3 && submissionSuccess && (
           <div className="form-card success-card">
             <div className="success-icon">
@@ -804,7 +797,6 @@ const ApplicationForm = () => {
         )}
       </div>
 
-      {/* Footer */}
       <div className="form-footer">
         <div className="container">
           <p>Need help with your application? <button className="footer-help-btn" onClick={handleWhatsAppClick}><FaWhatsapp /> Chat with us</button></p>
