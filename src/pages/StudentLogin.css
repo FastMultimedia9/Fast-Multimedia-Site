@@ -1,196 +1,182 @@
-/* Password Change Container */
-.password-change-container {
-  padding: 0 4px;
+/* ============================================
+   STUDENT LOGIN PAGE CSS
+   ============================================ */
+
+.student-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+  padding: 20px;
+  margin-top: 0;
 }
 
-.password-change-header {
+.login-container {
+  width: 100%;
+  max-width: 440px;
+  animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-card {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+/* ----- Login Header ----- */
+.login-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
-.password-change-icon {
-  font-size: 32px;
-  color: #FF9500;
-  margin-bottom: 8px;
+.login-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #007AFF, #5856D6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 28px;
+  color: white;
 }
 
-.password-change-header h3 {
-  font-size: 20px;
+.login-header h1 {
+  font-size: 24px;
+  font-weight: 700;
   color: #1a1a2e;
   margin: 0 0 4px;
 }
 
-.password-change-subtitle {
-  font-size: 14px;
+.login-header p {
   color: #666;
-  margin: 0 0 12px;
-}
-
-.default-password-info {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: #fff3e0;
-  border-radius: 8px;
   font-size: 14px;
-  color: #e65100;
-}
-
-.default-password-info strong {
-  font-family: monospace;
-  background: #fff;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid #ffe0b2;
-}
-
-/* Password Requirements */
-.password-requirements {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin: 4px 0 12px;
-}
-
-.password-requirements p {
-  font-size: 13px;
-  font-weight: 600;
-  color: #333;
-  margin: 0 0 4px;
-}
-
-.password-requirements ul {
-  list-style: none;
-  padding: 0;
   margin: 0;
 }
 
-.password-requirements ul li {
-  font-size: 12px;
-  color: #666;
-  padding: 2px 0;
-  padding-left: 20px;
-  position: relative;
-}
-
-.password-requirements ul li::before {
-  content: "•";
-  position: absolute;
-  left: 4px;
-  color: #007AFF;
-}
-
-/* Password Change Success */
-.password-change-success {
-  text-align: center;
-  padding: 20px 0;
-}
-
-.password-change-success .success-icon {
-  font-size: 48px;
-  color: #34C759;
-  margin-bottom: 12px;
-}
-
-.password-change-success h3 {
-  font-size: 20px;
-  color: #1a1a2e;
-  margin: 0 0 4px;
-}
-
-.password-change-success p {
-  color: #666;
-}
-
-/* Password Change Error */
-.password-change-error {
-  background: #ffebee;
-  color: #c62828;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
+/* ----- Login Type Selector ----- */
+.login-type-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
-/* Skip Password Button */
-.skip-password-btn {
-  width: 100%;
-  padding: 10px;
-  background: none;
-  border: none;
+.type-btn {
+  padding: 10px 8px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background: white;
   color: #666;
-  font-size: 14px;
-  cursor: pointer;
-  transition: color 0.3s ease;
-  margin-top: 8px;
-}
-
-.skip-password-btn:hover {
-  color: #007AFF;
-}
-
-/* Default Password Hint on Login Form */
-.default-password-hint {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #999;
-  margin-top: 6px;
-}
-
-.default-password-hint strong {
-  font-family: monospace;
-  background: #f5f5f5;
-  padding: 1px 6px;
-  border-radius: 4px;
-  color: #555;
-}
-
-/* Login Help */
-.login-help {
-  margin-top: 8px;
   font-size: 13px;
-  color: #999;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
 }
 
-.login-help strong {
-  font-family: monospace;
-  background: #f5f5f5;
-  padding: 1px 8px;
-  border-radius: 4px;
-  color: #555;
+.type-btn:hover {
+  border-color: #007AFF;
+  color: #007AFF;
+  background: #f0f7ff;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 480px) {
-  .password-change-header h3 {
-    font-size: 18px;
-  }
-  
-  .default-password-info {
-    font-size: 12px;
-    padding: 6px 12px;
-  }
-  
-  .password-requirements ul li {
-    font-size: 11px;
-  }
+.type-btn.active {
+  border-color: #007AFF;
+  background: #f0f7ff;
+  color: #007AFF;
 }
 
+/* ----- Error Message ----- */
+.login-error {
+  background: #ffebee;
+  color: #c62828;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
 /* ============================================
-   ADMISSION STATUS STYLES
+   USER ROLE BADGE
    ============================================ */
+.user-role-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  background: #f0f7ff;
+  border: 2px solid #007AFF;
+  animation: slideIn 0.4s ease;
+}
 
+.user-role-badge.admin {
+  background: #ffebee;
+  border-color: #FF3B30;
+}
+
+.user-role-badge.staff {
+  background: #e8f5e9;
+  border-color: #34C759;
+}
+
+.user-role-badge.student {
+  background: #e3f2fd;
+  border-color: #007AFF;
+}
+
+.role-icon {
+  font-size: 24px;
+}
+
+.user-role-badge.admin .role-icon {
+  color: #FF3B30;
+}
+
+.user-role-badge.staff .role-icon {
+  color: #34C759;
+}
+
+.user-role-badge.student .role-icon {
+  color: #007AFF;
+}
+
+.role-content h4 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+
+.role-content p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+/* ============================================
+   ADMISSION STATUS
+   ============================================ */
 .admission-status {
   display: flex;
   align-items: flex-start;
@@ -274,8 +260,155 @@
   color: #f44336;
 }
 
-/* Loading Spinner Animation */
-.spinner {
+/* ============================================
+   FORM
+   ============================================ */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  color: #999;
+  font-size: 16px;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 12px 14px 12px 44px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+  background: #fafafa;
+}
+
+.input-wrapper input:focus {
+  outline: none;
+  border-color: #007AFF;
+  background: white;
+}
+
+.input-wrapper input.error {
+  border-color: #FF3B30;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+  color: #333;
+}
+
+.default-password-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #999;
+  margin-top: 6px;
+}
+
+.default-password-hint strong {
+  font-family: monospace;
+  background: #f5f5f5;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: #555;
+}
+
+/* ----- Login Options ----- */
+.login-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #555;
+}
+
+.remember-me input {
+  width: 16px;
+  height: 16px;
+  accent-color: #007AFF;
+}
+
+.forgot-link {
+  color: #007AFF;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+  color: #0056CC;
+}
+
+/* ----- Login Button ----- */
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #007AFF, #5856D6);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.login-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 122, 255, 0.3);
+}
+
+.login-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.login-btn .spinner {
   animation: spin 1s linear infinite;
 }
 
@@ -284,63 +417,546 @@
   to { transform: rotate(360deg); }
 }
 
-/* Password Change Container - Updated */
+/* ----- Login Footer ----- */
+.login-footer {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.login-footer p {
+  font-size: 14px;
+  color: #555;
+  margin: 4px 0;
+}
+
+.login-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #999;
+}
+
+.login-help {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.login-help strong {
+  font-family: monospace;
+  background: #f5f5f5;
+  padding: 1px 8px;
+  border-radius: 4px;
+  color: #555;
+}
+
+/* ----- Back Link ----- */
+.login-back {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.back-link {
+  color: #666;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.back-link:hover {
+  color: #007AFF;
+}
+
+/* ============================================
+   PASSWORD CHANGE CONTAINER
+   ============================================ */
 .password-change-container {
   padding: 0 4px;
   animation: slideIn 0.4s ease;
 }
 
-/* User Role Badge */
-.user-role-badge {
-  display: flex;
+.password-change-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.password-change-icon {
+  font-size: 32px;
+  color: #FF9500;
+  margin-bottom: 8px;
+}
+
+.password-change-header h3 {
+  font-size: 20px;
+  color: #1a1a2e;
+  margin: 0 0 4px;
+}
+
+.password-change-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 12px;
+}
+
+.default-password-info {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #fff3e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #e65100;
+}
+
+.default-password-info strong {
+  font-family: monospace;
+  background: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #ffe0b2;
+}
+
+/* ----- Password Requirements ----- */
+.password-requirements {
+  background: #f8f9fa;
+  border-radius: 8px;
   padding: 12px 16px;
-  border-radius: 10px;
-  margin-bottom: 16px;
-  background: #f0f7ff;
-  border: 2px solid #007AFF;
-  animation: slideIn 0.4s ease;
+  margin: 4px 0 12px;
 }
 
-.user-role-badge.admin {
-  background: #ffebee;
-  border-color: #FF3B30;
+.password-requirements p {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px;
 }
 
-.user-role-badge.staff {
-  background: #e8f5e9;
-  border-color: #34C759;
+.password-requirements ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.user-role-badge.student {
-  background: #e3f2fd;
-  border-color: #007AFF;
+.password-requirements ul li {
+  font-size: 12px;
+  color: #666;
+  padding: 2px 0;
+  padding-left: 20px;
+  position: relative;
 }
 
-.role-icon {
-  font-size: 24px;
-}
-
-.user-role-badge.admin .role-icon {
-  color: #FF3B30;
-}
-
-.user-role-badge.staff .role-icon {
-  color: #34C759;
-}
-
-.user-role-badge.student .role-icon {
+.password-requirements ul li::before {
+  content: "•";
+  position: absolute;
+  left: 4px;
   color: #007AFF;
 }
 
-.role-content h4 {
-  margin: 0 0 4px;
+/* ----- Password Change Error ----- */
+.password-change-error {
+  background: #ffebee;
+  color: #c62828;
+  padding: 10px 14px;
+  border-radius: 8px;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.role-content p {
-  margin: 0;
-  font-size: 13px;
-  opacity: 0.8;
+/* ----- Password Change Success ----- */
+.password-change-success {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.password-change-success .success-icon {
+  font-size: 48px;
+  color: #34C759;
+  margin-bottom: 12px;
+}
+
+.password-change-success h3 {
+  font-size: 20px;
+  color: #1a1a2e;
+  margin: 0 0 4px;
+}
+
+.password-change-success p {
+  color: #666;
+}
+
+/* ----- Skip Password Button ----- */
+.skip-password-btn {
+  width: 100%;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  margin-top: 8px;
+}
+
+.skip-password-btn:hover {
+  color: #007AFF;
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+  .login-card {
+    padding: 32px 24px;
+  }
+}
+
+/* Mobile (up to 768px) */
+@media (max-width: 768px) {
+  .login-card {
+    padding: 28px 20px;
+  }
+  
+  .login-type-selector {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  
+  .type-btn {
+    font-size: 12px;
+    padding: 8px 4px;
+  }
+  
+  .login-options {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  .login-header h1 {
+    font-size: 20px;
+  }
+  
+  .password-change-header h3 {
+    font-size: 18px;
+  }
+  
+  .default-password-info {
+    font-size: 12px;
+    padding: 6px 12px;
+    flex-wrap: wrap;
+  }
+}
+
+/* Small Mobile (up to 480px) */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 20px 16px;
+  }
+  
+  .login-container {
+    max-width: 100%;
+  }
+  
+  .login-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+  
+  .type-btn {
+    font-size: 11px;
+    padding: 6px 4px;
+  }
+  
+  .type-btn span {
+    display: none;
+  }
+  
+  .password-change-header h3 {
+    font-size: 16px;
+  }
+  
+  .password-requirements ul li {
+    font-size: 11px;
+  }
+  
+  .password-requirements {
+    padding: 10px 12px;
+  }
+  
+  .login-footer p {
+    font-size: 12px;
+  }
+  
+  .default-password-hint {
+    font-size: 11px;
+  }
+  
+  .input-wrapper input {
+    padding: 10px 12px 10px 38px;
+    font-size: 13px;
+  }
+  
+  .input-icon {
+    font-size: 14px;
+    left: 12px;
+  }
+  
+  .login-btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  .user-role-badge {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+  }
+  
+  .role-icon {
+    font-size: 20px;
+  }
+  
+  .role-content h4 {
+    font-size: 13px;
+  }
+  
+  .admission-status {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+  }
+  
+  .admission-status .status-icon {
+    font-size: 20px;
+  }
+  
+  .admission-status .status-content h4 {
+    font-size: 13px;
+  }
+  
+  .admission-status .status-content p {
+    font-size: 12px;
+  }
+}
+
+/* ============================================
+   DARK MODE SUPPORT
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  .student-login-page {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+  }
+  
+  .login-card {
+    background: #2d2d3d;
+  }
+  
+  .login-header h1 {
+    color: #fff;
+  }
+  
+  .login-header p {
+    color: #aaa;
+  }
+  
+  .type-btn {
+    background: #3d3d4d;
+    color: #aaa;
+    border-color: #4d4d5d;
+  }
+  
+  .type-btn:hover {
+    border-color: #007AFF;
+    color: #007AFF;
+    background: rgba(0, 122, 255, 0.15);
+  }
+  
+  .type-btn.active {
+    border-color: #007AFF;
+    background: rgba(0, 122, 255, 0.2);
+    color: #007AFF;
+  }
+  
+  .login-error {
+    background: rgba(255, 59, 48, 0.15);
+    color: #ff6b6b;
+  }
+  
+  .user-role-badge.admin {
+    background: rgba(255, 59, 48, 0.15);
+  }
+  
+  .user-role-badge.staff {
+    background: rgba(52, 199, 89, 0.15);
+  }
+  
+  .user-role-badge.student {
+    background: rgba(0, 122, 255, 0.15);
+  }
+  
+  .role-content p {
+    color: #ccc;
+  }
+  
+  .form-group label {
+    color: #ddd;
+  }
+  
+  .input-wrapper input {
+    background: #3d3d4d;
+    color: #fff;
+    border-color: #4d4d5d;
+  }
+  
+  .input-wrapper input:focus {
+    border-color: #007AFF;
+    background: #3d3d4d;
+  }
+  
+  .input-wrapper input::placeholder {
+    color: #888;
+  }
+  
+  .input-icon {
+    color: #888;
+  }
+  
+  .toggle-password {
+    color: #888;
+  }
+  
+  .toggle-password:hover {
+    color: #ccc;
+  }
+  
+  .default-password-hint {
+    color: #888;
+  }
+  
+  .default-password-hint strong {
+    background: #3d3d4d;
+    color: #ddd;
+  }
+  
+  .login-options .remember-me {
+    color: #ccc;
+  }
+  
+  .forgot-link {
+    color: #4da6ff;
+  }
+  
+  .login-footer p {
+    color: #ccc;
+  }
+  
+  .login-note {
+    color: #888;
+  }
+  
+  .login-help {
+    color: #888;
+  }
+  
+  .login-help strong {
+    background: #3d3d4d;
+    color: #ddd;
+  }
+  
+  .back-link {
+    color: #aaa;
+  }
+  
+  .back-link:hover {
+    color: #4da6ff;
+  }
+  
+  .admission-status.pending {
+    background: rgba(255, 152, 0, 0.15);
+    color: #ffb74d;
+  }
+  
+  .admission-status.approved {
+    background: rgba(76, 175, 80, 0.15);
+    color: #81c784;
+  }
+  
+  .admission-status.enrolled {
+    background: rgba(33, 150, 243, 0.15);
+    color: #64b5f6;
+  }
+  
+  .admission-status.rejected {
+    background: rgba(244, 67, 54, 0.15);
+    color: #ef9a9a;
+  }
+  
+  .password-change-header h3 {
+    color: #fff;
+  }
+  
+  .password-change-subtitle {
+    color: #aaa;
+  }
+  
+  .default-password-info {
+    background: rgba(255, 152, 0, 0.15);
+    color: #ffb74d;
+  }
+  
+  .default-password-info strong {
+    background: #3d3d4d;
+    color: #fff;
+    border-color: #4d4d5d;
+  }
+  
+  .password-requirements {
+    background: #3d3d4d;
+  }
+  
+  .password-requirements p {
+    color: #ddd;
+  }
+  
+  .password-requirements ul li {
+    color: #aaa;
+  }
+  
+  .password-requirements ul li::before {
+    color: #4da6ff;
+  }
+  
+  .password-change-error {
+    background: rgba(255, 59, 48, 0.15);
+    color: #ff6b6b;
+  }
+  
+  .password-change-success h3 {
+    color: #fff;
+  }
+  
+  .password-change-success p {
+    color: #ccc;
+  }
+  
+  .skip-password-btn {
+    color: #aaa;
+  }
+  
+  .skip-password-btn:hover {
+    color: #4da6ff;
+  }
 }
