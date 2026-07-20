@@ -1262,6 +1262,8 @@ export default {
   updateUserProfile,
   
   // Dashboard
-   createAdmission,
+  
+
+  
   getDashboardStats
 };
