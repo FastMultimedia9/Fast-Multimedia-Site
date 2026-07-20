@@ -52,8 +52,9 @@ import DatabaseViewer from './pages/DatabaseViewer';
 // New Post Page
 import NewPostPage from './pages/NewPostPage';
 
-// School Page
+// School Pages
 import SchoolPage from './pages/SchoolPage';
+import Admissions from './pages/Admissions'; // <-- ADD THIS IMPORT
 
 // Service Detail Page Component
 import ServiceDetailPage from './components/ServiceDetailPage';
@@ -186,7 +187,7 @@ function AppContent() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/download-guide" element={<DownloadGuide />} />
           
-          {/* ===== SCHOOL PAGE ===== */}
+          {/* ===== SCHOOL PAGES ===== */}
           <Route path="/school" element={<SchoolPage />} />
           <Route path="/school/overview" element={<SchoolPage />} />
           <Route path="/school/mission" element={<SchoolPage />} />
@@ -204,6 +205,10 @@ function AppContent() {
           <Route path="/school/student-life" element={<SchoolPage />} />
           <Route path="/school/events" element={<SchoolPage />} />
           <Route path="/school/gallery" element={<SchoolPage />} />
+          <Route path="/school/contact" element={<SchoolPage />} />
+          
+          {/* ===== ADMISSIONS PAGE ===== */}
+          <Route path="/school/admissions" element={<Admissions />} />
           
           {/* ===== BLOG PAGES (With Lazy Loading) ===== */}
           <Route path="/blog" element={
@@ -368,6 +373,7 @@ function AppContent() {
                     <li><a href="/">Go to Homepage</a></li>
                     <li><a href="/blog">Browse the Blog</a></li>
                     <li><a href="/school">Visit School Page</a></li>
+                    <li><a href="/school/admissions">View Admissions</a></li>
                     <li><a href="/test">Test Database Connection</a></li>
                     <li><a href="/login">Login</a></li>
                     <li><a href="/admin/login">Admin Login</a></li>
