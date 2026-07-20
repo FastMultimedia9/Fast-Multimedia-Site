@@ -27,16 +27,19 @@ import {
   FaLock,
   FaUnlock,
   FaShoppingCart,
-  FaCreditCard
+  FaCreditCard,
+  FaSpinner
 } from 'react-icons/fa';
 import { 
   generateSerialNumber, 
   verifySerial, 
   savePayment, 
   createAdmission,
-  sendNotification 
+  sendNotification,
+  markSerialAsUsed
 } from '../services/firebaseService';
 import { initializePayment } from '../services/paystackService';
+import { sendSerialEmail } from '../services/emailService';
 import './Admissions.css';
 
 const Admissions = () => {
@@ -55,6 +58,10 @@ const Admissions = () => {
   const [paymentPhone, setPaymentPhone] = useState('');
   const [paymentDateOfBirth, setPaymentDateOfBirth] = useState('');
   const [paymentGender, setPaymentGender] = useState('');
+  const [paymentError, setPaymentError] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [generatedSerial, setGeneratedSerial] = useState('');
+  const [isEmailSending, setIsEmailSending] = useState(false);
 
   const whatsappNumber = '233505159131';
   const displayWhatsappNumber = '+233 50 515 9131';
@@ -103,16 +110,60 @@ const Admissions = () => {
     window.open(whatsappUrl, '_blank');
   };
 
+  // Generate serial number function
+  const generateSerial = async () => {
+    try {
+      const year = new Date().getFullYear();
+      const count = await getSerialCount();
+      const serial = `FM-ADM-${year}-${String(count + 1).padStart(3, '0')}`;
+      return serial;
+    } catch (error) {
+      console.error('Error generating serial:', error);
+      throw error;
+    }
+  };
+
+  // Get serial count
+  const getSerialCount = async () => {
+    try {
+      // This would fetch from Firebase
+      return 0; // Placeholder
+    } catch (error) {
+      console.error('Error getting serial count:', error);
+      return 0;
+    }
+  };
+
+  // Send serial number email
+  const sendSerialEmailToUser = async (email, name, serial, course) => {
+    setIsEmailSending(true);
+    try {
+      await sendSerialEmail(email, name, serial, course);
+      return true;
+    } catch (error) {
+      console.error('Error sending serial email:', error);
+      return false;
+    } finally {
+      setIsEmailSending(false);
+    }
+  };
+
   // Paystack Payment Handler
   const handlePaystackPayment = async () => {
     if (!paymentEmail || !paymentName || !paymentPhone) {
-      alert('Please fill in all required fields (Name, Email, Phone).');
+      setPaymentError('Please fill in all required fields (Name, Email, Phone).');
       return;
     }
 
+    setPaymentError('');
     setIsProcessingPayment(true);
 
     try {
+      // Generate serial number first
+      const newSerial = await generateSerial();
+      setGeneratedSerial(newSerial);
+
+      // Initialize Paystack payment
       const response = await initializePayment(
         paymentEmail,
         100, // GH₵ 100
@@ -122,21 +173,22 @@ const Admissions = () => {
           course: selectedCourseForPayment || 'Not specified',
           type: 'admission_form',
           dateOfBirth: paymentDateOfBirth,
-          gender: paymentGender
+          gender: paymentGender,
+          serialNumber: newSerial // Pass serial to metadata
         }
       );
 
       // Payment successful
-      await handlePaymentSuccess(response);
+      await handlePaymentSuccess(response, newSerial);
     } catch (error) {
       console.error('Payment error:', error);
-      alert('Payment was cancelled or failed. Please try again.');
+      setPaymentError('Payment was cancelled or failed. Please try again.');
     } finally {
       setIsProcessingPayment(false);
     }
   };
 
-  const handlePaymentSuccess = async (response) => {
+  const handlePaymentSuccess = async (response, serial) => {
     try {
       // Save payment record
       await savePayment({
@@ -149,16 +201,14 @@ const Admissions = () => {
         dateOfBirth: paymentDateOfBirth,
         gender: paymentGender,
         paymentType: 'admission_form',
-        status: 'completed'
+        status: 'completed',
+        serialNumber: serial
       });
 
-      // Generate new serial number
-      const newSerial = await generateSerialNumber(selectedCourseForPayment, paymentName);
-      
       // Create admission record
       await createAdmission({
-        admissionId: newSerial,
-        serialNumber: newSerial,
+        admissionId: serial,
+        serialNumber: serial,
         fullName: paymentName,
         email: paymentEmail,
         phone: paymentPhone,
@@ -170,25 +220,32 @@ const Admissions = () => {
         applicationDate: new Date().toISOString()
       });
 
+      // Send email with serial number
+      const emailSent = await sendSerialEmailToUser(
+        paymentEmail,
+        paymentName,
+        serial,
+        selectedCourseForPayment
+      );
+
       // Send notification
       await sendNotification({
         userId: paymentEmail,
         title: 'Admission Form Purchased',
-        message: `You have successfully purchased the admission form. Your serial number is: ${newSerial}`,
+        message: `You have successfully purchased the admission form.\n\nYour Serial Number is: ${serial}\n\nPlease keep this serial number safe. You will need it to access the application form.`,
         type: 'admission',
-        link: '/school/application-form'
+        link: '/school/application-form',
+        serialNumber: serial
       });
 
-      // Show success message with serial number
-      alert(`✅ Payment Successful!\n\nYour Admission Serial Number is: ${newSerial}\n\nPlease keep this serial number safe. You will need it to access the application form.\n\nWe have also sent you an email with this information.`);
+      // Show success modal with serial number
+      setShowSuccessModal(true);
       
-      // Navigate to application form with serial number
-      navigate('/school/application-form', { state: { serialNumber: newSerial } });
-      setShowPaymentModal(false);
+      // Reset form
       resetPaymentForm();
     } catch (error) {
       console.error('Payment processing error:', error);
-      alert('There was an error processing your payment. Please contact support.');
+      setPaymentError('There was an error processing your payment. Please contact support.');
     }
   };
 
@@ -199,6 +256,7 @@ const Admissions = () => {
     setPaymentDateOfBirth('');
     setPaymentGender('');
     setSelectedCourseForPayment('');
+    setPaymentError('');
   };
 
   // Verify Serial Number
@@ -229,6 +287,8 @@ const Admissions = () => {
   // Buy Form Button Handler
   const handleBuyForm = () => {
     resetPaymentForm();
+    setPaymentError('');
+    setShowSuccessModal(false);
     setShowPaymentModal(true);
   };
 
@@ -604,6 +664,12 @@ const Admissions = () => {
                 <span className="amount-value">GH₵ 100.00</span>
               </div>
 
+              {paymentError && (
+                <div className="payment-error">
+                  <FaInfoCircle /> {paymentError}
+                </div>
+              )}
+
               <div className="form-group">
                 <label>Full Name *</label>
                 <input
@@ -684,7 +750,9 @@ const Admissions = () => {
               disabled={isProcessingPayment || !paymentEmail || !paymentName || !paymentPhone}
             >
               {isProcessingPayment ? (
-                'Processing...'
+                <>
+                  <FaSpinner className="spinner" /> Processing...
+                </>
               ) : (
                 <>
                   <FaCreditCard /> Pay GH₵ 100 Now
@@ -698,6 +766,83 @@ const Admissions = () => {
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal with Serial Number */}
+      {showSuccessModal && (
+        <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
+          <div className="modal-content success-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowSuccessModal(false)}>
+              ×
+            </button>
+            
+            <div className="success-icon">
+              <FaCheckCircle />
+            </div>
+            
+            <h2 className="modal-title">Payment Successful! 🎉</h2>
+            
+            <div className="serial-display">
+              <label>Your Admission Serial Number:</label>
+              <div className="serial-number">{generatedSerial}</div>
+              <button 
+                className="copy-serial-btn"
+                onClick={() => {
+                  navigator.clipboard.writeText(generatedSerial);
+                  alert('Serial number copied to clipboard!');
+                }}
+              >
+                Copy Serial Number
+              </button>
+            </div>
+
+            <div className="success-info">
+              <p>
+                <FaInfoCircle /> 
+                We have sent this serial number to <strong>{paymentEmail}</strong>
+              </p>
+              <p className="email-status">
+                {isEmailSending ? (
+                  <>
+                    <FaSpinner className="spinner" /> Sending email...
+                  </>
+                ) : (
+                  '✓ Email sent with serial number'
+                )}
+              </p>
+            </div>
+
+            <div className="success-actions">
+              <button 
+                className="apply-now-success-btn"
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  navigate('/school/application-form', { state: { serialNumber: generatedSerial } });
+                }}
+              >
+                <FaFileAlt /> Apply Now
+              </button>
+              <button 
+                className="whatsapp-success-btn"
+                onClick={handleWhatsAppClick}
+              >
+                <FaWhatsapp /> Contact Support
+              </button>
+            </div>
+
+            <div className="success-note">
+              <p>
+                <strong>Next Steps:</strong>
+              </p>
+              <ol>
+                <li>Keep your serial number safe</li>
+                <li>Click "Apply Now" to complete your application</li>
+                <li>Fill in your details and submit</li>
+                <li>We'll review and contact you within 24 hours</li>
+              </ol>
+            </div>
           </div>
         </div>
       )}
@@ -734,7 +879,15 @@ const Admissions = () => {
                   onClick={verifySerialNumber}
                   disabled={!serialNumber || isVerifying}
                 >
-                  {isVerifying ? 'Verifying...' : <><FaUnlock /> Verify & Access Form</>}
+                  {isVerifying ? (
+                    <>
+                      <FaSpinner className="spinner" /> Verifying...
+                    </>
+                  ) : (
+                    <>
+                      <FaUnlock /> Verify & Access Form
+                    </>
+                  )}
                 </button>
                 <button 
                   className="buy-form-btn"
