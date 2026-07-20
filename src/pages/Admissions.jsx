@@ -39,7 +39,7 @@ import {
   markSerialAsUsed
 } from '../services/firebaseService';
 import { initializePayment } from '../services/paystackService';
-import { sendSerialEmail } from '../services/emailService'; // Removed testEmailConnection
+import { sendSerialEmail } from '../services/emailService'; // ✅ Removed testEmailConnection
 import './Admissions.css';
 
 const Admissions = () => {
