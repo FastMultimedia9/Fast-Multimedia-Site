@@ -92,13 +92,10 @@ const Navbar = () => {
     navigate('/');
   };
 
-  // School menu items
+  // School menu items - FIXED
   const schoolMenuItems = [
-   
-   
+    { name: 'School Home', path: '/school', icon: '🏫' },
     { name: 'Admissions', path: '/school/admissions', icon: '📝' }
-    
-   
   ];
 
   // Group school items for mobile
@@ -218,7 +215,7 @@ const Navbar = () => {
             onMouseLeave={() => setIsSchoolDropdownOpen(false)}
           >
             <button 
-              className={`nav-link school-dropdown-btn ${isSchoolDropdownOpen ? 'active' : ''}`}
+              className={`nav-link school-dropdown-btn school-trigger ${isSchoolDropdownOpen ? 'active' : ''}`}
               onClick={toggleSchoolDropdown}
             >
               <span className="link-text">School</span>
@@ -330,7 +327,20 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="auth-buttons">
-             
+              <Link 
+                to="/login" 
+                className="btn btn-login"
+                onClick={() => handleNavigation('/login')}
+              >
+                Sign In
+              </Link>
+              <Link 
+                to="/contact" 
+                className="btn btn-primary"
+                onClick={() => handleNavigation('/contact')}
+              >
+                Get Started
+              </Link>
             </div>
           )}
         </div>
