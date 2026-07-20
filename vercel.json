@@ -1,6 +1,14 @@
 {
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "installCommand": "npm install --legacy-peer-deps"
+      }
+    }
+  ],
   "redirects": [
-
     {
       "source": "/:path*",
       "has": [
@@ -12,7 +20,6 @@
       "destination": "https://www.fastmultimedia.site/:path*",
       "permanent": true
     },
-
     {
       "source": "/:path*",
       "has": [
