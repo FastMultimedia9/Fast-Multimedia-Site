@@ -137,10 +137,13 @@ export const emailConfig = {
   isInitialized: true
 };
 
-// Default export - ALL functions are now properly exported
-export default {
+// Create a named object for default export (fixes no-anonymous-default-export ESLint warning)
+const emailService = {
   sendSerialEmail,
   resendSerialEmail,
-  testEmailConnection, // <-- THIS IS NOW INCLUDED
+  testEmailConnection,
   emailConfig
 };
+
+// Default export - using named variable to avoid ESLint warning
+export default emailService;
