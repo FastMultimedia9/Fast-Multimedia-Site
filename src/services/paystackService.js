@@ -90,7 +90,7 @@ const sendSerialEmail = async (response, metadata, email) => {
 // Store serial number in Firebase
 const storeSerialNumber = async (serial, metadata, email, reference) => {
   try {
-    // Use the imported db directly - NO getFirestore() needed
+    // Use the imported db directly
     await setDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, serial), {
       serial: serial,
       course: metadata.course || '',
@@ -205,11 +205,14 @@ export const getSerialNumberByEmail = async (email) => {
   }
 };
 
-// Export default object with all functions
-export default {
+// Create a named object for default export (fixes no-anonymous-default-export ESLint warning)
+const paystackService = {
   initializePayment,
   verifyPaymentAndGetSerial,
   checkSerialNumber,
   markSerialNumberAsUsed,
   getSerialNumberByEmail
 };
+
+// Export default object with all functions - using named variable
+export default paystackService;
