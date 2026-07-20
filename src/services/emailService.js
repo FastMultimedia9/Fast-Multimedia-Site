@@ -1,13 +1,13 @@
 // src/services/emailService.js
 import emailjs from '@emailjs/browser';
 
-// Initialize EmailJS with your Public API Key
-// Your API Key: a48f87f647d099b3e988739f2e33262f
-emailjs.init('a48f87f647d099b3e988739f2e33262f');
+// Get configuration from environment variables
+const PUBLIC_KEY = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'a48f87f647d099b3e988739f2e33262f';
+const SERVICE_ID = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_25rh2nj';
+const TEMPLATE_ID = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_kjuy3g3';
 
-// EmailJS Configuration - Replace these with your actual IDs
-const EMAILJS_SERVICE_ID = 'service_25rh2nj'; // Your EmailJS Service ID
-const EMAILJS_TEMPLATE_ID = 'template_kjuy3g3'; // Your EmailJS Template ID
+// Initialize EmailJS with Public API Key
+emailjs.init(PUBLIC_KEY);
 
 /**
  * Send serial number email to applicant
@@ -44,8 +44,8 @@ export const sendSerialEmail = async (email, name, serial, course) => {
 
     // Send email using EmailJS
     const result = await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID,
+      SERVICE_ID,
+      TEMPLATE_ID,
       templateParams
     );
 
@@ -78,12 +78,15 @@ export const resendSerialEmail = async (email, serial, name) => {
       to_name: name || 'Applicant',
       serial_number: serial,
       application_link: `${window.location.origin}/school/application-form`,
-      resend: true
+      resend: true,
+      current_year: new Date().getFullYear(),
+      whatsapp_number: '+233 50 515 9131',
+      support_email: 'fasttech227@gmail.com'
     };
 
     const result = await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID,
+      SERVICE_ID,
+      TEMPLATE_ID,
       templateParams
     );
 
@@ -103,16 +106,19 @@ export const resendSerialEmail = async (email, serial, name) => {
 export const testEmailConnection = async (email) => {
   try {
     const testParams = {
-      to_email: email,
+      to_email: email || 'test@example.com',
       to_name: 'Test User',
       serial_number: 'TEST-123-456',
       course: 'Test Course',
-      application_link: `${window.location.origin}/school/application-form`
+      application_link: `${window.location.origin}/school/application-form`,
+      current_year: new Date().getFullYear(),
+      whatsapp_number: '+233 50 515 9131',
+      support_email: 'fasttech227@gmail.com'
     };
 
     const result = await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID,
+      SERVICE_ID,
+      TEMPLATE_ID,
       testParams
     );
 
@@ -125,8 +131,9 @@ export const testEmailConnection = async (email) => {
 
 // Export configuration for debugging
 export const emailConfig = {
-  serviceId: EMAILJS_SERVICE_ID,
-  templateId: EMAILJS_TEMPLATE_ID,
+  publicKey: PUBLIC_KEY,
+  serviceId: SERVICE_ID,
+  templateId: TEMPLATE_ID,
   isInitialized: true
 };
 
