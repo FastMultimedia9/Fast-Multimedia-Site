@@ -10,6 +10,7 @@ const Navbar = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileSchoolOpen, setIsMobileSchoolOpen] = useState(false);
+  const [isSchoolDropdownOpen, setIsSchoolDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
 
@@ -58,6 +59,7 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
     if (isUserMenuOpen) setIsUserMenuOpen(false);
     if (isMobileSchoolOpen) setIsMobileSchoolOpen(false);
+    if (isSchoolDropdownOpen) setIsSchoolDropdownOpen(false);
   };
 
   const toggleUserMenu = () => {
@@ -68,10 +70,15 @@ const Navbar = () => {
     setIsMobileSchoolOpen(!isMobileSchoolOpen);
   };
 
+  const toggleSchoolDropdown = () => {
+    setIsSchoolDropdownOpen(!isSchoolDropdownOpen);
+  };
+
   const handleNavigation = (path) => {
     setIsMenuOpen(false);
     setIsUserMenuOpen(false);
     setIsMobileSchoolOpen(false);
+    setIsSchoolDropdownOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(path);
   };
@@ -85,51 +92,21 @@ const Navbar = () => {
     navigate('/');
   };
 
-  // School menu items for mobile accordion
+  // School menu items
   const schoolMenuItems = [
-    { name: 'School Home', path: '/school', icon: '' },
-    { name: 'Our Courses', path: '/school/courses', icon: '' },
-    { name: 'About School', path: '/school/overview', icon: '' },
-    { name: 'Mission & Vision', path: '/school/mission', icon: '' },
-    { name: 'Admissions', path: '/school/apply', icon: '' },
-    { name: 'Requirements', path: '/school/requirements', icon: '' },
-    { name: 'Tuition & Fees', path: '/school/tuition', icon: '' },
-    { name: 'Scholarships', path: '/school/scholarships', icon: '' },
-    { name: 'Academic Calendar', path: '/school/calendar', icon: '' },
-    { name: 'Facilities', path: '/school/facilities', icon: '' },
-    { name: 'Student Life', path: '/school/student-life', icon: '👥' },
-    { name: 'Events', path: '/school/events', icon: '' },
-    { name: 'Gallery', path: '/school/gallery', icon: '' },
-    { name: 'Contact School', path: '/school/contact', icon: '' }
+    { name: 'School Home', path: '/school', icon: '🏫' },
+    { name: 'About School', path: '/school/about', icon: '📚' },
+    { name: 'Admissions', path: '/school/admissions', icon: '📝' },
+    { name: 'Courses', path: '/school/courses', icon: '📖' },
+    { name: 'Contact School', path: '/school/contact', icon: '📞' }
   ];
 
-  // Group menu items by category for mobile
+  // Group school items for mobile
   const groupedSchoolItems = {
     main: {
-      title: 'Main',
-      icon: '',
-      items: schoolMenuItems.filter(item => item.path === '/school')
-    },
-    academics: {
-      title: 'Academics',
-      icon: '',
-      items: schoolMenuItems.filter(item => ['/school/courses', '/school/calendar'].includes(item.path))
-    },
-    about: {
-      title: 'About',
-      icon: '',
-      items: schoolMenuItems.filter(item => ['/school/overview', '/school/mission'].includes(item.path))
-    },
-    admissions: {
-      title: 'Admissions',
-      icon: '',
-      items: schoolMenuItems.filter(item => ['/school/apply', '/school/requirements', '/school/tuition', '/school/scholarships'].includes(item.path))
-    },
-    
-    contact: {
-      title: 'Contact',
-      icon: '',
-      items: schoolMenuItems.filter(item => item.path === '/school/contact')
+      title: 'School',
+      icon: '🏫',
+      items: schoolMenuItems
     }
   };
 
@@ -234,14 +211,40 @@ const Navbar = () => {
             </NavLink>
           ))}
 
-          {/* School Button - Simple navigation without dropdown */}
-          <button 
-            className="nav-link school-btn"
-            onClick={() => handleNavigation('/school')}
+          {/* School Dropdown */}
+          <div 
+            className="nav-dropdown-container"
+            onMouseEnter={() => setIsSchoolDropdownOpen(true)}
+            onMouseLeave={() => setIsSchoolDropdownOpen(false)}
           >
-            <span className="link-text">School</span>
-            <span className="link-indicator"></span>
-          </button>
+            <button 
+              className={`nav-link school-dropdown-btn ${isSchoolDropdownOpen ? 'active' : ''}`}
+              onClick={toggleSchoolDropdown}
+            >
+              <span className="link-text">School</span>
+              <svg className="dropdown-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="link-indicator"></span>
+            </button>
+
+            <div className={`school-dropdown ${isSchoolDropdownOpen ? 'show' : ''}`}>
+              {schoolMenuItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className="dropdown-item"
+                  onClick={() => handleNavigation(item.path)}
+                >
+                  <span className="dropdown-icon">{item.icon}</span>
+                  <span className="dropdown-text">{item.name}</span>
+                  <svg className="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Desktop Action Buttons */}
@@ -312,13 +315,35 @@ const Navbar = () => {
                 
                 <div className="dropdown-divider"></div>
                 
-               
+                <button 
+                  className="dropdown-item logout-item"
+                  onClick={handleLogout}
+                >
+                  <svg className="item-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M6 2H2V14H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M11 5L14 8L11 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M10 8H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>Sign Out</span>
+                </button>
               </div>
             </div>
           ) : (
             <div className="auth-buttons">
-             
-              
+              <Link 
+                to="/login" 
+                className="btn btn-login"
+                onClick={() => handleNavigation('/login')}
+              >
+                Sign In
+              </Link>
+              <Link 
+                to="/contact" 
+                className="btn btn-primary"
+                onClick={() => handleNavigation('/contact')}
+              >
+                Get Started
+              </Link>
             </div>
           )}
         </div>
@@ -392,27 +417,13 @@ const Navbar = () => {
             </Link>
           ))}
           
-          {/* School Button for Mobile */}
-          <Link
-            to="/school"
-            className="mobile-link school-mobile-link"
-            onClick={() => handleNavigation('/school')}
-          >
-            <span className="mobile-link-text">School</span>
-            <svg className="mobile-link-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M4 8H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M8 4L12 8L8 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </Link>
-          
-          {/* Mobile School Section - Accordion Style (Optional for additional links) */}
+          {/* Mobile School Section */}
           <div className="mobile-school-section">
             <button 
               className={`mobile-school-header ${isMobileSchoolOpen ? 'open' : ''}`}
               onClick={toggleMobileSchoolMenu}
             >
-              <span className="school-header-icon"></span>
-              <span className="school-header-title">School Menu</span>
+              <span className="school-header-title">🏫 School</span>
               <svg className="mobile-school-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -422,10 +433,6 @@ const Navbar = () => {
               {Object.entries(groupedSchoolItems).map(([key, category]) => (
                 category.items.length > 0 && (
                   <div key={key} className="mobile-school-category">
-                    <div className="mobile-category-title">
-                      <span className="category-icon">{category.icon}</span>
-                      {category.title}
-                    </div>
                     {category.items.map((item) => (
                       <Link
                         key={item.path}
