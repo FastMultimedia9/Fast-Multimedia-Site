@@ -2,13 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   FaUserGraduate, 
-  FaEnvelope, 
   FaLock, 
   FaArrowRight,
   FaEye,
   FaEyeSlash,
-  FaUser,
-  FaShieldAlt,
   FaKey,
   FaCheckCircle,
   FaExclamationTriangle,
@@ -17,35 +14,36 @@ import {
   FaHourglassHalf,
   FaTimesCircle,
   FaCheck,
-  FaUserTie
+  FaIdCard,
+  FaShieldAlt,
+  FaUniversity
 } from 'react-icons/fa';
 import { 
   getStudentAdmissionStatus, 
   getStudentByEmail,
-  getUserByEmail,
   updateStudent,
-  updateUser,
-  loginUser
+  getUserByEmail,
+  verifyStudentPassword,
+  updateStudentPassword
 } from '../services/firebaseService';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 import './StudentLogin.css';
 
 const StudentLogin = () => {
   const navigate = useNavigate();
-  const [loginType, setLoginType] = useState('student');
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // User role states
-  const [userRole, setUserRole] = useState(null);
-  const [userData, setUserData] = useState(null);
+  // Student data states
+  const [studentData, setStudentData] = useState(null);
   
-  // Admission status states (for students only)
+  // Admission status states
   const [admissionStatus, setAdmissionStatus] = useState(null);
-  const [checkingStatus, setCheckingStatus] = useState(false);
   const [statusChecked, setStatusChecked] = useState(false);
   
   // Password change states
@@ -61,87 +59,96 @@ const StudentLogin = () => {
   // Default password for all users
   const DEFAULT_PASSWORD = 'FastMultimedia2024@';
 
-  // Check user role and admission status
-  const checkUserAccess = async (email) => {
-    setCheckingStatus(true);
+  // Check student admission status
+  const checkStudentAccess = async (identifier) => {
     setError('');
     setAdmissionStatus(null);
     setStatusChecked(false);
-    setUserRole(null);
-    setUserData(null);
+    setStudentData(null);
 
     try {
-      // FIRST: Check if user exists in the users collection (for all roles)
-      const userProfile = await getUserByEmail(email);
+      // Check if identifier is a student ID or email
+      let student = null;
       
-      if (userProfile) {
-        const role = userProfile.role || 'student';
-        setUserRole(role);
-        setUserData(userProfile);
+      if (identifier.includes('@')) {
+        // Try to find by email
+        student = await getStudentByEmail(identifier);
+      } else {
+        // Try to find by student ID from the students collection
+        const { getStudentByStudentId } = await import('../services/firebaseService');
+        student = await getStudentByStudentId(identifier.toUpperCase());
         
-        // If user is admin or staff - SKIP admission status check entirely
-        if (role === 'admin' || role === 'staff') {
-          setStatusChecked(true);
-          setAdmissionStatus({
-            exists: true,
-            status: 'approved',
-            message: `${role.charAt(0).toUpperCase() + role.slice(1)} account found.`,
-            data: userProfile
-          });
-          setCheckingStatus(false);
-          return { exists: true, status: 'approved', data: userProfile, role: role };
-        }
-        
-        // If role is student but in users collection, check admission
-        if (role === 'student') {
-          // Check if student has admission status
-          const result = await getStudentAdmissionStatus(email);
-          if (result.exists) {
-            setUserRole('student');
-            setUserData(result.student);
-            setAdmissionStatus(result);
-            setStatusChecked(true);
-            setCheckingStatus(false);
-            return result;
-          } else {
-            // Student exists but no admission record - still allow login with warning
-            setUserRole('student');
-            setUserData(userProfile);
-            setAdmissionStatus({
-              exists: true,
-              status: 'pending',
-              message: 'Student account found but admission record is incomplete. Please contact support.'
-            });
-            setStatusChecked(true);
-            setCheckingStatus(false);
-            return { exists: true, status: 'pending', data: userProfile };
-          }
+        // If not found by student ID, try by email
+        if (!student) {
+          student = await getStudentByEmail(identifier);
         }
       }
 
-      // SECOND: If not found in users collection, check as student (for new students)
-      const result = await getStudentAdmissionStatus(email);
-      console.log('Admission status result:', result);
+      // If student not found, check if they exist in users collection
+      if (!student) {
+        const user = await getUserByEmail(identifier);
+        if (user && user.role === 'student') {
+          // Convert user to student format
+          student = {
+            id: user.id,
+            studentId: user.studentId || user.id,
+            fullName: user.fullName || user.name,
+            email: user.email,
+            admissionStatus: user.admissionStatus || 'approved',
+            password: user.password || DEFAULT_PASSWORD,
+            passwordUpdated: user.passwordUpdated || false
+          };
+        }
+      }
 
-      if (result.exists && result.status) {
-        setUserRole('student');
-        setUserData(result.student);
-        setAdmissionStatus(result);
+      if (!student) {
+        setError('Student not found. Please ensure you have completed your application or contact support.');
         setStatusChecked(true);
-        setCheckingStatus(false);
-        return result;
-      } else {
-        // User not found anywhere - show appropriate error
-        setError('User not found. Please ensure you have completed your application or contact support.');
-        setStatusChecked(true);
-        setCheckingStatus(false);
         return null;
       }
-    } catch (error) {
-      console.error('Error checking user access:', error);
-      setError('Error checking user access. Please try again.');
+
+      setStudentData(student);
+
+      // Check admission status
+      const status = student.admissionStatus || 'pending';
+      const statusMessages = {
+        pending: 'Your application is pending review. Please wait for approval before logging in.',
+        approved: 'Your application has been approved! You can now log in.',
+        rejected: 'Your application was not approved. Please contact admissions for more information.',
+        enrolled: 'You are enrolled! Welcome to Fast Multimedia Institute.'
+      };
+
+      const admissionInfo = {
+        exists: true,
+        status: status,
+        message: statusMessages[status] || 'Application status unknown.',
+        data: student
+      };
+
+      setAdmissionStatus(admissionInfo);
       setStatusChecked(true);
-      setCheckingStatus(false);
+
+      // Check if student can login
+      if (status === 'pending') {
+        setError('Your application is pending review. Please wait for approval before logging in.');
+        return null;
+      }
+
+      if (status === 'rejected') {
+        setError('Your application was not approved. Please contact admissions for more information.');
+        return null;
+      }
+
+      if (status !== 'approved' && status !== 'enrolled') {
+        setError('Unknown application status. Please contact admissions.');
+        return null;
+      }
+
+      return student;
+    } catch (error) {
+      console.error('Error checking student access:', error);
+      setError('Error checking student access. Please try again.');
+      setStatusChecked(true);
       return null;
     }
   };
@@ -150,9 +157,9 @@ const StudentLogin = () => {
     e.preventDefault();
     setError('');
     
-    // Validate email and password are not empty
-    if (!email.trim()) {
-      setError('Please enter your email address.');
+    // Validate identifier and password are not empty
+    if (!identifier.trim()) {
+      setError('Please enter your Student ID or Email Address.');
       return;
     }
     
@@ -161,52 +168,22 @@ const StudentLogin = () => {
       return;
     }
     
-    // First, check user access and role
+    // First, check student access
     if (!statusChecked) {
       setIsLoading(true);
-      const accessResult = await checkUserAccess(email);
+      const student = await checkStudentAccess(identifier);
       setIsLoading(false);
       
-      if (!accessResult || !accessResult.exists) {
-        return;
-      }
-
-      // Get the role from the access result
-      const role = accessResult.role || userRole || 'student';
-      
-      // If user is admin or staff - SKIP admission status validation entirely
-      if (role === 'admin' || role === 'staff') {
-        // Proceed directly to password validation
-        setAdmissionStatus(accessResult);
-        // Continue to password validation below
-      } else if (role === 'student') {
-        // Check student admission status - ONLY for students
-        if (accessResult.status === 'pending') {
-          setError('Your application is pending review. Please wait for approval before logging in.');
-          return;
-        }
-
-        if (accessResult.status === 'rejected') {
-          setError('Your application was not approved. Please contact admissions for more information.');
-          return;
-        }
-
-        if (accessResult.status !== 'approved' && accessResult.status !== 'enrolled') {
-          setError('Unknown application status. Please contact admissions.');
-          return;
-        }
-      } else {
-        setError('User role not recognized. Please contact support.');
+      if (!student) {
         return;
       }
     }
 
-    // Now validate password - this runs for ALL roles (admin, staff, student)
+    // Now validate password
     setIsLoading(true);
 
     try {
-      // Get the role from state
-      const role = userRole || 'student';
+      const student = studentData;
       
       // Check if using default password
       if (password === DEFAULT_PASSWORD) {
@@ -217,15 +194,22 @@ const StudentLogin = () => {
         return;
       }
 
-      // In production, use Firebase Auth to verify password
-      // For now, simulate successful login with custom password
-      // IMPORTANT: In production, replace this with actual Firebase Auth
-      if (password.length >= 6) {
-        // Login successful - redirect based on role
-        redirectBasedOnRole(role);
-      } else {
+      // Verify password with stored password
+      const storedPassword = student.password || '';
+      if (password !== storedPassword) {
         setError('Invalid password. Please try again.');
+        setIsLoading(false);
+        return;
       }
+
+      // Login successful - redirect to student portal
+      if (rememberMe) {
+        localStorage.setItem('studentLogin', 'true');
+        localStorage.setItem('studentId', student.studentId || student.id);
+        localStorage.setItem('studentEmail', student.email);
+      }
+      
+      redirectToPortal();
     } catch (error) {
       console.error('Login error:', error);
       setError('An error occurred during login. Please try again.');
@@ -234,24 +218,10 @@ const StudentLogin = () => {
     }
   };
 
-  const redirectBasedOnRole = (role) => {
-    // Clear any state before redirect
+  const redirectToPortal = () => {
     setIsLoading(false);
     setError('');
-    
-    // Redirect based on role
-    switch(role) {
-      case 'admin':
-        navigate('/admin/dashboard');
-        break;
-      case 'staff':
-        navigate('/staff/dashboard');
-        break;
-      case 'student':
-      default:
-        navigate('/student/portal');
-        break;
-    }
+    navigate('/student/portal');
   };
 
   const handlePasswordChange = async (e) => {
@@ -296,33 +266,11 @@ const StudentLogin = () => {
     setIsPasswordUpdating(true);
 
     try {
-      // Get the role
-      const role = userRole || 'student';
+      const student = studentData;
       
-      // Update password based on role
-      if (role === 'admin' || role === 'staff') {
-        // Update user profile
-        const user = await getUserByEmail(email);
-        if (user) {
-          await updateUser(user.id, {
-            passwordUpdated: true,
-            password: newPassword, // In production, hash this password
-            updatedAt: new Date().toISOString()
-          });
-        }
-      } else {
-        // Update student
-        const student = await getStudentByEmail(email);
-        if (student) {
-          await updateStudent(student.id, {
-            passwordUpdated: true,
-            password: newPassword, // In production, hash this password
-            updatedAt: new Date().toISOString()
-          });
-        }
-      }
+      // Update student password
+      await updateStudentPassword(student.id, newPassword);
 
-      // Simulate password update delay
       setTimeout(() => {
         setIsPasswordUpdating(false);
         setPasswordChangeSuccess(true);
@@ -330,7 +278,7 @@ const StudentLogin = () => {
         // After success, redirect after 2 seconds
         setTimeout(() => {
           setShowPasswordChange(false);
-          redirectBasedOnRole(role);
+          redirectToPortal();
         }, 2000);
       }, 1500);
     } catch (error) {
@@ -346,56 +294,10 @@ const StudentLogin = () => {
         <div className="login-card">
           <div className="login-header">
             <div className="login-icon">
-              <FaUserGraduate />
+              <FaUniversity />
             </div>
-            <h1>Welcome Back</h1>
-            <p>Login to access your portal</p>
-          </div>
-
-          {/* Login Type Selector */}
-          <div className="login-type-selector">
-            <button 
-              className={`type-btn ${loginType === 'student' ? 'active' : ''}`}
-              onClick={() => {
-                setLoginType('student');
-                setStatusChecked(false);
-                setAdmissionStatus(null);
-                setError('');
-                setUserRole(null);
-                setUserData(null);
-                setShowPasswordChange(false);
-              }}
-            >
-              <FaUserGraduate /> Student
-            </button>
-            <button 
-              className={`type-btn ${loginType === 'staff' ? 'active' : ''}`}
-              onClick={() => {
-                setLoginType('staff');
-                setStatusChecked(false);
-                setAdmissionStatus(null);
-                setError('');
-                setUserRole(null);
-                setUserData(null);
-                setShowPasswordChange(false);
-              }}
-            >
-              <FaUserTie /> Staff
-            </button>
-            <button 
-              className={`type-btn ${loginType === 'admin' ? 'active' : ''}`}
-              onClick={() => {
-                setLoginType('admin');
-                setStatusChecked(false);
-                setAdmissionStatus(null);
-                setError('');
-                setUserRole(null);
-                setUserData(null);
-                setShowPasswordChange(false);
-              }}
-            >
-              <FaShieldAlt /> Admin
-            </button>
+            <h1>Student Login</h1>
+            <p>Fast Multimedia Institute</p>
           </div>
 
           {error && (
@@ -404,23 +306,21 @@ const StudentLogin = () => {
             </div>
           )}
 
-          {/* User Role Display */}
-          {statusChecked && userRole && (
-            <div className={`user-role-badge ${userRole}`}>
-              <div className="role-icon">
-                {userRole === 'admin' && <FaShieldAlt />}
-                {userRole === 'staff' && <FaUserTie />}
-                {userRole === 'student' && <FaUserGraduate />}
+          {/* Student Info Display */}
+          {statusChecked && studentData && (
+            <div className="student-info-badge">
+              <div className="student-info-icon">
+                <FaUserGraduate />
               </div>
-              <div className="role-content">
-                <h4>Logged in as: <strong>{userRole.toUpperCase()}</strong></h4>
-                <p>{userData?.fullName || userData?.name || 'User'}</p>
+              <div className="student-info-content">
+                <h4>Welcome, <strong>{studentData.fullName}</strong></h4>
+                <p>Student ID: <strong>{studentData.studentId || studentData.id}</strong></p>
               </div>
             </div>
           )}
 
-          {/* Admission Status Display (for students only) */}
-          {statusChecked && admissionStatus && userRole === 'student' && (
+          {/* Admission Status Display */}
+          {statusChecked && admissionStatus && (
             <div className={`admission-status ${admissionStatus.status}`}>
               <div className="status-icon">
                 {admissionStatus.status === 'pending' && <FaHourglassHalf />}
@@ -545,23 +445,25 @@ const StudentLogin = () => {
             <>
               <form onSubmit={handleLogin} className="login-form">
                 <div className="form-group">
-                  <label>Email Address</label>
+                  <label>Student ID or Email Address</label>
                   <div className="input-wrapper">
-                    <FaEnvelope className="input-icon" />
+                    <FaIdCard className="input-icon" />
                     <input
-                      type="email"
-                      value={email}
+                      type="text"
+                      value={identifier}
                       onChange={(e) => {
-                        setEmail(e.target.value);
+                        setIdentifier(e.target.value);
                         setStatusChecked(false);
                         setAdmissionStatus(null);
                         setError('');
-                        setUserRole(null);
-                        setUserData(null);
+                        setStudentData(null);
                       }}
-                      placeholder="your@email.com"
+                      placeholder="Enter your Student ID or Email"
                       required
                     />
+                  </div>
+                  <div className="input-hint">
+                    <FaInfoCircle /> Enter your Student ID (e.g., JOHN260001) or Email Address
                   </div>
                 </div>
 
@@ -598,9 +500,6 @@ const StudentLogin = () => {
                     />
                     <span>Remember me</span>
                   </label>
-                  <Link to="/forgot-password" className="forgot-link">
-                    Forgot password?
-                  </Link>
                 </div>
 
                 <button 
@@ -626,6 +525,12 @@ const StudentLogin = () => {
                 </p>
                 <p className="login-help">
                   <FaInfoCircle /> Default password: <strong>{DEFAULT_PASSWORD}</strong>
+                </p>
+                <p className="login-help-note">
+                  First time logging in? Use the default password above and you'll be prompted to change it.
+                </p>
+                <p className="login-help-note">
+                  <FaInfoCircle /> Need help? Contact us at <strong>fasttech227@gmail.com</strong>
                 </p>
               </div>
 

@@ -81,12 +81,14 @@ export const generateStudentId = async (fullName) => {
     const studentId = `${namePart}${year}${numberPart}`;
     
     console.log(`✅ Generated student ID: ${studentId} for ${fullName}`);
+    console.log(`📊 Name Part: ${namePart}, Year: ${year}, Number: ${numberPart}`);
     return studentId;
     
   } catch (error) {
     console.error('Error generating student ID:', error);
     // Fallback to timestamp-based ID
     const fallbackId = `STU${Date.now().toString().slice(-6)}`;
+    console.log(`⚠️ Using fallback ID: ${fallbackId}`);
     return fallbackId;
   }
 };
@@ -119,9 +121,11 @@ export const createStudent = async (studentData) => {
       attendance: studentData.attendance || { total: 0, present: 0, absent: 0 },
       grades: studentData.grades || {},
       admissionStatus: studentData.admissionStatus || 'pending',
-      passwordUpdated: studentData.passwordUpdated || false
+      passwordUpdated: studentData.passwordUpdated || false,
+      password: studentData.password || 'FastMultimedia2024@' // Default password for first login
     });
     
+    console.log(`✅ Student created with ID: ${studentId}`);
     return studentId;
   } catch (error) {
     console.error('Error creating student:', error);
@@ -160,6 +164,107 @@ export const getStudentByEmail = async (email) => {
     return { id: doc.id, ...doc.data() };
   } catch (error) {
     console.error('Error getting student by email:', error);
+    throw error;
+  }
+};
+
+// Get student by Student ID
+export const getStudentByStudentId = async (studentId) => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.STUDENTS),
+      where('studentId', '==', studentId)
+    );
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) return null;
+    
+    const doc = snapshot.docs[0];
+    return { id: doc.id, ...doc.data() };
+  } catch (error) {
+    console.error('Error getting student by student ID:', error);
+    throw error;
+  }
+};
+
+// Get student by email or student ID (for login)
+export const getStudentByEmailOrStudentId = async (identifier) => {
+  try {
+    // Check if identifier is a student ID (contains letters and numbers, no @)
+    if (!identifier.includes('@')) {
+      // Try to find by student ID
+      const byStudentId = await getStudentByStudentId(identifier.toUpperCase());
+      if (byStudentId) return byStudentId;
+    }
+    
+    // Try to find by email
+    const byEmail = await getStudentByEmail(identifier);
+    if (byEmail) return byEmail;
+    
+    return null;
+  } catch (error) {
+    console.error('Error getting student by email or student ID:', error);
+    throw error;
+  }
+};
+
+// Verify student password (for login)
+export const verifyStudentPassword = async (identifier, password) => {
+  try {
+    // Get student by email or student ID
+    const student = await getStudentByEmailOrStudentId(identifier);
+    
+    if (!student) {
+      return { 
+        valid: false, 
+        error: 'Student not found. Please ensure you have completed your application or contact support.' 
+      };
+    }
+    
+    // Check if student is approved or enrolled
+    if (student.admissionStatus !== 'approved' && student.admissionStatus !== 'enrolled') {
+      return { 
+        valid: false, 
+        error: `Your application is ${student.admissionStatus || 'pending'}. Please wait for approval before logging in.`,
+        status: student.admissionStatus
+      };
+    }
+    
+    // Default password for first-time login
+    const DEFAULT_PASSWORD = 'FastMultimedia2024@';
+    const isDefaultPassword = password === DEFAULT_PASSWORD;
+    
+    // Check stored password
+    const storedPassword = student.password || '';
+    const passwordMatch = password === storedPassword || isDefaultPassword;
+    
+    if (!passwordMatch) {
+      return { valid: false, error: 'Invalid password. Please try again.' };
+    }
+    
+    return { 
+      valid: true, 
+      student: student,
+      isDefaultPassword: isDefaultPassword,
+      needsPasswordChange: isDefaultPassword || !student.passwordUpdated
+    };
+  } catch (error) {
+    console.error('Error verifying student password:', error);
+    return { valid: false, error: 'Error verifying login. Please try again.' };
+  }
+};
+
+// Update student password
+export const updateStudentPassword = async (studentId, newPassword) => {
+  try {
+    await updateStudent(studentId, {
+      password: newPassword,
+      passwordUpdated: true,
+      updatedAt: new Date().toISOString()
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating student password:', error);
     throw error;
   }
 };
@@ -1410,7 +1515,6 @@ export const registerUser = async (email, password, userData) => {
   }
 };
 
-// Login user
 // Login user - FIXED to return full userCredential
 export const loginUser = async (email, password) => {
   try {
@@ -1508,6 +1612,51 @@ export const getUserByEmail = async (email) => {
   }
 };
 
+// Get user by email or student ID (for all roles)
+export const getUserByEmailOrStudentId = async (identifier) => {
+  try {
+    // First, try to find in users collection by email
+    if (identifier.includes('@')) {
+      const byEmail = await getUserByEmail(identifier);
+      if (byEmail) return byEmail;
+    }
+    
+    // If not found, try to find as student by student ID
+    const student = await getStudentByStudentId(identifier.toUpperCase());
+    if (student) {
+      // Convert student to user format
+      return {
+        id: student.id,
+        uid: student.id,
+        email: student.email,
+        fullName: student.fullName,
+        role: 'student',
+        ...student
+      };
+    }
+    
+    // If still not found, try by email in students collection
+    if (identifier.includes('@')) {
+      const studentByEmail = await getStudentByEmail(identifier);
+      if (studentByEmail) {
+        return {
+          id: studentByEmail.id,
+          uid: studentByEmail.id,
+          email: studentByEmail.email,
+          fullName: studentByEmail.fullName,
+          role: 'student',
+          ...studentByEmail
+        };
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error getting user by email or student ID:', error);
+    throw error;
+  }
+};
+
 // Update user
 export const updateUser = async (userId, updateData) => {
   try {
@@ -1560,7 +1709,6 @@ export const getDashboardStats = async () => {
       totalSerials: serials.size,
       usedSerials: serials.docs.filter(doc => doc.data().isUsed).length,
       availableSerials: serials.docs.filter(doc => !doc.data().isUsed).length,
-      // New: Admission status breakdown
       pendingStudents: students.docs.filter(doc => doc.data().admissionStatus === 'pending').length,
       approvedStudents: students.docs.filter(doc => doc.data().admissionStatus === 'approved').length,
       enrolledStudents: students.docs.filter(doc => doc.data().admissionStatus === 'enrolled').length,
@@ -1588,13 +1736,17 @@ export default {
   createStudent,
   getStudent,
   getStudentByEmail,
+  getStudentByStudentId,
+  getStudentByEmailOrStudentId,
+  verifyStudentPassword,
+  updateStudentPassword,
   getAllStudents,
   updateStudent,
   deleteStudent,
+  generateStudentId,
   enrollStudentInCourse,
   getStudentAttendance,
   getStudentGrades,
-  generateStudentId,
   
   // Staff functions
   createStaff,
@@ -1612,7 +1764,7 @@ export default {
   updateAdmissionStatus,
   deleteAdmission,
   
-  // Admission Status functions (NEW)
+  // Admission Status functions
   getStudentAdmissionStatus,
   getStudentWithAdmissionStatus,
   updateStudentAdmissionStatus,
@@ -1666,6 +1818,11 @@ export default {
   getCurrentUser,
   getUserProfile,
   updateUserProfile,
+  
+  // User functions
+  getUserByEmail,
+  getUserByEmailOrStudentId,
+  updateUser,
   
   // Dashboard
   getDashboardStats,
