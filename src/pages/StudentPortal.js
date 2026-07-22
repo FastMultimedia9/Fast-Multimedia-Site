@@ -41,8 +41,18 @@ import {
   FaLaptop,
   FaHome,
   FaBullhorn,
-  FaClipboardList
+  FaClipboardList,
+  FaInfoCircle
 } from 'react-icons/fa';
+import {
+  getCurrentUser,
+  getUserProfile,
+  getStudentByEmail,
+  getStudentByStudentId,
+  updateStudent,
+  logoutUser,
+  updateStudentPassword
+} from '../services/firebaseService';
 import './StudentPortal.css';
 
 const StudentPortal = () => {
@@ -68,99 +78,199 @@ const StudentPortal = () => {
     emergencyContact: '',
     emergencyPhone: ''
   });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  // Mock student data - In production, fetch from Firebase
+  // Load student data from Firebase
   useEffect(() => {
-    // Simulate loading data
-    setTimeout(() => {
-      setStudentData({
-        id: 'STU-2026-001',
-        fullName: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: '+233 24 123 4567',
-        address: '123 Main Street, Accra, Ghana',
-        dateOfBirth: '1995-05-15',
-        gender: 'Male',
-        emergencyContact: 'Jane Doe',
-        emergencyPhone: '+233 24 765 4321',
-        enrolledCourses: [
-          {
-            id: 'web-dev',
-            name: 'Web Development',
-            progress: 75,
-            grade: 'A',
-            instructor: 'Mr. Kwame Appiah',
-            status: 'active',
-            startDate: '2026-01-15',
-            endDate: '2026-03-15',
-            assignments: [
-              { title: 'HTML Project', dueDate: '2026-02-01', status: 'submitted', grade: 85 },
-              { title: 'CSS Project', dueDate: '2026-02-15', status: 'submitted', grade: 90 },
-              { title: 'JavaScript Project', dueDate: '2026-03-01', status: 'pending', grade: null }
-            ]
-          },
-          {
-            id: 'graphic-design',
-            name: 'Graphic Design',
-            progress: 60,
-            grade: 'B+',
-            instructor: 'Ms. Abena Osei',
-            status: 'active',
-            startDate: '2026-01-15',
-            endDate: '2026-03-15',
-            assignments: [
-              { title: 'Logo Design', dueDate: '2026-02-10', status: 'submitted', grade: 88 },
-              { title: 'Poster Design', dueDate: '2026-02-28', status: 'pending', grade: null }
-            ]
-          }
-        ],
-        paymentHistory: [
-          { id: 'PAY-001', amount: 600, date: '2026-01-10', status: 'completed', method: 'Mobile Money' },
-          { id: 'PAY-002', amount: 400, date: '2026-02-10', status: 'completed', method: 'Mobile Money' }
-        ],
-        attendance: {
-          total: 20,
-          present: 18,
-          absent: 2,
-          percentage: 90
-        },
-        notifications: [
-          { id: 1, title: 'Assignment Due Soon', message: 'JavaScript project is due on March 1st', date: '2026-02-20', read: false },
-          { id: 2, title: 'Payment Reminder', message: 'Your next installment of GH₵ 400 is due on March 10th', date: '2026-02-25', read: false },
-          { id: 3, title: 'Class Schedule Update', message: 'Web Development class rescheduled to 3:00 PM', date: '2026-02-18', read: true }
-        ],
-        achievements: [
-          { title: 'First Assignment Submitted', icon: '📝', date: '2026-01-20' },
-          { title: 'Perfect Attendance Week', icon: '⭐', date: '2026-02-05' },
-          { title: 'Top Performer in Web Dev', icon: '🏆', date: '2026-02-15' }
-        ],
-        upcomingEvents: [
-          { title: 'Web Development Workshop', date: '2026-03-05', time: '2:00 PM - 4:00 PM' },
-          { title: 'Career Guidance Session', date: '2026-03-10', time: '10:00 AM - 12:00 PM' }
-        ]
-      });
-      setIsLoading(false);
-    }, 1500);
-  }, []);
+    const loadStudentData = async () => {
+      setIsLoading(true);
+      setError('');
 
-  const handlePasswordChange = (e) => {
+      try {
+        // Get current user from Firebase Auth
+        const user = await getCurrentUser();
+        
+        if (!user) {
+          // No user logged in, redirect to login
+          navigate('/student/login');
+          return;
+        }
+
+        // Get user profile from Firestore
+        const profile = await getUserProfile(user.uid);
+        
+        if (!profile) {
+          setError('Student profile not found. Please contact support.');
+          setIsLoading(false);
+          return;
+        }
+
+        // Check if user is a student
+        if (profile.role && profile.role !== 'student') {
+          setError('Access denied. Student portal is for students only.');
+          setIsLoading(false);
+          return;
+        }
+
+        // Get student data by email or student ID
+        let student = null;
+        
+        if (profile.email) {
+          student = await getStudentByEmail(profile.email);
+        }
+        
+        // If not found by email, try by student ID
+        if (!student && profile.studentId) {
+          student = await getStudentByStudentId(profile.studentId);
+        }
+
+        // If still not found, use profile data
+        if (!student) {
+          student = {
+            id: user.uid,
+            studentId: profile.studentId || user.uid,
+            fullName: profile.fullName || profile.name || 'Student',
+            email: profile.email || user.email,
+            phone: profile.phone || '',
+            address: profile.address || '',
+            dateOfBirth: profile.dateOfBirth || '',
+            gender: profile.gender || '',
+            emergencyContact: profile.emergencyContact || '',
+            emergencyPhone: profile.emergencyPhone || '',
+            course: profile.course || 'Not specified',
+            enrolledCourses: profile.enrolledCourses || [],
+            paymentHistory: profile.paymentHistory || [],
+            attendance: profile.attendance || { total: 0, present: 0, absent: 0, percentage: 0 },
+            notifications: profile.notifications || [],
+            achievements: profile.achievements || [],
+            upcomingEvents: profile.upcomingEvents || [],
+            admissionStatus: profile.admissionStatus || 'approved',
+            serialNumber: profile.serialNumber || '',
+            applicationDate: profile.applicationDate || new Date().toISOString(),
+            passwordUpdated: profile.passwordUpdated || false
+          };
+        }
+
+        // Set student data
+        setStudentData(student);
+        
+        // Set profile data for editing
+        setProfileData({
+          fullName: student.fullName || '',
+          email: student.email || '',
+          phone: student.phone || '',
+          address: student.address || '',
+          dateOfBirth: student.dateOfBirth || '',
+          gender: student.gender || '',
+          emergencyContact: student.emergencyContact || '',
+          emergencyPhone: student.emergencyPhone || ''
+        });
+
+      } catch (error) {
+        console.error('Error loading student data:', error);
+        setError('Error loading your data. Please refresh the page.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadStudentData();
+  }, [navigate]);
+
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
+    setError('');
+    setSuccess('');
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('New passwords do not match!');
+      setError('New passwords do not match!');
       return;
     }
-    // In production, call Firebase to update password
-    alert('Password changed successfully!');
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    setShowPasswordChange(false);
+
+    if (passwordData.newPassword.length < 8) {
+      setError('Password must be at least 8 characters long.');
+      return;
+    }
+
+    // Check for uppercase letter
+    if (!/[A-Z]/.test(passwordData.newPassword)) {
+      setError('Password must include at least one uppercase letter.');
+      return;
+    }
+
+    // Check for number
+    if (!/[0-9]/.test(passwordData.newPassword)) {
+      setError('Password must include at least one number.');
+      return;
+    }
+
+    // Check for special character
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(passwordData.newPassword)) {
+      setError('Password must include at least one special character.');
+      return;
+    }
+
+    try {
+      await updateStudentPassword(studentData.id, passwordData.newPassword);
+      setSuccess('Password changed successfully!');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setTimeout(() => {
+        setShowPasswordChange(false);
+        setSuccess('');
+      }, 3000);
+    } catch (error) {
+      console.error('Error updating password:', error);
+      setError('Error updating password. Please try again.');
+    }
   };
 
-  const handleProfileUpdate = (e) => {
+  const handleProfileUpdate = async (e) => {
     e.preventDefault();
-    // In production, update Firebase
-    setStudentData({ ...studentData, ...profileData });
-    setEditingProfile(false);
-    alert('Profile updated successfully!');
+    setError('');
+    setSuccess('');
+
+    try {
+      await updateStudent(studentData.id, {
+        fullName: profileData.fullName,
+        phone: profileData.phone,
+        address: profileData.address,
+        dateOfBirth: profileData.dateOfBirth,
+        gender: profileData.gender,
+        emergencyContact: profileData.emergencyContact,
+        emergencyPhone: profileData.emergencyPhone,
+        updatedAt: new Date().toISOString()
+      });
+
+      // Update local state
+      setStudentData({
+        ...studentData,
+        fullName: profileData.fullName,
+        phone: profileData.phone,
+        address: profileData.address,
+        dateOfBirth: profileData.dateOfBirth,
+        gender: profileData.gender,
+        emergencyContact: profileData.emergencyContact,
+        emergencyPhone: profileData.emergencyPhone
+      });
+
+      setSuccess('Profile updated successfully!');
+      setEditingProfile(false);
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setError('Error updating profile. Please try again.');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      navigate('/student/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      setError('Error logging out. Please try again.');
+    }
   };
 
   const handleWhatsAppClick = () => {
@@ -186,6 +296,28 @@ const StudentPortal = () => {
     }
   };
 
+  // Get enrolled course or single course
+  const getCourses = () => {
+    if (studentData?.enrolledCourses && studentData.enrolledCourses.length > 0) {
+      return studentData.enrolledCourses;
+    }
+    // If no enrolled courses but has a course field
+    if (studentData?.course && studentData.course !== 'Not specified') {
+      return [{
+        id: 'course-1',
+        name: studentData.course,
+        progress: 0,
+        grade: 'N/A',
+        instructor: 'Not assigned yet',
+        status: 'active',
+        startDate: studentData.applicationDate || new Date().toISOString().split('T')[0],
+        endDate: 'Pending',
+        assignments: []
+      }];
+    }
+    return [];
+  };
+
   if (isLoading) {
     return (
       <div className="student-portal-loading">
@@ -196,6 +328,26 @@ const StudentPortal = () => {
       </div>
     );
   }
+
+  if (error && !studentData) {
+    return (
+      <div className="student-portal-error">
+        <div className="error-container">
+          <FaExclamationTriangle className="error-icon" />
+          <h2>Something went wrong</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()} className="retry-btn">
+            Retry
+          </button>
+          <button onClick={handleLogout} className="logout-btn">
+            Logout
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const courses = getCourses();
 
   return (
     <div className="student-portal">
@@ -209,7 +361,10 @@ const StudentPortal = () => {
               </div>
               <div>
                 <h1>Welcome back, {studentData?.fullName?.split(' ')[0] || 'Student'}!</h1>
-                <p className="student-id">Student ID: {studentData?.id}</p>
+                <p className="student-id">Student ID: {studentData?.studentId || studentData?.id}</p>
+                <p className="student-course">
+                  <FaBookOpen /> Course: <strong>{studentData?.course || 'Not assigned'}</strong>
+                </p>
               </div>
             </div>
             <div className="header-actions">
@@ -226,6 +381,9 @@ const StudentPortal = () => {
               </button>
               <button className="help-btn" onClick={handleWhatsAppClick}>
                 <FaWhatsapp /> Help
+              </button>
+              <button className="logout-btn-header" onClick={handleLogout}>
+                <FaSignOutAlt /> Logout
               </button>
             </div>
           </div>
@@ -248,6 +406,11 @@ const StudentPortal = () => {
               </div>
             </div>
           ))}
+          {(!studentData?.notifications || studentData.notifications.length === 0) && (
+            <div className="no-notifications">
+              <p>No notifications yet.</p>
+            </div>
+          )}
         </div>
       )}
 
@@ -267,18 +430,6 @@ const StudentPortal = () => {
             <FaBookOpen /> My Courses
           </button>
           <button 
-            className={`tab-btn ${activeTab === 'payments' ? 'active' : ''}`}
-            onClick={() => setActiveTab('payments')}
-          >
-            <FaCreditCard /> Payments
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'attendance' ? 'active' : ''}`}
-            onClick={() => setActiveTab('attendance')}
-          >
-            <FaCalendarCheck /> Attendance
-          </button>
-          <button 
             className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
             onClick={() => setActiveTab('profile')}
           >
@@ -291,6 +442,40 @@ const StudentPortal = () => {
         {/* Dashboard Tab */}
         {activeTab === 'dashboard' && (
           <div className="dashboard-content">
+            {/* Success/Error Messages */}
+            {success && (
+              <div className="alert alert-success">
+                <FaCheckCircle /> {success}
+              </div>
+            )}
+            {error && (
+              <div className="alert alert-error">
+                <FaTimesCircle /> {error}
+              </div>
+            )}
+
+            {/* Student Info Card */}
+            <div className="student-info-card">
+              <div className="info-row">
+                <span className="info-label">Student ID:</span>
+                <span className="info-value">{studentData?.studentId || studentData?.id}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Course:</span>
+                <span className="info-value course-name">{studentData?.course || 'Not assigned'}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Status:</span>
+                <span className={`status-badge ${studentData?.admissionStatus || 'pending'}`}>
+                  {studentData?.admissionStatus || 'Pending'}
+                </span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Application Date:</span>
+                <span className="info-value">{new Date(studentData?.applicationDate).toLocaleDateString()}</span>
+              </div>
+            </div>
+
             {/* Stats Cards */}
             <div className="stats-grid">
               <div className="stat-card">
@@ -298,17 +483,8 @@ const StudentPortal = () => {
                   <FaBookOpen />
                 </div>
                 <div className="stat-info">
-                  <h3>{studentData?.enrolledCourses?.length || 0}</h3>
+                  <h3>{courses.length}</h3>
                   <p>Active Courses</p>
-                </div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon green">
-                  <FaTasks />
-                </div>
-                <div className="stat-info">
-                  <h3>5</h3>
-                  <p>Assignments Completed</p>
                 </div>
               </div>
               <div className="stat-card">
@@ -316,7 +492,7 @@ const StudentPortal = () => {
                   <FaAward />
                 </div>
                 <div className="stat-info">
-                  <h3>3</h3>
+                  <h3>{studentData?.achievements?.length || 0}</h3>
                   <p>Achievements</p>
                 </div>
               </div>
@@ -338,14 +514,14 @@ const StudentPortal = () => {
                 <button className="action-btn" onClick={() => setActiveTab('courses')}>
                   <FaBookOpen /> View Courses
                 </button>
-                <button className="action-btn" onClick={() => setActiveTab('payments')}>
-                  <FaCreditCard /> Make Payment
-                </button>
                 <button className="action-btn" onClick={handleWhatsAppClick}>
                   <FaWhatsapp /> Contact Support
                 </button>
                 <button className="action-btn" onClick={() => setActiveTab('profile')}>
                   <FaUser /> Update Profile
+                </button>
+                <button className="action-btn" onClick={handleLogout}>
+                  <FaSignOutAlt /> Logout
                 </button>
               </div>
             </div>
@@ -366,25 +542,11 @@ const StudentPortal = () => {
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-
-            {/* Upcoming Events */}
-            <div className="upcoming-events">
-              <h2>Upcoming Events</h2>
-              <div className="events-list">
-                {studentData?.upcomingEvents?.map((event, index) => (
-                  <div key={index} className="event-card">
-                    <div className="event-date">
-                      <span className="event-day">{new Date(event.date).getDate()}</span>
-                      <span className="event-month">{new Date(event.date).toLocaleString('default', { month: 'short' })}</span>
-                    </div>
-                    <div className="event-info">
-                      <h4>{event.title}</h4>
-                      <p><FaClock /> {event.time}</p>
-                    </div>
+                {(!studentData?.notifications || studentData.notifications.length === 0) && (
+                  <div className="no-activity">
+                    <p>No recent activity.</p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
@@ -395,105 +557,45 @@ const StudentPortal = () => {
           <div className="courses-content">
             <h2>My Courses</h2>
             <div className="courses-grid">
-              {studentData?.enrolledCourses?.map((course, index) => (
+              {courses.map((course, index) => (
                 <div key={index} className="course-card-detailed">
                   <div className="course-header">
                     <h3>{course.name}</h3>
-                    <span className={`course-status ${course.status}`}>{course.status}</span>
+                    <span className={`course-status ${course.status || 'active'}`}>
+                      {course.status || 'Active'}
+                    </span>
                   </div>
                   <div className="course-details">
-                    <p><FaUserGraduate /> Instructor: {course.instructor}</p>
-                    <p><FaCalendarAlt /> {course.startDate} - {course.endDate}</p>
+                    <p><FaUserGraduate /> Instructor: {course.instructor || 'Not assigned'}</p>
+                    <p><FaCalendarAlt /> Start: {course.startDate || 'Pending'}</p>
                     <p><FaStar /> Grade: {course.grade || 'N/A'}</p>
                   </div>
-                  <div className="course-progress">
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: `${course.progress}%` }}></div>
+                  {course.progress !== undefined && (
+                    <div className="course-progress">
+                      <div className="progress-bar">
+                        <div className="progress-fill" style={{ width: `${course.progress}%` }}></div>
+                      </div>
+                      <span className="progress-text">{course.progress}% Complete</span>
                     </div>
-                    <span className="progress-text">{course.progress}% Complete</span>
-                  </div>
+                  )}
                   <div className="course-assignments">
                     <h4>Assignments</h4>
-                    {course.assignments.map((assignment, idx) => (
-                      <div key={idx} className="assignment-item">
-                        <span className="assignment-title">{assignment.title}</span>
-                        <span className={`assignment-status ${getAssignmentStatusColor(assignment.status)}`}>
-                          {assignment.status}
-                        </span>
-                        <span className="assignment-grade">{assignment.grade ? `${assignment.grade}%` : '—'}</span>
-                      </div>
-                    ))}
+                    {course.assignments && course.assignments.length > 0 ? (
+                      course.assignments.map((assignment, idx) => (
+                        <div key={idx} className="assignment-item">
+                          <span className="assignment-title">{assignment.title}</span>
+                          <span className={`assignment-status ${getAssignmentStatusColor(assignment.status)}`}>
+                            {assignment.status}
+                          </span>
+                          <span className="assignment-grade">{assignment.grade ? `${assignment.grade}%` : '—'}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="no-assignments">No assignments available yet.</p>
+                    )}
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-        )}
-
-        {/* Payments Tab */}
-        {activeTab === 'payments' && (
-          <div className="payments-content">
-            <div className="payments-header">
-              <h2>Payment History</h2>
-              <button className="make-payment-btn">
-                <FaCreditCard /> Make Payment
-              </button>
-            </div>
-            <div className="payments-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Transaction ID</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Method</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {studentData?.paymentHistory?.map(payment => (
-                    <tr key={payment.id}>
-                      <td>{payment.id}</td>
-                      <td>GH₵ {payment.amount}</td>
-                      <td>{payment.date}</td>
-                      <td>{payment.method}</td>
-                      <td>
-                        <span className={`payment-status ${getPaymentStatusColor(payment.status)}`}>
-                          {payment.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Attendance Tab */}
-        {activeTab === 'attendance' && (
-          <div className="attendance-content">
-            <h2>Attendance Record</h2>
-            <div className="attendance-summary">
-              <div className="attendance-stat">
-                <span className="stat-label">Total Classes</span>
-                <span className="stat-value">{studentData?.attendance?.total || 0}</span>
-              </div>
-              <div className="attendance-stat present">
-                <span className="stat-label">Present</span>
-                <span className="stat-value">{studentData?.attendance?.present || 0}</span>
-              </div>
-              <div className="attendance-stat absent">
-                <span className="stat-label">Absent</span>
-                <span className="stat-value">{studentData?.attendance?.absent || 0}</span>
-              </div>
-              <div className="attendance-stat percentage">
-                <span className="stat-label">Attendance Rate</span>
-                <span className="stat-value">{studentData?.attendance?.percentage || 0}%</span>
-              </div>
-            </div>
-            <div className="attendance-chart-placeholder">
-              <p>Attendance chart will be displayed here</p>
             </div>
           </div>
         )}
@@ -512,24 +614,37 @@ const StudentPortal = () => {
               </button>
             </div>
 
+            {success && (
+              <div className="alert alert-success">
+                <FaCheckCircle /> {success}
+              </div>
+            )}
+            {error && (
+              <div className="alert alert-error">
+                <FaTimesCircle /> {error}
+              </div>
+            )}
+
             {!editingProfile ? (
               <div className="profile-display">
                 <div className="profile-section">
                   <h3><FaUser /> Personal Information</h3>
                   <div className="profile-grid">
+                    <div><strong>Student ID:</strong> {studentData?.studentId || studentData?.id}</div>
                     <div><strong>Full Name:</strong> {studentData?.fullName}</div>
                     <div><strong>Email:</strong> {studentData?.email}</div>
-                    <div><strong>Phone:</strong> {studentData?.phone}</div>
-                    <div><strong>Date of Birth:</strong> {studentData?.dateOfBirth}</div>
-                    <div><strong>Gender:</strong> {studentData?.gender}</div>
-                    <div><strong>Address:</strong> {studentData?.address}</div>
+                    <div><strong>Phone:</strong> {studentData?.phone || 'N/A'}</div>
+                    <div><strong>Date of Birth:</strong> {studentData?.dateOfBirth || 'N/A'}</div>
+                    <div><strong>Gender:</strong> {studentData?.gender || 'N/A'}</div>
+                    <div><strong>Address:</strong> {studentData?.address || 'N/A'}</div>
+                    <div><strong>Course:</strong> <span className="course-highlight">{studentData?.course || 'Not assigned'}</span></div>
                   </div>
                 </div>
                 <div className="profile-section">
                   <h3><FaUsers /> Emergency Contact</h3>
                   <div className="profile-grid">
-                    <div><strong>Name:</strong> {studentData?.emergencyContact}</div>
-                    <div><strong>Phone:</strong> {studentData?.emergencyPhone}</div>
+                    <div><strong>Name:</strong> {studentData?.emergencyContact || 'N/A'}</div>
+                    <div><strong>Phone:</strong> {studentData?.emergencyPhone || 'N/A'}</div>
                   </div>
                 </div>
                 <div className="profile-section">
@@ -537,11 +652,14 @@ const StudentPortal = () => {
                   <div className="achievements-grid">
                     {studentData?.achievements?.map((achievement, index) => (
                       <div key={index} className="achievement-card">
-                        <span className="achievement-icon">{achievement.icon}</span>
+                        <span className="achievement-icon">{achievement.icon || '🏆'}</span>
                         <span className="achievement-title">{achievement.title}</span>
                         <span className="achievement-date">{achievement.date}</span>
                       </div>
                     ))}
+                    {(!studentData?.achievements || studentData.achievements.length === 0) && (
+                      <p className="no-achievements">No achievements yet. Keep learning!</p>
+                    )}
                   </div>
                 </div>
                 <button 
@@ -558,23 +676,15 @@ const StudentPortal = () => {
                     <label>Full Name</label>
                     <input
                       type="text"
-                      value={profileData.fullName || studentData?.fullName || ''}
+                      value={profileData.fullName || ''}
                       onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Email</label>
-                    <input
-                      type="email"
-                      value={profileData.email || studentData?.email || ''}
-                      onChange={(e) => setProfileData({...profileData, email: e.target.value})}
                     />
                   </div>
                   <div className="form-group">
                     <label>Phone</label>
                     <input
                       type="tel"
-                      value={profileData.phone || studentData?.phone || ''}
+                      value={profileData.phone || ''}
                       onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
                     />
                   </div>
@@ -582,14 +692,14 @@ const StudentPortal = () => {
                     <label>Date of Birth</label>
                     <input
                       type="date"
-                      value={profileData.dateOfBirth || studentData?.dateOfBirth || ''}
+                      value={profileData.dateOfBirth || ''}
                       onChange={(e) => setProfileData({...profileData, dateOfBirth: e.target.value})}
                     />
                   </div>
                   <div className="form-group">
                     <label>Gender</label>
                     <select
-                      value={profileData.gender || studentData?.gender || ''}
+                      value={profileData.gender || ''}
                       onChange={(e) => setProfileData({...profileData, gender: e.target.value})}
                     >
                       <option value="">Select</option>
@@ -602,7 +712,7 @@ const StudentPortal = () => {
                     <label>Address</label>
                     <input
                       type="text"
-                      value={profileData.address || studentData?.address || ''}
+                      value={profileData.address || ''}
                       onChange={(e) => setProfileData({...profileData, address: e.target.value})}
                     />
                   </div>
@@ -610,7 +720,7 @@ const StudentPortal = () => {
                     <label>Emergency Contact</label>
                     <input
                       type="text"
-                      value={profileData.emergencyContact || studentData?.emergencyContact || ''}
+                      value={profileData.emergencyContact || ''}
                       onChange={(e) => setProfileData({...profileData, emergencyContact: e.target.value})}
                     />
                   </div>
@@ -618,7 +728,7 @@ const StudentPortal = () => {
                     <label>Emergency Phone</label>
                     <input
                       type="tel"
-                      value={profileData.emergencyPhone || studentData?.emergencyPhone || ''}
+                      value={profileData.emergencyPhone || ''}
                       onChange={(e) => setProfileData({...profileData, emergencyPhone: e.target.value})}
                     />
                   </div>
@@ -641,20 +751,12 @@ const StudentPortal = () => {
                   <h3><FaLock /> Change Password</h3>
                   <form onSubmit={handlePasswordChange}>
                     <div className="form-group">
-                      <label>Current Password</label>
-                      <input
-                        type="password"
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
                       <label>New Password</label>
                       <input
                         type="password"
                         value={passwordData.newPassword}
                         onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                        placeholder="Enter new password (min 8 characters)"
                         required
                       />
                     </div>
@@ -664,8 +766,18 @@ const StudentPortal = () => {
                         type="password"
                         value={passwordData.confirmPassword}
                         onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                        placeholder="Confirm your new password"
                         required
                       />
+                    </div>
+                    <div className="password-requirements">
+                      <p>Password must:</p>
+                      <ul>
+                        <li>Be at least 8 characters long</li>
+                        <li>Include at least one uppercase letter</li>
+                        <li>Include at least one number</li>
+                        <li>Include at least one special character</li>
+                      </ul>
                     </div>
                     <div className="modal-actions">
                       <button type="submit" className="save-btn">Update Password</button>
@@ -684,7 +796,7 @@ const StudentPortal = () => {
       {/* Footer */}
       <div className="portal-footer">
         <div className="container">
-          <p>© 2026 Fast Multimedia Institute. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Fast Multimedia Institute. All rights reserved.</p>
           <div className="footer-links">
             <button onClick={handleWhatsAppClick}><FaWhatsapp /> Support</button>
             <button onClick={() => navigate('/')}><FaHome /> Home</button>
