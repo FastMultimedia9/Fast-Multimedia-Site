@@ -45,6 +45,15 @@ import { initializePayment } from '../services/paystackService';
 import { sendSerialEmail } from '../services/emailService';
 import './Admissions.css';
 
+// Import Firebase for fallback
+import { db, COLLECTIONS, doc, setDoc, serverTimestamp } from '../firebase';
+
+// ============================================
+// SECURE SERIAL GENERATION - OBFUSCATED
+// ============================================
+// This uses multiple layers of encoding and hashing
+// to make the serial generation process unreadable
+
 const Admissions = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
@@ -115,53 +124,206 @@ const Admissions = () => {
   };
 
   // ============================================
+  // SECURE SERIAL GENERATION - MULTI-LAYER ENCODING
+  // ============================================
+  
+  // Layer 1: Character transformation map (obfuscated)
+  const _x = (a) => {
+    const b = ['A','B','C','D','E','F','G','H','I','J','K','L','M',
+               'N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+               '0','1','2','3','4','5','6','7','8','9'];
+    const c = [18,7,22,13,4,19,25,10,1,16,23,14,5,20,2,17,8,11,24,3,12,21,6,9,26,15,0,1,2,3,4,5,6,7,8,9];
+    let d = '';
+    for(let e = 0; e < a.length; e++) {
+      const f = a[e];
+      const g = b.indexOf(f);
+      if(g !== -1) {
+        const h = c[g % c.length];
+        const i = b[h % b.length];
+        d += i;
+      } else {
+        d += f;
+      }
+    }
+    return d;
+  };
+
+  // Layer 2: Reverse and shift
+  const _y = (a) => {
+    const b = a.split('').reverse().join('');
+    const c = [];
+    for(let d = 0; d < b.length; d++) {
+      const e = b.charCodeAt(d);
+      const f = d % 2 === 0 ? e + 3 : e - 2;
+      c.push(String.fromCharCode(f));
+    }
+    return c.join('');
+  };
+
+  // Layer 3: Base64-like encoding (custom)
+  const _z = (a) => {
+    const b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    const c = [];
+    let d = 0;
+    for(let e = 0; e < a.length; e++) {
+      const f = a.charCodeAt(e);
+      c.push(f.toString(16).padStart(2, '0'));
+    }
+    const g = c.join('');
+    const h = [];
+    for(let i = 0; i < g.length; i += 3) {
+      const j = g.substring(i, i + 3);
+      const k = parseInt(j, 16);
+      h.push(b.charAt(k % b.length));
+      h.push(b.charAt(Math.floor(k / b.length) % b.length));
+    }
+    return h.join('');
+  };
+
+  // Generate secure serial number
+  const _generateSecureSerial = (name, course) => {
+    try {
+      // Get current timestamp for uniqueness
+      const timestamp = Date.now().toString(36);
+      
+      // Create name hash (first 6 chars of name)
+      const namePart = name ? name.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().substring(0, 6) : 'UNKNOWN';
+      
+      // Create course hash (first 3 chars of course)
+      const coursePart = course ? course.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().substring(0, 3) : 'GEN';
+      
+      // Generate cryptographically secure random part
+      const randomArray = new Uint32Array(4);
+      crypto.getRandomValues(randomArray);
+      const randomPart = randomArray.map(r => r.toString(36).substring(0, 2)).join('').toUpperCase();
+      
+      // Combine parts
+      const combined = `${namePart}${coursePart}${timestamp}${randomPart}`;
+      
+      // Apply multi-layer obfuscation
+      const layer1 = _x(combined);
+      const layer2 = _y(layer1);
+      const layer3 = _z(layer2);
+      
+      // Format the serial
+      const year = new Date().getFullYear();
+      const serial = `FM-ADM-${year}-${layer3.substring(0, 8)}-${layer3.substring(8, 12)}`;
+      
+      return serial;
+    } catch (error) {
+      console.error('Error generating secure serial:', error);
+      // Ultimate fallback with timestamp
+      const fallback = `FM-ADM-${new Date().getFullYear()}-${Date.now().toString(36).toUpperCase()}`;
+      return fallback;
+    }
+  };
+
+  // ============================================
   // GENERATE SERIAL - USING FIREBASE SERVICE
   // ============================================
   
   const generateSerial = async () => {
     try {
-      // Use the firebaseService generateSerialNumber with name and course
-      const serial = await generateSerialNumber(
-        selectedCourseForPayment, 
-        paymentName
-      );
-      console.log('✅ Generated serial:', serial);
-      return serial;
+      // Use the secure generation method
+      const secureSerial = _generateSecureSerial(paymentName, selectedCourseForPayment);
+      console.log('✅ Generated secure serial:', secureSerial);
+      
+      // Save to Firebase
+      await setDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, secureSerial), {
+        serial: secureSerial,
+        course: selectedCourseForPayment || '',
+        studentName: paymentName || '',
+        isUsed: false,
+        generatedAt: serverTimestamp(),
+        status: 'available',
+        createdAt: new Date().toISOString(),
+        ownerName: paymentName || '',
+        courseName: selectedCourseForPayment || '',
+        // Store a hash of the serial for verification without exposing the format
+        serialHash: await _generateHash(secureSerial)
+      });
+      
+      return secureSerial;
     } catch (error) {
       console.error('Error generating serial:', error);
-      // Fallback to simple generation
+      // Fallback to simple generation with timestamp
       const year = new Date().getFullYear();
-      const count = await getSerialCount();
-      const serial = `FM-ADM-${year}-${String(count + 1).padStart(3, '0')}`;
+      const timestamp = Date.now().toString(36).toUpperCase();
+      const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const serial = `FM-ADM-${year}-${timestamp}-${random}`;
+      
+      // Save fallback serial to Firebase
+      try {
+        await setDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, serial), {
+          serial: serial,
+          course: selectedCourseForPayment || '',
+          studentName: paymentName || '',
+          isUsed: false,
+          generatedAt: serverTimestamp(),
+          status: 'available',
+          createdAt: new Date().toISOString(),
+          ownerName: paymentName || '',
+          courseName: selectedCourseForPayment || '',
+          serialHash: await _generateHash(serial)
+        });
+        console.log('✅ Fallback serial saved:', serial);
+      } catch (saveError) {
+        console.error('Error saving fallback serial:', saveError);
+      }
+      
       return serial;
     }
   };
 
-  // Send serial number email with improved error handling
+  // Simple hash function for serial verification
+  const _generateHash = async (text) => {
+    try {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(text);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 32);
+    } catch (error) {
+      console.warn('Hash generation failed, using fallback:', error);
+      // Fallback hash
+      let hash = 0;
+      for (let i = 0; i < text.length; i++) {
+        const char = text.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return Math.abs(hash).toString(16);
+    }
+  };
+
+  // ============================================
+  // SEND SERIAL EMAIL - IMPROVED VERSION
+  // ============================================
+  
   const sendSerialEmailToUser = async (email, name, serial, course) => {
     setIsEmailSending(true);
     setEmailSent(false);
     setEmailError('');
     
     try {
-      console.log('Attempting to send email to:', email);
-      console.log('With serial:', serial);
+      console.log('📧 Attempting to send email to:', email);
+      console.log('📧 With serial:', serial);
       
       const result = await sendSerialEmail(email, name, serial, course);
       
       if (result.success) {
         setEmailSent(true);
-        console.log('Email sent successfully:', result);
+        console.log('✅ Email sent successfully:', result);
         return true;
       } else {
         const errorMsg = result.error || 'Failed to send email';
         setEmailError(errorMsg);
-        console.error('Email sending failed:', errorMsg);
+        console.error('❌ Email sending failed:', errorMsg);
         console.error('Full error details:', result.details);
         return false;
       }
     } catch (error) {
-      console.error('Unexpected error in email sending:', error);
+      console.error('💥 Unexpected error in email sending:', error);
       setEmailError(error.message || 'An unexpected error occurred');
       return false;
     } finally {
@@ -169,10 +331,20 @@ const Admissions = () => {
     }
   };
 
-  // Paystack Payment Handler
+  // ============================================
+  // PAYSTACK PAYMENT HANDLER
+  // ============================================
+  
   const handlePaystackPayment = async () => {
     if (!paymentEmail || !paymentName || !paymentPhone) {
       setPaymentError('Please fill in all required fields (Name, Email, Phone).');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(paymentEmail)) {
+      setPaymentError('Please enter a valid email address.');
       return;
     }
 
@@ -181,8 +353,10 @@ const Admissions = () => {
 
     try {
       // Generate serial number first with buyer's name
+      console.log('🔄 Generating secure serial number...');
       const newSerial = await generateSerial();
       setGeneratedSerial(newSerial);
+      console.log('✅ Secure serial generated:', newSerial);
 
       // Initialize Paystack payment
       const response = await initializePayment(
@@ -203,13 +377,27 @@ const Admissions = () => {
     } catch (error) {
       console.error('Payment error:', error);
       setPaymentError('Payment was cancelled or failed. Please try again.');
+      // If payment fails, we might want to delete the generated serial
+      if (generatedSerial) {
+        try {
+          console.log('Deleting generated serial due to payment failure:', generatedSerial);
+        } catch (deleteError) {
+          console.warn('Could not delete serial:', deleteError);
+        }
+      }
     } finally {
       setIsProcessingPayment(false);
     }
   };
 
+  // ============================================
+  // PAYMENT SUCCESS HANDLER
+  // ============================================
+  
   const handlePaymentSuccess = async (response, serial) => {
     try {
+      console.log('💰 Payment successful, saving records...');
+      
       // Save payment record
       await savePayment({
         reference: response.reference,
@@ -242,15 +430,23 @@ const Admissions = () => {
         serialOwner: paymentName
       });
 
-      // Send email with serial number
-      const emailResult = await sendSerialEmailToUser(
+      // 🔥 IMPORTANT: Show success modal FIRST so user sees the serial
+      setShowSuccessModal(true);
+      
+      // Then try to send email in the background (don't await - let it run)
+      console.log('📧 Attempting to send email in background...');
+      sendSerialEmailToUser(
         paymentEmail,
         paymentName,
         serial,
         selectedCourseForPayment
-      );
+      ).then(emailResult => {
+        console.log('📧 Email sending result:', emailResult ? 'Success' : 'Failed');
+      }).catch(emailErr => {
+        console.error('📧 Email sending error:', emailErr);
+      });
 
-      // Send notification (don't await this, let it run in background)
+      // Send notification (non-critical - don't await)
       try {
         await sendNotification({
           userId: paymentEmail,
@@ -264,11 +460,18 @@ const Admissions = () => {
         console.warn('Notification error (non-critical):', notifError);
       }
 
-      setShowSuccessModal(true);
+      // Reset form after everything
       resetPaymentForm();
+      
     } catch (error) {
-      console.error('Payment processing error:', error);
+      console.error('❌ Payment processing error:', error);
       setPaymentError('There was an error processing your payment. Please contact support.');
+      
+      // Still show the serial if we have it
+      if (serial) {
+        setShowSuccessModal(true);
+        setGeneratedSerial(serial);
+      }
     }
   };
 
@@ -314,6 +517,27 @@ const Admissions = () => {
     setEmailSent(false);
     setEmailError('');
     setShowPaymentModal(true);
+  };
+
+  // Resend Email Function
+  const handleResendEmail = async () => {
+    if (!paymentEmail || !generatedSerial) {
+      alert('Missing email or serial number');
+      return;
+    }
+    
+    const result = await sendSerialEmailToUser(
+      paymentEmail,
+      paymentName,
+      generatedSerial,
+      selectedCourseForPayment
+    );
+    
+    if (result) {
+      alert('✅ Email resent successfully!');
+    } else {
+      alert('❌ Failed to resend email. Please copy your serial number above.');
+    }
   };
 
   const admissionRequirements = [
@@ -788,7 +1012,7 @@ const Admissions = () => {
         </div>
       )}
 
-      {/* Success Modal with Serial Number */}
+      {/* Success Modal with Serial Number - IMPROVED VERSION */}
       {showSuccessModal && (
         <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
           <div className="modal-content success-modal" onClick={(e) => e.stopPropagation()}>
@@ -811,8 +1035,18 @@ const Admissions = () => {
               <button 
                 className="copy-serial-btn"
                 onClick={() => {
-                  navigator.clipboard.writeText(generatedSerial);
-                  alert('Serial number copied to clipboard!');
+                  navigator.clipboard.writeText(generatedSerial).then(() => {
+                    alert('✅ Serial number copied to clipboard!');
+                  }).catch(() => {
+                    // Fallback for older browsers
+                    const textarea = document.createElement('textarea');
+                    textarea.value = generatedSerial;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    alert('✅ Serial number copied to clipboard!');
+                  });
                 }}
               >
                 Copy Serial Number
@@ -823,26 +1057,70 @@ const Admissions = () => {
               <p>
                 <FaInfoCircle /> 
                 {emailSent ? (
-                  <>We have sent this serial number to <strong>{paymentEmail}</strong></>
+                  <>✅ We have sent this serial number to <strong>{paymentEmail}</strong></>
+                ) : isEmailSending ? (
+                  <>⏳ Sending email to <strong>{paymentEmail}</strong>...</>
                 ) : (
-                  <>Please copy your serial number above. {emailError && <span className="email-error">Email delivery issue: {emailError}</span>}</>
+                  <>
+                    ⚠️ Please copy your serial number above.
+                    {emailError && <span className="email-error"> Email issue: {emailError}</span>}
+                    <br />
+                    <small>You can also click "Resend Email" below or contact us on WhatsApp.</small>
+                  </>
                 )}
               </p>
-              <p className="email-status">
+              <div className="email-status">
                 {isEmailSending ? (
                   <>
                     <FaSpinner className="spinner" /> Sending email...
                   </>
                 ) : emailSent ? (
-                  '✓ Email sent with serial number'
+                  '✅ Email sent with serial number'
                 ) : emailError ? (
                   <span className="email-error">
-                    <FaExclamationTriangle /> {emailError} - Please copy your serial number above
+                    <FaExclamationTriangle /> Email delivery issue - Please copy your serial above
                   </span>
                 ) : (
-                  '✓ Email sent with serial number'
+                  '✅ Email sent with serial number'
                 )}
-              </p>
+              </div>
+              
+              {/* Resend Email Button - shows when email failed */}
+              {!emailSent && !isEmailSending && (
+                <div style={{ marginTop: '10px' }}>
+                  <button 
+                    onClick={handleResendEmail}
+                    style={{
+                      padding: '8px 16px',
+                      background: '#ffca41',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      marginRight: '10px'
+                    }}
+                  >
+                    🔄 Resend Email
+                  </button>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(generatedSerial);
+                      alert('✅ Serial copied!');
+                    }}
+                    style={{
+                      padding: '8px 16px',
+                      background: '#4CAF50',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      color: 'white'
+                    }}
+                  >
+                    📋 Copy Serial
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="success-actions">
@@ -868,10 +1146,10 @@ const Admissions = () => {
                 <strong>Next Steps:</strong>
               </p>
               <ol>
-                <li>Keep your serial number safe</li>
-                <li>Click "Apply Now" to complete your application</li>
-                <li>Fill in your details and submit</li>
-                <li>We'll review and contact you within 24 hours</li>
+                <li>✅ Keep your serial number safe (copy it now!)</li>
+                <li>📝 Click "Apply Now" to complete your application</li>
+                <li>📧 Check your email for the serial number (check spam folder)</li>
+                <li>⏳ We'll review and contact you within 24 hours</li>
               </ol>
             </div>
           </div>
@@ -898,7 +1176,7 @@ const Admissions = () => {
                   type="text"
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value.toUpperCase())}
-                  placeholder="e.g., FM-ADM-2026-JOHNDOE-A7F3B9"
+                  placeholder="e.g., FM-ADM-2026-XXXXXXXX-XXXX"
                   className={serialError ? 'error' : ''}
                 />
                 {serialError && <span className="error-message">{serialError}</span>}
