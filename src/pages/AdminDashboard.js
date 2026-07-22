@@ -251,17 +251,20 @@ const AdminDashboard = () => {
     }
   };
 
-  // ============================================
+// ============================================
 // CREATE STUDENT FROM ADMISSION DATA
 // ============================================
 const createStudentFromAdmission = async (admission) => {
   try {
     // Generate memorable student ID using full first name + 4-digit number
+    // IMPORTANT: Pass the full name to generateStudentId
     const studentId = await generateStudentId(admission.fullName);
     
-    // Prepare student data
+    console.log('📝 Generated Student ID:', studentId);
+    console.log('📝 For student:', admission.fullName);
+    
+    // Prepare student data - DO NOT override studentId
     const studentData = {
-      studentId: studentId,
       fullName: admission.fullName || 'N/A',
       email: admission.email || 'N/A',
       phone: admission.phone || 'N/A',
@@ -294,11 +297,11 @@ const createStudentFromAdmission = async (admission) => {
     };
 
     console.log('📝 Creating student from admission:', studentData);
-    console.log('✅ Generated Student ID:', studentId);
+    console.log('✅ Student ID to be used:', studentId);
     
-    // Create student in Firebase
+    // Create student in Firebase - let createStudent handle the studentId
     await createStudent(studentData);
-    console.log(`✅ Student created successfully: ${studentId}`);
+    console.log(`✅ Student created successfully with ID: ${studentId}`);
     
     return studentId;
   } catch (error) {
