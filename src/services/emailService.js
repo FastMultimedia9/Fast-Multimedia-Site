@@ -11,183 +11,197 @@ emailjs.init(PUBLIC_KEY);
 
 /**
  * Send serial number email to applicant
- * @param {string} email - Recipient's email address
- * @param {string} name - Applicant's full name
- * @param {string} serial - Generated serial number
- * @param {string} course - Selected course (optional)
- * @returns {Promise} EmailJS response
  */
 export const sendSerialEmail = async (email, name, serial, course) => {
   try {
-    // Validate inputs
     if (!email || !name || !serial) {
       throw new Error('Missing required fields: email, name, or serial number');
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      throw new Error('Invalid email address format');
-    }
-
-    // Prepare template parameters - MATCHING YOUR TEMPLATE EXACTLY
     const templateParams = {
-      // These variables are used in your template
-      to_name: name,                    // {{to_name}}
-      to_email: email,                  // Not in template but good practice
-      serial_number: serial,            // {{serial_number}}
-      course: course || 'Not specified', // {{course}}
-      application_link: `${window.location.origin}/school/application-form`, // {{application_link}}
-      current_year: new Date().getFullYear(), // {{current_year}}
-      
-      // Add any other variables your template might need
-      // Note: Your template uses these hardcoded values, so they don't need to be passed
-      // But we'll include them anyway for flexibility
-      from_name: 'Fast Multimedia Institute',
-      reply_to: 'fasttech227@gmail.com',
+      to_email: email,
+      to_name: name,
+      serial_number: serial,
+      course: course || 'Not specified',
+      application_link: `${window.location.origin}/school/application-form`,
+      current_year: new Date().getFullYear(),
       whatsapp_number: '+233 50 515 9131',
-      support_email: 'fasttech227@gmail.com'
+      support_email: 'fasttech227@gmail.com',
+      from_name: 'Fast Multimedia Institute',
+      reply_to: 'fasttech227@gmail.com'
     };
 
-    console.log('📧 Sending email with params:', templateParams);
-    console.log('📧 Using Service ID:', SERVICE_ID);
-    console.log('📧 Using Template ID:', TEMPLATE_ID);
-
-    // Send email using EmailJS
     const result = await emailjs.send(
       SERVICE_ID,
       TEMPLATE_ID,
-      templateParams,
-      PUBLIC_KEY // Explicitly pass the public key
+      templateParams
     );
 
-    console.log('✅ Email sent successfully:', result);
     return { success: true, result };
-
   } catch (error) {
-    console.error('❌ Error sending serial email - Full error:', error);
-    
-    // Parse error response
-    let errorMessage = error.message || 'Failed to send email';
-    let errorDetails = error;
-    
-    // Check if error has text property (EmailJS error format)
-    if (error.text) {
-      try {
-        const errorData = JSON.parse(error.text);
-        errorMessage = errorData.message || errorMessage;
-        errorDetails = errorData;
-      } catch (e) {
-        // If not JSON, use the text directly
-        errorMessage = error.text || errorMessage;
-      }
+    console.error('Error sending serial email:', error);
+    return { success: false, error: error.message || 'Failed to send email', details: error };
+  }
+};
+
+/**
+ * Send admission status email to applicant
+ */
+export const sendAdmissionStatusEmail = async (email, name, status, course, notes = '') => {
+  try {
+    if (!email || !name || !status) {
+      throw new Error('Missing required fields: email, name, or status');
     }
-    
-    // Return error with details
+
+    // Status-specific messages and subject lines
+    const statusConfig = {
+      approved: {
+        subject: '🎉 Congratulations! Your Admission Has Been Approved',
+        emoji: '🎉',
+        message: `We are pleased to inform you that your application to Fast Multimedia Institute has been <strong>APPROVED</strong>!`,
+        nextSteps: `
+          <h3>Next Steps:</h3>
+          <ol>
+            <li>Complete your enrollment by paying your tuition fees</li>
+            <li>Choose your preferred study mode (Online or In-Person)</li>
+            <li>Attend the orientation session</li>
+            <li>Get started with your course materials</li>
+          </ol>
+        `
+      },
+      enrolled: {
+        subject: '✅ Welcome! You Are Now Enrolled',
+        emoji: '✅',
+        message: `You have been successfully <strong>ENROLLED</strong> at Fast Multimedia Institute!`,
+        nextSteps: `
+          <h3>What's Next:</h3>
+          <ol>
+            <li>Check your student dashboard for course materials</li>
+            <li>Attend your first class (check schedule)</li>
+            <li>Connect with your instructors</li>
+            <li>Join the student community</li>
+          </ol>
+        `
+      },
+      rejected: {
+        subject: '📋 Update on Your Admission Application',
+        emoji: '📋',
+        message: `We appreciate your interest in Fast Multimedia Institute. After careful review, we regret to inform you that your application has been <strong>REJECTED</strong>.`,
+        nextSteps: `
+          <h3>What You Can Do:</h3>
+          <ol>
+            <li>Contact admissions for feedback on your application</li>
+            <li>Consider reapplying for the next intake</li>
+            <li>Explore our other programs that might be a better fit</li>
+            <li>Contact us for guidance on improving your application</li>
+          </ol>
+        `
+      }
+    };
+
+    const config = statusConfig[status] || statusConfig.rejected;
+
+    const templateParams = {
+      to_email: email,
+      to_name: name,
+      status: status,
+      status_emoji: config.emoji,
+      status_message: config.message,
+      course: course || 'Not specified',
+      next_steps: config.nextSteps,
+      notes: notes || '',
+      application_link: `${window.location.origin}/student/login`,
+      current_year: new Date().getFullYear(),
+      whatsapp_number: '+233 50 515 9131',
+      support_email: 'fasttech227@gmail.com',
+      from_name: 'Fast Multimedia Institute',
+      reply_to: 'fasttech227@gmail.com',
+      subject: config.subject
+    };
+
+    console.log(`📧 Sending ${status} admission email to:`, email);
+
+    const result = await emailjs.send(
+      SERVICE_ID,
+      TEMPLATE_ID,
+      templateParams
+    );
+
+    console.log(`✅ ${status} email sent successfully:`, result);
+    return { success: true, result };
+  } catch (error) {
+    console.error(`❌ Error sending ${status} admission email:`, error);
     return { 
       success: false, 
-      error: errorMessage,
-      details: errorDetails,
-      status: error.status || 400
+      error: error.message || 'Failed to send admission status email', 
+      details: error 
     };
   }
 };
 
 /**
  * Resend serial number email
- * @param {string} email - Recipient's email address
- * @param {string} serial - Existing serial number
- * @param {string} name - Applicant's full name
- * @param {string} course - Selected course (optional)
- * @returns {Promise} EmailJS response
  */
 export const resendSerialEmail = async (email, serial, name, course) => {
   try {
     const templateParams = {
-      to_name: name || 'Applicant',      // {{to_name}}
       to_email: email,
-      serial_number: serial,            // {{serial_number}}
-      course: course || 'Not specified', // {{course}}
-      application_link: `${window.location.origin}/school/application-form`, // {{application_link}}
-      current_year: new Date().getFullYear(), // {{current_year}}
-      from_name: 'Fast Multimedia Institute',
-      reply_to: 'fasttech227@gmail.com',
+      to_name: name || 'Applicant',
+      serial_number: serial,
+      course: course || 'Not specified',
+      application_link: `${window.location.origin}/school/application-form`,
+      resend: true,
+      current_year: new Date().getFullYear(),
       whatsapp_number: '+233 50 515 9131',
-      support_email: 'fasttech227@gmail.com'
+      support_email: 'fasttech227@gmail.com',
+      from_name: 'Fast Multimedia Institute',
+      reply_to: 'fasttech227@gmail.com'
     };
 
     const result = await emailjs.send(
       SERVICE_ID,
       TEMPLATE_ID,
-      templateParams,
-      PUBLIC_KEY
+      templateParams
     );
 
     return { success: true, result };
-
   } catch (error) {
-    console.error('❌ Error resending email:', error);
-    
-    let errorMessage = error.message || 'Failed to resend email';
-    if (error.text) {
-      try {
-        const errorData = JSON.parse(error.text);
-        errorMessage = errorData.message || errorMessage;
-      } catch (e) {
-        errorMessage = error.text || errorMessage;
-      }
-    }
-    
-    return { success: false, error: errorMessage, details: error };
+    console.error('Error resending email:', error);
+    return { success: false, error: error.message || 'Failed to resend email', details: error };
   }
 };
 
 /**
  * Test email connection
- * @param {string} email - Test recipient email
- * @returns {Promise} Test result
  */
 export const testEmailConnection = async (email) => {
   try {
     const testParams = {
-      to_name: 'Test User',
       to_email: email || 'test@example.com',
-      serial_number: 'FM-ADM-2026-TEST-12345',
+      to_name: 'Test User',
+      serial_number: 'TEST-123-456',
       course: 'Test Course',
       application_link: `${window.location.origin}/school/application-form`,
       current_year: new Date().getFullYear(),
-      from_name: 'Fast Multimedia Institute',
-      reply_to: 'fasttech227@gmail.com',
       whatsapp_number: '+233 50 515 9131',
-      support_email: 'fasttech227@gmail.com'
+      support_email: 'fasttech227@gmail.com',
+      from_name: 'Fast Multimedia Institute',
+      reply_to: 'fasttech227@gmail.com'
     };
 
     const result = await emailjs.send(
       SERVICE_ID,
       TEMPLATE_ID,
-      testParams,
-      PUBLIC_KEY
+      testParams
     );
 
-    return { success: true, message: '✅ Email test successful', result };
+    return { success: true, message: 'Email test successful', result };
   } catch (error) {
-    console.error('❌ Email test failed:', error);
-    
-    let errorMessage = error.message || 'Test failed';
-    if (error.text) {
-      try {
-        const errorData = JSON.parse(error.text);
-        errorMessage = errorData.message || errorMessage;
-      } catch (e) {
-        errorMessage = error.text || errorMessage;
-      }
-    }
-    
-    return { success: false, error: errorMessage, details: error };
+    console.error('Email test failed:', error);
+    return { success: false, error: error.message || 'Test failed', details: error };
   }
 };
 
-// Export configuration for debugging
 export const emailConfig = {
   publicKey: PUBLIC_KEY,
   serviceId: SERVICE_ID,
@@ -197,9 +211,9 @@ export const emailConfig = {
   serviceIdMasked: SERVICE_ID.substring(0, 10) + '...'
 };
 
-// Create a named object for default export
 const emailService = {
   sendSerialEmail,
+  sendAdmissionStatusEmail,
   resendSerialEmail,
   testEmailConnection,
   emailConfig

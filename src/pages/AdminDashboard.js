@@ -57,6 +57,7 @@ import {
 } from 'react-icons/fa';
 import {
   getAllStudents,
+  getStudent,
   getStudentByEmail,
   updateStudent,
   getAllAdmissions,
@@ -242,24 +243,43 @@ const AdminDashboard = () => {
   // Handle student admission status update with email
   const handleUpdateAdmissionStatus = async (studentId, status, studentData = null) => {
     try {
+      console.log(`🔄 Updating admission status to ${status} for:`, studentId);
+      
       // Get student data if not provided
       let student = studentData;
       if (!student) {
         // Find student in the list
         student = students.find(s => s.id === studentId);
         if (!student) {
-          // Try to fetch from API
-          const studentData = await getStudentByEmail(studentId) || await getStudent(studentId);
-          if (studentData) {
-            student = studentData;
+          // Try to fetch from API using the ID or email
+          try {
+            // Try to get by ID first
+            const studentById = await getStudent(studentId);
+            if (studentById) {
+              student = studentById;
+            } else {
+              // Try to find by email in admissions
+              const admission = admissions.find(a => a.id === studentId);
+              if (admission && admission.email) {
+                const studentByEmail = await getStudentByEmail(admission.email);
+                if (studentByEmail) {
+                  student = studentByEmail;
+                }
+              }
+            }
+          } catch (fetchError) {
+            console.error('Error fetching student:', fetchError);
           }
         }
       }
 
       if (!student) {
+        console.error('❌ Student not found for ID:', studentId);
         showNotification('Student not found', 'error');
         return;
       }
+
+      console.log('✅ Student found:', student);
 
       // Update student status
       await updateStudent(studentId, { admissionStatus: status });
@@ -291,7 +311,7 @@ const AdminDashboard = () => {
       loadDashboardData();
     } catch (error) {
       console.error('Error updating admission status:', error);
-      showNotification('Error updating admission status', 'error');
+      showNotification('Error updating admission status: ' + error.message, 'error');
     }
   };
 
