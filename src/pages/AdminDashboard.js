@@ -60,7 +60,9 @@ import {
   getStudent,
   getStudentByEmail,
   updateStudent,
+  createStudent,
   getAllAdmissions,
+  getAdmission,
   updateAdmissionStatus,
   getAllPayments,
   getDashboardStats,
@@ -240,59 +242,138 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle student admission status update with email
+  // ============================================
+  // CREATE STUDENT FROM ADMISSION DATA
+  // ============================================
+  const createStudentFromAdmission = async (admission) => {
+    try {
+      // Generate student ID
+      const studentId = `STU-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+      
+      // Prepare student data
+      const studentData = {
+        studentId: studentId,
+        fullName: admission.fullName || 'N/A',
+        email: admission.email || 'N/A',
+        phone: admission.phone || 'N/A',
+        dateOfBirth: admission.dateOfBirth || '',
+        gender: admission.gender || '',
+        address: admission.address || '',
+        city: admission.city || '',
+        course: admission.course || 'Not specified',
+        educationLevel: admission.educationLevel || '',
+        previousSchool: admission.previousSchool || '',
+        preferredStudyMode: admission.preferredStudyMode || '',
+        guardianName: admission.guardianName || '',
+        guardianPhone: admission.guardianPhone || '',
+        guardianEmail: admission.guardianEmail || '',
+        guardianRelationship: admission.guardianRelationship || '',
+        hearAboutUs: admission.hearAboutUs || '',
+        reasonToJoin: admission.reasonToJoin || '',
+        specialNeeds: admission.specialNeeds || 'None',
+        admissionStatus: admission.status || 'approved',
+        serialNumber: admission.serialNumber || '',
+        applicationDate: admission.applicationDate || new Date().toISOString(),
+        enrolledCourses: [admission.course || 'Not specified'],
+        status: 'active',
+        paymentHistory: [],
+        attendance: { total: 0, present: 0, absent: 0 },
+        grades: {},
+        passwordUpdated: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      console.log('📝 Creating student from admission:', studentData);
+      
+      // Create student in Firebase
+      await createStudent(studentData);
+      console.log(`✅ Student created successfully: ${studentId}`);
+      
+      return studentId;
+    } catch (error) {
+      console.error('Error creating student from admission:', error);
+      throw error;
+    }
+  };
+
+  // ============================================
+  // HANDLE ADMISSION STATUS UPDATE - WITH STUDENT CREATION
+  // ============================================
   const handleUpdateAdmissionStatus = async (studentId, status, studentData = null) => {
     try {
       console.log(`🔄 Updating admission status to ${status} for:`, studentId);
       
-      // Get student data if not provided
-      let student = studentData;
-      if (!student) {
-        // Find student in the list
-        student = students.find(s => s.id === studentId);
-        if (!student) {
-          // Try to fetch from API using the ID or email
+      // Get admission data
+      let admission = studentData;
+      if (!admission) {
+        // Find admission in the list
+        admission = admissions.find(a => a.id === studentId);
+        if (!admission) {
+          // Try to fetch from API
           try {
-            // Try to get by ID first
-            const studentById = await getStudent(studentId);
-            if (studentById) {
-              student = studentById;
-            } else {
-              // Try to find by email in admissions
-              const admission = admissions.find(a => a.id === studentId);
-              if (admission && admission.email) {
-                const studentByEmail = await getStudentByEmail(admission.email);
-                if (studentByEmail) {
-                  student = studentByEmail;
-                }
-              }
+            const admissionById = await getAdmission(studentId);
+            if (admissionById) {
+              admission = admissionById;
             }
           } catch (fetchError) {
-            console.error('Error fetching student:', fetchError);
+            console.error('Error fetching admission:', fetchError);
           }
         }
       }
 
-      if (!student) {
-        console.error('❌ Student not found for ID:', studentId);
-        showNotification('Student not found', 'error');
+      if (!admission) {
+        console.error('❌ Admission not found for ID:', studentId);
+        showNotification('Admission not found', 'error');
         return;
       }
 
-      console.log('✅ Student found:', student);
+      console.log('✅ Admission found:', admission);
 
-      // Update student status
-      await updateStudent(studentId, { admissionStatus: status });
+      // Update admission status
       await updateAdmissionStatus(studentId, status);
 
+      // If status is approved or enrolled, create student record
+      let studentCreated = false;
+      let studentIdCreated = null;
+
+      if (status === 'approved' || status === 'enrolled') {
+        try {
+          // Check if student already exists
+          let existingStudent = students.find(s => s.id === studentId);
+          if (!existingStudent && admission.email) {
+            existingStudent = await getStudentByEmail(admission.email);
+          }
+
+          if (existingStudent) {
+            // Update existing student
+            await updateStudent(existingStudent.id, { 
+              admissionStatus: status,
+              course: admission.course || existingStudent.course,
+              updatedAt: new Date().toISOString()
+            });
+            console.log('✅ Existing student updated:', existingStudent.id);
+            studentIdCreated = existingStudent.id;
+          } else {
+            // Create new student from admission
+            studentIdCreated = await createStudentFromAdmission(admission);
+            studentCreated = true;
+            console.log('✅ New student created:', studentIdCreated);
+          }
+        } catch (studentError) {
+          console.error('Error handling student record:', studentError);
+          // Continue even if student creation fails
+        }
+      }
+
       // Send email notification
-      const emailSent = await sendAdmissionStatusEmailToStudent(student, status);
+      const emailSent = await sendAdmissionStatusEmailToStudent(admission, status);
 
       // Send in-app notification
       await sendNotification({
         userId: studentId,
         title: `Admission ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-        message: `Your admission has been ${status}. ${emailSent ? 'A confirmation email has been sent to you.' : 'Please check your email for confirmation.'}`,
+        message: `Your admission has been ${status}. ${emailSent ? 'A confirmation email has been sent to you.' : 'Please check your email for confirmation.'}${studentCreated ? ' Your student account has been created.' : ''}`,
         type: 'admission',
         link: '/student/portal'
       });
@@ -303,8 +384,10 @@ const AdminDashboard = () => {
         rejected: 'rejected ❌'
       };
 
+      const studentMessage = studentCreated ? ' Student record created!' : studentIdCreated ? ' Student record updated!' : '';
+
       showNotification(
-        `Student admission ${statusMessages[status] || status}. ${emailSent ? 'Email sent!' : 'Email failed to send.'}`,
+        `Admission ${statusMessages[status] || status}. ${emailSent ? 'Email sent!' : 'Email failed to send.'}${studentMessage}`,
         emailSent ? 'success' : 'warning'
       );
       
@@ -745,21 +828,21 @@ const AdminDashboard = () => {
                 onClick={() => handleUpdateAdmissionStatus(admission.id, 'approved', admission)}
                 disabled={isSendingEmail}
               >
-                <FaCheck /> {isSendingEmail ? 'Sending...' : 'Approve & Send Email'}
+                <FaCheck /> {isSendingEmail ? 'Sending...' : 'Approve & Create Student'}
               </button>
               <button
                 className="btn-enroll"
                 onClick={() => handleUpdateAdmissionStatus(admission.id, 'enrolled', admission)}
                 disabled={isSendingEmail}
               >
-                <FaGraduationCap /> {isSendingEmail ? 'Sending...' : 'Enroll & Send Email'}
+                <FaGraduationCap /> {isSendingEmail ? 'Sending...' : 'Enroll & Create Student'}
               </button>
               <button
                 className="btn-reject"
                 onClick={() => handleUpdateAdmissionStatus(admission.id, 'rejected', admission)}
                 disabled={isSendingEmail}
               >
-                <FaTimesCircle /> {isSendingEmail ? 'Sending...' : 'Reject & Send Email'}
+                <FaTimesCircle /> {isSendingEmail ? 'Sending...' : 'Reject'}
               </button>
               <button
                 className="btn-view"
