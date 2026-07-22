@@ -252,59 +252,60 @@ const AdminDashboard = () => {
   };
 
   // ============================================
-  // CREATE STUDENT FROM ADMISSION DATA
-  // ============================================
-  const createStudentFromAdmission = async (admission) => {
-    try {
-      // Generate student ID
-      const studentId = `STU-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-      
-      // Prepare student data
-      const studentData = {
-        studentId: studentId,
-        fullName: admission.fullName || 'N/A',
-        email: admission.email || 'N/A',
-        phone: admission.phone || 'N/A',
-        dateOfBirth: admission.dateOfBirth || '',
-        gender: admission.gender || '',
-        address: admission.address || '',
-        city: admission.city || '',
-        course: admission.course || 'Not specified',
-        educationLevel: admission.educationLevel || '',
-        previousSchool: admission.previousSchool || '',
-        preferredStudyMode: admission.preferredStudyMode || '',
-        guardianName: admission.guardianName || '',
-        guardianPhone: admission.guardianPhone || '',
-        guardianEmail: admission.guardianEmail || '',
-        guardianRelationship: admission.guardianRelationship || '',
-        hearAboutUs: admission.hearAboutUs || '',
-        reasonToJoin: admission.reasonToJoin || '',
-        specialNeeds: admission.specialNeeds || 'None',
-        admissionStatus: admission.status || 'approved',
-        serialNumber: admission.serialNumber || '',
-        applicationDate: admission.applicationDate || new Date().toISOString(),
-        enrolledCourses: [admission.course || 'Not specified'],
-        status: 'active',
-        paymentHistory: [],
-        attendance: { total: 0, present: 0, absent: 0 },
-        grades: {},
-        passwordUpdated: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+// CREATE STUDENT FROM ADMISSION DATA
+// ============================================
+const createStudentFromAdmission = async (admission) => {
+  try {
+    // Generate memorable student ID using full first name + 4-digit number
+    const studentId = await generateStudentId(admission.fullName);
+    
+    // Prepare student data
+    const studentData = {
+      studentId: studentId,
+      fullName: admission.fullName || 'N/A',
+      email: admission.email || 'N/A',
+      phone: admission.phone || 'N/A',
+      dateOfBirth: admission.dateOfBirth || '',
+      gender: admission.gender || '',
+      address: admission.address || '',
+      city: admission.city || '',
+      course: admission.course || 'Not specified',
+      educationLevel: admission.educationLevel || '',
+      previousSchool: admission.previousSchool || '',
+      preferredStudyMode: admission.preferredStudyMode || '',
+      guardianName: admission.guardianName || '',
+      guardianPhone: admission.guardianPhone || '',
+      guardianEmail: admission.guardianEmail || '',
+      guardianRelationship: admission.guardianRelationship || '',
+      hearAboutUs: admission.hearAboutUs || '',
+      reasonToJoin: admission.reasonToJoin || '',
+      specialNeeds: admission.specialNeeds || 'None',
+      admissionStatus: admission.status || 'approved',
+      serialNumber: admission.serialNumber || '',
+      applicationDate: admission.applicationDate || new Date().toISOString(),
+      enrolledCourses: [admission.course || 'Not specified'],
+      status: 'active',
+      paymentHistory: [],
+      attendance: { total: 0, present: 0, absent: 0 },
+      grades: {},
+      passwordUpdated: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
 
-      console.log('📝 Creating student from admission:', studentData);
-      
-      // Create student in Firebase
-      await createStudent(studentData);
-      console.log(`✅ Student created successfully: ${studentId}`);
-      
-      return studentId;
-    } catch (error) {
-      console.error('Error creating student from admission:', error);
-      throw error;
-    }
-  };
+    console.log('📝 Creating student from admission:', studentData);
+    console.log('✅ Generated Student ID:', studentId);
+    
+    // Create student in Firebase
+    await createStudent(studentData);
+    console.log(`✅ Student created successfully: ${studentId}`);
+    
+    return studentId;
+  } catch (error) {
+    console.error('Error creating student from admission:', error);
+    throw error;
+  }
+};
 
   // ============================================
   // HANDLE ADMISSION STATUS UPDATE - WITH STUDENT CREATION
