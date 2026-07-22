@@ -1,797 +1,590 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  FaUser,
-  FaGraduationCap,
-  FaBookOpen,
-  FaClock,
-  FaCalendarAlt,
-  FaMoneyBillWave,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaSpinner,
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { 
+  FaUserGraduate, 
+  FaLock, 
   FaArrowRight,
-  FaWhatsapp,
-  FaEnvelope,
-  FaPhone,
-  FaDownload,
-  FaPrint,
-  FaUserGraduate,
-  FaChartLine,
-  FaAward,
-  FaTasks,
-  FaBell,
-  FaCog,
-  FaSignOutAlt,
-  FaCreditCard,
-  FaFileAlt,
-  FaAddressCard,
-  FaEdit,
-  FaSave,
-  FaLock,
-  FaUnlock,
   FaEye,
   FaEyeSlash,
-  FaIdCard,
-  FaCalendarCheck,
-  FaHistory,
-  FaStar,
-  FaUsers,
-  FaChalkboardTeacher,
-  FaLaptop,
-  FaHome,
-  FaBullhorn,
-  FaClipboardList,
+  FaKey,
+  FaCheckCircle,
+  FaExclamationTriangle,
   FaInfoCircle,
-  FaExclamationTriangle
+  FaSpinner,
+  FaHourglassHalf,
+  FaTimesCircle,
+  FaCheck,
+  FaIdCard,
+  FaShieldAlt,
+  FaUniversity
 } from 'react-icons/fa';
-import {
-  getCurrentUser,
-  getUserProfile,
+import { 
+  getStudentAdmissionStatus, 
   getStudentByEmail,
-  getStudentByStudentId,
   updateStudent,
-  logoutUser,
+  getUserByEmail,
+  getStudentByStudentId,
+  verifyStudentPassword,
   updateStudentPassword
 } from '../services/firebaseService';
-import './StudentPortal.css';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
+import './StudentLogin.css';
 
-const StudentPortal = () => {
+const StudentLogin = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [isLoading, setIsLoading] = useState(true);
-  const [studentData, setStudentData] = useState(null);
-  const [showPasswordChange, setShowPasswordChange] = useState(false);
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [editingProfile, setEditingProfile] = useState(false);
-  const [profileData, setProfileData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    address: '',
-    dateOfBirth: '',
-    gender: '',
-    emergencyContact: '',
-    emergencyPhone: ''
-  });
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  
+  // Student data states
+  const [studentData, setStudentData] = useState(null);
+  
+  // Admission status states
+  const [admissionStatus, setAdmissionStatus] = useState(null);
+  const [statusChecked, setStatusChecked] = useState(false);
+  
+  // Password change states
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordChangeError, setPasswordChangeError] = useState('');
+  const [passwordChangeSuccess, setPasswordChangeSuccess] = useState(false);
+  const [isPasswordUpdating, setIsPasswordUpdating] = useState(false);
 
-  // Load student data from Firebase
-  useEffect(() => {
-    const loadStudentData = async () => {
-      setIsLoading(true);
-      setError('');
+  // Default password for all users
+  const DEFAULT_PASSWORD = 'FastMultimedia2024@';
 
-      try {
-        // Get current user from Firebase Auth
-        const user = await getCurrentUser();
-        
-        if (!user) {
-          navigate('/student/login');
-          return;
-        }
+  // Check student admission status
+  const checkStudentAccess = async (identifier) => {
+    setError('');
+    setAdmissionStatus(null);
+    setStatusChecked(false);
+    setStudentData(null);
 
-        // Get user profile from Firestore
-        const profile = await getUserProfile(user.uid);
-        
-        if (!profile) {
-          setError('Student profile not found. Please contact support.');
-          setIsLoading(false);
-          return;
-        }
+    try {
+      // Check if identifier is a student ID or email
+      let student = null;
+      
+      // Try to find by student ID first
+      if (!identifier.includes('@')) {
+        student = await getStudentByStudentId(identifier.toUpperCase());
+      }
+      
+      // If not found by student ID, try by email
+      if (!student) {
+        student = await getStudentByEmail(identifier);
+      }
 
-        // Check if user is a student
-        if (profile.role && profile.role !== 'student') {
-          setError('Access denied. Student portal is for students only.');
-          setIsLoading(false);
-          return;
-        }
-
-        // Get student data by email or student ID
-        let student = null;
-        
-        if (profile.email) {
-          student = await getStudentByEmail(profile.email);
-        }
-        
-        if (!student && profile.studentId) {
-          student = await getStudentByStudentId(profile.studentId);
-        }
-
-        if (!student) {
+      // If student not found, check if they exist in users collection
+      if (!student) {
+        const user = await getUserByEmail(identifier);
+        if (user && user.role === 'student') {
+          // Convert user to student format
           student = {
-            id: user.uid,
-            studentId: profile.studentId || user.uid,
-            fullName: profile.fullName || profile.name || 'Student',
-            email: profile.email || user.email,
-            phone: profile.phone || '',
-            address: profile.address || '',
-            dateOfBirth: profile.dateOfBirth || '',
-            gender: profile.gender || '',
-            emergencyContact: profile.emergencyContact || '',
-            emergencyPhone: profile.emergencyPhone || '',
-            course: profile.course || 'Not assigned',
-            enrolledCourses: profile.enrolledCourses || [],
-            paymentHistory: profile.paymentHistory || [],
-            attendance: profile.attendance || { total: 0, present: 0, absent: 0, percentage: 0 },
-            notifications: profile.notifications || [],
-            achievements: profile.achievements || [],
-            upcomingEvents: profile.upcomingEvents || [],
-            admissionStatus: profile.admissionStatus || 'approved',
-            serialNumber: profile.serialNumber || '',
-            applicationDate: profile.applicationDate || new Date().toISOString(),
-            passwordUpdated: profile.passwordUpdated || false
+            id: user.id,
+            studentId: user.studentId || user.id,
+            fullName: user.fullName || user.name,
+            email: user.email,
+            course: user.course || 'Not specified',
+            admissionStatus: user.admissionStatus || 'approved',
+            password: user.password || DEFAULT_PASSWORD,
+            passwordUpdated: user.passwordUpdated || false
           };
         }
-
-        // Ensure the course is set
-        if (!student.course || student.course === 'Not specified') {
-          student.course = profile.course || 'Not assigned';
-        }
-
-        setStudentData(student);
-        setProfileData({
-          fullName: student.fullName || '',
-          email: student.email || '',
-          phone: student.phone || '',
-          address: student.address || '',
-          dateOfBirth: student.dateOfBirth || '',
-          gender: student.gender || '',
-          emergencyContact: student.emergencyContact || '',
-          emergencyPhone: student.emergencyPhone || ''
-        });
-
-      } catch (error) {
-        console.error('Error loading student data:', error);
-        setError('Error loading your data. Please refresh the page.');
-      } finally {
-        setIsLoading(false);
       }
-    };
 
-    loadStudentData();
-  }, [navigate]);
+      if (!student) {
+        setError('Student not found. Please ensure you have completed your application or contact support.');
+        setStatusChecked(true);
+        return null;
+      }
+
+      // Ensure student has a password
+      if (!student.password) {
+        student.password = DEFAULT_PASSWORD;
+      }
+
+      // Set student data in state
+      setStudentData(student);
+
+      // Check admission status
+      const status = student.admissionStatus || 'pending';
+      const statusMessages = {
+        pending: 'Your application is pending review. Please wait for approval before logging in.',
+        approved: 'Your application has been approved! You can now log in.',
+        rejected: 'Your application was not approved. Please contact admissions for more information.',
+        enrolled: 'You are enrolled! Welcome to Fast Multimedia Institute.'
+      };
+
+      const admissionInfo = {
+        exists: true,
+        status: status,
+        message: statusMessages[status] || 'Application status unknown.',
+        data: student
+      };
+
+      setAdmissionStatus(admissionInfo);
+      setStatusChecked(true);
+
+      // Check if student can login
+      if (status === 'pending') {
+        setError('Your application is pending review. Please wait for approval before logging in.');
+        return null;
+      }
+
+      if (status === 'rejected') {
+        setError('Your application was not approved. Please contact admissions for more information.');
+        return null;
+      }
+
+      if (status !== 'approved' && status !== 'enrolled') {
+        setError('Unknown application status. Please contact admissions.');
+        return null;
+      }
+
+      return student;
+    } catch (error) {
+      console.error('Error checking student access:', error);
+      setError('Error checking student access. Please try again.');
+      setStatusChecked(true);
+      return null;
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    
+    // Validate identifier and password are not empty
+    if (!identifier.trim()) {
+      setError('Please enter your Student ID or Email Address.');
+      return;
+    }
+    
+    if (!password.trim()) {
+      setError('Please enter your password.');
+      return;
+    }
+    
+    // First, check student access
+    if (!statusChecked) {
+      setIsLoading(true);
+      const student = await checkStudentAccess(identifier);
+      setIsLoading(false);
+      
+      if (!student) {
+        return;
+      }
+    }
+
+    // Now validate password - use the studentData from state
+    setIsLoading(true);
+
+    try {
+      // Get the student from state (should be set by checkStudentAccess)
+      const student = studentData;
+      
+      if (!student) {
+        setError('Student data not found. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      // IMPORTANT: Check if password has been updated
+      // If passwordUpdated is true, the default password should NOT work
+      const isDefaultPassword = password === DEFAULT_PASSWORD;
+      const hasPasswordBeenUpdated = student.passwordUpdated === true;
+      
+      // If using default password but password has been updated, reject
+      if (isDefaultPassword && hasPasswordBeenUpdated) {
+        setError('The default password has been changed. Please use your new password.');
+        setIsLoading(false);
+        return;
+      }
+
+      // If using default password and password has NOT been updated, force change
+      if (isDefaultPassword && !hasPasswordBeenUpdated) {
+        setShowPasswordChange(true);
+        setError('');
+        setIsLoading(false);
+        return;
+      }
+
+      // Verify password with stored password
+      const storedPassword = student.password || '';
+      if (password !== storedPassword) {
+        setError('Invalid password. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Login successful - redirect to student portal
+      if (rememberMe) {
+        localStorage.setItem('studentLogin', 'true');
+        localStorage.setItem('studentId', student.studentId || student.id);
+        localStorage.setItem('studentEmail', student.email);
+      }
+      
+      redirectToPortal();
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('An error occurred during login. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const redirectToPortal = () => {
+    setIsLoading(false);
+    setError('');
+    navigate('/student/portal');
+  };
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setPasswordChangeError('');
+    setPasswordChangeSuccess(false);
 
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError('New passwords do not match!');
+    // Validate new password
+    if (newPassword.length < 8) {
+      setPasswordChangeError('Password must be at least 8 characters long.');
       return;
     }
 
-    if (passwordData.newPassword.length < 8) {
-      setError('Password must be at least 8 characters long.');
+    // Check for uppercase letter
+    if (!/[A-Z]/.test(newPassword)) {
+      setPasswordChangeError('Password must include at least one uppercase letter.');
       return;
     }
 
-    if (!/[A-Z]/.test(passwordData.newPassword)) {
-      setError('Password must include at least one uppercase letter.');
+    // Check for number
+    if (!/[0-9]/.test(newPassword)) {
+      setPasswordChangeError('Password must include at least one number.');
       return;
     }
 
-    if (!/[0-9]/.test(passwordData.newPassword)) {
-      setError('Password must include at least one number.');
+    // Check for special character
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
+      setPasswordChangeError('Password must include at least one special character.');
       return;
     }
 
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(passwordData.newPassword)) {
-      setError('Password must include at least one special character.');
+    if (newPassword !== confirmPassword) {
+      setPasswordChangeError('Passwords do not match.');
       return;
     }
+
+    if (newPassword === DEFAULT_PASSWORD) {
+      setPasswordChangeError('Please choose a different password from the default.');
+      return;
+    }
+
+    setIsPasswordUpdating(true);
 
     try {
-      await updateStudentPassword(studentData.id, passwordData.newPassword);
-      setSuccess('Password changed successfully!');
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setTimeout(() => {
-        setShowPasswordChange(false);
-        setSuccess('');
-      }, 3000);
-    } catch (error) {
-      console.error('Error updating password:', error);
-      setError('Error updating password. Please try again.');
-    }
-  };
+      const student = studentData;
+      
+      if (!student) {
+        setPasswordChangeError('Student data not found. Please try again.');
+        setIsPasswordUpdating(false);
+        return;
+      }
+      
+      // Update student password
+      await updateStudentPassword(student.id, newPassword);
 
-  const handleProfileUpdate = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    try {
-      await updateStudent(studentData.id, {
-        fullName: profileData.fullName,
-        phone: profileData.phone,
-        address: profileData.address,
-        dateOfBirth: profileData.dateOfBirth,
-        gender: profileData.gender,
-        emergencyContact: profileData.emergencyContact,
-        emergencyPhone: profileData.emergencyPhone,
-        updatedAt: new Date().toISOString()
-      });
-
+      // Update local student data to reflect password change
       setStudentData({
-        ...studentData,
-        fullName: profileData.fullName,
-        phone: profileData.phone,
-        address: profileData.address,
-        dateOfBirth: profileData.dateOfBirth,
-        gender: profileData.gender,
-        emergencyContact: profileData.emergencyContact,
-        emergencyPhone: profileData.emergencyPhone
+        ...student,
+        password: newPassword,
+        passwordUpdated: true
       });
 
-      setSuccess('Profile updated successfully!');
-      setEditingProfile(false);
-      setTimeout(() => setSuccess(''), 3000);
+      setTimeout(() => {
+        setIsPasswordUpdating(false);
+        setPasswordChangeSuccess(true);
+        
+        // After success, redirect after 2 seconds
+        setTimeout(() => {
+          setShowPasswordChange(false);
+          redirectToPortal();
+        }, 2000);
+      }, 1500);
     } catch (error) {
-      console.error('Error updating profile:', error);
-      setError('Error updating profile. Please try again.');
+      console.error('Password update error:', error);
+      setPasswordChangeError('Error updating password. Please try again.');
+      setIsPasswordUpdating(false);
     }
   };
-
-  const handleLogout = async () => {
-    try {
-      await logoutUser();
-      navigate('/student/login');
-    } catch (error) {
-      console.error('Error logging out:', error);
-      setError('Error logging out. Please try again.');
-    }
-  };
-
-  const handleWhatsAppClick = () => {
-    const message = `Hi Fast Multimedia Institute! I need assistance with my student portal.`;
-    window.open(`https://wa.me/233505159131?text=${encodeURIComponent(message)}`, '_blank');
-  };
-
-  if (isLoading) {
-    return (
-      <div className="student-portal-loading">
-        <div className="loading-spinner">
-          <FaSpinner className="spinner" />
-        </div>
-        <p>Loading your portal...</p>
-      </div>
-    );
-  }
-
-  if (error && !studentData) {
-    return (
-      <div className="student-portal-error">
-        <div className="error-container">
-          <FaExclamationTriangle className="error-icon" />
-          <h2>Something went wrong</h2>
-          <p>{error}</p>
-          <button onClick={() => window.location.reload()} className="retry-btn">
-            Retry
-          </button>
-          <button onClick={handleLogout} className="logout-btn">
-            Logout
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Get the student's single course
-  const getStudentCourse = () => {
-    // If student has enrolled courses array, get the first one
-    if (studentData?.enrolledCourses && studentData.enrolledCourses.length > 0) {
-      const course = studentData.enrolledCourses[0];
-      return {
-        id: course.id || 'course-1',
-        name: course.name || studentData.course || 'Not assigned',
-        progress: course.progress || 0,
-        grade: course.grade || 'N/A',
-        instructor: course.instructor || 'Not assigned yet',
-        status: course.status || 'active',
-        startDate: course.startDate || studentData.applicationDate || new Date().toISOString().split('T')[0],
-        endDate: course.endDate || 'In Progress',
-        assignments: course.assignments || []
-      };
-    }
-    
-    // If only course field exists
-    if (studentData?.course && studentData.course !== 'Not specified' && studentData.course !== 'Not assigned') {
-      return {
-        id: 'course-1',
-        name: studentData.course,
-        progress: 0,
-        grade: 'N/A',
-        instructor: 'Not assigned yet',
-        status: 'active',
-        startDate: studentData.applicationDate || new Date().toISOString().split('T')[0],
-        endDate: 'In Progress',
-        assignments: []
-      };
-    }
-    
-    // No course assigned
-    return null;
-  };
-
-  const studentCourse = getStudentCourse();
 
   return (
-    <div className="student-portal">
-      {/* Header */}
-      <div className="portal-header">
-        <div className="container">
-          <div className="header-content">
-            <div className="user-greeting">
-              <div className="user-avatar-large">
-                {studentData?.fullName?.charAt(0) || 'S'}
-              </div>
-              <div>
-                <h1>Welcome back, {studentData?.fullName?.split(' ')[0] || 'Student'}!</h1>
-                <p className="student-id">
-                  <FaIdCard /> Student ID: <strong>{studentData?.studentId || studentData?.id}</strong>
-                </p>
-                <p className="student-course">
-                  <FaBookOpen /> Course: <strong className="course-name-highlight">{studentData?.course || 'Not assigned'}</strong>
-                </p>
-              </div>
+    <div className="student-login-page">
+      <div className="login-container">
+        <div className="login-card">
+          <div className="login-header">
+            <div className="login-icon">
+              <FaUniversity />
             </div>
-            <div className="header-actions">
-              <button 
-                className="notification-btn"
-                onClick={() => setShowNotifications(!showNotifications)}
-              >
-                <FaBell />
-                {studentData?.notifications?.filter(n => !n.read).length > 0 && (
-                  <span className="notification-badge">
-                    {studentData.notifications.filter(n => !n.read).length}
-                  </span>
-                )}
-              </button>
-              <button className="help-btn" onClick={handleWhatsAppClick}>
-                <FaWhatsapp /> Help
-              </button>
-              <button className="logout-btn-header" onClick={handleLogout}>
-                <FaSignOutAlt /> Logout
-              </button>
-            </div>
+            <h1>Student Login</h1>
+            <p>Fast Multimedia Institute</p>
           </div>
-        </div>
-      </div>
 
-      {/* Notification Dropdown */}
-      {showNotifications && (
-        <div className="notifications-dropdown">
-          <div className="notifications-header">
-            <h3>Notifications</h3>
-            <button className="mark-all-read">Mark all as read</button>
-          </div>
-          {studentData?.notifications?.map(notification => (
-            <div key={notification.id} className={`notification-item ${notification.read ? 'read' : 'unread'}`}>
-              <div className="notification-content">
-                <h4>{notification.title}</h4>
-                <p>{notification.message}</p>
-                <span className="notification-date">{notification.date}</span>
-              </div>
-            </div>
-          ))}
-          {(!studentData?.notifications || studentData.notifications.length === 0) && (
-            <div className="no-notifications">
-              <p>No notifications yet.</p>
+          {error && (
+            <div className="login-error">
+              <FaExclamationTriangle /> {error}
             </div>
           )}
-        </div>
-      )}
 
-      {/* Navigation Tabs */}
-      <div className="portal-tabs">
-        <div className="container">
-          <button 
-            className={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dashboard')}
-          >
-            <FaHome /> Dashboard
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'course' ? 'active' : ''}`}
-            onClick={() => setActiveTab('course')}
-          >
-            <FaBookOpen /> My Course
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
-            onClick={() => setActiveTab('profile')}
-          >
-            <FaUser /> Profile
-          </button>
-        </div>
-      </div>
-
-      <div className="container">
-        {/* Dashboard Tab */}
-        {activeTab === 'dashboard' && (
-          <div className="dashboard-content">
-            {/* Success/Error Messages */}
-            {success && (
-              <div className="alert alert-success">
-                <FaCheckCircle /> {success}
+          {/* Student Info Display */}
+          {statusChecked && studentData && (
+            <div className="student-info-badge">
+              <div className="student-info-icon">
+                <FaUserGraduate />
               </div>
-            )}
-            {error && (
-              <div className="alert alert-error">
-                <FaTimesCircle /> {error}
-              </div>
-            )}
-
-            {/* Student Info Card */}
-            <div className="student-info-card">
-              <h3><FaUserGraduate /> Student Information</h3>
-              <div className="info-row">
-                <span className="info-label">Student ID:</span>
-                <span className="info-value">{studentData?.studentId || studentData?.id}</span>
-              </div>
-              <div className="info-row">
-                <span className="info-label">Course:</span>
-                <span className="info-value course-name">
-                  <FaBookOpen /> {studentData?.course || 'Not assigned'}
-                </span>
-              </div>
-              <div className="info-row">
-                <span className="info-label">Status:</span>
-                <span className={`status-badge ${studentData?.admissionStatus || 'pending'}`}>
-                  {studentData?.admissionStatus === 'approved' ? '✅ Approved' :
-                   studentData?.admissionStatus === 'enrolled' ? '✅ Enrolled' :
-                   studentData?.admissionStatus || 'Pending'}
-                </span>
-              </div>
-              <div className="info-row">
-                <span className="info-label">Application Date:</span>
-                <span className="info-value">{new Date(studentData?.applicationDate).toLocaleDateString()}</span>
+              <div className="student-info-content">
+                <h4>Welcome, <strong>{studentData.fullName}</strong></h4>
+                <p>Student ID: <strong>{studentData.studentId || studentData.id}</strong></p>
+                <p>Course: <strong>{studentData.course || 'Not assigned'}</strong></p>
+                <p>Password Status: <strong>{studentData.passwordUpdated ? '✅ Changed' : '⚠️ Default'}</strong></p>
               </div>
             </div>
+          )}
 
-            {/* Course Overview Card */}
-            {studentCourse && (
-              <div className="course-overview-card">
-                <h3><FaBookOpen /> Your Course</h3>
-                <div className="course-overview-content">
-                  <div className="course-name-large">{studentCourse.name}</div>
-                  <div className="course-meta">
-                    <span><FaUserGraduate /> {studentCourse.instructor}</span>
-                    <span><FaCalendarAlt /> Started: {studentCourse.startDate}</span>
-                    <span><FaClock /> Status: {studentCourse.status}</span>
-                  </div>
-                  <div className="course-progress">
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: `${studentCourse.progress}%` }}></div>
-                    </div>
-                    <span className="progress-text">{studentCourse.progress}% Complete</span>
-                  </div>
-                  <button 
-                    className="view-course-btn"
-                    onClick={() => setActiveTab('course')}
-                  >
-                    View Course Details <FaArrowRight />
-                  </button>
-                </div>
+          {/* Admission Status Display */}
+          {statusChecked && admissionStatus && (
+            <div className={`admission-status ${admissionStatus.status}`}>
+              <div className="status-icon">
+                {admissionStatus.status === 'pending' && <FaHourglassHalf />}
+                {admissionStatus.status === 'approved' && <FaCheck />}
+                {admissionStatus.status === 'enrolled' && <FaCheckCircle />}
+                {admissionStatus.status === 'rejected' && <FaTimesCircle />}
               </div>
-            )}
-
-            {/* Quick Actions */}
-            <div className="quick-actions">
-              <h2>Quick Actions</h2>
-              <div className="action-grid">
-                <button className="action-btn" onClick={() => setActiveTab('course')}>
-                  <FaBookOpen /> My Course
-                </button>
-                <button className="action-btn" onClick={handleWhatsAppClick}>
-                  <FaWhatsapp /> Contact Support
-                </button>
-                <button className="action-btn" onClick={() => setActiveTab('profile')}>
-                  <FaUser /> Update Profile
-                </button>
-                <button className="action-btn" onClick={handleLogout}>
-                  <FaSignOutAlt /> Logout
-                </button>
+              <div className="status-content">
+                <h4>Application Status: <strong>{admissionStatus.status.toUpperCase()}</strong></h4>
+                <p>{admissionStatus.message}</p>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Course Tab - Shows only the student's single course */}
-        {activeTab === 'course' && (
-          <div className="courses-content">
-            <h2>My Course</h2>
-            {studentCourse ? (
-              <div className="course-card-detailed single-course">
-                <div className="course-header">
-                  <h3>{studentCourse.name}</h3>
-                  <span className={`course-status ${studentCourse.status || 'active'}`}>
-                    {studentCourse.status || 'Active'}
-                  </span>
-                </div>
-                <div className="course-details">
-                  <p><FaUserGraduate /> Instructor: {studentCourse.instructor || 'Not assigned'}</p>
-                  <p><FaCalendarAlt /> Start Date: {studentCourse.startDate || 'Pending'}</p>
-                  <p><FaCalendarCheck /> End Date: {studentCourse.endDate || 'In Progress'}</p>
-                  <p><FaStar /> Grade: {studentCourse.grade || 'N/A'}</p>
-                </div>
-                <div className="course-progress">
-                  <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: `${studentCourse.progress}%` }}></div>
-                  </div>
-                  <span className="progress-text">{studentCourse.progress}% Complete</span>
-                </div>
-                <div className="course-assignments">
-                  <h4>Assignments</h4>
-                  {studentCourse.assignments && studentCourse.assignments.length > 0 ? (
-                    studentCourse.assignments.map((assignment, idx) => (
-                      <div key={idx} className="assignment-item">
-                        <span className="assignment-title">{assignment.title}</span>
-                        <span className={`assignment-status ${assignment.status === 'submitted' ? 'status-submitted' : 'status-pending'}`}>
-                          {assignment.status || 'pending'}
-                        </span>
-                        <span className="assignment-grade">{assignment.grade ? `${assignment.grade}%` : '—'}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="no-assignments">No assignments available yet.</p>
-                  )}
-                </div>
-                <div className="course-support">
-                  <h4>Need Help?</h4>
-                  <button className="support-btn" onClick={handleWhatsAppClick}>
-                    <FaWhatsapp /> Contact Your Instructor
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="no-course-message">
-                <FaBookOpen className="no-course-icon" />
-                <h3>No Course Assigned Yet</h3>
-                <p>Your course will be assigned upon admission approval.</p>
-                <p className="contact-support-text">
-                  If you believe this is an error, please contact support.
+          {/* Password Change Form - Shown when default password is used */}
+          {showPasswordChange ? (
+            <div className="password-change-container">
+              <div className="password-change-header">
+                <FaKey className="password-change-icon" />
+                <h3>Change Your Password</h3>
+                <p className="password-change-subtitle">
+                  You are using the default password. Please create a new password to secure your account.
                 </p>
-                <button className="support-btn" onClick={handleWhatsAppClick}>
-                  <FaWhatsapp /> Contact Support
-                </button>
+                <div className="default-password-info">
+                  <FaInfoCircle /> Default Password: <strong>{DEFAULT_PASSWORD}</strong>
+                </div>
               </div>
-            )}
-          </div>
-        )}
 
-        {/* Profile Tab */}
-        {activeTab === 'profile' && (
-          <div className="profile-content">
-            <div className="profile-header">
-              <h2>My Profile</h2>
-              <button 
-                className="edit-profile-btn"
-                onClick={() => setEditingProfile(!editingProfile)}
-              >
-                {editingProfile ? <FaSave /> : <FaEdit />} 
-                {editingProfile ? 'Save Changes' : 'Edit Profile'}
-              </button>
-            </div>
+              {passwordChangeSuccess ? (
+                <div className="password-change-success">
+                  <FaCheckCircle className="success-icon" />
+                  <h3>Password Changed Successfully!</h3>
+                  <p>Redirecting to your dashboard...</p>
+                </div>
+              ) : (
+                <form onSubmit={handlePasswordChange} className="password-change-form">
+                  {passwordChangeError && (
+                    <div className="password-change-error">
+                      <FaExclamationTriangle /> {passwordChangeError}
+                    </div>
+                  )}
 
-            {success && (
-              <div className="alert alert-success">
-                <FaCheckCircle /> {success}
-              </div>
-            )}
-            {error && (
-              <div className="alert alert-error">
-                <FaTimesCircle /> {error}
-              </div>
-            )}
-
-            {!editingProfile ? (
-              <div className="profile-display">
-                <div className="profile-section">
-                  <h3><FaUser /> Personal Information</h3>
-                  <div className="profile-grid">
-                    <div><strong>Student ID:</strong> {studentData?.studentId || studentData?.id}</div>
-                    <div><strong>Full Name:</strong> {studentData?.fullName}</div>
-                    <div><strong>Email:</strong> {studentData?.email}</div>
-                    <div><strong>Phone:</strong> {studentData?.phone || 'N/A'}</div>
-                    <div><strong>Date of Birth:</strong> {studentData?.dateOfBirth || 'N/A'}</div>
-                    <div><strong>Gender:</strong> {studentData?.gender || 'N/A'}</div>
-                    <div><strong>Address:</strong> {studentData?.address || 'N/A'}</div>
-                    <div><strong>Course:</strong> <span className="course-highlight">{studentData?.course || 'Not assigned'}</span></div>
-                  </div>
-                </div>
-                <div className="profile-section">
-                  <h3><FaUsers /> Emergency Contact</h3>
-                  <div className="profile-grid">
-                    <div><strong>Name:</strong> {studentData?.emergencyContact || 'N/A'}</div>
-                    <div><strong>Phone:</strong> {studentData?.emergencyPhone || 'N/A'}</div>
-                  </div>
-                </div>
-                <div className="profile-section">
-                  <h3><FaAward /> Achievements</h3>
-                  <div className="achievements-grid">
-                    {studentData?.achievements?.map((achievement, index) => (
-                      <div key={index} className="achievement-card">
-                        <span className="achievement-icon">{achievement.icon || '🏆'}</span>
-                        <span className="achievement-title">{achievement.title}</span>
-                        <span className="achievement-date">{achievement.date}</span>
-                      </div>
-                    ))}
-                    {(!studentData?.achievements || studentData.achievements.length === 0) && (
-                      <p className="no-achievements">No achievements yet. Keep learning!</p>
-                    )}
-                  </div>
-                </div>
-                <button 
-                  className="change-password-btn"
-                  onClick={() => setShowPasswordChange(!showPasswordChange)}
-                >
-                  <FaLock /> Change Password
-                </button>
-              </div>
-            ) : (
-              <form className="profile-edit-form" onSubmit={handleProfileUpdate}>
-                <div className="form-grid">
                   <div className="form-group">
-                    <label>Full Name</label>
-                    <input
-                      type="text"
-                      value={profileData.fullName || ''}
-                      onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Phone</label>
-                    <input
-                      type="tel"
-                      value={profileData.phone || ''}
-                      onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Date of Birth</label>
-                    <input
-                      type="date"
-                      value={profileData.dateOfBirth || ''}
-                      onChange={(e) => setProfileData({...profileData, dateOfBirth: e.target.value})}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Gender</label>
-                    <select
-                      value={profileData.gender || ''}
-                      onChange={(e) => setProfileData({...profileData, gender: e.target.value})}
-                    >
-                      <option value="">Select</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div className="form-group full-width">
-                    <label>Address</label>
-                    <input
-                      type="text"
-                      value={profileData.address || ''}
-                      onChange={(e) => setProfileData({...profileData, address: e.target.value})}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Emergency Contact</label>
-                    <input
-                      type="text"
-                      value={profileData.emergencyContact || ''}
-                      onChange={(e) => setProfileData({...profileData, emergencyContact: e.target.value})}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Emergency Phone</label>
-                    <input
-                      type="tel"
-                      value={profileData.emergencyPhone || ''}
-                      onChange={(e) => setProfileData({...profileData, emergencyPhone: e.target.value})}
-                    />
-                  </div>
-                </div>
-                <div className="form-actions">
-                  <button type="submit" className="save-btn">
-                    <FaSave /> Save Changes
-                  </button>
-                  <button type="button" className="cancel-btn" onClick={() => setEditingProfile(false)}>
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Change Password Modal */}
-            {showPasswordChange && (
-              <div className="password-change-modal">
-                <div className="modal-content">
-                  <h3><FaLock /> Change Password</h3>
-                  <form onSubmit={handlePasswordChange}>
-                    <div className="form-group">
-                      <label>New Password</label>
+                    <label>New Password</label>
+                    <div className="input-wrapper">
+                      <FaLock className="input-icon" />
                       <input
-                        type="password"
-                        value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                        type={showNewPassword ? 'text' : 'password'}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="Enter new password (min 8 characters)"
                         required
                       />
+                      <button 
+                        type="button"
+                        className="toggle-password"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                      >
+                        {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                      </button>
                     </div>
-                    <div className="form-group">
-                      <label>Confirm New Password</label>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Confirm New Password</label>
+                    <div className="input-wrapper">
+                      <FaLock className="input-icon" />
                       <input
-                        type="password"
-                        value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="Confirm your new password"
                         required
                       />
-                    </div>
-                    <div className="password-requirements">
-                      <p>Password must:</p>
-                      <ul>
-                        <li>Be at least 8 characters long</li>
-                        <li>Include at least one uppercase letter</li>
-                        <li>Include at least one number</li>
-                        <li>Include at least one special character</li>
-                      </ul>
-                    </div>
-                    <div className="modal-actions">
-                      <button type="submit" className="save-btn">Update Password</button>
-                      <button type="button" className="cancel-btn" onClick={() => setShowPasswordChange(false)}>
-                        Cancel
+                      <button 
+                        type="button"
+                        className="toggle-password"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                       </button>
                     </div>
-                  </form>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+                  </div>
 
-      {/* Footer */}
-      <div className="portal-footer">
-        <div className="container">
-          <p>© {new Date().getFullYear()} Fast Multimedia Institute. All rights reserved.</p>
-          <div className="footer-links">
-            <button onClick={handleWhatsAppClick}><FaWhatsapp /> Support</button>
-            <button onClick={() => navigate('/')}><FaHome /> Home</button>
-          </div>
+                  <div className="password-requirements">
+                    <p>Password must:</p>
+                    <ul>
+                      <li>Be at least 8 characters long</li>
+                      <li>Include at least one uppercase letter</li>
+                      <li>Include at least one number</li>
+                      <li>Include at least one special character</li>
+                    </ul>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    className="login-btn"
+                    disabled={isPasswordUpdating}
+                  >
+                    {isPasswordUpdating ? (
+                      <>
+                        <FaSpinner className="spinner" /> Updating...
+                      </>
+                    ) : (
+                      <>
+                        Update Password <FaArrowRight />
+                      </>
+                    )}
+                  </button>
+
+                  <button 
+                    type="button"
+                    className="skip-password-btn"
+                    onClick={() => navigate('/')}
+                  >
+                    Skip for now
+                  </button>
+                </form>
+              )}
+            </div>
+          ) : (
+            <>
+              <form onSubmit={handleLogin} className="login-form">
+                <div className="form-group">
+                  <label>Student ID or Email Address</label>
+                  <div className="input-wrapper">
+                    <FaIdCard className="input-icon" />
+                    <input
+                      type="text"
+                      value={identifier}
+                      onChange={(e) => {
+                        setIdentifier(e.target.value);
+                        setStatusChecked(false);
+                        setAdmissionStatus(null);
+                        setError('');
+                        setStudentData(null);
+                      }}
+                      placeholder="Enter your Student ID or Email"
+                      required
+                    />
+                  </div>
+                  <div className="input-hint">
+                    <FaInfoCircle /> Enter your Student ID (e.g., JOHN260001) or Email Address
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Password</label>
+                  <div className="input-wrapper">
+                    <FaLock className="input-icon" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      required
+                    />
+                    <button 
+                      type="button"
+                      className="toggle-password"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                  <div className="default-password-hint">
+                    <FaKey /> Default Password: <strong>{DEFAULT_PASSWORD}</strong>
+                    <span style={{ fontSize: '12px', color: '#ff8b20', marginLeft: '8px' }}>
+                      (Only if password hasn't been changed)
+                    </span>
+                  </div>
+                </div>
+
+                <div className="login-options">
+                  <label className="remember-me">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                    />
+                    <span>Remember me</span>
+                  </label>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="login-btn"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <FaSpinner className="spinner" /> Checking...
+                    </>
+                  ) : (
+                    <>
+                      Login <FaArrowRight />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="login-footer">
+                <p className="login-note">
+                  <FaShieldAlt /> Secured by Firebase Authentication
+                </p>
+                <p className="login-help">
+                  <FaInfoCircle /> Default password: <strong>{DEFAULT_PASSWORD}</strong>
+                </p>
+                <p className="login-help-note">
+                  First time logging in? Use the default password above and you'll be prompted to change it.
+                </p>
+                <p className="login-help-note">
+                  <FaInfoCircle /> Need help? Contact us at <strong>fasttech227@gmail.com</strong>
+                </p>
+              </div>
+
+              <div className="login-back">
+                <Link to="/" className="back-link">
+                  ← Back to Home
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default StudentPortal;
+export default StudentLogin;
