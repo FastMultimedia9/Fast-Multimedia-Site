@@ -68,43 +68,52 @@ const LoginPage = () => {
     try {
       console.log('🔐 Attempting login...');
       const userCredential = await loginUser(email, password);
-      const user = userCredential.user;
       
-      if (user) {
-        const profile = await getUserProfile(user.uid);
+      // Get the user from the credential
+      const user = userCredential?.user;
+      
+      if (!user) {
+        setError('Login failed: No user data received');
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('✅ User logged in:', user.uid);
+      
+      // Get user profile
+      const profile = await getUserProfile(user.uid);
+      
+      if (profile) {
+        console.log('✅ User profile found:', profile);
         
-        if (profile) {
-          console.log('✅ User profile found:', profile);
+        if (rememberMe) {
+          localStorage.setItem('login_remember_me', 'true');
+          localStorage.setItem('login_user_email', email);
+        } else {
+          localStorage.removeItem('login_remember_me');
+          localStorage.removeItem('login_user_email');
+        }
+        
+        setError('success:Login successful! Redirecting...');
+        
+        setTimeout(() => {
+          const role = profile.role || 'user';
+          let redirectPath = '/dashboard';
           
-          if (rememberMe) {
-            localStorage.setItem('login_remember_me', 'true');
-            localStorage.setItem('login_user_email', email);
-          } else {
-            localStorage.removeItem('login_remember_me');
-            localStorage.removeItem('login_user_email');
+          if (role === 'admin') {
+            redirectPath = '/admin';
+          } else if (role === 'staff') {
+            redirectPath = '/staff';
+          } else if (role === 'student') {
+            redirectPath = '/student/portal';
           }
           
-          setError('success:Login successful! Redirecting...');
-          
-          setTimeout(() => {
-            const role = profile.role || 'user';
-            let redirectPath = '/dashboard';
-            
-            if (role === 'admin') {
-              redirectPath = '/admin';
-            } else if (role === 'staff') {
-              redirectPath = '/staff';
-            } else if (role === 'student') {
-              redirectPath = '/student';
-            }
-            
-            const from = location.state?.from || redirectPath;
-            console.log(`🎯 Final redirect to: ${from} (Role: ${role})`);
-            navigate(from, { replace: true });
-          }, 1000);
-        } else {
-          setError('User profile not found. Please contact support.');
-        }
+          const from = location.state?.from || redirectPath;
+          console.log(`🎯 Final redirect to: ${from} (Role: ${role})`);
+          navigate(from, { replace: true });
+        }, 1000);
+      } else {
+        setError('User profile not found. Please contact support.');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -114,6 +123,8 @@ const LoginPage = () => {
         setError('Invalid password. Please try again.');
       } else if (error.code === 'auth/too-many-requests') {
         setError('Too many failed attempts. Please try again later.');
+      } else if (error.code === 'auth/invalid-credential') {
+        setError('Invalid credentials. Please check your email and password.');
       } else {
         setError(error.message || 'Login failed. Please try again.');
       }
@@ -136,7 +147,7 @@ const LoginPage = () => {
     
     try {
       const { sendPasswordResetEmail } = await import('../firebase');
-      await sendPasswordResetEmail(resetEmail);
+      await sendPasswordResetEmail(auth, resetEmail);
       
       setResetSuccess('Password reset instructions sent to your email.');
       setError('');

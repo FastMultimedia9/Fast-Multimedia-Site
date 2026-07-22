@@ -1325,10 +1325,11 @@ export const registerUser = async (email, password, userData) => {
 };
 
 // Login user
+// Login user - FIXED to return full userCredential
 export const loginUser = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
+    return userCredential; // Return the full credential object, not just user
   } catch (error) {
     console.error('Error logging in:', error);
     throw error;
