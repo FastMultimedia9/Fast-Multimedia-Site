@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { authAPI, supabase } from '../supabase';
+import { getCurrentUser, getUserProfile, logoutUser } from '../services/firebaseService';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -17,31 +17,30 @@ const Navbar = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const user = await authAPI.getCurrentUserWithProfile();
-        setCurrentUser(user);
-        setUserRole(user?.profile?.role || null);
-        setUserProfile(user?.profile || null);
+        const user = await getCurrentUser();
+        console.log('🔐 Navbar - Current user:', user);
+        
+        if (user) {
+          setCurrentUser(user);
+          const profile = await getUserProfile(user.uid);
+          console.log('👤 Navbar - User profile:', profile);
+          
+          if (profile) {
+            setUserProfile(profile);
+            setUserRole(profile.role || 'user');
+          }
+        } else {
+          console.log('👤 Navbar - No user logged in');
+          setCurrentUser(null);
+          setUserProfile(null);
+          setUserRole(null);
+        }
       } catch (error) {
-        console.error('Auth check error:', error);
+        console.error('Auth check error in Navbar:', error);
       }
     };
     
     checkAuth();
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session) {
-          const user = await authAPI.getCurrentUserWithProfile();
-          setCurrentUser(user);
-          setUserRole(user?.profile?.role || null);
-          setUserProfile(user?.profile || null);
-        } else {
-          setCurrentUser(null);
-          setUserRole(null);
-          setUserProfile(null);
-        }
-      }
-    );
 
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -50,7 +49,6 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     
     return () => {
-      subscription.unsubscribe();
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
@@ -84,15 +82,19 @@ const Navbar = () => {
   };
 
   const handleLogout = async () => {
-    await authAPI.logout();
-    setCurrentUser(null);
-    setUserRole(null);
-    setUserProfile(null);
-    setIsUserMenuOpen(false);
-    navigate('/');
+    try {
+      await logoutUser();
+      setCurrentUser(null);
+      setUserRole(null);
+      setUserProfile(null);
+      setIsUserMenuOpen(false);
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
-  // School menu items - WITH STUDENT PORTAL LINKING TO LOGIN
+  // School menu items
   const schoolMenuItems = [
     { name: 'School Home', path: '/school', icon: '🏫' },
     { name: 'Admissions', path: '/school/admissions', icon: '📝' },
@@ -119,6 +121,11 @@ const Navbar = () => {
   const getUserDisplayName = () => {
     if (!currentUser) return '';
     
+    if (userProfile?.fullName) {
+      const firstName = userProfile.fullName.split(' ')[0];
+      return firstName;
+    }
+    
     if (userProfile?.name) {
       const firstName = userProfile.name.split(' ')[0];
       return firstName;
@@ -142,12 +149,21 @@ const Navbar = () => {
         />
       );
     }
+    // Generate avatar from name initials
+    const name = userProfile?.fullName || userProfile?.name || 'User';
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    
     return (
-      <div className="avatar-placeholder">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12Z" fill="currentColor"/>
-          <path d="M20 17.5C20 19.985 16.418 22 12 22C7.582 22 4 19.985 4 17.5C4 15.015 7.582 13 12 13C16.418 13 20 15.015 20 17.5Z" fill="currentColor"/>
-        </svg>
+      <div className="avatar-placeholder" style={{ 
+        background: 'linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%)',
+        color: '#161b26',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 'bold',
+        fontSize: '14px'
+      }}>
+        {initials || 'U'}
       </div>
     );
   };
@@ -176,8 +192,8 @@ const Navbar = () => {
                       <path d="M12 10L20 16L12 22V10Z" fill="white"/>
                       <defs>
                         <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#007AFF"/>
-                          <stop offset="1" stopColor="#5856D6"/>
+                          <stop stopColor="#ffca41"/>
+                          <stop offset="1" stopColor="#ff8b20"/>
                         </linearGradient>
                       </defs>
                     </svg>
@@ -273,21 +289,31 @@ const Navbar = () => {
                   <div className="user-info-large">
                     <div className="user-avatar-large">
                       {userProfile?.avatar_url ? (
-                        <img src={userProfile.avatar_url} alt={userProfile.name} />
+                        <img src={userProfile.avatar_url} alt={userProfile.fullName || 'User'} />
                       ) : (
-                        <div className="avatar-placeholder-large">
-                          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                            <path d="M20 20C24.418 20 28 16.418 28 12C28 7.582 24.418 4 20 4C15.582 4 12 7.582 12 12C12 16.418 15.582 20 20 20Z" fill="currentColor"/>
-                            <path d="M30 30C30 34.418 25.523 38 20 38C14.477 38 10 34.418 10 30C10 25.582 14.477 22 20 22C25.523 22 30 25.582 30 30Z" fill="currentColor"/>
-                          </svg>
+                        <div className="avatar-placeholder-large" style={{
+                          background: 'linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%)',
+                          color: '#161b26',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 'bold',
+                          fontSize: '20px',
+                          borderRadius: '50%',
+                          width: '48px',
+                          height: '48px'
+                        }}>
+                          {(userProfile?.fullName || userProfile?.name || 'U').charAt(0).toUpperCase()}
                         </div>
                       )}
                     </div>
                     <div className="user-details">
-                      <div className="user-name-large">{userProfile?.name || currentUser.email}</div>
+                      <div className="user-name-large">{userProfile?.fullName || userProfile?.name || currentUser.email}</div>
                       <div className="user-email">{currentUser.email}</div>
                       <div className={`role-tag ${userRole}`}>
-                        {userRole === 'admin' ? 'Administrator' : 'User'}
+                        {userRole === 'admin' ? 'Administrator' : 
+                         userRole === 'staff' ? 'Staff' : 
+                         userRole === 'student' ? 'Student' : 'User'}
                       </div>
                     </div>
                   </div>
@@ -296,10 +322,16 @@ const Navbar = () => {
                 <div className="dropdown-divider"></div>
                 
                 <Link 
-                  to={userRole === 'admin' ? '/admin' : '/user/dashboard'}
+                  to={userRole === 'admin' ? '/admin' : 
+                      userRole === 'staff' ? '/staff' : 
+                      userRole === 'student' ? '/student/portal' : 
+                      '/user/dashboard'}
                   className="dropdown-item"
                   onClick={() => {
-                    handleNavigation(userRole === 'admin' ? '/admin' : '/user/dashboard');
+                    handleNavigation(userRole === 'admin' ? '/admin' : 
+                                  userRole === 'staff' ? '/staff' : 
+                                  userRole === 'student' ? '/student/portal' : 
+                                  '/user/dashboard');
                     setIsUserMenuOpen(false);
                   }}
                 >
@@ -308,7 +340,7 @@ const Navbar = () => {
                     <path d="M1 5H15" stroke="currentColor" strokeWidth="1.5"/>
                     <path d="M5 2V14" stroke="currentColor" strokeWidth="1.5"/>
                   </svg>
-                  <span>{userRole === 'admin' ? 'Admin Panel' : 'Dashboard'}</span>
+                  <span>Dashboard</span>
                 </Link>
                 
                 <div className="dropdown-divider"></div>
@@ -375,8 +407,8 @@ const Navbar = () => {
                   <path d="M12 10L20 16L12 22V10Z" fill="white"/>
                   <defs>
                     <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#007AFF"/>
-                      <stop offset="1" stopColor="#5856D6"/>
+                      <stop stopColor="#ffca41"/>
+                      <stop offset="1" stopColor="#ff8b20"/>
                     </linearGradient>
                   </defs>
                 </svg>
@@ -455,31 +487,47 @@ const Navbar = () => {
               <div className="mobile-user-info">
                 <div className="mobile-user-avatar">
                   {userProfile?.avatar_url ? (
-                    <img src={userProfile.avatar_url} alt={userProfile.name} />
+                    <img src={userProfile.avatar_url} alt={userProfile.fullName || 'User'} />
                   ) : (
-                    <div className="avatar-placeholder">
-                      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                        <path d="M20 20C24.418 20 28 16.418 28 12C28 7.582 24.418 4 20 4C15.582 4 12 7.582 12 12C12 16.418 15.582 20 20 20Z" fill="currentColor"/>
-                        <path d="M30 30C30 34.418 25.523 38 20 38C14.477 38 10 34.418 10 30C10 25.582 14.477 22 20 22C25.523 22 30 25.582 30 30Z" fill="currentColor"/>
-                      </svg>
+                    <div className="avatar-placeholder" style={{
+                      background: 'linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%)',
+                      color: '#161b26',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 'bold',
+                      fontSize: '16px',
+                      borderRadius: '50%',
+                      width: '40px',
+                      height: '40px'
+                    }}>
+                      {(userProfile?.fullName || userProfile?.name || 'U').charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
                 <div className="mobile-user-details">
-                  <div className="mobile-user-name">{userProfile?.name || currentUser.email}</div>
+                  <div className="mobile-user-name">{userProfile?.fullName || userProfile?.name || currentUser.email}</div>
                   <div className="mobile-user-email">{currentUser.email}</div>
                   <div className={`role-tag ${userRole}`}>
-                    {userRole === 'admin' ? 'Administrator' : 'User'}
+                    {userRole === 'admin' ? 'Administrator' : 
+                     userRole === 'staff' ? 'Staff' : 
+                     userRole === 'student' ? 'Student' : 'User'}
                   </div>
                 </div>
               </div>
               <div className="mobile-user-actions">
                 <Link 
-                  to={userRole === 'admin' ? '/admin' : '/user/dashboard'}
+                  to={userRole === 'admin' ? '/admin' : 
+                      userRole === 'staff' ? '/staff' : 
+                      userRole === 'student' ? '/student/portal' : 
+                      '/user/dashboard'}
                   className="btn btn-outline"
-                  onClick={() => handleNavigation(userRole === 'admin' ? '/admin' : '/user/dashboard')}
+                  onClick={() => handleNavigation(userRole === 'admin' ? '/admin' : 
+                                userRole === 'staff' ? '/staff' : 
+                                userRole === 'student' ? '/student/portal' : 
+                                '/user/dashboard')}
                 >
-                  {userRole === 'admin' ? 'Admin Panel' : 'Dashboard'}
+                  Dashboard
                 </Link>
                 <button 
                   onClick={handleLogout}
