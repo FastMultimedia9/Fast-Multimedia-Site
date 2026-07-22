@@ -35,13 +35,77 @@ import {
 } from '../firebase';
 
 // ============================================
+// GENERATE MEMORABLE STUDENT ID
+// ============================================
+
+// Generate a memorable student ID using full first name + 4-digit number
+export const generateStudentId = async (fullName) => {
+  try {
+    // Extract first name (first part of full name)
+    const firstName = fullName?.trim()?.split(' ')[0] || 'STU';
+    
+    // Clean first name - remove special characters, keep only letters
+    const cleanFirstName = firstName.replace(/[^a-zA-Z]/g, '').toUpperCase();
+    
+    // Use the FULL first name (up to 6 characters for readability)
+    const namePart = cleanFirstName.substring(0, 6).padEnd(3, 'X');
+    
+    // Get current year (last 2 digits)
+    const year = new Date().getFullYear().toString().slice(-2);
+    
+    // Get all existing student IDs to find the next number
+    const allStudents = await getAllStudents();
+    
+    // Find the highest number for this name and year
+    let highestNumber = 0;
+    const pattern = new RegExp(`^${namePart}${year}(\\d{4})$`);
+    
+    allStudents.forEach(student => {
+      const id = student.studentId || '';
+      const match = id.match(pattern);
+      if (match) {
+        const num = parseInt(match[1]);
+        if (num > highestNumber) {
+          highestNumber = num;
+        }
+      }
+    });
+    
+    // Next number (start from 1 if none exist)
+    const nextNumber = highestNumber + 1;
+    
+    // Format with leading zeros (4 digits)
+    const numberPart = String(nextNumber).padStart(4, '0');
+    
+    // Create the student ID
+    const studentId = `${namePart}${year}${numberPart}`;
+    
+    console.log(`✅ Generated student ID: ${studentId} for ${fullName}`);
+    return studentId;
+    
+  } catch (error) {
+    console.error('Error generating student ID:', error);
+    // Fallback to timestamp-based ID
+    const fallbackId = `STU${Date.now().toString().slice(-6)}`;
+    return fallbackId;
+  }
+};
+
+// ============================================
 // STUDENT MANAGEMENT
 // ============================================
 
-// Create a new student
+// Create a new student with memorable ID
 export const createStudent = async (studentData) => {
   try {
-    const studentId = studentData.studentId || `STU-${Date.now()}`;
+    // If no studentId provided, generate one
+    let studentId = studentData.studentId;
+    if (!studentId) {
+      // Generate memorable ID from full name
+      studentId = await generateStudentId(studentData.fullName || 'Student');
+      studentData.studentId = studentId;
+    }
+    
     const studentRef = doc(db, COLLECTIONS.STUDENTS, studentId);
     
     await setDoc(studentRef, {
@@ -1530,6 +1594,7 @@ export default {
   enrollStudentInCourse,
   getStudentAttendance,
   getStudentGrades,
+  generateStudentId,
   
   // Staff functions
   createStaff,
