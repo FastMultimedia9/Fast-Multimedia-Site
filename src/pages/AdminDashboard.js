@@ -53,7 +53,10 @@ import {
   FaMapMarkerAlt,
   FaCalendarCheck,
   FaBriefcase,
-  FaSchool
+  FaSchool,
+  FaChevronDown,
+  FaChevronRight,
+  FaUser
 } from 'react-icons/fa';
 import {
   getAllStudents,
@@ -111,6 +114,7 @@ const AdminDashboard = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [expandedCourses, setExpandedCourses] = useState({});
   const [staffData, setStaffData] = useState({
     fullName: '',
     email: '',
@@ -503,9 +507,35 @@ const AdminDashboard = () => {
     showNotification('Data exported successfully', 'success');
   };
 
-  // Filter students
-  const getFilteredStudents = () => {
-    let filtered = students;
+  // ============================================
+  // GROUP STUDENTS BY COURSE
+  // ============================================
+  const getStudentsGroupedByCourse = () => {
+    const grouped = {};
+    
+    // Get all unique courses from students
+    const allCourses = [...new Set(students.map(s => s.course || s.enrolledCourses?.[0] || 'Not Assigned'))];
+    
+    allCourses.forEach(course => {
+      grouped[course] = students.filter(s => 
+        (s.course || s.enrolledCourses?.[0] || 'Not Assigned') === course
+      );
+    });
+    
+    return grouped;
+  };
+
+  // Toggle course expansion
+  const toggleCourseExpansion = (courseName) => {
+    setExpandedCourses(prev => ({
+      ...prev,
+      [courseName]: !prev[courseName]
+    }));
+  };
+
+  // Filter students by status and search
+  const getFilteredStudentsForCourse = (courseStudents) => {
+    let filtered = courseStudents;
     
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -708,102 +738,155 @@ const AdminDashboard = () => {
     </div>
   );
 
-  // Render Students
-  const renderStudents = () => (
-    <div className="students-content">
-      <div className="content-header">
-        <h2>Student Management</h2>
-        <div className="header-actions">
-          <div className="search-box">
-            <FaSearch />
-            <input
-              type="text"
-              placeholder="Search students..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+  // Render Students - GROUPED BY COURSE
+  const renderStudents = () => {
+    const groupedStudents = getStudentsGroupedByCourse();
+    
+    return (
+      <div className="students-content">
+        <div className="content-header">
+          <h2>Student Management</h2>
+          <div className="header-actions">
+            <div className="search-box">
+              <FaSearch />
+              <input
+                type="text"
+                placeholder="Search students..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <select
+              className="filter-select"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="enrolled">Enrolled</option>
+            </select>
+            <button className="export-btn" onClick={() => exportToCSV(students, 'students')}>
+              <FaDownloadIcon /> Export
+            </button>
           </div>
-          <select
-            className="filter-select"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="enrolled">Enrolled</option>
-          </select>
-          <button className="export-btn" onClick={() => exportToCSV(getFilteredStudents(), 'students')}>
-            <FaDownloadIcon /> Export
-          </button>
+        </div>
+
+        <div className="students-grouped">
+          {Object.entries(groupedStudents).map(([courseName, courseStudents]) => {
+            const filteredStudents = getFilteredStudentsForCourse(courseStudents);
+            const isExpanded = expandedCourses[courseName] || false;
+            const studentCount = filteredStudents.length;
+            
+            // Skip empty courses when searching
+            if (searchQuery && studentCount === 0) return null;
+            
+            return (
+              <div key={courseName} className="course-group">
+                <div 
+                  className="course-group-header"
+                  onClick={() => toggleCourseExpansion(courseName)}
+                >
+                  <div className="course-group-title">
+                    <span className="course-icon">
+                      <FaBookOpen />
+                    </span>
+                    <span className="course-name">{courseName}</span>
+                    <span className="course-count">
+                      <FaUsers /> {studentCount} {studentCount === 1 ? 'Student' : 'Students'}
+                    </span>
+                  </div>
+                  <div className="course-group-actions">
+                    <span className={`expand-icon ${isExpanded ? 'expanded' : ''}`}>
+                      {isExpanded ? <FaChevronDown /> : <FaChevronRight />}
+                    </span>
+                  </div>
+                </div>
+                
+                {isExpanded && (
+                  <div className="course-group-body">
+                    {filteredStudents.length === 0 ? (
+                      <div className="no-students-message">
+                        <FaInfoCircle /> No students match your filters
+                      </div>
+                    ) : (
+                      <div className="students-table">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Student ID</th>
+                              <th>Name</th>
+                              <th>Email</th>
+                              <th>Phone</th>
+                              <th>Status</th>
+                              <th>Date</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredStudents.map((student) => (
+                              <tr key={student.id}>
+                                <td><strong>{student.studentId || 'N/A'}</strong></td>
+                                <td>{student.fullName}</td>
+                                <td>{student.email}</td>
+                                <td>{student.phone}</td>
+                                <td>
+                                  <span className={`status-badge ${getStatusColor(student.admissionStatus)}`}>
+                                    {getStatusIcon(student.admissionStatus)} {student.admissionStatus || 'pending'}
+                                  </span>
+                                </td>
+                                <td>{new Date(student.createdAt?.seconds * 1000).toLocaleDateString()}</td>
+                                <td>
+                                  <div className="action-buttons">
+                                    <button 
+                                      className="action-btn-icon view"
+                                      onClick={() => {
+                                        setSelectedStudent(student);
+                                        setShowStudentModal(true);
+                                      }}
+                                    >
+                                      <FaEye />
+                                    </button>
+                                    <button 
+                                      className="action-btn-icon edit"
+                                      onClick={() => {
+                                        setEditingStudent(student);
+                                        setEditFormData(student);
+                                        setShowEditModal(true);
+                                      }}
+                                    >
+                                      <FaEdit />
+                                    </button>
+                                    <button 
+                                      className="action-btn-icon delete"
+                                      onClick={() => handleDeleteStudent(student.id)}
+                                    >
+                                      <FaTrash />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          
+          {Object.keys(groupedStudents).length === 0 && (
+            <div className="no-students-message">
+              <FaInfoCircle /> No students found
+            </div>
+          )}
         </div>
       </div>
-
-      <div className="students-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Student ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Course</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {getFilteredStudents().map((student) => (
-              <tr key={student.id}>
-                <td><strong>{student.studentId || 'N/A'}</strong></td>
-                <td>{student.fullName}</td>
-                <td>{student.email}</td>
-                <td>{student.phone}</td>
-                <td>{student.course || student.enrolledCourses?.[0] || 'N/A'}</td>
-                <td>
-                  <span className={`status-badge ${getStatusColor(student.admissionStatus)}`}>
-                    {getStatusIcon(student.admissionStatus)} {student.admissionStatus || 'pending'}
-                  </span>
-                </td>
-                <td>{new Date(student.createdAt?.seconds * 1000).toLocaleDateString()}</td>
-                <td>
-                  <div className="action-buttons">
-                    <button 
-                      className="action-btn-icon view"
-                      onClick={() => {
-                        setSelectedStudent(student);
-                        setShowStudentModal(true);
-                      }}
-                    >
-                      <FaEye />
-                    </button>
-                    <button 
-                      className="action-btn-icon edit"
-                      onClick={() => {
-                        setEditingStudent(student);
-                        setEditFormData(student);
-                        setShowEditModal(true);
-                      }}
-                    >
-                      <FaEdit />
-                    </button>
-                    <button 
-                      className="action-btn-icon delete"
-                      onClick={() => handleDeleteStudent(student.id)}
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+    );
+  };
 
   // Render Admissions with detailed view and delete button
   const renderAdmissions = () => (
