@@ -1,6 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { authAPI } from './supabase';
+import { getCurrentUser, getUserProfile } from './services/firebaseService';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import MetaCacheFix from './components/MetaCacheFix';
@@ -78,7 +78,9 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Simple Protected Route without Auth Context
+// ============================================
+// FIXED: ProtectedRoute using Firebase Auth
+// ============================================
 const ProtectedRoute = ({ children, adminOnly = false, requireAuth = true }) => {
   const [authState, setAuthState] = useState({
     isAuthenticated: false,
@@ -90,16 +92,32 @@ const ProtectedRoute = ({ children, adminOnly = false, requireAuth = true }) => 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const user = await authAPI.getCurrentUserWithProfile();
+        console.log('🔐 ProtectedRoute: Checking auth...');
+        const user = await getCurrentUser();
+        console.log('🔐 ProtectedRoute: User:', user);
         
         if (user) {
-          const role = user.profile?.role || 'user';
-          setAuthState({
-            isAuthenticated: true,
-            userRole: role,
-            loading: false
-          });
+          const profile = await getUserProfile(user.uid);
+          console.log('🔐 ProtectedRoute: Profile:', profile);
+          
+          if (profile) {
+            const role = profile.role || 'user';
+            setAuthState({
+              isAuthenticated: true,
+              userRole: role,
+              loading: false
+            });
+            console.log('✅ ProtectedRoute: User authenticated, role:', role);
+          } else {
+            console.log('⚠️ ProtectedRoute: No profile found for user');
+            setAuthState({
+              isAuthenticated: false,
+              userRole: 'user',
+              loading: false
+            });
+          }
         } else {
+          console.log('⚠️ ProtectedRoute: No user found');
           setAuthState({
             isAuthenticated: false,
             userRole: 'user',
@@ -107,7 +125,7 @@ const ProtectedRoute = ({ children, adminOnly = false, requireAuth = true }) => 
           });
         }
       } catch (error) {
-        console.error('Auth check error:', error);
+        console.error('❌ ProtectedRoute auth check error:', error);
         setAuthState({
           isAuthenticated: false,
           userRole: 'user',
@@ -117,7 +135,7 @@ const ProtectedRoute = ({ children, adminOnly = false, requireAuth = true }) => 
     };
     
     checkAuth();
-  }, [location]);
+  }, [location.pathname]); // Re-check when path changes
 
   if (authState.loading) {
     return (
@@ -136,15 +154,20 @@ const ProtectedRoute = ({ children, adminOnly = false, requireAuth = true }) => 
   }
 
   // If admin access is required but user is not admin
-  if (adminOnly && authState.userRole !== 'admin') {
-    console.log('🚫 Redirecting to home - User not admin');
+  if (adminOnly && authState.userRole !== 'admin' && authState.userRole !== 'staff') {
+    console.log('🚫 Redirecting to home - User not admin/staff');
     return <Navigate to="/" replace />;
   }
 
   // If user is authenticated but trying to access login page
   if (!requireAuth && authState.isAuthenticated && (location.pathname === '/login' || location.pathname === '/admin/login')) {
-    console.log('📍 User already logged in, redirecting to admin dashboard');
-    return <Navigate to="/admin/dashboard" replace />;
+    console.log('📍 User already logged in, redirecting to dashboard');
+    const role = authState.userRole;
+    let redirectPath = '/dashboard';
+    if (role === 'admin') redirectPath = '/admin';
+    else if (role === 'staff') redirectPath = '/staff';
+    else if (role === 'student') redirectPath = '/student/portal';
+    return <Navigate to={redirectPath} replace />;
   }
 
   return children;
@@ -262,7 +285,7 @@ function AppContent() {
             </Suspense>
           } />
           
-          {/* ===== AUTH PAGES - MOVED TO TOP LEVEL ===== */}
+          {/* ===== AUTH PAGES ===== */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           
@@ -389,7 +412,6 @@ function AppContent() {
                     <li><a href="/login">Login</a></li>
                     <li><a href="/register">Register</a></li>
                     <li><a href="/admin/dashboard">Admin Dashboard</a></li>
-                    <li><a href="/test">Test Database Connection</a></li>
                   </ul>
                 </div>
                 <a href="/" className="back-home-btn">Back to Home</a>
