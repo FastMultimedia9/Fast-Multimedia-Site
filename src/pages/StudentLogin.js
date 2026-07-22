@@ -110,6 +110,7 @@ const StudentLogin = () => {
         student.password = DEFAULT_PASSWORD;
       }
 
+      // Set student data in state
       setStudentData(student);
 
       // Check admission status
