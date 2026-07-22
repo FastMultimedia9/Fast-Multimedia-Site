@@ -23,6 +23,7 @@ import {
   getStudentByEmail,
   updateStudent,
   getUserByEmail,
+  getStudentByStudentId,
   verifyStudentPassword,
   updateStudentPassword
 } from '../services/firebaseService';
@@ -70,18 +71,14 @@ const StudentLogin = () => {
       // Check if identifier is a student ID or email
       let student = null;
       
-      if (identifier.includes('@')) {
-        // Try to find by email
-        student = await getStudentByEmail(identifier);
-      } else {
-        // Try to find by student ID from the students collection
-        const { getStudentByStudentId } = await import('../services/firebaseService');
+      // Try to find by student ID first
+      if (!identifier.includes('@')) {
         student = await getStudentByStudentId(identifier.toUpperCase());
-        
-        // If not found by student ID, try by email
-        if (!student) {
-          student = await getStudentByEmail(identifier);
-        }
+      }
+      
+      // If not found by student ID, try by email
+      if (!student) {
+        student = await getStudentByEmail(identifier);
       }
 
       // If student not found, check if they exist in users collection
@@ -94,6 +91,7 @@ const StudentLogin = () => {
             studentId: user.studentId || user.id,
             fullName: user.fullName || user.name,
             email: user.email,
+            course: user.course || 'Not specified',
             admissionStatus: user.admissionStatus || 'approved',
             password: user.password || DEFAULT_PASSWORD,
             passwordUpdated: user.passwordUpdated || false
@@ -105,6 +103,11 @@ const StudentLogin = () => {
         setError('Student not found. Please ensure you have completed your application or contact support.');
         setStatusChecked(true);
         return null;
+      }
+
+      // Ensure student has a password
+      if (!student.password) {
+        student.password = DEFAULT_PASSWORD;
       }
 
       setStudentData(student);
@@ -179,12 +182,19 @@ const StudentLogin = () => {
       }
     }
 
-    // Now validate password
+    // Now validate password - use the studentData from state
     setIsLoading(true);
 
     try {
+      // Get the student from state (should be set by checkStudentAccess)
       const student = studentData;
       
+      if (!student) {
+        setError('Student data not found. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
       // Check if using default password
       if (password === DEFAULT_PASSWORD) {
         // User is using default password - force password change
@@ -268,6 +278,12 @@ const StudentLogin = () => {
     try {
       const student = studentData;
       
+      if (!student) {
+        setPasswordChangeError('Student data not found. Please try again.');
+        setIsPasswordUpdating(false);
+        return;
+      }
+      
       // Update student password
       await updateStudentPassword(student.id, newPassword);
 
@@ -315,6 +331,7 @@ const StudentLogin = () => {
               <div className="student-info-content">
                 <h4>Welcome, <strong>{studentData.fullName}</strong></h4>
                 <p>Student ID: <strong>{studentData.studentId || studentData.id}</strong></p>
+                <p>Course: <strong>{studentData.course || 'Not assigned'}</strong></p>
               </div>
             </div>
           )}
