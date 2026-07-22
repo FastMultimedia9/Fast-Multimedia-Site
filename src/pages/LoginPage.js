@@ -71,7 +71,6 @@ const LoginPage = () => {
       const user = userCredential.user;
       
       if (user) {
-        // Get user profile to check role
         const profile = await getUserProfile(user.uid);
         
         if (profile) {
@@ -85,10 +84,8 @@ const LoginPage = () => {
             localStorage.removeItem('login_user_email');
           }
           
-          // Show success message
           setError('success:Login successful! Redirecting...');
           
-          // Redirect based on user role
           setTimeout(() => {
             const role = profile.role || 'user';
             let redirectPath = '/dashboard';
@@ -138,9 +135,8 @@ const LoginPage = () => {
     setIsLoading(true);
     
     try {
-      // Use Firebase password reset
       const { sendPasswordResetEmail } = await import('../firebase');
-      await sendPasswordResetEmail(email);
+      await sendPasswordResetEmail(resetEmail);
       
       setResetSuccess('Password reset instructions sent to your email.');
       setError('');
@@ -362,7 +358,6 @@ const LoginPage = () => {
                     )}
                   </button>
 
-                  {/* Registration Link */}
                   <div className="register-link">
                     <p>Don't have an account? 
                       <button 
@@ -376,14 +371,12 @@ const LoginPage = () => {
                   </div>
                   
                   <div className="login-footer-actions">
-                    {!showResetForm && (
-                      <button 
-                        onClick={() => setShowResetForm(true)}
-                        className="forgot-password"
-                      >
-                        <i className="fas fa-question-circle"></i> Forgot Password?
-                      </button>
-                    )}
+                    <button 
+                      onClick={() => setShowResetForm(true)}
+                      className="forgot-password"
+                    >
+                      <i className="fas fa-question-circle"></i> Forgot Password?
+                    </button>
                     <button 
                       type="button"
                       onClick={handleGuestBrowse}
