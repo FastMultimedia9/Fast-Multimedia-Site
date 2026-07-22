@@ -59,6 +59,9 @@ const StudentLogin = () => {
 
   // Default password for all users
   const DEFAULT_PASSWORD = 'FastMultimedia2024@';
+  
+  // Store student data in a ref to access it in handleLogin
+  const [cachedStudent, setCachedStudent] = useState(null);
 
   // Check student admission status
   const checkStudentAccess = async (identifier) => {
@@ -66,6 +69,7 @@ const StudentLogin = () => {
     setAdmissionStatus(null);
     setStatusChecked(false);
     setStudentData(null);
+    setCachedStudent(null);
 
     try {
       // Check if identifier is a student ID or email
@@ -110,8 +114,9 @@ const StudentLogin = () => {
         student.password = DEFAULT_PASSWORD;
       }
 
-      // Set student data in state
+      // Set student data in state AND cache
       setStudentData(student);
+      setCachedStudent(student);
 
       // Check admission status
       const status = student.admissionStatus || 'pending';
@@ -183,12 +188,12 @@ const StudentLogin = () => {
       }
     }
 
-    // Now validate password - use the studentData from state
+    // Now validate password - use the cached student data
     setIsLoading(true);
 
     try {
-      // Get the student from state (should be set by checkStudentAccess)
-      const student = studentData;
+      // Get the student from cache or state
+      const student = cachedStudent || studentData;
       
       if (!student) {
         setError('Student data not found. Please try again.');
@@ -197,7 +202,6 @@ const StudentLogin = () => {
       }
 
       // IMPORTANT: Check if password has been updated
-      // If passwordUpdated is true, the default password should NOT work
       const isDefaultPassword = password === DEFAULT_PASSWORD;
       const hasPasswordBeenUpdated = student.passwordUpdated === true;
       
@@ -288,7 +292,7 @@ const StudentLogin = () => {
     setIsPasswordUpdating(true);
 
     try {
-      const student = studentData;
+      const student = cachedStudent || studentData;
       
       if (!student) {
         setPasswordChangeError('Student data not found. Please try again.');
@@ -300,11 +304,14 @@ const StudentLogin = () => {
       await updateStudentPassword(student.id, newPassword);
 
       // Update local student data to reflect password change
-      setStudentData({
+      const updatedStudent = {
         ...student,
         password: newPassword,
         passwordUpdated: true
-      });
+      };
+      
+      setStudentData(updatedStudent);
+      setCachedStudent(updatedStudent);
 
       setTimeout(() => {
         setIsPasswordUpdating(false);
@@ -342,16 +349,16 @@ const StudentLogin = () => {
           )}
 
           {/* Student Info Display */}
-          {statusChecked && studentData && (
+          {statusChecked && (cachedStudent || studentData) && (
             <div className="student-info-badge">
               <div className="student-info-icon">
                 <FaUserGraduate />
               </div>
               <div className="student-info-content">
-                <h4>Welcome, <strong>{studentData.fullName}</strong></h4>
-                <p>Student ID: <strong>{studentData.studentId || studentData.id}</strong></p>
-                <p>Course: <strong>{studentData.course || 'Not assigned'}</strong></p>
-                <p>Password Status: <strong>{studentData.passwordUpdated ? '✅ Changed' : '⚠️ Default'}</strong></p>
+                <h4>Welcome, <strong>{(cachedStudent || studentData).fullName}</strong></h4>
+                <p>Student ID: <strong>{(cachedStudent || studentData).studentId || (cachedStudent || studentData).id}</strong></p>
+                <p>Course: <strong>{(cachedStudent || studentData).course || 'Not assigned'}</strong></p>
+                <p>Password Status: <strong>{(cachedStudent || studentData).passwordUpdated ? '✅ Changed' : '⚠️ Default'}</strong></p>
               </div>
             </div>
           )}
@@ -494,6 +501,7 @@ const StudentLogin = () => {
                         setAdmissionStatus(null);
                         setError('');
                         setStudentData(null);
+                        setCachedStudent(null);
                       }}
                       placeholder="Enter your Student ID or Email"
                       required
