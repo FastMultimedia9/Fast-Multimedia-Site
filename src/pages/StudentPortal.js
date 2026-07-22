@@ -42,7 +42,8 @@ import {
   FaHome,
   FaBullhorn,
   FaClipboardList,
-  FaInfoCircle
+  FaInfoCircle,
+  FaExclamationTriangle
 } from 'react-icons/fa';
 import {
   getCurrentUser,
@@ -92,7 +93,6 @@ const StudentPortal = () => {
         const user = await getCurrentUser();
         
         if (!user) {
-          // No user logged in, redirect to login
           navigate('/student/login');
           return;
         }
@@ -120,12 +120,10 @@ const StudentPortal = () => {
           student = await getStudentByEmail(profile.email);
         }
         
-        // If not found by email, try by student ID
         if (!student && profile.studentId) {
           student = await getStudentByStudentId(profile.studentId);
         }
 
-        // If still not found, use profile data
         if (!student) {
           student = {
             id: user.uid,
@@ -138,7 +136,7 @@ const StudentPortal = () => {
             gender: profile.gender || '',
             emergencyContact: profile.emergencyContact || '',
             emergencyPhone: profile.emergencyPhone || '',
-            course: profile.course || 'Not specified',
+            course: profile.course || 'Not assigned',
             enrolledCourses: profile.enrolledCourses || [],
             paymentHistory: profile.paymentHistory || [],
             attendance: profile.attendance || { total: 0, present: 0, absent: 0, percentage: 0 },
@@ -152,10 +150,12 @@ const StudentPortal = () => {
           };
         }
 
-        // Set student data
+        // Ensure the course is set
+        if (!student.course || student.course === 'Not specified') {
+          student.course = profile.course || 'Not assigned';
+        }
+
         setStudentData(student);
-        
-        // Set profile data for editing
         setProfileData({
           fullName: student.fullName || '',
           email: student.email || '',
@@ -193,19 +193,16 @@ const StudentPortal = () => {
       return;
     }
 
-    // Check for uppercase letter
     if (!/[A-Z]/.test(passwordData.newPassword)) {
       setError('Password must include at least one uppercase letter.');
       return;
     }
 
-    // Check for number
     if (!/[0-9]/.test(passwordData.newPassword)) {
       setError('Password must include at least one number.');
       return;
     }
 
-    // Check for special character
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(passwordData.newPassword)) {
       setError('Password must include at least one special character.');
       return;
@@ -242,7 +239,6 @@ const StudentPortal = () => {
         updatedAt: new Date().toISOString()
       });
 
-      // Update local state
       setStudentData({
         ...studentData,
         fullName: profileData.fullName,
@@ -278,46 +274,6 @@ const StudentPortal = () => {
     window.open(`https://wa.me/233505159131?text=${encodeURIComponent(message)}`, '_blank');
   };
 
-  const getPaymentStatusColor = (status) => {
-    switch(status) {
-      case 'completed': return 'status-completed';
-      case 'pending': return 'status-pending';
-      case 'failed': return 'status-failed';
-      default: return '';
-    }
-  };
-
-  const getAssignmentStatusColor = (status) => {
-    switch(status) {
-      case 'submitted': return 'status-submitted';
-      case 'pending': return 'status-pending';
-      case 'graded': return 'status-graded';
-      default: return '';
-    }
-  };
-
-  // Get enrolled course or single course
-  const getCourses = () => {
-    if (studentData?.enrolledCourses && studentData.enrolledCourses.length > 0) {
-      return studentData.enrolledCourses;
-    }
-    // If no enrolled courses but has a course field
-    if (studentData?.course && studentData.course !== 'Not specified') {
-      return [{
-        id: 'course-1',
-        name: studentData.course,
-        progress: 0,
-        grade: 'N/A',
-        instructor: 'Not assigned yet',
-        status: 'active',
-        startDate: studentData.applicationDate || new Date().toISOString().split('T')[0],
-        endDate: 'Pending',
-        assignments: []
-      }];
-    }
-    return [];
-  };
-
   if (isLoading) {
     return (
       <div className="student-portal-loading">
@@ -347,7 +303,44 @@ const StudentPortal = () => {
     );
   }
 
-  const courses = getCourses();
+  // Get the student's single course
+  const getStudentCourse = () => {
+    // If student has enrolled courses array, get the first one
+    if (studentData?.enrolledCourses && studentData.enrolledCourses.length > 0) {
+      const course = studentData.enrolledCourses[0];
+      return {
+        id: course.id || 'course-1',
+        name: course.name || studentData.course || 'Not assigned',
+        progress: course.progress || 0,
+        grade: course.grade || 'N/A',
+        instructor: course.instructor || 'Not assigned yet',
+        status: course.status || 'active',
+        startDate: course.startDate || studentData.applicationDate || new Date().toISOString().split('T')[0],
+        endDate: course.endDate || 'In Progress',
+        assignments: course.assignments || []
+      };
+    }
+    
+    // If only course field exists
+    if (studentData?.course && studentData.course !== 'Not specified' && studentData.course !== 'Not assigned') {
+      return {
+        id: 'course-1',
+        name: studentData.course,
+        progress: 0,
+        grade: 'N/A',
+        instructor: 'Not assigned yet',
+        status: 'active',
+        startDate: studentData.applicationDate || new Date().toISOString().split('T')[0],
+        endDate: 'In Progress',
+        assignments: []
+      };
+    }
+    
+    // No course assigned
+    return null;
+  };
+
+  const studentCourse = getStudentCourse();
 
   return (
     <div className="student-portal">
@@ -361,9 +354,11 @@ const StudentPortal = () => {
               </div>
               <div>
                 <h1>Welcome back, {studentData?.fullName?.split(' ')[0] || 'Student'}!</h1>
-                <p className="student-id">Student ID: {studentData?.studentId || studentData?.id}</p>
+                <p className="student-id">
+                  <FaIdCard /> Student ID: <strong>{studentData?.studentId || studentData?.id}</strong>
+                </p>
                 <p className="student-course">
-                  <FaBookOpen /> Course: <strong>{studentData?.course || 'Not assigned'}</strong>
+                  <FaBookOpen /> Course: <strong className="course-name-highlight">{studentData?.course || 'Not assigned'}</strong>
                 </p>
               </div>
             </div>
@@ -424,10 +419,10 @@ const StudentPortal = () => {
             <FaHome /> Dashboard
           </button>
           <button 
-            className={`tab-btn ${activeTab === 'courses' ? 'active' : ''}`}
-            onClick={() => setActiveTab('courses')}
+            className={`tab-btn ${activeTab === 'course' ? 'active' : ''}`}
+            onClick={() => setActiveTab('course')}
           >
-            <FaBookOpen /> My Courses
+            <FaBookOpen /> My Course
           </button>
           <button 
             className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
@@ -456,18 +451,23 @@ const StudentPortal = () => {
 
             {/* Student Info Card */}
             <div className="student-info-card">
+              <h3><FaUserGraduate /> Student Information</h3>
               <div className="info-row">
                 <span className="info-label">Student ID:</span>
                 <span className="info-value">{studentData?.studentId || studentData?.id}</span>
               </div>
               <div className="info-row">
                 <span className="info-label">Course:</span>
-                <span className="info-value course-name">{studentData?.course || 'Not assigned'}</span>
+                <span className="info-value course-name">
+                  <FaBookOpen /> {studentData?.course || 'Not assigned'}
+                </span>
               </div>
               <div className="info-row">
                 <span className="info-label">Status:</span>
                 <span className={`status-badge ${studentData?.admissionStatus || 'pending'}`}>
-                  {studentData?.admissionStatus || 'Pending'}
+                  {studentData?.admissionStatus === 'approved' ? '✅ Approved' :
+                   studentData?.admissionStatus === 'enrolled' ? '✅ Enrolled' :
+                   studentData?.admissionStatus || 'Pending'}
                 </span>
               </div>
               <div className="info-row">
@@ -476,43 +476,39 @@ const StudentPortal = () => {
               </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-icon blue">
-                  <FaBookOpen />
-                </div>
-                <div className="stat-info">
-                  <h3>{courses.length}</h3>
-                  <p>Active Courses</p>
-                </div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon gold">
-                  <FaAward />
-                </div>
-                <div className="stat-info">
-                  <h3>{studentData?.achievements?.length || 0}</h3>
-                  <p>Achievements</p>
-                </div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon purple">
-                  <FaChartLine />
-                </div>
-                <div className="stat-info">
-                  <h3>{studentData?.attendance?.percentage || 0}%</h3>
-                  <p>Attendance Rate</p>
+            {/* Course Overview Card */}
+            {studentCourse && (
+              <div className="course-overview-card">
+                <h3><FaBookOpen /> Your Course</h3>
+                <div className="course-overview-content">
+                  <div className="course-name-large">{studentCourse.name}</div>
+                  <div className="course-meta">
+                    <span><FaUserGraduate /> {studentCourse.instructor}</span>
+                    <span><FaCalendarAlt /> Started: {studentCourse.startDate}</span>
+                    <span><FaClock /> Status: {studentCourse.status}</span>
+                  </div>
+                  <div className="course-progress">
+                    <div className="progress-bar">
+                      <div className="progress-fill" style={{ width: `${studentCourse.progress}%` }}></div>
+                    </div>
+                    <span className="progress-text">{studentCourse.progress}% Complete</span>
+                  </div>
+                  <button 
+                    className="view-course-btn"
+                    onClick={() => setActiveTab('course')}
+                  >
+                    View Course Details <FaArrowRight />
+                  </button>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Quick Actions */}
             <div className="quick-actions">
               <h2>Quick Actions</h2>
               <div className="action-grid">
-                <button className="action-btn" onClick={() => setActiveTab('courses')}>
-                  <FaBookOpen /> View Courses
+                <button className="action-btn" onClick={() => setActiveTab('course')}>
+                  <FaBookOpen /> My Course
                 </button>
                 <button className="action-btn" onClick={handleWhatsAppClick}>
                   <FaWhatsapp /> Contact Support
@@ -525,78 +521,69 @@ const StudentPortal = () => {
                 </button>
               </div>
             </div>
-
-            {/* Recent Activity */}
-            <div className="recent-activity">
-              <h2>Recent Activity</h2>
-              <div className="activity-list">
-                {studentData?.notifications?.slice(0, 3).map(notification => (
-                  <div key={notification.id} className="activity-item">
-                    <div className="activity-icon">
-                      {notification.read ? <FaCheckCircle /> : <FaBell />}
-                    </div>
-                    <div className="activity-content">
-                      <h4>{notification.title}</h4>
-                      <p>{notification.message}</p>
-                      <span className="activity-date">{notification.date}</span>
-                    </div>
-                  </div>
-                ))}
-                {(!studentData?.notifications || studentData.notifications.length === 0) && (
-                  <div className="no-activity">
-                    <p>No recent activity.</p>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         )}
 
-        {/* Courses Tab */}
-        {activeTab === 'courses' && (
+        {/* Course Tab - Shows only the student's single course */}
+        {activeTab === 'course' && (
           <div className="courses-content">
-            <h2>My Courses</h2>
-            <div className="courses-grid">
-              {courses.map((course, index) => (
-                <div key={index} className="course-card-detailed">
-                  <div className="course-header">
-                    <h3>{course.name}</h3>
-                    <span className={`course-status ${course.status || 'active'}`}>
-                      {course.status || 'Active'}
-                    </span>
-                  </div>
-                  <div className="course-details">
-                    <p><FaUserGraduate /> Instructor: {course.instructor || 'Not assigned'}</p>
-                    <p><FaCalendarAlt /> Start: {course.startDate || 'Pending'}</p>
-                    <p><FaStar /> Grade: {course.grade || 'N/A'}</p>
-                  </div>
-                  {course.progress !== undefined && (
-                    <div className="course-progress">
-                      <div className="progress-bar">
-                        <div className="progress-fill" style={{ width: `${course.progress}%` }}></div>
-                      </div>
-                      <span className="progress-text">{course.progress}% Complete</span>
-                    </div>
-                  )}
-                  <div className="course-assignments">
-                    <h4>Assignments</h4>
-                    {course.assignments && course.assignments.length > 0 ? (
-                      course.assignments.map((assignment, idx) => (
-                        <div key={idx} className="assignment-item">
-                          <span className="assignment-title">{assignment.title}</span>
-                          <span className={`assignment-status ${getAssignmentStatusColor(assignment.status)}`}>
-                            {assignment.status}
-                          </span>
-                          <span className="assignment-grade">{assignment.grade ? `${assignment.grade}%` : '—'}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="no-assignments">No assignments available yet.</p>
-                    )}
-                  </div>
+            <h2>My Course</h2>
+            {studentCourse ? (
+              <div className="course-card-detailed single-course">
+                <div className="course-header">
+                  <h3>{studentCourse.name}</h3>
+                  <span className={`course-status ${studentCourse.status || 'active'}`}>
+                    {studentCourse.status || 'Active'}
+                  </span>
                 </div>
-              ))}
-            </div>
+                <div className="course-details">
+                  <p><FaUserGraduate /> Instructor: {studentCourse.instructor || 'Not assigned'}</p>
+                  <p><FaCalendarAlt /> Start Date: {studentCourse.startDate || 'Pending'}</p>
+                  <p><FaCalendarCheck /> End Date: {studentCourse.endDate || 'In Progress'}</p>
+                  <p><FaStar /> Grade: {studentCourse.grade || 'N/A'}</p>
+                </div>
+                <div className="course-progress">
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: `${studentCourse.progress}%` }}></div>
+                  </div>
+                  <span className="progress-text">{studentCourse.progress}% Complete</span>
+                </div>
+                <div className="course-assignments">
+                  <h4>Assignments</h4>
+                  {studentCourse.assignments && studentCourse.assignments.length > 0 ? (
+                    studentCourse.assignments.map((assignment, idx) => (
+                      <div key={idx} className="assignment-item">
+                        <span className="assignment-title">{assignment.title}</span>
+                        <span className={`assignment-status ${assignment.status === 'submitted' ? 'status-submitted' : 'status-pending'}`}>
+                          {assignment.status || 'pending'}
+                        </span>
+                        <span className="assignment-grade">{assignment.grade ? `${assignment.grade}%` : '—'}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="no-assignments">No assignments available yet.</p>
+                  )}
+                </div>
+                <div className="course-support">
+                  <h4>Need Help?</h4>
+                  <button className="support-btn" onClick={handleWhatsAppClick}>
+                    <FaWhatsapp /> Contact Your Instructor
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="no-course-message">
+                <FaBookOpen className="no-course-icon" />
+                <h3>No Course Assigned Yet</h3>
+                <p>Your course will be assigned upon admission approval.</p>
+                <p className="contact-support-text">
+                  If you believe this is an error, please contact support.
+                </p>
+                <button className="support-btn" onClick={handleWhatsAppClick}>
+                  <FaWhatsapp /> Contact Support
+                </button>
+              </div>
+            )}
           </div>
         )}
 
