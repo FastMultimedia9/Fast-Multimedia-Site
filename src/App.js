@@ -132,7 +132,7 @@ const ProtectedRoute = ({ children, adminOnly = false, requireAuth = true }) => 
   if (requireAuth && !authState.isAuthenticated) {
     console.log('🔒 Redirecting to login - User not authenticated');
     localStorage.setItem('redirectAfterLogin', location.pathname);
-    return <Navigate to="/admin/login" replace state={{ from: location }} />;
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   // If admin access is required but user is not admin
@@ -142,7 +142,7 @@ const ProtectedRoute = ({ children, adminOnly = false, requireAuth = true }) => 
   }
 
   // If user is authenticated but trying to access login page
-  if (!requireAuth && authState.isAuthenticated && (location.pathname === '/admin/login' || location.pathname === '/login')) {
+  if (!requireAuth && authState.isAuthenticated && (location.pathname === '/login' || location.pathname === '/admin/login')) {
     console.log('📍 User already logged in, redirecting to admin dashboard');
     return <Navigate to="/admin/dashboard" replace />;
   }
@@ -262,20 +262,12 @@ function AppContent() {
             </Suspense>
           } />
           
-          {/* ===== AUTH PAGES (No Auth Required) ===== */}
-          <Route 
-            path="/login" 
-            element={<LoginPage />}
-          />
-          <Route 
-            path="/admin/login" 
-            element={
-              <ProtectedRoute requireAuth={false}>
-                <LoginPage />
-              </ProtectedRoute>
-            } 
-          />
+          {/* ===== AUTH PAGES - MOVED TO TOP LEVEL ===== */}
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          
+          {/* ===== LEGACY AUTH REDIRECT ===== */}
+          <Route path="/admin/login" element={<Navigate to="/login" replace />} />
           
           {/* ===== USER DASHBOARD (For Regular Users - Auth Required) ===== */}
           <Route 
@@ -394,11 +386,10 @@ function AppContent() {
                     <li><a href="/school">Visit School Page</a></li>
                     <li><a href="/school/admissions">View Admissions</a></li>
                     <li><a href="/student/login">Student Login</a></li>
-                    <li><a href="/admin/login">Admin Login</a></li>
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/register">Register</a></li>
                     <li><a href="/admin/dashboard">Admin Dashboard</a></li>
                     <li><a href="/test">Test Database Connection</a></li>
-                    <li><a href="/login">Login</a></li>
-                    <li><a href="/admin/posts/new">Create New Post</a></li>
                   </ul>
                 </div>
                 <a href="/" className="back-home-btn">Back to Home</a>
