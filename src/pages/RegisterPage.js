@@ -100,6 +100,13 @@ const RegisterPage = () => {
       return;
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
     // Validate admin password if needed
     if (!validateAdminPassword()) {
       return;
@@ -113,6 +120,10 @@ const RegisterPage = () => {
     setIsLoading(true);
 
     try {
+      console.log('📝 Attempting to register user...');
+      console.log('📝 Email:', formData.email);
+      console.log('📝 Role:', formData.role);
+      
       // Register with Firebase Auth
       const userCredential = await registerUser(
         formData.email.trim(),
@@ -127,18 +138,44 @@ const RegisterPage = () => {
         }
       );
 
-      const user = userCredential.user;
+      // Check if userCredential and user exist
+      if (!userCredential) {
+        throw new Error('Registration failed: No user credential returned');
+      }
+
+      const user = userCredential.user || userCredential;
+      
+      if (!user) {
+        throw new Error('Registration failed: No user object returned');
+      }
+
+      if (!user.uid) {
+        console.error('User object missing uid:', user);
+        throw new Error('Registration failed: User UID not found');
+      }
+
+      console.log('✅ User created successfully:', user.uid);
 
       // Update user profile with additional data
-      await updateUserProfile(user.uid, {
-        fullName: formData.fullName.trim(),
-        role: formData.role,
-        phone: formData.phone.trim(),
-        dateOfBirth: formData.dateOfBirth,
-        gender: formData.gender,
-        emailVerified: false,
-        createdAt: new Date().toISOString()
-      });
+      try {
+        await updateUserProfile(user.uid, {
+          fullName: formData.fullName.trim(),
+          role: formData.role,
+          phone: formData.phone.trim(),
+          dateOfBirth: formData.dateOfBirth,
+          gender: formData.gender,
+          emailVerified: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+        console.log('✅ User profile updated successfully');
+      } catch (profileError) {
+        console.error('Error updating profile:', profileError);
+        // Don't throw - user was created, profile update can be retried
+        setError('Account created but profile update failed. Please contact support.');
+        setIsLoading(false);
+        return;
+      }
 
       setSuccess('Registration successful! Redirecting to login...');
       setFormData({
@@ -155,14 +192,27 @@ const RegisterPage = () => {
       });
       setShowAdminPassword(false);
       
-      // Redirect to login page
+      // Redirect to login page after success
       setTimeout(() => {
-        navigate('/login');
+        navigate('/login', { 
+          state: { 
+            message: 'Registration successful! Please login with your credentials.' 
+          } 
+        });
       }, 2000);
+
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('❌ Registration error:', error);
+      
+      // Handle specific Firebase auth errors
       if (error.code === 'auth/email-already-in-use') {
         setError('This email is already registered. Please login instead.');
+      } else if (error.code === 'auth/invalid-email') {
+        setError('Invalid email address. Please check and try again.');
+      } else if (error.code === 'auth/weak-password') {
+        setError('Password is too weak. Please use a stronger password.');
+      } else if (error.code === 'auth/too-many-requests') {
+        setError('Too many registration attempts. Please try again later.');
       } else {
         setError(error.message || 'Registration failed. Please try again.');
       }
