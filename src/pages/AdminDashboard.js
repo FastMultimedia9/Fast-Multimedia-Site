@@ -80,7 +80,10 @@ import {
   getAllSerials,
   logoutUser,
   getCurrentUser,
-  getUserProfile
+  getUserProfile,
+  deleteDoc,
+  doc,
+  db
 } from '../services/firebaseService';
 import { sendAdmissionStatusEmail } from '../services/emailService';
 import './AdminDashboard.css';
@@ -203,14 +206,16 @@ const AdminDashboard = () => {
     }
   };
 
-  // Format currency
+  // Format currency - FIXED: Convert from pesewas to GHS
   const formatCurrency = (amount) => {
+    // If amount is in pesewas (like 10000 for GH₵ 100.00), divide by 100
+    const amountInGHS = amount > 100 ? amount / 100 : amount;
     return new Intl.NumberFormat('en-GH', {
       style: 'currency',
       currency: 'GHS',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    }).format(amount || 0);
+    }).format(amountInGHS || 0);
   };
 
   // ============================================
@@ -395,6 +400,23 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error updating admission status:', error);
       showNotification('Error updating admission status: ' + error.message, 'error');
+    }
+  };
+
+  // ============================================
+  // DELETE ADMISSION
+  // ============================================
+  const handleDeleteAdmission = async (admissionId) => {
+    if (window.confirm('⚠️ Are you sure you want to delete this admission? This action cannot be undone.')) {
+      try {
+        // Delete the admission document
+        await deleteDoc(doc(db, 'admissions', admissionId));
+        showNotification('Admission deleted successfully', 'success');
+        loadDashboardData();
+      } catch (error) {
+        console.error('Error deleting admission:', error);
+        showNotification('Error deleting admission: ' + error.message, 'error');
+      }
     }
   };
 
@@ -783,7 +805,7 @@ const AdminDashboard = () => {
     </div>
   );
 
-  // Render Admissions with detailed view
+  // Render Admissions with detailed view and delete button
   const renderAdmissions = () => (
     <div className="admissions-content">
       <div className="content-header">
@@ -828,14 +850,14 @@ const AdminDashboard = () => {
                 onClick={() => handleUpdateAdmissionStatus(admission.id, 'approved', admission)}
                 disabled={isSendingEmail}
               >
-                <FaCheck /> {isSendingEmail ? 'Sending...' : 'Approve & Create Student'}
+                <FaCheck /> {isSendingEmail ? 'Sending...' : 'Approve'}
               </button>
               <button
                 className="btn-enroll"
                 onClick={() => handleUpdateAdmissionStatus(admission.id, 'enrolled', admission)}
                 disabled={isSendingEmail}
               >
-                <FaGraduationCap /> {isSendingEmail ? 'Sending...' : 'Enroll & Create Student'}
+                <FaGraduationCap /> {isSendingEmail ? 'Sending...' : 'Enroll'}
               </button>
               <button
                 className="btn-reject"
@@ -853,6 +875,12 @@ const AdminDashboard = () => {
               >
                 <FaEye /> View Details
               </button>
+              <button
+                className="btn-delete"
+                onClick={() => handleDeleteAdmission(admission.id)}
+              >
+                <FaTrash /> Delete
+              </button>
             </div>
           </div>
         ))}
@@ -860,7 +888,7 @@ const AdminDashboard = () => {
     </div>
   );
 
-  // Render Payments with currency formatting
+  // Render Payments with currency formatting - FIXED
   const renderPayments = () => (
     <div className="payments-content">
       <div className="content-header">
