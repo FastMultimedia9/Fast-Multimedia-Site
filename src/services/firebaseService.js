@@ -471,8 +471,19 @@ export const updateAdmissionStatus = async (admissionId, status, notes = null) =
   }
 };
 
+// Delete admission
+export const deleteAdmission = async (admissionId) => {
+  try {
+    await deleteDoc(doc(db, COLLECTIONS.ADMISSIONS, admissionId));
+    return true;
+  } catch (error) {
+    console.error('Error deleting admission:', error);
+    throw error;
+  }
+};
+
 // ============================================
-// ADMISSION STATUS CHECK FUNCTIONS (NEW)
+// ADMISSION STATUS CHECK FUNCTIONS
 // ============================================
 
 // Get student admission status by email
@@ -1410,8 +1421,6 @@ export const updateUserProfile = async (uid, updateData) => {
   }
 };
 
-
-
 // ============================================
 // USER MANAGEMENT (for all roles)
 // ============================================
@@ -1500,6 +1509,13 @@ export const getDashboardStats = async () => {
 };
 
 // ============================================
+// FIREBASE DELETE FUNCTIONS (Direct exports)
+// ============================================
+
+// Export deleteDoc, doc, and db directly for use in components
+export { deleteDoc, doc, db };
+
+// ============================================
 // EXPORT ALL FUNCTIONS
 // ============================================
 
@@ -1529,6 +1545,7 @@ export default {
   getAdmissionBySerial,
   getAllAdmissions,
   updateAdmissionStatus,
+  deleteAdmission,
   
   // Admission Status functions (NEW)
   getStudentAdmissionStatus,
@@ -1586,5 +1603,10 @@ export default {
   updateUserProfile,
   
   // Dashboard
-  getDashboardStats
+  getDashboardStats,
+  
+  // Firebase utilities
+  deleteDoc,
+  doc,
+  db
 };
