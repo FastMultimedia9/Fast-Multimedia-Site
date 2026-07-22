@@ -1737,6 +1737,7 @@ export default {
   getStudent,
   getStudentByEmail,
   getStudentByStudentId,
+  getStudentByStudentId,
   getStudentByEmailOrStudentId,
   verifyStudentPassword,
   updateStudentPassword,
