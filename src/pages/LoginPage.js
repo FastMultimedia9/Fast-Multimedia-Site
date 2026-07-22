@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { authAPI } from '../supabase';
+import { loginUser, getUserProfile, getCurrentUser } from '../services/firebaseService';
 import './LoginPage.css';
 
 const LoginPage = () => {
@@ -21,12 +21,13 @@ const LoginPage = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const loggedIn = await authAPI.isLoggedIn();
-        
-        if (loggedIn) {
-          const from = location.state?.from || '/blog';
-          console.log('📍 User already logged in, redirecting to:', from);
-          navigate(from, { replace: true });
+        const user = await getCurrentUser();
+        if (user) {
+          const profile = await getUserProfile(user.uid);
+          if (profile) {
+            const from = location.state?.from || '/dashboard';
+            navigate(from, { replace: true });
+          }
         }
       } catch (error) {
         console.error('Auth check error:', error);
@@ -38,8 +39,8 @@ const LoginPage = () => {
 
   // Pre-fill email if remembered
   useEffect(() => {
-    const remembered = localStorage.getItem('blog_remember_me');
-    const rememberedEmail = localStorage.getItem('blog_user_email');
+    const remembered = localStorage.getItem('login_remember_me');
+    const rememberedEmail = localStorage.getItem('login_user_email');
     
     if (remembered === 'true' && rememberedEmail) {
       setEmail(rememberedEmail);
@@ -66,35 +67,59 @@ const LoginPage = () => {
     
     try {
       console.log('🔐 Attempting login...');
-      const result = await authAPI.adminLogin(email, password);
+      const userCredential = await loginUser(email, password);
+      const user = userCredential.user;
       
-      if (result.success) {
-        if (rememberMe) {
-          localStorage.setItem('blog_remember_me', 'true');
-          localStorage.setItem('blog_user_email', email);
+      if (user) {
+        // Get user profile to check role
+        const profile = await getUserProfile(user.uid);
+        
+        if (profile) {
+          console.log('✅ User profile found:', profile);
+          
+          if (rememberMe) {
+            localStorage.setItem('login_remember_me', 'true');
+            localStorage.setItem('login_user_email', email);
+          } else {
+            localStorage.removeItem('login_remember_me');
+            localStorage.removeItem('login_user_email');
+          }
+          
+          // Show success message
+          setError('success:Login successful! Redirecting...');
+          
+          // Redirect based on user role
+          setTimeout(() => {
+            const role = profile.role || 'user';
+            let redirectPath = '/dashboard';
+            
+            if (role === 'admin') {
+              redirectPath = '/admin';
+            } else if (role === 'staff') {
+              redirectPath = '/staff';
+            } else if (role === 'student') {
+              redirectPath = '/student';
+            }
+            
+            const from = location.state?.from || redirectPath;
+            console.log(`🎯 Final redirect to: ${from} (Role: ${role})`);
+            navigate(from, { replace: true });
+          }, 1000);
         } else {
-          localStorage.removeItem('blog_remember_me');
-          localStorage.removeItem('blog_user_email');
+          setError('User profile not found. Please contact support.');
         }
-        
-        console.log('✅ Login successful, redirecting...');
-        
-        // Show success message
-        setError('success:Login successful! Redirecting...');
-        
-        // Redirect based on user role
-        setTimeout(() => {
-          const redirectPath = result.isAdmin ? '/admin' : '/blog';
-          const from = location.state?.from || redirectPath;
-          console.log(`🎯 Final redirect to: ${from}`);
-          navigate(from, { replace: true });
-        }, 1000);
-      } else {
-        setError(result.error || 'Invalid email or password');
       }
     } catch (error) {
       console.error('Login error:', error);
-      setError('Login failed. Please try again.');
+      if (error.code === 'auth/user-not-found') {
+        setError('User not found. Please ensure you have completed your application or contact support.');
+      } else if (error.code === 'auth/wrong-password') {
+        setError('Invalid password. Please try again.');
+      } else if (error.code === 'auth/too-many-requests') {
+        setError('Too many failed attempts. Please try again later.');
+      } else {
+        setError(error.message || 'Login failed. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -103,6 +128,7 @@ const LoginPage = () => {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setError('');
+    setResetSuccess('');
     
     if (!resetEmail.trim() || !resetEmail.includes('@')) {
       setError('Please enter a valid email address');
@@ -112,17 +138,19 @@ const LoginPage = () => {
     setIsLoading(true);
     
     try {
-      const result = await authAPI.resetPassword(resetEmail);
+      // Use Firebase password reset
+      const { sendPasswordResetEmail } = await import('../firebase');
+      await sendPasswordResetEmail(email);
       
-      if (result.success) {
-        setResetSuccess(result.message);
-        setError('');
-      } else {
-        setError(result.error || 'Failed to send reset instructions');
-      }
+      setResetSuccess('Password reset instructions sent to your email.');
+      setError('');
     } catch (error) {
       console.error('Reset password error:', error);
-      setError('Password reset failed. Please try again.');
+      if (error.code === 'auth/user-not-found') {
+        setError('No account found with this email address.');
+      } else {
+        setError('Password reset failed. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +168,7 @@ const LoginPage = () => {
   };
 
   const handleGuestBrowse = () => {
-    navigate('/blog');
+    navigate('/');
   };
 
   return (
@@ -149,22 +177,22 @@ const LoginPage = () => {
         <div className="login-left">
           <div className="login-brand">
             <div className="login-logo">
-              <i className="fas fa-blog"></i>
+              <i className="fas fa-graduation-cap"></i>
             </div>
-            <h1>Blog Platform</h1>
+            <h1>Fast Multimedia</h1>
             <p className="login-tagline">
-              Access your blog dashboard
+              Institute of Technology & Design
             </p>
           </div>
           
           <div className="login-features">
             <h3><i className="fas fa-check-circle"></i> What you can do:</h3>
             <ul>
-              <li><i className="fas fa-edit"></i> Write and publish blog posts</li>
-              <li><i className="fas fa-comments"></i> Engage with readers</li>
-              <li><i className="fas fa-chart-line"></i> Track post performance</li>
-              <li><i className="fas fa-images"></i> Add images to articles</li>
-              <li><i className="fas fa-share-alt"></i> Share your content</li>
+              <li><i className="fas fa-user-graduate"></i> Access your student dashboard</li>
+              <li><i className="fas fa-book-open"></i> Enroll in courses</li>
+              <li><i className="fas fa-chart-line"></i> Track your progress</li>
+              <li><i className="fas fa-comments"></i> Connect with instructors</li>
+              <li><i className="fas fa-certificate"></i> Get certified</li>
             </ul>
           </div>
         </div>
@@ -243,7 +271,7 @@ const LoginPage = () => {
               <>
                 <div className="login-header">
                   <h2>Welcome Back</h2>
-                  <p>Sign in to access your blog</p>
+                  <p>Sign in to access your dashboard</p>
                 </div>
                 
                 <form onSubmit={handleLogin} className="login-form">

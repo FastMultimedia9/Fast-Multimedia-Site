@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase, authAPI } from '../supabase';
+import { registerUser, updateUserProfile, getCurrentUser } from '../services/firebaseService';
 import './RegisterPage.css';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    username: '',
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    avatar_url: '',
-    role: 'user',
+    phone: '',
+    dateOfBirth: '',
+    gender: '',
+    role: 'student',
     adminPassword: '',
     agreedToTerms: false
   });
@@ -19,7 +20,6 @@ const RegisterPage = () => {
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showAdminPassword, setShowAdminPassword] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState('');
   const navigate = useNavigate();
 
   // Secret admin password
@@ -29,14 +29,9 @@ const RegisterPage = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const isLoggedIn = await authAPI.isLoggedIn();
-        if (isLoggedIn) {
-          const user = await authAPI.getCurrentUserWithProfile();
-          if (user?.profile?.role === 'admin') {
-            navigate('/admin');
-          } else {
-            navigate('/blog');
-          }
+        const user = await getCurrentUser();
+        if (user) {
+          navigate('/dashboard');
         }
       } catch (error) {
         console.error('Auth check error:', error);
@@ -46,7 +41,6 @@ const RegisterPage = () => {
     checkAuth();
   }, [navigate]);
 
-  // Handle registration form changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     
@@ -56,7 +50,7 @@ const RegisterPage = () => {
     };
     
     // If role changes to user, clear admin password
-    if (name === 'role' && value === 'user') {
+    if (name === 'role' && value !== 'admin') {
       newFormData.adminPassword = '';
       setShowAdminPassword(false);
     }
@@ -66,31 +60,19 @@ const RegisterPage = () => {
       setShowAdminPassword(true);
     }
     
-    // If avatar URL changes, update preview
-    if (name === 'avatar_url') {
-      if (value.trim()) {
-        setAvatarPreview(value);
-      } else {
-        // Generate default avatar based on name or username
-        const nameForAvatar = newFormData.name || newFormData.username || 'User';
-        setAvatarPreview(`https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&background=6c63ff&color=fff&size=128`);
-      }
-    }
-    
     setFormData(newFormData);
   };
 
-  // Validate admin password
   const validateAdminPassword = () => {
     if (formData.role !== 'admin') return true;
     
     if (!formData.adminPassword.trim()) {
-      setError('Admin password is required for administrator registration');
+      setError('Admin authorization password is required for administrator registration');
       return false;
     }
     
     if (formData.adminPassword !== ADMIN_SECRET_PASSWORD) {
-      setError('Invalid admin password. Administrator registration requires special authorization.');
+      setError('Invalid admin authorization password.');
       return false;
     }
     
@@ -103,7 +85,7 @@ const RegisterPage = () => {
     setSuccess('');
 
     // Manual validation
-    if (!formData.name || !formData.email || !formData.password || !formData.username) {
+    if (!formData.fullName || !formData.email || !formData.password) {
       setError('Please fill in all required fields');
       return;
     }
@@ -131,69 +113,59 @@ const RegisterPage = () => {
     setIsLoading(true);
 
     try {
-      // Register with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email.trim(),
-        password: formData.password.trim(),
-        options: {
-          data: {
-            name: formData.name,
-            username: formData.username
-          }
+      // Register with Firebase Auth
+      const userCredential = await registerUser(
+        formData.email.trim(),
+        formData.password.trim(),
+        {
+          fullName: formData.fullName.trim(),
+          role: formData.role,
+          phone: formData.phone.trim(),
+          dateOfBirth: formData.dateOfBirth,
+          gender: formData.gender,
+          email: formData.email.trim()
         }
+      );
+
+      const user = userCredential.user;
+
+      // Update user profile with additional data
+      await updateUserProfile(user.uid, {
+        fullName: formData.fullName.trim(),
+        role: formData.role,
+        phone: formData.phone.trim(),
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender,
+        emailVerified: false,
+        createdAt: new Date().toISOString()
       });
 
-      if (authError) {
-        throw new Error(authError.message || 'Registration failed');
-      }
-
-      if (authData.user) {
-        // Create user profile in users table
-        const { error: profileError } = await supabase
-          .from('users')
-          .insert([
-            {
-              id: authData.user.id,
-              email: formData.email.trim(),
-              username: formData.username.trim(),
-              name: formData.name.trim(),
-              avatar_url: formData.avatar_url.trim() || `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name.trim())}&background=6c63ff&color=fff`,
-              role: formData.role,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }
-          ]);
-
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-          // Still show success but log the error
-        }
-
-        setSuccess('Registration successful! You can now login with your credentials.');
-        setFormData({
-          name: '',
-          username: '',
-          email: '',
-          password: '',
-          confirmPassword: '',
-          avatar_url: '',
-          role: 'user',
-          adminPassword: '',
-          agreedToTerms: false
-        });
-        setShowAdminPassword(false);
-        setAvatarPreview('');
-        
-        // Redirect to login page
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
-      } else {
-        setError('Registration failed. Please try again.');
-      }
+      setSuccess('Registration successful! Redirecting to login...');
+      setFormData({
+        fullName: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        phone: '',
+        dateOfBirth: '',
+        gender: '',
+        role: 'student',
+        adminPassword: '',
+        agreedToTerms: false
+      });
+      setShowAdminPassword(false);
+      
+      // Redirect to login page
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (error) {
       console.error('Registration error:', error);
-      setError(error.message || 'Registration failed. Please try again.');
+      if (error.code === 'auth/email-already-in-use') {
+        setError('This email is already registered. Please login instead.');
+      } else {
+        setError(error.message || 'Registration failed. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -208,7 +180,7 @@ const RegisterPage = () => {
               <i className="fas fa-user-plus"></i>
             </div>
             <h2>Create Account</h2>
-            <p>Join our blog community and start sharing your thoughts</p>
+            <p>Join Fast Multimedia Institute</p>
           </div>
 
           {error && (
@@ -226,34 +198,18 @@ const RegisterPage = () => {
           )}
 
           <form onSubmit={handleSubmit} className="register-form" noValidate>
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="name">Full Name *</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="John Doe"
-                  disabled={isLoading}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="username">Username *</label>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  placeholder="johndoe"
-                  disabled={isLoading}
-                  required
-                />
-              </div>
+            <div className="form-group">
+              <label htmlFor="fullName">Full Name *</label>
+              <input
+                type="text"
+                id="fullName"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="John Doe"
+                disabled={isLoading}
+                required
+              />
             </div>
 
             <div className="form-group">
@@ -271,28 +227,46 @@ const RegisterPage = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="avatar_url">Profile Picture URL (Optional)</label>
+              <label htmlFor="phone">Phone Number</label>
               <input
-                type="url"
-                id="avatar_url"
-                name="avatar_url"
-                value={formData.avatar_url}
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
                 onChange={handleChange}
-                placeholder="https://example.com/your-photo.jpg"
+                placeholder="024XXXXXXX"
                 disabled={isLoading}
               />
-              <small>Leave blank to use a generated avatar</small>
-              
-              {avatarPreview && (
-                <div className="avatar-preview">
-                  <img src={avatarPreview} alt="Avatar preview" onError={(e) => {
-                    e.target.onerror = null;
-                    const nameForAvatar = formData.name || formData.username || 'User';
-                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&background=6c63ff&color=fff&size=128`;
-                  }} />
-                  <p>Preview of how your avatar will appear</p>
-                </div>
-              )}
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="dateOfBirth">Date of Birth</label>
+                <input
+                  type="date"
+                  id="dateOfBirth"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="gender">Gender</label>
+                <select
+                  id="gender"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                >
+                  <option value="">Select</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
             </div>
 
             <div className="form-row">
@@ -336,13 +310,16 @@ const RegisterPage = () => {
                 disabled={isLoading}
                 className="role-select"
               >
-                <option value="user">Regular User</option>
+                <option value="student">Student</option>
+                <option value="staff">Staff Member</option>
                 <option value="admin">Administrator</option>
               </select>
               <small className="role-hint">
                 {formData.role === 'admin' 
                   ? 'Admin accounts can manage all content and users. Requires special authorization.'
-                  : 'Regular users can create posts and comment on articles.'}
+                  : formData.role === 'staff'
+                  ? 'Staff members can manage courses and students.'
+                  : 'Students can enroll in courses and access learning materials.'}
               </small>
             </div>
 
@@ -365,7 +342,6 @@ const RegisterPage = () => {
                 />
                 <small className="admin-password-hint">
                   <i className="fas fa-info-circle"></i> This password is required to register as an administrator.
-                  Contact the system administrator if you need this access.
                 </small>
               </div>
             )}
@@ -419,33 +395,15 @@ const RegisterPage = () => {
           </form>
 
           <div className="register-footer">
-            <div className="footer-links">
-              <p>Already have an account? 
-                <button 
-                  type="button"
-                  onClick={() => navigate('/login')}
-                  className="login-link"
-                >
-                  Sign In
-                </button>
-              </p>
-              
+            <p>Already have an account? 
               <button 
                 type="button"
-                onClick={() => navigate('/')}
-                className="back-home"
+                onClick={() => navigate('/login')}
+                className="login-link"
               >
-                <i className="fas fa-arrow-left"></i> Back to Home
+                Sign In
               </button>
-            </div>
-            
-            <div className="setup-instructions">
-              <p><strong>Note:</strong> You will be automatically logged in after registration.</p>
-              <p className="admin-note">
-                <i className="fas fa-shield-alt"></i> Administrator registration requires special authorization.
-                Please select "Regular User" if you don't have admin privileges.
-              </p>
-            </div>
+            </p>
           </div>
         </div>
       </div>

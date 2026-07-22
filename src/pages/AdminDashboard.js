@@ -39,7 +39,7 @@ import {
   FaExclamationTriangle,
   FaInfoCircle,
   FaShieldAlt,
-  FaHome, // <-- REPLACED FaDashboard with FaHome
+  FaHome,
   FaUsersCog,
   FaCreditCard,
   FaIdCard,
@@ -47,7 +47,8 @@ import {
   FaFolderOpen,
   FaUpload,
   FaDownload as FaDownloadIcon,
-  FaChartPie // <-- Alternative for dashboard
+  FaChartPie,
+  FaSave
 } from 'react-icons/fa';
 import {
   getAllStudents,
@@ -68,7 +69,10 @@ import {
   updateCourse,
   deleteCourse,
   generateSerialNumber,
-  getAllSerials
+  getAllSerials,
+  logoutUser,
+  getCurrentUser,
+  getUserProfile
 } from '../services/firebaseService';
 import './AdminDashboard.css';
 
@@ -92,6 +96,8 @@ const AdminDashboard = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [notification, setNotification] = useState(null);
   const [editingStudent, setEditingStudent] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [staffData, setStaffData] = useState({
     fullName: '',
     email: '',
@@ -115,10 +121,33 @@ const AdminDashboard = () => {
     endDate: new Date().toISOString().split('T')[0]
   });
 
-  // Load data on component mount
+  // Check authentication on mount
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    const checkAuth = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (!user) {
+          navigate('/login', { state: { from: '/admin' } });
+          return;
+        }
+        
+        const profile = await getUserProfile(user.uid);
+        if (!profile || (profile.role !== 'admin' && profile.role !== 'staff')) {
+          navigate('/dashboard');
+          return;
+        }
+        
+        setCurrentUser(user);
+        setUserProfile(profile);
+        loadDashboardData();
+      } catch (error) {
+        console.error('Auth check error:', error);
+        navigate('/login');
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
 
   const loadDashboardData = async () => {
     setIsLoading(true);
@@ -151,6 +180,17 @@ const AdminDashboard = () => {
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 5000);
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      navigate('/login', { state: { from: '/admin' } });
+    } catch (error) {
+      console.error('Logout error:', error);
+      showNotification('Error logging out', 'error');
+    }
   };
 
   // Handle student admission status update
@@ -901,6 +941,15 @@ const AdminDashboard = () => {
       <div className="admin-sidebar">
         <div className="sidebar-header">
           <h2>Admin Panel</h2>
+          {userProfile && (
+            <div className="sidebar-user">
+              <span className="sidebar-avatar">
+                {userProfile.fullName?.charAt(0) || 'A'}
+              </span>
+              <span className="sidebar-username">{userProfile.fullName || 'Admin'}</span>
+              <span className="sidebar-role">{userProfile.role || 'Administrator'}</span>
+            </div>
+          )}
         </div>
         <nav className="sidebar-nav">
           {navItems.map((item) => (
@@ -914,7 +963,7 @@ const AdminDashboard = () => {
           ))}
         </nav>
         <div className="sidebar-footer">
-          <button className="nav-item logout" onClick={() => navigate('/admin/login')}>
+          <button className="nav-item logout" onClick={handleLogout}>
             <FaSignOutAlt /> Logout
           </button>
         </div>
@@ -925,10 +974,12 @@ const AdminDashboard = () => {
         <div className="admin-header">
           <h1>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
           <div className="admin-user">
-            <span className="admin-avatar">A</span>
+            <span className="admin-avatar">
+              {userProfile?.fullName?.charAt(0) || 'A'}
+            </span>
             <div>
-              <strong>Administrator</strong>
-              <span>admin@fastmultimedia.com</span>
+              <strong>{userProfile?.fullName || 'Administrator'}</strong>
+              <span>{userProfile?.email || 'admin@fastmultimedia.com'}</span>
             </div>
           </div>
         </div>
