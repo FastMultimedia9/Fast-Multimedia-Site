@@ -798,6 +798,17 @@ export const updateCourse = async (courseId, updateData) => {
   }
 };
 
+// Delete course
+export const deleteCourse = async (courseId) => {
+  try {
+    await deleteDoc(doc(db, COLLECTIONS.COURSES, courseId));
+    return true;
+  } catch (error) {
+    console.error('Error deleting course:', error);
+    throw error;
+  }
+};
+
 // ============================================
 // CLASS MANAGEMENT
 // ============================================
@@ -1537,6 +1548,7 @@ export default {
   createCourse,
   getAllCourses,
   updateCourse,
+  deleteCourse,
   
   // Class functions
   createClass,
