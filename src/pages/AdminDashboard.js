@@ -48,7 +48,12 @@ import {
   FaUpload,
   FaDownload as FaDownloadIcon,
   FaChartPie,
-  FaSave
+  FaSave,
+  FaUserCircle,
+  FaMapMarkerAlt,
+  FaCalendarCheck,
+  FaBriefcase,
+  FaSchool
 } from 'react-icons/fa';
 import {
   getAllStudents,
@@ -74,6 +79,7 @@ import {
   getCurrentUser,
   getUserProfile
 } from '../services/firebaseService';
+import { sendAdmissionStatusEmail } from '../services/emailService';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -98,6 +104,7 @@ const AdminDashboard = () => {
   const [editingStudent, setEditingStudent] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [staffData, setStaffData] = useState({
     fullName: '',
     email: '',
@@ -193,20 +200,94 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle student admission status update
-  const handleUpdateAdmissionStatus = async (studentId, status) => {
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-GH', {
+      style: 'currency',
+      currency: 'GHS',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount || 0);
+  };
+
+  // ============================================
+  // SEND ADMISSION STATUS EMAIL
+  // ============================================
+  const sendAdmissionStatusEmailToStudent = async (student, status, notes = '') => {
+    setIsSendingEmail(true);
     try {
+      const emailResult = await sendAdmissionStatusEmail(
+        student.email,
+        student.fullName,
+        status,
+        student.course || 'Not specified',
+        notes
+      );
+
+      if (emailResult.success) {
+        console.log(`✅ Admission ${status} email sent to ${student.email}`);
+        return true;
+      } else {
+        console.error(`❌ Failed to send ${status} email:`, emailResult.error);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error sending admission email:', error);
+      return false;
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  // Handle student admission status update with email
+  const handleUpdateAdmissionStatus = async (studentId, status, studentData = null) => {
+    try {
+      // Get student data if not provided
+      let student = studentData;
+      if (!student) {
+        // Find student in the list
+        student = students.find(s => s.id === studentId);
+        if (!student) {
+          // Try to fetch from API
+          const studentData = await getStudentByEmail(studentId) || await getStudent(studentId);
+          if (studentData) {
+            student = studentData;
+          }
+        }
+      }
+
+      if (!student) {
+        showNotification('Student not found', 'error');
+        return;
+      }
+
+      // Update student status
       await updateStudent(studentId, { admissionStatus: status });
       await updateAdmissionStatus(studentId, status);
-      
+
+      // Send email notification
+      const emailSent = await sendAdmissionStatusEmailToStudent(student, status);
+
+      // Send in-app notification
       await sendNotification({
         userId: studentId,
-        title: 'Admission Status Updated',
-        message: `Your admission status has been updated to ${status}`,
-        type: 'admission'
+        title: `Admission ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+        message: `Your admission has been ${status}. ${emailSent ? 'A confirmation email has been sent to you.' : 'Please check your email for confirmation.'}`,
+        type: 'admission',
+        link: '/student/portal'
       });
+
+      const statusMessages = {
+        approved: 'approved 🎉',
+        enrolled: 'enrolled ✅',
+        rejected: 'rejected ❌'
+      };
+
+      showNotification(
+        `Student admission ${statusMessages[status] || status}. ${emailSent ? 'Email sent!' : 'Email failed to send.'}`,
+        emailSent ? 'success' : 'warning'
+      );
       
-      showNotification(`Student admission status updated to ${status}`, 'success');
       loadDashboardData();
     } catch (error) {
       console.error('Error updating admission status:', error);
@@ -421,7 +502,7 @@ const AdminDashboard = () => {
             <FaMoneyBillWave />
           </div>
           <div className="stat-info">
-            <h3>GH₵ {stats?.totalRevenue?.toLocaleString() || 0}</h3>
+            <h3>{formatCurrency(stats?.totalRevenue || 0)}</h3>
             <p>Total Revenue</p>
             <div className="stat-change positive">
               <FaArrowRight /> +8% this month
@@ -599,7 +680,7 @@ const AdminDashboard = () => {
     </div>
   );
 
-  // Render Admissions
+  // Render Admissions with detailed view
   const renderAdmissions = () => (
     <div className="admissions-content">
       <div className="content-header">
@@ -629,28 +710,45 @@ const AdminDashboard = () => {
               </span>
             </div>
             <div className="admission-details">
-              <p><FaPhone /> {admission.phone}</p>
+              <p><FaPhone /> {admission.phone || 'N/A'}</p>
               <p><FaCalendarAlt /> {new Date(admission.createdAt?.seconds * 1000).toLocaleDateString()}</p>
               <p><FaBookOpen /> {admission.course || 'Not specified'}</p>
+              <p><FaCalendarCheck /> {admission.dateOfBirth || 'N/A'}</p>
+              <p><FaUserCircle /> {admission.gender || 'N/A'}</p>
+              {admission.address && <p><FaMapMarkerAlt /> {admission.address}</p>}
+              {admission.educationLevel && <p><FaSchool /> {admission.educationLevel}</p>}
+              {admission.previousSchool && <p><FaUniversity /> {admission.previousSchool}</p>}
             </div>
             <div className="admission-actions">
               <button
                 className="btn-approve"
-                onClick={() => handleUpdateAdmissionStatus(admission.id, 'approved')}
+                onClick={() => handleUpdateAdmissionStatus(admission.id, 'approved', admission)}
+                disabled={isSendingEmail}
               >
-                <FaCheck /> Approve
+                <FaCheck /> {isSendingEmail ? 'Sending...' : 'Approve & Send Email'}
               </button>
               <button
                 className="btn-enroll"
-                onClick={() => handleUpdateAdmissionStatus(admission.id, 'enrolled')}
+                onClick={() => handleUpdateAdmissionStatus(admission.id, 'enrolled', admission)}
+                disabled={isSendingEmail}
               >
-                <FaGraduationCap /> Enroll
+                <FaGraduationCap /> {isSendingEmail ? 'Sending...' : 'Enroll & Send Email'}
               </button>
               <button
                 className="btn-reject"
-                onClick={() => handleUpdateAdmissionStatus(admission.id, 'rejected')}
+                onClick={() => handleUpdateAdmissionStatus(admission.id, 'rejected', admission)}
+                disabled={isSendingEmail}
               >
-                <FaTimesCircle /> Reject
+                <FaTimesCircle /> {isSendingEmail ? 'Sending...' : 'Reject & Send Email'}
+              </button>
+              <button
+                className="btn-view"
+                onClick={() => {
+                  setSelectedStudent(admission);
+                  setShowStudentModal(true);
+                }}
+              >
+                <FaEye /> View Details
               </button>
             </div>
           </div>
@@ -659,7 +757,7 @@ const AdminDashboard = () => {
     </div>
   );
 
-  // Render Payments
+  // Render Payments with currency formatting
   const renderPayments = () => (
     <div className="payments-content">
       <div className="content-header">
@@ -701,7 +799,7 @@ const AdminDashboard = () => {
               <tr key={payment.id}>
                 <td>{payment.paymentId || payment.id}</td>
                 <td>{payment.name || payment.studentName}</td>
-                <td>GH₵ {payment.amount}</td>
+                <td>{formatCurrency(payment.amount)}</td>
                 <td>{new Date(payment.createdAt?.seconds * 1000).toLocaleDateString()}</td>
                 <td>{payment.method || 'Mobile Money'}</td>
                 <td>
@@ -775,7 +873,7 @@ const AdminDashboard = () => {
             <p className="course-description">{course.description}</p>
             <div className="course-details">
               <span><FaClock /> {course.duration || '2 Months'}</span>
-              <span><FaMoneyBillWave /> GH₵ {course.price || '0'}</span>
+              <span><FaMoneyBillWave /> {formatCurrency(course.price)}</span>
               <span><FaUsers /> {course.enrolledStudents || 0}/{course.maxStudents || 50}</span>
             </div>
             <div className="course-actions">
@@ -873,11 +971,11 @@ const AdminDashboard = () => {
           <div className="report-stats">
             <div className="report-stat">
               <span className="label">Total Revenue</span>
-              <span className="value">GH₵ {stats?.totalRevenue?.toLocaleString() || 0}</span>
+              <span className="value">{formatCurrency(stats?.totalRevenue || 0)}</span>
             </div>
             <div className="report-stat">
               <span className="label">Pending Payments</span>
-              <span className="value orange">GH₵ {stats?.pendingPayments?.toLocaleString() || 0}</span>
+              <span className="value orange">{formatCurrency(stats?.pendingPayments || 0)}</span>
             </div>
             <div className="report-stat">
               <span className="label">Total Payments</span>
@@ -988,7 +1086,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Student Detail Modal */}
+      {/* Student Detail Modal - Enhanced */}
       {showStudentModal && selectedStudent && (
         <div className="modal-overlay" onClick={() => setShowStudentModal(false)}>
           <div className="modal-content student-detail-modal" onClick={(e) => e.stopPropagation()}>
@@ -1000,68 +1098,91 @@ const AdminDashboard = () => {
               <div>
                 <h2>{selectedStudent.fullName}</h2>
                 <p>{selectedStudent.studentId || 'Student ID not assigned'}</p>
+                <span className={`status-badge ${getStatusColor(selectedStudent.admissionStatus || selectedStudent.status)}`}>
+                  {getStatusIcon(selectedStudent.admissionStatus || selectedStudent.status)} {selectedStudent.admissionStatus || selectedStudent.status || 'pending'}
+                </span>
               </div>
-              <span className={`status-badge ${getStatusColor(selectedStudent.admissionStatus)}`}>
-                {getStatusIcon(selectedStudent.admissionStatus)} {selectedStudent.admissionStatus || 'pending'}
-              </span>
             </div>
+            
             <div className="student-detail-body">
+              {/* Personal Information */}
               <div className="detail-section">
-                <h3>Personal Information</h3>
+                <h3><FaUserCircle /> Personal Information</h3>
                 <div className="detail-grid">
                   <div><strong>Email:</strong> {selectedStudent.email}</div>
-                  <div><strong>Phone:</strong> {selectedStudent.phone}</div>
+                  <div><strong>Phone:</strong> {selectedStudent.phone || 'N/A'}</div>
                   <div><strong>Date of Birth:</strong> {selectedStudent.dateOfBirth || 'N/A'}</div>
                   <div><strong>Gender:</strong> {selectedStudent.gender || 'N/A'}</div>
                   <div><strong>Address:</strong> {selectedStudent.address || 'N/A'}</div>
                   <div><strong>City:</strong> {selectedStudent.city || 'N/A'}</div>
                 </div>
               </div>
+
+              {/* Academic Information */}
               <div className="detail-section">
-                <h3>Academic Information</h3>
+                <h3><FaBookOpen /> Academic Information</h3>
                 <div className="detail-grid">
                   <div><strong>Course:</strong> {selectedStudent.course || selectedStudent.enrolledCourses?.[0] || 'N/A'}</div>
                   <div><strong>Education Level:</strong> {selectedStudent.educationLevel || 'N/A'}</div>
                   <div><strong>Previous School:</strong> {selectedStudent.previousSchool || 'N/A'}</div>
                   <div><strong>Preferred Study Mode:</strong> {selectedStudent.preferredStudyMode || 'N/A'}</div>
+                  <div><strong>Application Date:</strong> {new Date(selectedStudent.createdAt?.seconds * 1000).toLocaleDateString()}</div>
+                  <div><strong>Serial Number:</strong> {selectedStudent.serialNumber || 'N/A'}</div>
                 </div>
               </div>
+
+              {/* Emergency Contact */}
               <div className="detail-section">
-                <h3>Emergency Contact</h3>
+                <h3><FaShieldAlt /> Emergency Contact</h3>
                 <div className="detail-grid">
                   <div><strong>Name:</strong> {selectedStudent.guardianName || selectedStudent.emergencyContact || 'N/A'}</div>
                   <div><strong>Phone:</strong> {selectedStudent.guardianPhone || selectedStudent.emergencyPhone || 'N/A'}</div>
                   <div><strong>Email:</strong> {selectedStudent.guardianEmail || 'N/A'}</div>
+                  <div><strong>Relationship:</strong> {selectedStudent.guardianRelationship || 'N/A'}</div>
+                </div>
+              </div>
+
+              {/* Additional Information */}
+              <div className="detail-section">
+                <h3><FaInfoCircle /> Additional Information</h3>
+                <div className="detail-grid">
+                  <div><strong>How did you hear about us?:</strong> {selectedStudent.hearAboutUs || 'N/A'}</div>
+                  <div><strong>Why do you want to join?:</strong> {selectedStudent.reasonToJoin || 'N/A'}</div>
+                  <div><strong>Special Needs:</strong> {selectedStudent.specialNeeds || 'None'}</div>
                 </div>
               </div>
             </div>
+
             <div className="student-detail-actions">
               <button 
                 className="btn-approve"
                 onClick={() => {
-                  handleUpdateAdmissionStatus(selectedStudent.id, 'approved');
+                  handleUpdateAdmissionStatus(selectedStudent.id, 'approved', selectedStudent);
                   setShowStudentModal(false);
                 }}
+                disabled={isSendingEmail}
               >
-                <FaCheck /> Approve
+                <FaCheck /> {isSendingEmail ? 'Sending...' : 'Approve'}
               </button>
               <button 
                 className="btn-enroll"
                 onClick={() => {
-                  handleUpdateAdmissionStatus(selectedStudent.id, 'enrolled');
+                  handleUpdateAdmissionStatus(selectedStudent.id, 'enrolled', selectedStudent);
                   setShowStudentModal(false);
                 }}
+                disabled={isSendingEmail}
               >
-                <FaGraduationCap /> Enroll
+                <FaGraduationCap /> {isSendingEmail ? 'Sending...' : 'Enroll'}
               </button>
               <button 
                 className="btn-reject"
                 onClick={() => {
-                  handleUpdateAdmissionStatus(selectedStudent.id, 'rejected');
+                  handleUpdateAdmissionStatus(selectedStudent.id, 'rejected', selectedStudent);
                   setShowStudentModal(false);
                 }}
+                disabled={isSendingEmail}
               >
-                <FaTimesCircle /> Reject
+                <FaTimesCircle /> {isSendingEmail ? 'Sending...' : 'Reject'}
               </button>
               <button 
                 className="btn-edit"
