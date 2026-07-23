@@ -40,153 +40,28 @@ import {
   FaHistory,
   FaArrowRight,
   FaArrowLeft,
-  FaPlay,
-  FaPause,
-  FaStop,
-  FaVideo,
-  FaFilePdf,
-  FaFileWord,
-  FaFileExcel,
-  FaFilePowerpoint,
-  FaFileImage,
-  FaFileArchive,
-  FaFile,
-  FaLink,
-  FaExternalLinkAlt,
-  FaStar,
-  FaStarHalfAlt,
-  FaRegStar,
-  FaThumbsUp,
-  FaThumbsDown,
-  FaComment,
-  FaShare,
-  FaEllipsisV,
-  FaHeart,
-  FaRegHeart,
-  FaBookmark,
-  FaRegBookmark,
   FaSearch,
   FaFilter,
-  FaSort,
-  FaSortUp,
-  FaSortDown,
-  FaPlus,
-  FaMinus,
-  FaCheck,
-  FaUndo,
-  FaRedo,
-  FaSync,
   FaLock,
   FaUnlock,
   FaShieldAlt,
-  FaServer,
-  FaDatabase,
-  FaCloud,
-  FaMobileAlt,
-  FaDesktop,
-  FaTablet,
-  FaWifi,
-  FaBluetooth,
-  FaPrint as FaPrintIcon,
-  FaQrcode,
-  FaBarcode,
-  FaTags,
-  FaGift,
-  FaAward,
-  FaMedal,
-  FaCertificate,
-  FaDiploma,
-  FaSchool,
   FaUniversity,
-  FaBuilding,
-  FaCity,
-  FaGlobe,
-  FaLanguage,
-  FaFlag,
-  FaMap,
-  FaCompass,
-  FaLocationArrow,
-  FaPlane,
-  FaCar,
-  FaBus,
-  FaTrain,
-  FaBicycle,
-  FaWalking,
-  FaRunning,
-  FaSwimmer,
-  FaDumbbell,
-  FaUtensils,
-  FaCoffee,
-  FaBeer,
-  FaWineGlass,
-  FaGlassCheers,
-  FaPizzaSlice,
-  FaIceCream,
-  FaAppleAlt,
-  FaCarrot,
-  FaLeaf,
-  FaSeedling,
-  FaTree,
-  FaMountain,
-  FaWater,
-  FaCloudSun,
-  FaCloudRain,
-  FaSnowflake,
-  FaWind,
-  FaSun,
-  FaMoon,
-  FaStarOfLife,
-  FaHeartbeat,
-  FaStethoscope,
-  FaPills,
-  FaSyringe,
-  FaBandAid,
-  FaAmbulance,
-  FaHospital,
-  FaClinicMedical,
-  FaDental,
+  FaWallet,
+  FaReceipt,
+  FaPercent,
+  FaCalendar,
+  FaCheck,
+  FaPlus,
+  FaMinus,
   FaEye,
   FaEyeSlash,
-  FaSmile,
-  FaFrown,
-  FaMeh,
-  FaGrin,
-  FaGrinStars,
-  FaGrinHearts,
-  FaGrinBeam,
-  FaGrinBeamSweat,
-  FaGrinAlt,
-  FaGrinSquint,
-  FaGrinSquintTears,
-  FaGrinTears,
-  FaGrinWink,
-  FaSmileWink,
-  FaKiss,
-  FaKissBeam,
-  FaKissWinkHeart,
-  FaLaugh,
-  FaLaughBeam,
-  FaLaughSquint,
-  FaLaughWink,
-  FaSadCry,
-  FaSadTear,
-  FaTired,
-  FaAngry,
-  FaDizzy,
-  FaFlushed,
-  FaFrownOpen,
-  FaGrimace,
-  FaMehBlank,
-  FaMehRollingEyes,
-  FaSurprise,
-  FaWink
+  FaSync
 } from 'react-icons/fa';
 import { auth, db } from '../firebase';
 import {
   getStudentByStudentId,
   getStudentByEmail,
   updateStudent,
-  getStudentAttendance,
   getStudentGrades,
   getPaymentsByStudent,
   getStudent,
@@ -195,18 +70,22 @@ import {
   getCurrentUser,
   getUserProfile,
   sendNotification,
-  getAllCourses
+  getAllCourses,
+  createPayment,
+  updatePaymentStatus
 } from '../services/firebaseService';
 import { signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import './StudentPortal.css';
+
+// Paystack integration
+const PAYSTACK_PUBLIC_KEY = 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'; // Replace with your key
 
 const StudentPortal = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [student, setStudent] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [attendance, setAttendance] = useState([]);
   const [grades, setGrades] = useState([]);
   const [payments, setPayments] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -227,19 +106,9 @@ const StudentPortal = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [expandedSections, setExpandedSections] = useState({
-    attendance: true,
-    grades: true,
     payments: true,
-    courses: true
-  });
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [showCourseModal, setShowCourseModal] = useState(false);
-  const [attendanceStats, setAttendanceStats] = useState({
-    present: 0,
-    absent: 0,
-    late: 0,
-    total: 0,
-    percentage: 0
+    courses: true,
+    fees: true
   });
   const [gradeStats, setGradeStats] = useState({
     average: 0,
@@ -251,11 +120,16 @@ const StudentPortal = () => {
     totalPaid: 0,
     totalDue: 0,
     pending: 0,
-    completed: 0
+    completed: 0,
+    outstanding: 0
   });
-  const [calendarView, setCalendarView] = useState('month');
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentEmail, setPaymentEmail] = useState('');
+  const [paymentName, setPaymentName] = useState('');
+  const [paymentReference, setPaymentReference] = useState('');
 
   // Default password
   const DEFAULT_PASSWORD = 'FastMultimedia2024@';
@@ -291,7 +165,6 @@ const StudentPortal = () => {
         }
         
         if (!studentData) {
-          // Try to get from profile
           if (profile && profile.studentId) {
             studentData = await getStudentByStudentId(profile.studentId);
           }
@@ -305,8 +178,9 @@ const StudentPortal = () => {
         
         setStudent(studentData);
         setEditFormData(studentData);
+        setPaymentEmail(studentData.email || '');
+        setPaymentName(studentData.fullName || '');
         
-        // Load all data
         await loadStudentData(studentData);
         
         setIsLoading(false);
@@ -324,15 +198,6 @@ const StudentPortal = () => {
   const loadStudentData = async (studentData) => {
     try {
       const studentId = studentData.studentId || studentData.id;
-      
-      // Get attendance
-      try {
-        const attendanceData = await getStudentAttendance(studentId);
-        setAttendance(attendanceData || []);
-        calculateAttendanceStats(attendanceData || []);
-      } catch (error) {
-        console.error('Error loading attendance:', error);
-      }
       
       // Get grades
       try {
@@ -363,30 +228,6 @@ const StudentPortal = () => {
     } catch (error) {
       console.error('Error loading student data:', error);
     }
-  };
-
-  // Calculate attendance statistics
-  const calculateAttendanceStats = (data) => {
-    let present = 0;
-    let absent = 0;
-    let late = 0;
-    let total = data.length;
-    
-    data.forEach(record => {
-      if (record.status === 'present') present++;
-      else if (record.status === 'absent') absent++;
-      else if (record.status === 'late') late++;
-    });
-    
-    const percentage = total > 0 ? ((present + late) / total) * 100 : 0;
-    
-    setAttendanceStats({
-      present,
-      absent,
-      late,
-      total,
-      percentage: Math.round(percentage)
-    });
   };
 
   // Calculate grade statistics
@@ -433,11 +274,16 @@ const StudentPortal = () => {
       }
     });
     
+    // Calculate outstanding (course fee - total paid)
+    const courseFee = student?.courseFee || 600;
+    const outstanding = courseFee - totalPaid;
+    
     setPaymentStats({
       totalPaid,
       totalDue,
       pending,
-      completed
+      completed,
+      outstanding: outstanding > 0 ? outstanding : 0
     });
   };
 
@@ -475,7 +321,6 @@ const StudentPortal = () => {
       showNotification('Profile updated successfully!', 'success');
       setShowEditProfile(false);
       
-      // Update user profile if available
       if (currentUser) {
         try {
           await updateProfile(currentUser, {
@@ -512,7 +357,6 @@ const StudentPortal = () => {
     }
     
     try {
-      // Verify current password
       try {
         await signInWithEmailAndPassword(auth, student.email, passwordData.currentPassword);
       } catch (error) {
@@ -521,10 +365,8 @@ const StudentPortal = () => {
         return;
       }
       
-      // Update password
       await updateStudentPassword(student.id, passwordData.newPassword);
       
-      // Update Firebase Auth password
       if (currentUser) {
         await currentUser.updatePassword(passwordData.newPassword);
       }
@@ -568,6 +410,7 @@ const StudentPortal = () => {
       case 'rejected': return 'status-rejected';
       case 'active': return 'status-active';
       case 'inactive': return 'status-inactive';
+      case 'paid': return 'status-completed';
       default: return 'status-default';
     }
   };
@@ -584,6 +427,7 @@ const StudentPortal = () => {
       case 'rejected': return <FaTimesCircle />;
       case 'active': return <FaCheckCircle />;
       case 'inactive': return <FaTimesCircle />;
+      case 'paid': return <FaCheckCircle />;
       default: return <FaInfoCircle />;
     }
   };
@@ -596,31 +440,82 @@ const StudentPortal = () => {
     }));
   };
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="student-portal-loading">
-        <div className="loading-spinner">
-          <FaSpinner className="spinner" />
-        </div>
-        <p>Loading your dashboard...</p>
-      </div>
-    );
-  }
+  // Initialize Paystack payment
+  const initializePayment = async () => {
+    if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
+      showNotification('Please enter a valid amount', 'error');
+      return;
+    }
 
-  // No student data
-  if (!student) {
-    return (
-      <div className="student-portal-error">
-        <FaExclamationTriangle className="error-icon" />
-        <h2>Student Data Not Found</h2>
-        <p>We couldn't find your student profile. Please contact support.</p>
-        <button className="btn-primary" onClick={() => navigate('/student/login')}>
-          Go to Login
-        </button>
-      </div>
-    );
-  }
+    setIsProcessingPayment(true);
+
+    try {
+      // Generate reference
+      const reference = `PAY-${Date.now()}-${student.studentId}`;
+      setPaymentReference(reference);
+
+      // Create payment record in Firestore
+      const paymentData = {
+        studentId: student.id,
+        studentName: student.fullName,
+        studentEmail: student.email,
+        amount: parseFloat(paymentAmount),
+        description: `School Fees Payment - ${student.course}`,
+        reference: reference,
+        status: 'pending',
+        paymentType: 'school_fees',
+        method: 'paystack',
+        createdAt: new Date().toISOString()
+      };
+
+      await createPayment(paymentData);
+
+      // Initialize Paystack
+      const handler = window.PaystackPop.setup({
+        key: PAYSTACK_PUBLIC_KEY,
+        email: paymentEmail || student.email,
+        amount: parseFloat(paymentAmount) * 100, // Convert to pesewas
+        currency: 'GHS',
+        ref: reference,
+        callback: async (response) => {
+          console.log('Payment successful:', response);
+          
+          // Update payment status
+          await updatePaymentStatus(reference, 'completed');
+          
+          // Send notification
+          await sendNotification({
+            userId: student.id,
+            title: 'Payment Successful',
+            message: `Your payment of ${formatCurrency(parseFloat(paymentAmount))} for ${student.course} has been confirmed.`,
+            type: 'payment',
+            link: '/student/portal'
+          });
+
+          showNotification(`Payment of ${formatCurrency(parseFloat(paymentAmount))} successful!`, 'success');
+          
+          // Reload data
+          await loadStudentData(student);
+          setShowPaymentModal(false);
+          setPaymentAmount('');
+          setIsProcessingPayment(false);
+        },
+        onClose: async () => {
+          console.log('Payment window closed');
+          // Update payment as failed if not completed
+          await updatePaymentStatus(reference, 'failed');
+          showNotification('Payment was cancelled', 'warning');
+          setIsProcessingPayment(false);
+        }
+      });
+
+      handler.openIframe();
+    } catch (error) {
+      console.error('Payment initialization error:', error);
+      showNotification('Error initializing payment: ' + error.message, 'error');
+      setIsProcessingPayment(false);
+    }
+  };
 
   // Render Dashboard
   const renderDashboard = () => (
@@ -655,14 +550,11 @@ const StudentPortal = () => {
         </div>
         <div className="stat-card">
           <div className="stat-icon green">
-            <FaCheckCircle />
+            <FaBookOpen />
           </div>
           <div className="stat-info">
-            <h3>{attendanceStats.percentage}%</h3>
-            <p>Attendance Rate</p>
-            <div className="stat-detail">
-              {attendanceStats.present} Present | {attendanceStats.absent} Absent
-            </div>
+            <h3>{student.course || 'Not Enrolled'}</h3>
+            <p>Current Course</p>
           </div>
         </div>
         <div className="stat-card">
@@ -685,26 +577,32 @@ const StudentPortal = () => {
             <h3>{formatCurrency(paymentStats.totalPaid)}</h3>
             <p>Total Paid</p>
             <div className="stat-detail">
-              {paymentStats.pending} Pending
+              Outstanding: {formatCurrency(paymentStats.outstanding)}
             </div>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon teal">
-            <FaBookOpen />
+            <FaWallet />
           </div>
           <div className="stat-info">
-            <h3>{courses.length}</h3>
-            <p>Courses Enrolled</p>
+            <h3>{formatCurrency(paymentStats.outstanding)}</h3>
+            <p>Outstanding Balance</p>
+            <div className="stat-detail">
+              Course Fee: {formatCurrency(student.courseFee || 600)}
+            </div>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon red">
-            <FaClock />
+            <FaReceipt />
           </div>
           <div className="stat-info">
-            <h3>{attendanceStats.total}</h3>
-            <p>Total Classes</p>
+            <h3>{paymentStats.completed}</h3>
+            <p>Payments Made</p>
+            <div className="stat-detail">
+              {paymentStats.pending} Pending
+            </div>
           </div>
         </div>
       </div>
@@ -713,14 +611,14 @@ const StudentPortal = () => {
       <div className="quick-actions">
         <h3>Quick Actions</h3>
         <div className="action-grid">
-          <button className="action-btn" onClick={() => setActiveTab('attendance')}>
-            <FaCalendarCheck /> View Attendance
+          <button className="action-btn" onClick={() => setActiveTab('account')}>
+            <FaWallet /> Pay Fees
           </button>
           <button className="action-btn" onClick={() => setActiveTab('grades')}>
             <FaChartLine /> Check Grades
           </button>
-          <button className="action-btn" onClick={() => setActiveTab('payments')}>
-            <FaCreditCard /> Make Payment
+          <button className="action-btn" onClick={() => setActiveTab('account')}>
+            <FaReceipt /> Payment History
           </button>
           <button className="action-btn" onClick={() => setActiveTab('profile')}>
             <FaUserCircle /> Edit Profile
@@ -728,172 +626,29 @@ const StudentPortal = () => {
         </div>
       </div>
 
-      {/* Recent Activity */}
+      {/* Recent Payments */}
       <div className="recent-activity">
-        <h3>Recent Activity</h3>
+        <h3>Recent Payments</h3>
         <div className="activity-list">
-          {attendance.slice(0, 5).map((record, index) => (
+          {payments.slice(0, 5).map((payment, index) => (
             <div key={index} className="activity-item">
-              <div className={`activity-icon ${record.status}`}>
-                {getStatusIcon(record.status)}
+              <div className={`activity-icon ${payment.status}`}>
+                {getStatusIcon(payment.status)}
               </div>
               <div className="activity-content">
                 <p>
-                  <strong>{record.course || 'Class'}</strong> - {record.status}
+                  <strong>{formatCurrency(payment.amount)}</strong> - {payment.description || 'Payment'}
                 </p>
                 <span className="activity-date">
-                  {new Date(record.date?.seconds * 1000 || record.createdAt?.seconds * 1000).toLocaleDateString()}
+                  {new Date(payment.createdAt?.seconds * 1000 || payment.createdAt).toLocaleDateString()}
                 </span>
               </div>
             </div>
           ))}
-          {attendance.length === 0 && (
-            <p className="no-activity">No recent activity</p>
+          {payments.length === 0 && (
+            <p className="no-activity">No payment records found</p>
           )}
         </div>
-      </div>
-    </div>
-  );
-
-  // Render Attendance
-  const renderAttendance = () => (
-    <div className="attendance-content">
-      <div className="content-header">
-        <h2>Attendance Record</h2>
-        <div className="header-actions">
-          <div className="attendance-summary">
-            <span className="summary-item present">
-              <FaCheckCircle /> Present: {attendanceStats.present}
-            </span>
-            <span className="summary-item late">
-              <FaClock /> Late: {attendanceStats.late}
-            </span>
-            <span className="summary-item absent">
-              <FaTimesCircle /> Absent: {attendanceStats.absent}
-            </span>
-            <span className="summary-item total">
-              <FaCalendarAlt /> Total: {attendanceStats.total}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Attendance Chart */}
-      <div className="attendance-chart">
-        <div className="chart-container">
-          <div className="chart-header">
-            <h4>Attendance Overview</h4>
-            <div className="chart-legend">
-              <span className="legend-item present">Present</span>
-              <span className="legend-item late">Late</span>
-              <span className="legend-item absent">Absent</span>
-            </div>
-          </div>
-          <div className="attendance-bars">
-            <div className="bar-item">
-              <div className="bar-label">Present</div>
-              <div className="bar-track">
-                <div 
-                  className="bar-fill present" 
-                  style={{ 
-                    width: `${attendanceStats.total > 0 ? (attendanceStats.present / attendanceStats.total) * 100 : 0}%` 
-                  }}
-                />
-              </div>
-              <div className="bar-value">{attendanceStats.present}</div>
-            </div>
-            <div className="bar-item">
-              <div className="bar-label">Late</div>
-              <div className="bar-track">
-                <div 
-                  className="bar-fill late" 
-                  style={{ 
-                    width: `${attendanceStats.total > 0 ? (attendanceStats.late / attendanceStats.total) * 100 : 0}%` 
-                  }}
-                />
-              </div>
-              <div className="bar-value">{attendanceStats.late}</div>
-            </div>
-            <div className="bar-item">
-              <div className="bar-label">Absent</div>
-              <div className="bar-track">
-                <div 
-                  className="bar-fill absent" 
-                  style={{ 
-                    width: `${attendanceStats.total > 0 ? (attendanceStats.absent / attendanceStats.total) * 100 : 0}%` 
-                  }}
-                />
-              </div>
-              <div className="bar-value">{attendanceStats.absent}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Attendance Table */}
-      <div className="attendance-table-container">
-        <div className="table-header">
-          <div className="search-box">
-            <FaSearch />
-            <input
-              type="text"
-              placeholder="Search attendance..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <select
-            className="filter-select"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="all">All Status</option>
-            <option value="present">Present</option>
-            <option value="absent">Absent</option>
-            <option value="late">Late</option>
-          </select>
-        </div>
-
-        <table className="attendance-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Course</th>
-              <th>Time</th>
-              <th>Status</th>
-              <th>Remarks</th>
-            </tr>
-          </thead>
-          <tbody>
-            {attendance
-              .filter(record => {
-                if (filterStatus !== 'all' && record.status !== filterStatus) return false;
-                if (searchQuery) {
-                  const query = searchQuery.toLowerCase();
-                  return (record.course || '').toLowerCase().includes(query);
-                }
-                return true;
-              })
-              .map((record, index) => (
-                <tr key={index}>
-                  <td>{new Date(record.date?.seconds * 1000 || record.createdAt?.seconds * 1000).toLocaleDateString()}</td>
-                  <td>{record.course || 'N/A'}</td>
-                  <td>{record.time || 'N/A'}</td>
-                  <td>
-                    <span className={`status-badge ${getStatusColor(record.status)}`}>
-                      {getStatusIcon(record.status)} {record.status}
-                    </span>
-                  </td>
-                  <td>{record.remarks || '—'}</td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-        {attendance.length === 0 && (
-          <div className="no-data-message">
-            <FaInfoCircle /> No attendance records found
-          </div>
-        )}
       </div>
     </div>
   );
@@ -921,7 +676,6 @@ const StudentPortal = () => {
         </div>
       </div>
 
-      {/* Grade Cards */}
       <div className="grades-grid">
         {grades.map((grade, index) => (
           <div key={index} className="grade-card">
@@ -963,65 +717,204 @@ const StudentPortal = () => {
     </div>
   );
 
-  // Render Payments
-  const renderPayments = () => (
-    <div className="payments-content">
+  // Render Account (Payments + Fees)
+  const renderAccount = () => (
+    <div className="account-content">
       <div className="content-header">
-        <h2>Payment History</h2>
+        <h2>Account & Fees</h2>
         <div className="header-actions">
-          <div className="payments-summary">
-            <span className="summary-item">
-              <FaMoneyBillWave /> Total Paid: <strong>{formatCurrency(paymentStats.totalPaid)}</strong>
-            </span>
-            <span className="summary-item">
-              <FaClock /> Pending: <strong>{formatCurrency(paymentStats.totalDue)}</strong>
-            </span>
-            <span className="summary-item">
-              <FaCheckCircle /> Completed: <strong>{paymentStats.completed}</strong>
-            </span>
+          <button className="btn-pay-fees" onClick={() => setShowPaymentModal(true)}>
+            <FaPlus /> Pay Fees
+          </button>
+        </div>
+      </div>
+
+      {/* Fee Summary */}
+      <div className="fee-summary">
+        <div className="fee-card">
+          <div className="fee-icon blue">
+            <FaWallet />
+          </div>
+          <div className="fee-info">
+            <h3>{formatCurrency(student.courseFee || 600)}</h3>
+            <p>Course Fee</p>
+          </div>
+        </div>
+        <div className="fee-card">
+          <div className="fee-icon green">
+            <FaCheckCircle />
+          </div>
+          <div className="fee-info">
+            <h3>{formatCurrency(paymentStats.totalPaid)}</h3>
+            <p>Total Paid</p>
+          </div>
+        </div>
+        <div className="fee-card">
+          <div className="fee-icon orange">
+            <FaClock />
+          </div>
+          <div className="fee-info">
+            <h3>{formatCurrency(paymentStats.outstanding)}</h3>
+            <p>Outstanding Balance</p>
+          </div>
+        </div>
+        <div className="fee-card">
+          <div className="fee-icon purple">
+            <FaReceipt />
+          </div>
+          <div className="fee-info">
+            <h3>{paymentStats.completed}</h3>
+            <p>Payments Made</p>
           </div>
         </div>
       </div>
 
-      {/* Payment Cards */}
-      <div className="payments-grid">
-        {payments.map((payment, index) => (
-          <div key={index} className="payment-card">
-            <div className="payment-header">
-              <div className="payment-icon">
-                {payment.status === 'completed' || payment.status === 'paid' ? 
-                  <FaCheckCircle className="icon-success" /> : 
-                  <FaClock className="icon-pending" />
-                }
-              </div>
-              <div className="payment-info">
-                <h4>{payment.description || payment.paymentType || 'Payment'}</h4>
-                <p className="payment-date">
-                  {new Date(payment.createdAt?.seconds * 1000 || payment.date).toLocaleDateString()}
-                </p>
-              </div>
-              <span className={`payment-amount ${payment.status === 'completed' || payment.status === 'paid' ? 'paid' : 'pending'}`}>
-                {formatCurrency(payment.amount)}
-              </span>
-            </div>
-            <div className="payment-details">
-              <p><strong>Method:</strong> {payment.method || 'N/A'}</p>
-              <p><strong>Reference:</strong> {payment.reference || payment.paymentId || 'N/A'}</p>
-              <p><strong>Status:</strong> 
-                <span className={`status-badge ${getStatusColor(payment.status)}`}>
-                  {getStatusIcon(payment.status)} {payment.status}
-                </span>
-              </p>
-              {payment.remarks && <p><strong>Remarks:</strong> {payment.remarks}</p>}
-            </div>
-          </div>
-        ))}
-        {payments.length === 0 && (
-          <div className="no-data-message">
-            <FaInfoCircle /> No payment records found
-          </div>
-        )}
+      {/* Fee Breakdown */}
+      <div className="fee-breakdown">
+        <h3>Fee Breakdown</h3>
+        <div className="breakdown-item">
+          <span>Course Fee</span>
+          <span>{formatCurrency(student.courseFee || 600)}</span>
+        </div>
+        <div className="breakdown-item">
+          <span>Registration Fee</span>
+          <span>{formatCurrency(0)}</span>
+        </div>
+        <div className="breakdown-item">
+          <span>Total Paid</span>
+          <span className="paid">{formatCurrency(paymentStats.totalPaid)}</span>
+        </div>
+        <div className="breakdown-item total">
+          <span>Outstanding Balance</span>
+          <span className="outstanding">{formatCurrency(paymentStats.outstanding)}</span>
+        </div>
       </div>
+
+      {/* Payment History */}
+      <div className="payment-history">
+        <h3>Payment History</h3>
+        <div className="payments-grid">
+          {payments.map((payment, index) => (
+            <div key={index} className="payment-card">
+              <div className="payment-header">
+                <div className="payment-icon">
+                  {payment.status === 'completed' || payment.status === 'paid' ? 
+                    <FaCheckCircle className="icon-success" /> : 
+                    <FaClock className="icon-pending" />
+                  }
+                </div>
+                <div className="payment-info">
+                  <h4>{payment.description || payment.paymentType || 'Payment'}</h4>
+                  <p className="payment-date">
+                    {new Date(payment.createdAt?.seconds * 1000 || payment.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <span className={`payment-amount ${payment.status === 'completed' || payment.status === 'paid' ? 'paid' : 'pending'}`}>
+                  {formatCurrency(payment.amount)}
+                </span>
+              </div>
+              <div className="payment-details">
+                <p><strong>Method:</strong> {payment.method || 'N/A'}</p>
+                <p><strong>Reference:</strong> {payment.reference || payment.paymentId || 'N/A'}</p>
+                <p><strong>Status:</strong> 
+                  <span className={`status-badge ${getStatusColor(payment.status)}`}>
+                    {getStatusIcon(payment.status)} {payment.status}
+                  </span>
+                </p>
+                {payment.remarks && <p><strong>Remarks:</strong> {payment.remarks}</p>}
+              </div>
+            </div>
+          ))}
+          {payments.length === 0 && (
+            <div className="no-data-message">
+              <FaInfoCircle /> No payment records found
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
+          <div className="modal-content payment-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowPaymentModal(false)}>×</button>
+            <h2><FaWallet /> Make Payment</h2>
+            
+            <div className="payment-summary-info">
+              <p><strong>Student:</strong> {student.fullName}</p>
+              <p><strong>Course:</strong> {student.course}</p>
+              <p><strong>Outstanding Balance:</strong> {formatCurrency(paymentStats.outstanding)}</p>
+            </div>
+
+            <form onSubmit={(e) => { e.preventDefault(); initializePayment(); }}>
+              <div className="form-group">
+                <label>Amount to Pay (GH₵)</label>
+                <input
+                  type="number"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  placeholder="Enter amount"
+                  required
+                  min="1"
+                  max={paymentStats.outstanding || 600}
+                />
+                <small>Max: {formatCurrency(paymentStats.outstanding || 600)}</small>
+              </div>
+
+              <div className="form-group">
+                <label>Email (for receipt)</label>
+                <input
+                  type="email"
+                  value={paymentEmail}
+                  onChange={(e) => setPaymentEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Full Name</label>
+                <input
+                  type="text"
+                  value={paymentName}
+                  onChange={(e) => setPaymentName(e.target.value)}
+                  placeholder="Your full name"
+                  required
+                />
+              </div>
+
+              <div className="payment-info-note">
+                <FaInfoCircle /> You will be redirected to Paystack to complete your payment securely.
+              </div>
+
+              <div className="modal-actions">
+                <button 
+                  type="submit" 
+                  className="btn-pay-now"
+                  disabled={isProcessingPayment}
+                >
+                  {isProcessingPayment ? (
+                    <>
+                      <FaSpinner className="spinner" /> Processing...
+                    </>
+                  ) : (
+                    <>
+                      <FaCreditCard /> Pay Now
+                    </>
+                  )}
+                </button>
+                <button 
+                  type="button" 
+                  className="btn-cancel" 
+                  onClick={() => setShowPaymentModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -1299,9 +1192,8 @@ const StudentPortal = () => {
   // Sidebar navigation items
   const navItems = [
     { id: 'dashboard', icon: <FaHome />, label: 'Dashboard' },
-    { id: 'attendance', icon: <FaCalendarCheck />, label: 'Attendance' },
+    { id: 'account', icon: <FaWallet />, label: 'Account' },
     { id: 'grades', icon: <FaChartLine />, label: 'Grades' },
-    { id: 'payments', icon: <FaCreditCard />, label: 'Payments' },
     { id: 'profile', icon: <FaUserCircle />, label: 'Profile' }
   ];
 
@@ -1366,9 +1258,8 @@ const StudentPortal = () => {
         </div>
         <div className="portal-content">
           {activeTab === 'dashboard' && renderDashboard()}
-          {activeTab === 'attendance' && renderAttendance()}
+          {activeTab === 'account' && renderAccount()}
           {activeTab === 'grades' && renderGrades()}
-          {activeTab === 'payments' && renderPayments()}
           {activeTab === 'profile' && renderProfile()}
         </div>
       </div>
