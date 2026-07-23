@@ -72,7 +72,8 @@ import {
   sendNotification,
   getAllCourses,
   createPayment,
-  updatePaymentStatus
+  updatePaymentStatus,
+  getPayment
 } from '../services/firebaseService';
 import { signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -214,13 +215,16 @@ const StudentPortal = () => {
         console.error('Error loading grades:', error);
       }
       
-      // Get payments
+      // Get payments - FIXED: now handles errors gracefully
       try {
         const paymentsData = await getPaymentsByStudent(studentId);
         setPayments(paymentsData || []);
         calculatePaymentStats(paymentsData || []);
       } catch (error) {
         console.error('Error loading payments:', error);
+        // Set empty payments on error
+        setPayments([]);
+        calculatePaymentStats([]);
       }
       
       // Get courses
@@ -270,7 +274,7 @@ const StudentPortal = () => {
     let pending = 0;
     let completed = 0;
     
-    data.forEach(payment => {
+    (data || []).forEach(payment => {
       if (payment.status === 'completed' || payment.status === 'paid') {
         completed++;
         totalPaid += payment.amount || 0;
@@ -465,6 +469,12 @@ const StudentPortal = () => {
       return;
     }
 
+    // Check if Paystack is loaded
+    if (typeof window.PaystackPop === 'undefined') {
+      showNotification('Payment system is loading. Please try again.', 'error');
+      return;
+    }
+
     setIsProcessingPayment(true);
 
     try {
@@ -495,22 +505,41 @@ const StudentPortal = () => {
         amount: parseFloat(paymentAmount) * 100, // Convert to pesewas
         currency: 'GHS',
         ref: reference,
+        metadata: {
+          custom_fields: [
+            {
+              display_name: "Student ID",
+              variable_name: "student_id",
+              value: student?.studentId || ''
+            },
+            {
+              display_name: "Course",
+              variable_name: "course",
+              value: student?.course || ''
+            }
+          ]
+        },
         callback: async (response) => {
           console.log('Payment successful:', response);
           
-          // Update payment status
-          await updatePaymentStatus(reference, 'completed');
-          
-          // Send notification
-          await sendNotification({
-            userId: student?.id || '',
-            title: 'Payment Successful',
-            message: `Your payment of ${formatCurrency(parseFloat(paymentAmount))} for ${student?.course || 'Course'} has been confirmed.`,
-            type: 'payment',
-            link: '/student/portal'
-          });
+          try {
+            // Update payment status
+            await updatePaymentStatus(reference, 'completed');
+            
+            // Send notification
+            await sendNotification({
+              userId: student?.id || '',
+              title: 'Payment Successful',
+              message: `Your payment of ${formatCurrency(parseFloat(paymentAmount))} for ${student?.course || 'Course'} has been confirmed.`,
+              type: 'payment',
+              link: '/student/portal'
+            });
 
-          showNotification(`Payment of ${formatCurrency(parseFloat(paymentAmount))} successful!`, 'success');
+            showNotification(`Payment of ${formatCurrency(parseFloat(paymentAmount))} successful!`, 'success');
+          } catch (error) {
+            console.error('Error processing successful payment:', error);
+            showNotification('Payment was successful but there was an error updating your record. Please contact support.', 'warning');
+          }
           
           // Reload data
           if (student) {
@@ -522,8 +551,12 @@ const StudentPortal = () => {
         },
         onClose: async () => {
           console.log('Payment window closed');
-          // Update payment as failed if not completed
-          await updatePaymentStatus(reference, 'failed');
+          try {
+            // Update payment as failed if not completed
+            await updatePaymentStatus(reference, 'failed');
+          } catch (error) {
+            console.error('Error updating payment status on close:', error);
+          }
           showNotification('Payment was cancelled', 'warning');
           setIsProcessingPayment(false);
         }
@@ -653,22 +686,23 @@ const StudentPortal = () => {
         <div className="recent-activity">
           <h3>Recent Payments</h3>
           <div className="activity-list">
-            {payments.slice(0, 5).map((payment, index) => (
-              <div key={index} className="activity-item">
-                <div className={`activity-icon ${payment.status}`}>
-                  {getStatusIcon(payment.status)}
+            {payments.length > 0 ? (
+              payments.slice(0, 5).map((payment, index) => (
+                <div key={index} className="activity-item">
+                  <div className={`activity-icon ${payment.status}`}>
+                    {getStatusIcon(payment.status)}
+                  </div>
+                  <div className="activity-content">
+                    <p>
+                      <strong>{formatCurrency(payment.amount)}</strong> - {payment.description || 'Payment'}
+                    </p>
+                    <span className="activity-date">
+                      {new Date(payment.createdAt?.seconds * 1000 || payment.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
-                <div className="activity-content">
-                  <p>
-                    <strong>{formatCurrency(payment.amount)}</strong> - {payment.description || 'Payment'}
-                  </p>
-                  <span className="activity-date">
-                    {new Date(payment.createdAt?.seconds * 1000 || payment.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            ))}
-            {payments.length === 0 && (
+              ))
+            ) : (
               <p className="no-activity">No payment records found</p>
             )}
           </div>
@@ -701,38 +735,39 @@ const StudentPortal = () => {
       </div>
 
       <div className="grades-grid">
-        {grades.map((grade, index) => (
-          <div key={index} className="grade-card">
-            <div className="grade-header">
-              <h4>{grade.course || grade.subject || 'Subject'}</h4>
-              <span className={`grade-score ${grade.score >= 70 ? 'high' : grade.score >= 50 ? 'medium' : 'low'}`}>
-                {grade.score}%
-              </span>
-            </div>
-            <div className="grade-details">
-              <p><strong>Grade:</strong> {grade.grade || grade.letter || 'N/A'}</p>
-              <p><strong>Points:</strong> {grade.points || grade.gpa || 'N/A'}</p>
-              <p><strong>Status:</strong> 
-                <span className={`grade-status ${grade.score >= 50 ? 'passed' : 'failed'}`}>
-                  {grade.score >= 50 ? '✅ Passed' : '❌ Failed'}
+        {grades.length > 0 ? (
+          grades.map((grade, index) => (
+            <div key={index} className="grade-card">
+              <div className="grade-header">
+                <h4>{grade.course || grade.subject || 'Subject'}</h4>
+                <span className={`grade-score ${grade.score >= 70 ? 'high' : grade.score >= 50 ? 'medium' : 'low'}`}>
+                  {grade.score}%
                 </span>
-              </p>
-              {grade.remarks && <p><strong>Remarks:</strong> {grade.remarks}</p>}
-            </div>
-            <div className="grade-progress">
-              <div className="progress-track">
-                <div 
-                  className="progress-fill" 
-                  style={{ 
-                    width: `${grade.score || 0}%`,
-                    background: grade.score >= 70 ? '#27ae60' : grade.score >= 50 ? '#f39c12' : '#e74c3c'
-                  }}
-                />
+              </div>
+              <div className="grade-details">
+                <p><strong>Grade:</strong> {grade.grade || grade.letter || 'N/A'}</p>
+                <p><strong>Points:</strong> {grade.points || grade.gpa || 'N/A'}</p>
+                <p><strong>Status:</strong> 
+                  <span className={`grade-status ${grade.score >= 50 ? 'passed' : 'failed'}`}>
+                    {grade.score >= 50 ? '✅ Passed' : '❌ Failed'}
+                  </span>
+                </p>
+                {grade.remarks && <p><strong>Remarks:</strong> {grade.remarks}</p>}
+              </div>
+              <div className="grade-progress">
+                <div className="progress-track">
+                  <div 
+                    className="progress-fill" 
+                    style={{ 
+                      width: `${grade.score || 0}%`,
+                      background: grade.score >= 70 ? '#27ae60' : grade.score >= 50 ? '#f39c12' : '#e74c3c'
+                    }}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-        {grades.length === 0 && (
+          ))
+        ) : (
           <div className="no-data-message">
             <FaInfoCircle /> No grades available yet
           </div>
@@ -821,38 +856,39 @@ const StudentPortal = () => {
         <div className="payment-history">
           <h3>Payment History</h3>
           <div className="payments-grid">
-            {payments.map((payment, index) => (
-              <div key={index} className="payment-card">
-                <div className="payment-header">
-                  <div className="payment-icon">
-                    {payment.status === 'completed' || payment.status === 'paid' ? 
-                      <FaCheckCircle className="icon-success" /> : 
-                      <FaClock className="icon-pending" />
-                    }
-                  </div>
-                  <div className="payment-info">
-                    <h4>{payment.description || payment.paymentType || 'Payment'}</h4>
-                    <p className="payment-date">
-                      {new Date(payment.createdAt?.seconds * 1000 || payment.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <span className={`payment-amount ${payment.status === 'completed' || payment.status === 'paid' ? 'paid' : 'pending'}`}>
-                    {formatCurrency(payment.amount)}
-                  </span>
-                </div>
-                <div className="payment-details">
-                  <p><strong>Method:</strong> {payment.method || 'N/A'}</p>
-                  <p><strong>Reference:</strong> {payment.reference || payment.paymentId || 'N/A'}</p>
-                  <p><strong>Status:</strong> 
-                    <span className={`status-badge ${getStatusColor(payment.status)}`}>
-                      {getStatusIcon(payment.status)} {payment.status}
+            {payments.length > 0 ? (
+              payments.map((payment, index) => (
+                <div key={index} className="payment-card">
+                  <div className="payment-header">
+                    <div className="payment-icon">
+                      {payment.status === 'completed' || payment.status === 'paid' ? 
+                        <FaCheckCircle className="icon-success" /> : 
+                        <FaClock className="icon-pending" />
+                      }
+                    </div>
+                    <div className="payment-info">
+                      <h4>{payment.description || payment.paymentType || 'Payment'}</h4>
+                      <p className="payment-date">
+                        {new Date(payment.createdAt?.seconds * 1000 || payment.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <span className={`payment-amount ${payment.status === 'completed' || payment.status === 'paid' ? 'paid' : 'pending'}`}>
+                      {formatCurrency(payment.amount)}
                     </span>
-                  </p>
-                  {payment.remarks && <p><strong>Remarks:</strong> {payment.remarks}</p>}
+                  </div>
+                  <div className="payment-details">
+                    <p><strong>Method:</strong> {payment.method || 'N/A'}</p>
+                    <p><strong>Reference:</strong> {payment.reference || payment.paymentId || 'N/A'}</p>
+                    <p><strong>Status:</strong> 
+                      <span className={`status-badge ${getStatusColor(payment.status)}`}>
+                        {getStatusIcon(payment.status)} {payment.status}
+                      </span>
+                    </p>
+                    {payment.remarks && <p><strong>Remarks:</strong> {payment.remarks}</p>}
+                  </div>
                 </div>
-              </div>
-            ))}
-            {payments.length === 0 && (
+              ))
+            ) : (
               <div className="no-data-message">
                 <FaInfoCircle /> No payment records found
               </div>

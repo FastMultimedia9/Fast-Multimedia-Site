@@ -850,13 +850,12 @@ export const getPayment = async (paymentId) => {
   }
 };
 
-// Get payments by student
+// Get payments by student - FIXED: Removed orderBy to avoid index requirement
 export const getPaymentsByStudent = async (studentId) => {
   try {
     const q = query(
       collection(db, COLLECTIONS.PAYMENTS),
-      where('studentId', '==', studentId),
-      orderBy('createdAt', 'desc')
+      where('studentId', '==', studentId)
     );
     
     const snapshot = await getDocs(q);
@@ -865,10 +864,18 @@ export const getPaymentsByStudent = async (studentId) => {
       payments.push({ id: doc.id, ...doc.data() });
     });
     
+    // Sort in memory instead of using orderBy
+    payments.sort((a, b) => {
+      const dateA = a.createdAt?.seconds || 0;
+      const dateB = b.createdAt?.seconds || 0;
+      return dateB - dateA;
+    });
+    
     return payments;
   } catch (error) {
     console.error('Error getting payments by student:', error);
-    throw error;
+    // Return empty array on error
+    return [];
   }
 };
 
