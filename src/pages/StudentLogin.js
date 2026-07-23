@@ -25,7 +25,11 @@ import {
   getUserByEmail,
   getStudentByStudentId,
   verifyStudentPassword,
-  updateStudentPassword
+  updateStudentPassword,
+  getAdmissionBySerial,
+  getAdmissionByEmail,
+  createStudent,
+  generateStudentId
 } from '../services/firebaseService';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -70,10 +74,54 @@ const StudentLogin = () => {
     try {
       // Check if identifier is a student ID or email
       let student = null;
+      let isFromAdmission = false;
       
-      // Try to find by student ID first
+      // Try to find by student ID first (this works for both studentId and admission serial)
       if (!identifier.includes('@')) {
+        // Check by studentId field
         student = await getStudentByStudentId(identifier.toUpperCase());
+        
+        // If not found, try to find by serial number in admissions
+        if (!student) {
+          const admission = await getAdmissionBySerial(identifier.toUpperCase());
+          if (admission) {
+            isFromAdmission = true;
+            // Check if student already exists for this admission
+            const existingStudent = await getStudentByEmail(admission.email);
+            if (existingStudent) {
+              student = existingStudent;
+            } else {
+              // Create a student object from admission data
+              student = {
+                id: admission.admissionId || admission.id,
+                studentId: admission.serialNumber || identifier.toUpperCase(),
+                fullName: admission.fullName,
+                email: admission.email,
+                phone: admission.phone || '',
+                course: admission.course || 'Not specified',
+                admissionStatus: admission.status || 'pending',
+                password: DEFAULT_PASSWORD,
+                passwordUpdated: false,
+                enrolledCourses: [admission.course || 'Not specified']
+              };
+              
+              // Actually create the student in Firebase
+              try {
+                const generatedStudentId = await generateStudentId(admission.fullName);
+                const newStudentData = {
+                  ...student,
+                  studentId: generatedStudentId,
+                  admissionId: admission.admissionId || admission.id
+                };
+                await createStudent(newStudentData);
+                student.studentId = generatedStudentId;
+                console.log('✅ Student created from admission:', generatedStudentId);
+              } catch (createError) {
+                console.error('Error creating student from admission:', createError);
+              }
+            }
+          }
+        }
       }
       
       // If not found by student ID, try by email
@@ -81,21 +129,44 @@ const StudentLogin = () => {
         student = await getStudentByEmail(identifier);
       }
 
-      // If student not found, check if they exist in users collection
+      // If student still not found, check if they exist in admissions
       if (!student) {
-        const user = await getUserByEmail(identifier);
-        if (user && user.role === 'student') {
-          // Convert user to student format
-          student = {
-            id: user.id,
-            studentId: user.studentId || user.id,
-            fullName: user.fullName || user.name,
-            email: user.email,
-            course: user.course || 'Not specified',
-            admissionStatus: user.admissionStatus || 'approved',
-            password: user.password || DEFAULT_PASSWORD,
-            passwordUpdated: user.passwordUpdated || false
-          };
+        const admission = await getAdmissionByEmail(identifier);
+        if (admission) {
+          isFromAdmission = true;
+          // Check if student already exists for this admission
+          const existingStudent = await getStudentByEmail(admission.email);
+          if (existingStudent) {
+            student = existingStudent;
+          } else {
+            student = {
+              id: admission.admissionId || admission.id,
+              studentId: admission.serialNumber || `STU${Date.now().toString().slice(-6)}`,
+              fullName: admission.fullName,
+              email: admission.email,
+              phone: admission.phone || '',
+              course: admission.course || 'Not specified',
+              admissionStatus: admission.status || 'pending',
+              password: DEFAULT_PASSWORD,
+              passwordUpdated: false,
+              enrolledCourses: [admission.course || 'Not specified']
+            };
+            
+            // Actually create the student in Firebase
+            try {
+              const generatedStudentId = await generateStudentId(admission.fullName);
+              const newStudentData = {
+                ...student,
+                studentId: generatedStudentId,
+                admissionId: admission.admissionId || admission.id
+              };
+              await createStudent(newStudentData);
+              student.studentId = generatedStudentId;
+              console.log('✅ Student created from admission (email):', generatedStudentId);
+            } catch (createError) {
+              console.error('Error creating student from admission:', createError);
+            }
+          }
         }
       }
 
@@ -108,6 +179,11 @@ const StudentLogin = () => {
       // Ensure student has a password
       if (!student.password) {
         student.password = DEFAULT_PASSWORD;
+      }
+
+      // Ensure student has a studentId
+      if (!student.studentId) {
+        student.studentId = student.id || `STU${Date.now().toString().slice(-6)}`;
       }
 
       // Set student data in state
@@ -218,6 +294,7 @@ const StudentLogin = () => {
         localStorage.setItem('studentLogin', 'true');
         localStorage.setItem('studentId', student.studentId || student.id);
         localStorage.setItem('studentEmail', student.email);
+        localStorage.setItem('studentName', student.fullName);
       }
       
       redirectToPortal();
@@ -333,6 +410,7 @@ const StudentLogin = () => {
                 <h4>Welcome, <strong>{studentData.fullName}</strong></h4>
                 <p>Student ID: <strong>{studentData.studentId || studentData.id}</strong></p>
                 <p>Course: <strong>{studentData.course || 'Not assigned'}</strong></p>
+                <p>Email: <strong>{studentData.email}</strong></p>
               </div>
             </div>
           )}
@@ -482,6 +560,9 @@ const StudentLogin = () => {
                   </div>
                   <div className="input-hint">
                     <FaInfoCircle /> Enter your Student ID (e.g., JOHN260001) or Email Address
+                  </div>
+                  <div className="input-hint">
+                    <FaInfoCircle /> You can also use your Admission Serial Number (e.g., FM-ADM-2026-XXXXXXXX-XXXX)
                   </div>
                 </div>
 

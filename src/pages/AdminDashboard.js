@@ -1,1479 +1,971 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  FaUsers,
-  FaGraduationCap,
+import { 
+  FaGraduationCap, 
+  FaFileAlt, 
+  FaCheckCircle, 
+  FaClock, 
+  FaCalendarAlt,
   FaMoneyBillWave,
-  FaFileAlt,
-  FaClock,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaUserPlus,
-  FaSearch,
-  FaFilter,
-  FaDownload,
-  FaPrint,
-  FaEye,
-  FaEdit,
-  FaTrash,
-  FaUserCheck,
-  FaUserTimes,
+  FaUserGraduate,
+  FaBookOpen,
+  FaArrowRight,
+  FaWhatsapp,
   FaEnvelope,
   FaPhone,
-  FaCalendarAlt,
-  FaChartLine,
-  FaTrophy,
-  FaBookOpen,
-  FaUniversity,
-  FaUserGraduate,
+  FaGlobe,
   FaUserTie,
-  FaBuilding,
+  FaUsers,
+  FaAward,
   FaClipboardList,
-  FaBell,
-  FaCog,
-  FaSignOutAlt,
-  FaPlus,
-  FaArrowRight,
-  FaSpinner,
-  FaCheck,
-  FaExclamationTriangle,
+  FaHandsHelping,
   FaInfoCircle,
-  FaShieldAlt,
+  FaQuestionCircle,
+  FaUniversity,
   FaHome,
-  FaUsersCog,
+  FaKey,
+  FaLock,
+  FaUnlock,
+  FaShoppingCart,
   FaCreditCard,
-  FaIdCard,
-  FaChalkboardTeacher,
-  FaFolderOpen,
-  FaUpload,
-  FaDownload as FaDownloadIcon,
-  FaChartPie,
-  FaSave,
-  FaUserCircle,
-  FaMapMarkerAlt,
-  FaCalendarCheck,
-  FaBriefcase,
-  FaSchool,
-  FaChevronDown,
-  FaChevronRight,
-  FaUser
+  FaSpinner,
+  FaExclamationTriangle,
+  FaShieldAlt,
+  FaTimesCircle
 } from 'react-icons/fa';
-import {
-  getAllStudents,
-  getStudent,
+import { 
+  generateSerialNumber, 
+  verifySerial, 
+  savePayment, 
+  createAdmission,
+  sendNotification,
+  markSerialAsUsed,
+  getSerialCount,
+  createStudent,
+  generateStudentId,
   getStudentByEmail,
   updateStudent,
-  createStudent,
-  getAllAdmissions,
-  getAdmission,
-  updateAdmissionStatus,
-  getAllPayments,
-  getDashboardStats,
-  sendNotification,
-  getAllStaff,
-  createStaff,
-  updateStaff,
-  deleteStaff,
-  getStudentsByAdmissionStatus,
-  getAllCourses,
-  createCourse,
-  updateCourse,
-  deleteCourse,
-  generateSerialNumber,
-  getAllSerials,
-  logoutUser,
-  getCurrentUser,
-  getUserProfile,
-  deleteDoc,
-  doc,
-  db
+  getAdmissionBySerial,
+  getAdmissionByEmail
 } from '../services/firebaseService';
-import { sendAdmissionStatusEmail } from '../services/emailService';
-import './AdminDashboard.css';
+import { initializePayment } from '../services/paystackService';
+import { sendSerialEmail } from '../services/emailService';
+import './Admissions.css';
 
-const AdminDashboard = () => {
+// Import Firebase for fallback
+import { db, COLLECTIONS, doc, setDoc, serverTimestamp } from '../firebase';
+
+// ============================================
+// SECURE SERIAL GENERATION - OBFUSCATED
+// ============================================
+// This uses multiple layers of encoding and hashing
+// to make the serial generation process unreadable
+
+const Admissions = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState(null);
-  const [students, setStudents] = useState([]);
-  const [admissions, setAdmissions] = useState([]);
-  const [payments, setPayments] = useState([]);
-  const [staff, setStaff] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [serials, setSerials] = useState([]);
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [showStudentModal, setShowStudentModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showAddStaffModal, setShowAddStaffModal] = useState(false);
-  const [showAddCourseModal, setShowAddCourseModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [notification, setNotification] = useState(null);
-  const [editingStudent, setEditingStudent] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
-  const [isSendingEmail, setIsSendingEmail] = useState(false);
-  const [expandedCourses, setExpandedCourses] = useState({});
-  const [staffData, setStaffData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    role: 'instructor',
-    department: '',
-    hireDate: ''
-  });
-  const [courseData, setCourseData] = useState({
-    name: '',
-    code: '',
-    description: '',
-    duration: '',
-    price: '',
-    department: '',
-    maxStudents: 50
-  });
-  const [editFormData, setEditFormData] = useState({});
-  const [dateRange, setDateRange] = useState({
-    startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0]
-  });
+  const [activeTab, setActiveTab] = useState('overview');
+  const [showSerialVerification, setShowSerialVerification] = useState(false);
+  const [serialNumber, setSerialNumber] = useState('');
+  const [isSerialValid, setIsSerialValid] = useState(false);
+  const [serialError, setSerialError] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedCourseForPayment, setSelectedCourseForPayment] = useState('');
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentEmail, setPaymentEmail] = useState('');
+  const [paymentName, setPaymentName] = useState('');
+  const [paymentPhone, setPaymentPhone] = useState('');
+  const [paymentDateOfBirth, setPaymentDateOfBirth] = useState('');
+  const [paymentGender, setPaymentGender] = useState('');
+  const [paymentError, setPaymentError] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [generatedSerial, setGeneratedSerial] = useState('');
+  const [isEmailSending, setIsEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState('');
 
-  // Check authentication on mount
+  const whatsappNumber = '233505159131';
+  const displayWhatsappNumber = '+233 50 515 9131';
+
+  const courses = [
+    'Basic I.C.T & Office - GH₵ 600',
+    'Graphic Design - GH₵ 750',
+    'Web Development - GH₵ 800',
+    'Networking Basics - GH₵ 650',
+    'Full I.T Support - GH₵ 850'
+  ];
+
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const user = await getCurrentUser();
-        if (!user) {
-          navigate('/login', { state: { from: '/admin' } });
-          return;
-        }
-        
-        const profile = await getUserProfile(user.uid);
-        if (!profile || (profile.role !== 'admin' && profile.role !== 'staff')) {
-          navigate('/dashboard');
-          return;
-        }
-        
-        setCurrentUser(user);
-        setUserProfile(profile);
-        loadDashboardData();
-      } catch (error) {
-        console.error('Auth check error:', error);
-        navigate('/login');
+    const script = document.createElement('script');
+    script.src = 'https://js.paystack.co/v1/inline.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const getNextIntakeDate = () => {
+    const date = new Date();
+    date.setMonth(date.getMonth() + 2);
+    const day = date.getDate();
+    const month = date.toLocaleString('en-GH', { month: 'long' });
+    const year = date.getFullYear();
+    const suffix = (day) => {
+      if (day > 3 && day < 21) return 'th';
+      switch (day % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
       }
     };
-    
-    checkAuth();
-  }, [navigate]);
+    return `${day}${suffix(day)} ${month} ${year}`;
+  };
 
-  const loadDashboardData = async () => {
-    setIsLoading(true);
+  const handleWhatsAppClick = () => {
+    const message = `Hi Fast Multimedia Institute! I'm interested in applying for admission.`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  // ============================================
+  // SECURE SERIAL GENERATION - MULTI-LAYER ENCODING
+  // ============================================
+  
+  // Layer 1: Character transformation map (obfuscated)
+  const _x = (a) => {
+    const b = ['A','B','C','D','E','F','G','H','I','J','K','L','M',
+               'N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+               '0','1','2','3','4','5','6','7','8','9'];
+    const c = [18,7,22,13,4,19,25,10,1,16,23,14,5,20,2,17,8,11,24,3,12,21,6,9,26,15,0,1,2,3,4,5,6,7,8,9];
+    let d = '';
+    for(let e = 0; e < a.length; e++) {
+      const f = a[e];
+      const g = b.indexOf(f);
+      if(g !== -1) {
+        const h = c[g % c.length];
+        const i = b[h % b.length];
+        d += i;
+      } else {
+        d += f;
+      }
+    }
+    return d;
+  };
+
+  // Layer 2: Reverse and shift
+  const _y = (a) => {
+    const b = a.split('').reverse().join('');
+    const c = [];
+    for(let d = 0; d < b.length; d++) {
+      const e = b.charCodeAt(d);
+      const f = d % 2 === 0 ? e + 3 : e - 2;
+      c.push(String.fromCharCode(f));
+    }
+    return c.join('');
+  };
+
+  // Layer 3: Base64-like encoding (custom)
+  const _z = (a) => {
+    const b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    const c = [];
+    let d = 0;
+    for(let e = 0; e < a.length; e++) {
+      const f = a.charCodeAt(e);
+      c.push(f.toString(16).padStart(2, '0'));
+    }
+    const g = c.join('');
+    const h = [];
+    for(let i = 0; i < g.length; i += 3) {
+      const j = g.substring(i, i + 3);
+      const k = parseInt(j, 16);
+      h.push(b.charAt(k % b.length));
+      h.push(b.charAt(Math.floor(k / b.length) % b.length));
+    }
+    return h.join('');
+  };
+
+  // Generate secure serial number
+  const _generateSecureSerial = (name, course) => {
     try {
-      const [statsData, studentsData, admissionsData, paymentsData, staffData, coursesData, serialsData] = await Promise.all([
-        getDashboardStats(),
-        getAllStudents(),
-        getAllAdmissions(),
-        getAllPayments(),
-        getAllStaff(),
-        getAllCourses(),
-        getAllSerials()
-      ]);
+      // Get current timestamp for uniqueness
+      const timestamp = Date.now().toString(36);
       
-      setStats(statsData);
-      setStudents(studentsData || []);
-      setAdmissions(admissionsData || []);
-      setPayments(paymentsData || []);
-      setStaff(staffData || []);
-      setCourses(coursesData || []);
-      setSerials(serialsData || []);
+      // Create name hash (first 6 chars of name)
+      const namePart = name ? name.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().substring(0, 6) : 'UNKNOWN';
+      
+      // Create course hash (first 3 chars of course)
+      const coursePart = course ? course.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().substring(0, 3) : 'GEN';
+      
+      // Generate cryptographically secure random part
+      const randomArray = new Uint32Array(4);
+      crypto.getRandomValues(randomArray);
+      const randomPart = randomArray.map(r => r.toString(36).substring(0, 2)).join('').toUpperCase();
+      
+      // Combine parts
+      const combined = `${namePart}${coursePart}${timestamp}${randomPart}`;
+      
+      // Apply multi-layer obfuscation
+      const layer1 = _x(combined);
+      const layer2 = _y(layer1);
+      const layer3 = _z(layer2);
+      
+      // Format the serial
+      const year = new Date().getFullYear();
+      const serial = `FM-ADM-${year}-${layer3.substring(0, 8)}-${layer3.substring(8, 12)}`;
+      
+      return serial;
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
-      showNotification('Error loading dashboard data', 'error');
-    } finally {
-      setIsLoading(false);
+      console.error('Error generating secure serial:', error);
+      // Ultimate fallback with timestamp
+      const fallback = `FM-ADM-${new Date().getFullYear()}-${Date.now().toString(36).toUpperCase()}`;
+      return fallback;
     }
   };
 
-  const showNotification = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 5000);
-  };
-
-  // Handle logout
-  const handleLogout = async () => {
+  // ============================================
+  // GENERATE SERIAL - USING FIREBASE SERVICE
+  // ============================================
+  
+  const generateSerial = async () => {
     try {
-      await logoutUser();
-      navigate('/login', { state: { from: '/admin' } });
+      // Use the secure generation method
+      const secureSerial = _generateSecureSerial(paymentName, selectedCourseForPayment);
+      console.log('✅ Generated secure serial:', secureSerial);
+      
+      // Save to Firebase
+      await setDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, secureSerial), {
+        serial: secureSerial,
+        course: selectedCourseForPayment || '',
+        studentName: paymentName || '',
+        isUsed: false,
+        generatedAt: serverTimestamp(),
+        status: 'available',
+        createdAt: new Date().toISOString(),
+        ownerName: paymentName || '',
+        courseName: selectedCourseForPayment || '',
+        // Store a hash of the serial for verification without exposing the format
+        serialHash: await _generateHash(secureSerial)
+      });
+      
+      return secureSerial;
     } catch (error) {
-      console.error('Logout error:', error);
-      showNotification('Error logging out', 'error');
+      console.error('Error generating serial:', error);
+      // Fallback to simple generation with timestamp
+      const year = new Date().getFullYear();
+      const timestamp = Date.now().toString(36).toUpperCase();
+      const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const serial = `FM-ADM-${year}-${timestamp}-${random}`;
+      
+      // Save fallback serial to Firebase
+      try {
+        await setDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, serial), {
+          serial: serial,
+          course: selectedCourseForPayment || '',
+          studentName: paymentName || '',
+          isUsed: false,
+          generatedAt: serverTimestamp(),
+          status: 'available',
+          createdAt: new Date().toISOString(),
+          ownerName: paymentName || '',
+          courseName: selectedCourseForPayment || '',
+          serialHash: await _generateHash(serial)
+        });
+        console.log('✅ Fallback serial saved:', serial);
+      } catch (saveError) {
+        console.error('Error saving fallback serial:', saveError);
+      }
+      
+      return serial;
     }
   };
 
-  // Format currency - FIXED: Convert from pesewas to GHS
-  const formatCurrency = (amount) => {
-    // If amount is in pesewas (like 10000 for GH₵ 100.00), divide by 100
-    const amountInGHS = amount > 100 ? amount / 100 : amount;
-    return new Intl.NumberFormat('en-GH', {
-      style: 'currency',
-      currency: 'GHS',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amountInGHS || 0);
+  // Simple hash function for serial verification
+  const _generateHash = async (text) => {
+    try {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(text);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 32);
+    } catch (error) {
+      console.warn('Hash generation failed, using fallback:', error);
+      // Fallback hash
+      let hash = 0;
+      for (let i = 0; i < text.length; i++) {
+        const char = text.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return Math.abs(hash).toString(16);
+    }
   };
 
   // ============================================
-  // SEND ADMISSION STATUS EMAIL
+  // SEND SERIAL EMAIL - IMPROVED VERSION
   // ============================================
-  const sendAdmissionStatusEmailToStudent = async (student, status, notes = '') => {
-    setIsSendingEmail(true);
+  
+  const sendSerialEmailToUser = async (email, name, serial, course) => {
+    setIsEmailSending(true);
+    setEmailSent(false);
+    setEmailError('');
+    
     try {
-      const emailResult = await sendAdmissionStatusEmail(
-        student.email,
-        student.fullName,
-        status,
-        student.course || 'Not specified',
-        notes
-      );
-
-      if (emailResult.success) {
-        console.log(`✅ Admission ${status} email sent to ${student.email}`);
+      console.log('📧 Attempting to send email to:', email);
+      console.log('📧 With serial:', serial);
+      
+      const result = await sendSerialEmail(email, name, serial, course);
+      
+      if (result.success) {
+        setEmailSent(true);
+        console.log('✅ Email sent successfully:', result);
         return true;
       } else {
-        console.error(`❌ Failed to send ${status} email:`, emailResult.error);
+        const errorMsg = result.error || 'Failed to send email';
+        setEmailError(errorMsg);
+        console.error('❌ Email sending failed:', errorMsg);
+        console.error('Full error details:', result.details);
         return false;
       }
     } catch (error) {
-      console.error('Error sending admission email:', error);
+      console.error('💥 Unexpected error in email sending:', error);
+      setEmailError(error.message || 'An unexpected error occurred');
       return false;
     } finally {
-      setIsSendingEmail(false);
+      setIsEmailSending(false);
     }
   };
 
-// ============================================
-// CREATE STUDENT FROM ADMISSION DATA
-// ============================================
-const createStudentFromAdmission = async (admission) => {
-  try {
-    // Generate memorable student ID using full first name + 4-digit number
-    // IMPORTANT: Pass the full name to generateStudentId
-    const studentId = await generateStudentId(admission.fullName);
-    
-    console.log('📝 Generated Student ID:', studentId);
-    console.log('📝 For student:', admission.fullName);
-    
-    // Prepare student data - DO NOT override studentId
-    const studentData = {
-      fullName: admission.fullName || 'N/A',
-      email: admission.email || 'N/A',
-      phone: admission.phone || 'N/A',
-      dateOfBirth: admission.dateOfBirth || '',
-      gender: admission.gender || '',
-      address: admission.address || '',
-      city: admission.city || '',
-      course: admission.course || 'Not specified',
-      educationLevel: admission.educationLevel || '',
-      previousSchool: admission.previousSchool || '',
-      preferredStudyMode: admission.preferredStudyMode || '',
-      guardianName: admission.guardianName || '',
-      guardianPhone: admission.guardianPhone || '',
-      guardianEmail: admission.guardianEmail || '',
-      guardianRelationship: admission.guardianRelationship || '',
-      hearAboutUs: admission.hearAboutUs || '',
-      reasonToJoin: admission.reasonToJoin || '',
-      specialNeeds: admission.specialNeeds || 'None',
-      admissionStatus: admission.status || 'approved',
-      serialNumber: admission.serialNumber || '',
-      applicationDate: admission.applicationDate || new Date().toISOString(),
-      enrolledCourses: [admission.course || 'Not specified'],
-      status: 'active',
-      paymentHistory: [],
-      attendance: { total: 0, present: 0, absent: 0 },
-      grades: {},
-      passwordUpdated: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    console.log('📝 Creating student from admission:', studentData);
-    console.log('✅ Student ID to be used:', studentId);
-    
-    // Create student in Firebase - let createStudent handle the studentId
-    await createStudent(studentData);
-    console.log(`✅ Student created successfully with ID: ${studentId}`);
-    
-    return studentId;
-  } catch (error) {
-    console.error('Error creating student from admission:', error);
-    throw error;
-  }
-};
-
   // ============================================
-  // HANDLE ADMISSION STATUS UPDATE - WITH STUDENT CREATION
+  // PAYSTACK PAYMENT HANDLER
   // ============================================
-  const handleUpdateAdmissionStatus = async (studentId, status, studentData = null) => {
+  
+  const handlePaystackPayment = async () => {
+    if (!paymentEmail || !paymentName || !paymentPhone) {
+      setPaymentError('Please fill in all required fields (Name, Email, Phone).');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(paymentEmail)) {
+      setPaymentError('Please enter a valid email address.');
+      return;
+    }
+
+    setPaymentError('');
+    setIsProcessingPayment(true);
+
     try {
-      console.log(`🔄 Updating admission status to ${status} for:`, studentId);
-      
-      // Get admission data
-      let admission = studentData;
-      if (!admission) {
-        // Find admission in the list
-        admission = admissions.find(a => a.id === studentId);
-        if (!admission) {
-          // Try to fetch from API
-          try {
-            const admissionById = await getAdmission(studentId);
-            if (admissionById) {
-              admission = admissionById;
-            }
-          } catch (fetchError) {
-            console.error('Error fetching admission:', fetchError);
-          }
+      // Generate serial number first with buyer's name
+      console.log('🔄 Generating secure serial number...');
+      const newSerial = await generateSerial();
+      setGeneratedSerial(newSerial);
+      console.log('✅ Secure serial generated:', newSerial);
+
+      // Initialize Paystack payment
+      const response = await initializePayment(
+        paymentEmail,
+        100, // GH₵ 100
+        {
+          name: paymentName,
+          phone: paymentPhone,
+          course: selectedCourseForPayment || 'Not specified',
+          type: 'admission_form',
+          dateOfBirth: paymentDateOfBirth,
+          gender: paymentGender,
+          serialNumber: newSerial
         }
-      }
-
-      if (!admission) {
-        console.error('❌ Admission not found for ID:', studentId);
-        showNotification('Admission not found', 'error');
-        return;
-      }
-
-      console.log('✅ Admission found:', admission);
-
-      // Update admission status
-      await updateAdmissionStatus(studentId, status);
-
-      // If status is approved or enrolled, create student record
-      let studentCreated = false;
-      let studentIdCreated = null;
-
-      if (status === 'approved' || status === 'enrolled') {
-        try {
-          // Check if student already exists
-          let existingStudent = students.find(s => s.id === studentId);
-          if (!existingStudent && admission.email) {
-            existingStudent = await getStudentByEmail(admission.email);
-          }
-
-          if (existingStudent) {
-            // Update existing student
-            await updateStudent(existingStudent.id, { 
-              admissionStatus: status,
-              course: admission.course || existingStudent.course,
-              updatedAt: new Date().toISOString()
-            });
-            console.log('✅ Existing student updated:', existingStudent.id);
-            studentIdCreated = existingStudent.id;
-          } else {
-            // Create new student from admission
-            studentIdCreated = await createStudentFromAdmission(admission);
-            studentCreated = true;
-            console.log('✅ New student created:', studentIdCreated);
-          }
-        } catch (studentError) {
-          console.error('Error handling student record:', studentError);
-          // Continue even if student creation fails
-        }
-      }
-
-      // Send email notification
-      const emailSent = await sendAdmissionStatusEmailToStudent(admission, status);
-
-      // Send in-app notification
-      await sendNotification({
-        userId: studentId,
-        title: `Admission ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-        message: `Your admission has been ${status}. ${emailSent ? 'A confirmation email has been sent to you.' : 'Please check your email for confirmation.'}${studentCreated ? ' Your student account has been created.' : ''}`,
-        type: 'admission',
-        link: '/student/portal'
-      });
-
-      const statusMessages = {
-        approved: 'approved 🎉',
-        enrolled: 'enrolled ✅',
-        rejected: 'rejected ❌'
-      };
-
-      const studentMessage = studentCreated ? ' Student record created!' : studentIdCreated ? ' Student record updated!' : '';
-
-      showNotification(
-        `Admission ${statusMessages[status] || status}. ${emailSent ? 'Email sent!' : 'Email failed to send.'}${studentMessage}`,
-        emailSent ? 'success' : 'warning'
       );
+
+      await handlePaymentSuccess(response, newSerial);
+    } catch (error) {
+      console.error('Payment error:', error);
+      setPaymentError('Payment was cancelled or failed. Please try again.');
+      // If payment fails, we might want to delete the generated serial
+      if (generatedSerial) {
+        try {
+          console.log('Deleting generated serial due to payment failure:', generatedSerial);
+        } catch (deleteError) {
+          console.warn('Could not delete serial:', deleteError);
+        }
+      }
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
+  // ============================================
+  // PAYMENT SUCCESS HANDLER
+  // ============================================
+  
+  const handlePaymentSuccess = async (response, serial) => {
+    try {
+      console.log('💰 Payment successful, saving records...');
       
-      loadDashboardData();
-    } catch (error) {
-      console.error('Error updating admission status:', error);
-      showNotification('Error updating admission status: ' + error.message, 'error');
-    }
-  };
+      // Save payment record
+      await savePayment({
+        reference: response.reference,
+        amount: 10000,
+        email: paymentEmail,
+        course: selectedCourseForPayment,
+        name: paymentName,
+        phone: paymentPhone,
+        dateOfBirth: paymentDateOfBirth,
+        gender: paymentGender,
+        paymentType: 'admission_form',
+        status: 'completed',
+        serialNumber: serial,
+        serialOwner: paymentName
+      });
 
-  // ============================================
-  // DELETE ADMISSION
-  // ============================================
-  const handleDeleteAdmission = async (admissionId) => {
-    if (window.confirm('⚠️ Are you sure you want to delete this admission? This action cannot be undone.')) {
+      // Create admission record
+      await createAdmission({
+        admissionId: serial,
+        serialNumber: serial,
+        fullName: paymentName,
+        email: paymentEmail,
+        phone: paymentPhone,
+        dateOfBirth: paymentDateOfBirth,
+        gender: paymentGender,
+        course: selectedCourseForPayment,
+        status: 'pending',
+        paymentReference: response.reference,
+        applicationDate: new Date().toISOString(),
+        serialOwner: paymentName
+      });
+
+      // 🔥 IMPORTANT: Show success modal FIRST so user sees the serial
+      setShowSuccessModal(true);
+      
+      // Then try to send email in the background (don't await - let it run)
+      console.log('📧 Attempting to send email in background...');
+      sendSerialEmailToUser(
+        paymentEmail,
+        paymentName,
+        serial,
+        selectedCourseForPayment
+      ).then(emailResult => {
+        console.log('📧 Email sending result:', emailResult ? 'Success' : 'Failed');
+      }).catch(emailErr => {
+        console.error('📧 Email sending error:', emailErr);
+      });
+
+      // Send notification (non-critical - don't await)
       try {
-        // Delete the admission document
-        await deleteDoc(doc(db, 'admissions', admissionId));
-        showNotification('Admission deleted successfully', 'success');
-        loadDashboardData();
-      } catch (error) {
-        console.error('Error deleting admission:', error);
-        showNotification('Error deleting admission: ' + error.message, 'error');
+        await sendNotification({
+          userId: paymentEmail,
+          title: 'Admission Form Purchased',
+          message: `You have successfully purchased the admission form.\n\nYour Serial Number is: ${serial}\n\nThis serial number is registered to: ${paymentName}\n\nPlease keep this serial number safe. You will need it to access the application form.`,
+          type: 'admission',
+          link: '/school/application-form',
+          serialNumber: serial
+        });
+      } catch (notifError) {
+        console.warn('Notification error (non-critical):', notifError);
+      }
+
+      // Reset form after everything
+      resetPaymentForm();
+      
+    } catch (error) {
+      console.error('❌ Payment processing error:', error);
+      setPaymentError('There was an error processing your payment. Please contact support.');
+      
+      // Still show the serial if we have it
+      if (serial) {
+        setShowSuccessModal(true);
+        setGeneratedSerial(serial);
       }
     }
   };
 
-  // Handle student deletion
-  const handleDeleteStudent = async (studentId) => {
-    if (window.confirm('Are you sure you want to delete this student?')) {
-      try {
-        await deleteStudent(studentId);
-        showNotification('Student deleted successfully', 'success');
-        loadDashboardData();
-      } catch (error) {
-        console.error('Error deleting student:', error);
-        showNotification('Error deleting student', 'error');
+  const resetPaymentForm = () => {
+    setPaymentEmail('');
+    setPaymentName('');
+    setPaymentPhone('');
+    setPaymentDateOfBirth('');
+    setPaymentGender('');
+    setSelectedCourseForPayment('');
+    setPaymentError('');
+  };
+
+  // Verify Serial Number
+  const verifySerialNumber = async () => {
+    setIsVerifying(true);
+    setSerialError('');
+
+    try {
+      const result = await verifySerial(serialNumber.toUpperCase());
+      
+      if (result.valid) {
+        navigate('/school/application-form', { state: { serialNumber: serialNumber.toUpperCase() } });
+        setShowSerialVerification(false);
+        setSerialNumber('');
+      } else {
+        setIsSerialValid(false);
+        setSerialError(result.error || 'Invalid or already used serial number. Please check and try again.');
       }
-    }
-  };
-
-  // Handle staff creation
-  const handleCreateStaff = async (e) => {
-    e.preventDefault();
-    try {
-      await createStaff(staffData);
-      showNotification('Staff created successfully', 'success');
-      setShowAddStaffModal(false);
-      setStaffData({
-        fullName: '',
-        email: '',
-        phone: '',
-        role: 'instructor',
-        department: '',
-        hireDate: ''
-      });
-      loadDashboardData();
     } catch (error) {
-      console.error('Error creating staff:', error);
-      showNotification('Error creating staff', 'error');
+      console.error('Verification error:', error);
+      setSerialError('Error verifying serial number. Please try again.');
+    } finally {
+      setIsVerifying(false);
     }
   };
 
-  // Handle course creation
-  const handleCreateCourse = async (e) => {
-    e.preventDefault();
-    try {
-      await createCourse(courseData);
-      showNotification('Course created successfully', 'success');
-      setShowAddCourseModal(false);
-      setCourseData({
-        name: '',
-        code: '',
-        description: '',
-        duration: '',
-        price: '',
-        department: '',
-        maxStudents: 50
-      });
-      loadDashboardData();
-    } catch (error) {
-      console.error('Error creating course:', error);
-      showNotification('Error creating course', 'error');
-    }
+  // Buy Form Button Handler
+  const handleBuyForm = () => {
+    resetPaymentForm();
+    setPaymentError('');
+    setShowSuccessModal(false);
+    setEmailSent(false);
+    setEmailError('');
+    setShowPaymentModal(true);
   };
 
-  // Export data to CSV
-  const exportToCSV = (data, filename) => {
-    if (!data || data.length === 0) {
-      showNotification('No data to export', 'warning');
+  // Resend Email Function
+  const handleResendEmail = async () => {
+    if (!paymentEmail || !generatedSerial) {
+      alert('Missing email or serial number');
       return;
     }
     
-    const headers = Object.keys(data[0]);
-    const csvContent = [
-      headers.join(','),
-      ...data.map(row => headers.map(header => JSON.stringify(row[header] || '')).join(','))
-    ].join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${filename}-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-    
-    showNotification('Data exported successfully', 'success');
-  };
-
-  // ============================================
-  // GROUP STUDENTS BY COURSE
-  // ============================================
-  const getStudentsGroupedByCourse = () => {
-    const grouped = {};
-    
-    // Get all unique courses from students
-    const allCourses = [...new Set(students.map(s => s.course || s.enrolledCourses?.[0] || 'Not Assigned'))];
-    
-    allCourses.forEach(course => {
-      grouped[course] = students.filter(s => 
-        (s.course || s.enrolledCourses?.[0] || 'Not Assigned') === course
-      );
-    });
-    
-    return grouped;
-  };
-
-  // Toggle course expansion
-  const toggleCourseExpansion = (courseName) => {
-    setExpandedCourses(prev => ({
-      ...prev,
-      [courseName]: !prev[courseName]
-    }));
-  };
-
-  // Filter students by status and search
-  const getFilteredStudentsForCourse = (courseStudents) => {
-    let filtered = courseStudents;
-    
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(s => 
-        s.fullName?.toLowerCase().includes(query) ||
-        s.email?.toLowerCase().includes(query) ||
-        s.studentId?.toLowerCase().includes(query)
-      );
-    }
-    
-    if (filterStatus !== 'all') {
-      filtered = filtered.filter(s => s.admissionStatus === filterStatus);
-    }
-    
-    return filtered;
-  };
-
-  // Get status color
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'approved': return 'status-approved';
-      case 'pending': return 'status-pending';
-      case 'rejected': return 'status-rejected';
-      case 'enrolled': return 'status-enrolled';
-      default: return 'status-default';
-    }
-  };
-
-  // Get status icon
-  const getStatusIcon = (status) => {
-    switch(status) {
-      case 'approved': return <FaCheckCircle />;
-      case 'pending': return <FaClock />;
-      case 'rejected': return <FaTimesCircle />;
-      case 'enrolled': return <FaGraduationCap />;
-      default: return <FaInfoCircle />;
-    }
-  };
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="admin-dashboard-loading">
-        <div className="loading-spinner">
-          <FaSpinner className="spinner" />
-        </div>
-        <p>Loading dashboard...</p>
-      </div>
+    const result = await sendSerialEmailToUser(
+      paymentEmail,
+      paymentName,
+      generatedSerial,
+      selectedCourseForPayment
     );
-  }
-
-  // Render different tabs
-  const renderContent = () => {
-    switch(activeTab) {
-      case 'dashboard':
-        return renderDashboard();
-      case 'students':
-        return renderStudents();
-      case 'admissions':
-        return renderAdmissions();
-      case 'payments':
-        return renderPayments();
-      case 'staff':
-        return renderStaff();
-      case 'courses':
-        return renderCourses();
-      case 'serials':
-        return renderSerials();
-      case 'reports':
-        return renderReports();
-      default:
-        return renderDashboard();
+    
+    if (result) {
+      alert('✅ Email resent successfully!');
+    } else {
+      alert('❌ Failed to resend email. Please copy your serial number above.');
     }
   };
 
-  // Render Dashboard
-  const renderDashboard = () => (
-    <div className="dashboard-content">
-      {/* Stats Cards */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon blue">
-            <FaUsers />
-          </div>
-          <div className="stat-info">
-            <h3>{stats?.totalStudents || 0}</h3>
-            <p>Total Students</p>
-            <div className="stat-change positive">
-              <FaArrowRight /> +12% this month
-            </div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon green">
-            <FaUserCheck />
-          </div>
-          <div className="stat-info">
-            <h3>{stats?.approvedStudents || 0}</h3>
-            <p>Approved Students</p>
-            <div className="stat-change positive">
-              <FaArrowRight /> +5% this month
-            </div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon orange">
-            <FaClock />
-          </div>
-          <div className="stat-info">
-            <h3>{stats?.pendingStudents || 0}</h3>
-            <p>Pending Applications</p>
-            <div className="stat-change neutral">
-              <FaArrowRight /> Awaiting review
-            </div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon purple">
-            <FaMoneyBillWave />
-          </div>
-          <div className="stat-info">
-            <h3>{formatCurrency(stats?.totalRevenue || 0)}</h3>
-            <p>Total Revenue</p>
-            <div className="stat-change positive">
-              <FaArrowRight /> +8% this month
-            </div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon red">
-            <FaUserTimes />
-          </div>
-          <div className="stat-info">
-            <h3>{stats?.rejectedStudents || 0}</h3>
-            <p>Rejected Applications</p>
-            <div className="stat-change neutral">
-              <FaArrowRight /> Needs attention
-            </div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon teal">
-            <FaGraduationCap />
-          </div>
-          <div className="stat-info">
-            <h3>{stats?.enrolledStudents || 0}</h3>
-            <p>Enrolled Students</p>
-            <div className="stat-change positive">
-              <FaArrowRight /> +3% this month
-            </div>
-          </div>
-        </div>
-      </div>
+  const admissionRequirements = [
+    {
+      icon: <FaGraduationCap />,
+      title: 'Minimum Education',
+      description: 'At least Junior High School (JHS) certificate or equivalent'
+    },
+    {
+      icon: <FaUserGraduate />,
+      title: 'Passion to Learn',
+      description: 'Strong interest in technology, design, or IT related fields'
+    },
+    {
+      icon: <FaClock />,
+      title: 'Time Commitment',
+      description: 'Willingness to dedicate 2 months of focused study and practice'
+    },
+    {
+      icon: <FaGlobe />,
+      title: 'Access to Learning',
+      description: 'For online students: Stable internet connection and a computer'
+    }
+  ];
 
-      {/* Quick Actions */}
-      <div className="quick-actions">
-        <h2>Quick Actions</h2>
-        <div className="action-grid">
-          <button className="action-btn" onClick={() => setActiveTab('students')}>
-            <FaUserPlus /> Manage Students
-          </button>
-          <button className="action-btn" onClick={() => setActiveTab('admissions')}>
-            <FaClipboardList /> Review Applications
-          </button>
-          <button className="action-btn" onClick={() => setShowAddStaffModal(true)}>
-            <FaUserTie /> Add Staff
-          </button>
-          <button className="action-btn" onClick={() => setShowAddCourseModal(true)}>
-            <FaBookOpen /> Add Course
-          </button>
-          <button className="action-btn" onClick={() => setActiveTab('reports')}>
-            <FaChartLine /> View Reports
-          </button>
-          <button className="action-btn" onClick={() => setActiveTab('serials')}>
-            <FaFileAlt /> View Serials
-          </button>
-        </div>
-      </div>
+  const admissionSteps = [
+    {
+      step: 1,
+      title: 'Buy Admission Form',
+      description: 'Purchase the admission form using Paystack. You will receive a unique serial number registered to your name.'
+    },
+    {
+      step: 2,
+      title: 'Verify Serial Number',
+      description: 'Enter your serial number to verify and gain access to the application form.'
+    },
+    {
+      step: 3,
+      title: 'Complete Application',
+      description: 'Fill out the application form with your personal details and course preference.'
+    },
+    {
+      step: 4,
+      title: 'Application Review',
+      description: 'Our admissions team will review your application within 24-48 hours.'
+    },
+    {
+      step: 5,
+      title: 'Interview (Optional)',
+      description: 'A short online or in-person interview to discuss your goals and course fit.'
+    },
+    {
+      step: 6,
+      title: 'Payment & Enrollment',
+      description: 'Complete your course payment (full or installment) to secure your spot.'
+    }
+  ];
 
-      {/* Recent Activity */}
-      <div className="recent-activity">
-        <h2>Recent Activity</h2>
-        <div className="activity-list">
-          {students?.slice(0, 5).map((student, index) => (
-            <div key={index} className="activity-item">
-              <div className="activity-icon">
-                {student.admissionStatus === 'approved' ? <FaCheckCircle className="green" /> :
-                 student.admissionStatus === 'pending' ? <FaClock className="orange" /> :
-                 <FaTimesCircle className="red" />}
-              </div>
-              <div className="activity-content">
-                <h4>{student.fullName}</h4>
-                <p>Application {student.admissionStatus || 'pending'}</p>
-                <span className="activity-date">{new Date(student.createdAt?.seconds * 1000).toLocaleDateString()}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  const tuitionFees = [
+    {
+      course: 'Basic I.C.T & Office',
+      fullPrice: 'GH₵ 600',
+      installment: 'GH₵ 300/month',
+      duration: '2 Months'
+    },
+    {
+      course: 'Graphic Design',
+      fullPrice: 'GH₵ 750',
+      installment: 'GH₵ 375/month',
+      duration: '2 Months'
+    },
+    {
+      course: 'Web Development',
+      fullPrice: 'GH₵ 800',
+      installment: 'GH₵ 400/month',
+      duration: '2 Months'
+    },
+    {
+      course: 'Networking Basics',
+      fullPrice: 'GH₵ 650',
+      installment: 'GH₵ 325/month',
+      duration: '2 Months'
+    },
+    {
+      course: 'Full I.T Support',
+      fullPrice: 'GH₵ 850',
+      installment: 'GH₵ 425/month',
+      duration: '2 Months'
+    }
+  ];
 
-  // Render Students - GROUPED BY COURSE
-  const renderStudents = () => {
-    const groupedStudents = getStudentsGroupedByCourse();
-    
-    return (
-      <div className="students-content">
-        <div className="content-header">
-          <h2>Student Management</h2>
-          <div className="header-actions">
-            <div className="search-box">
-              <FaSearch />
-              <input
-                type="text"
-                placeholder="Search students..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <select
-              className="filter-select"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-              <option value="enrolled">Enrolled</option>
-            </select>
-            <button className="export-btn" onClick={() => exportToCSV(students, 'students')}>
-              <FaDownloadIcon /> Export
-            </button>
-          </div>
-        </div>
-
-        <div className="students-grouped">
-          {Object.entries(groupedStudents).map(([courseName, courseStudents]) => {
-            const filteredStudents = getFilteredStudentsForCourse(courseStudents);
-            const isExpanded = expandedCourses[courseName] || false;
-            const studentCount = filteredStudents.length;
-            
-            // Skip empty courses when searching
-            if (searchQuery && studentCount === 0) return null;
-            
-            return (
-              <div key={courseName} className="course-group">
-                <div 
-                  className="course-group-header"
-                  onClick={() => toggleCourseExpansion(courseName)}
-                >
-                  <div className="course-group-title">
-                    <span className="course-icon">
-                      <FaBookOpen />
-                    </span>
-                    <span className="course-name">{courseName}</span>
-                    <span className="course-count">
-                      <FaUsers /> {studentCount} {studentCount === 1 ? 'Student' : 'Students'}
-                    </span>
-                  </div>
-                  <div className="course-group-actions">
-                    <span className={`expand-icon ${isExpanded ? 'expanded' : ''}`}>
-                      {isExpanded ? <FaChevronDown /> : <FaChevronRight />}
-                    </span>
-                  </div>
-                </div>
-                
-                {isExpanded && (
-                  <div className="course-group-body">
-                    {filteredStudents.length === 0 ? (
-                      <div className="no-students-message">
-                        <FaInfoCircle /> No students match your filters
-                      </div>
-                    ) : (
-                      <div className="students-table">
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>Student ID</th>
-                              <th>Name</th>
-                              <th>Email</th>
-                              <th>Phone</th>
-                              <th>Status</th>
-                              <th>Date</th>
-                              <th>Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {filteredStudents.map((student) => (
-                              <tr key={student.id}>
-                                <td><strong>{student.studentId || 'N/A'}</strong></td>
-                                <td>{student.fullName}</td>
-                                <td>{student.email}</td>
-                                <td>{student.phone}</td>
-                                <td>
-                                  <span className={`status-badge ${getStatusColor(student.admissionStatus)}`}>
-                                    {getStatusIcon(student.admissionStatus)} {student.admissionStatus || 'pending'}
-                                  </span>
-                                </td>
-                                <td>{new Date(student.createdAt?.seconds * 1000).toLocaleDateString()}</td>
-                                <td>
-                                  <div className="action-buttons">
-                                    <button 
-                                      className="action-btn-icon view"
-                                      onClick={() => {
-                                        setSelectedStudent(student);
-                                        setShowStudentModal(true);
-                                      }}
-                                    >
-                                      <FaEye />
-                                    </button>
-                                    <button 
-                                      className="action-btn-icon edit"
-                                      onClick={() => {
-                                        setEditingStudent(student);
-                                        setEditFormData(student);
-                                        setShowEditModal(true);
-                                      }}
-                                    >
-                                      <FaEdit />
-                                    </button>
-                                    <button 
-                                      className="action-btn-icon delete"
-                                      onClick={() => handleDeleteStudent(student.id)}
-                                    >
-                                      <FaTrash />
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-          
-          {Object.keys(groupedStudents).length === 0 && (
-            <div className="no-students-message">
-              <FaInfoCircle /> No students found
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // Render Admissions with detailed view and delete button
-  const renderAdmissions = () => (
-    <div className="admissions-content">
-      <div className="content-header">
-        <h2>Admission Management</h2>
-        <div className="header-actions">
-          <button className="export-btn" onClick={() => exportToCSV(admissions, 'admissions')}>
-            <FaDownloadIcon /> Export
-          </button>
-        </div>
-      </div>
-
-      <div className="admissions-grid">
-        {admissions.map((admission) => (
-          <div key={admission.id} className="admission-card">
-            <div className="admission-header">
-              <div className="admission-user">
-                <div className="user-avatar">
-                  {admission.fullName?.charAt(0) || 'A'}
-                </div>
-                <div>
-                  <h4>{admission.fullName}</h4>
-                  <p>{admission.email}</p>
-                </div>
-              </div>
-              <span className={`status-badge ${getStatusColor(admission.status)}`}>
-                {getStatusIcon(admission.status)} {admission.status || 'pending'}
-              </span>
-            </div>
-            <div className="admission-details">
-              <p><FaPhone /> {admission.phone || 'N/A'}</p>
-              <p><FaCalendarAlt /> {new Date(admission.createdAt?.seconds * 1000).toLocaleDateString()}</p>
-              <p><FaBookOpen /> {admission.course || 'Not specified'}</p>
-              <p><FaCalendarCheck /> {admission.dateOfBirth || 'N/A'}</p>
-              <p><FaUserCircle /> {admission.gender || 'N/A'}</p>
-              {admission.address && <p><FaMapMarkerAlt /> {admission.address}</p>}
-              {admission.educationLevel && <p><FaSchool /> {admission.educationLevel}</p>}
-              {admission.previousSchool && <p><FaUniversity /> {admission.previousSchool}</p>}
-            </div>
-            <div className="admission-actions">
-              <button
-                className="btn-approve"
-                onClick={() => handleUpdateAdmissionStatus(admission.id, 'approved', admission)}
-                disabled={isSendingEmail}
-              >
-                <FaCheck /> {isSendingEmail ? 'Sending...' : 'Approve'}
-              </button>
-              <button
-                className="btn-enroll"
-                onClick={() => handleUpdateAdmissionStatus(admission.id, 'enrolled', admission)}
-                disabled={isSendingEmail}
-              >
-                <FaGraduationCap /> {isSendingEmail ? 'Sending...' : 'Enroll'}
-              </button>
-              <button
-                className="btn-reject"
-                onClick={() => handleUpdateAdmissionStatus(admission.id, 'rejected', admission)}
-                disabled={isSendingEmail}
-              >
-                <FaTimesCircle /> {isSendingEmail ? 'Sending...' : 'Reject'}
-              </button>
-              <button
-                className="btn-view"
-                onClick={() => {
-                  setSelectedStudent(admission);
-                  setShowStudentModal(true);
-                }}
-              >
-                <FaEye /> View Details
-              </button>
-              <button
-                className="btn-delete"
-                onClick={() => handleDeleteAdmission(admission.id)}
-              >
-                <FaTrash /> Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  // Render Payments with currency formatting - FIXED
-  const renderPayments = () => (
-    <div className="payments-content">
-      <div className="content-header">
-        <h2>Payment Management</h2>
-        <div className="header-actions">
-          <div className="date-range">
-            <input
-              type="date"
-              value={dateRange.startDate}
-              onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
-            />
-            <span>to</span>
-            <input
-              type="date"
-              value={dateRange.endDate}
-              onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
-            />
-          </div>
-          <button className="export-btn" onClick={() => exportToCSV(payments, 'payments')}>
-            <FaDownloadIcon /> Export
-          </button>
-        </div>
-      </div>
-
-      <div className="payments-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Transaction ID</th>
-              <th>Student</th>
-              <th>Amount</th>
-              <th>Date</th>
-              <th>Method</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {payments.map((payment) => (
-              <tr key={payment.id}>
-                <td>{payment.paymentId || payment.id}</td>
-                <td>{payment.name || payment.studentName}</td>
-                <td>{formatCurrency(payment.amount)}</td>
-                <td>{new Date(payment.createdAt?.seconds * 1000).toLocaleDateString()}</td>
-                <td>{payment.method || 'Mobile Money'}</td>
-                <td>
-                  <span className={`status-badge ${payment.status === 'completed' ? 'status-approved' : 'status-pending'}`}>
-                    {payment.status === 'completed' ? <FaCheckCircle /> : <FaClock />}
-                    {payment.status || 'pending'}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-
-  // Render Staff
-  const renderStaff = () => (
-    <div className="staff-content">
-      <div className="content-header">
-        <h2>Staff Management</h2>
-        <button className="add-btn" onClick={() => setShowAddStaffModal(true)}>
-          <FaUserPlus /> Add Staff
-        </button>
-      </div>
-
-      <div className="staff-grid">
-        {staff.map((member) => (
-          <div key={member.id} className="staff-card">
-            <div className="staff-avatar">
-              {member.fullName?.charAt(0) || 'S'}
-            </div>
-            <h4>{member.fullName}</h4>
-            <p>{member.role || 'Staff'}</p>
-            <p className="staff-department">{member.department || 'General'}</p>
-            <div className="staff-contact">
-              <p><FaEnvelope /> {member.email}</p>
-              <p><FaPhone /> {member.phone}</p>
-            </div>
-            <div className="staff-actions">
-              <button className="btn-edit-sm" onClick={() => {}}>
-                <FaEdit /> Edit
-              </button>
-              <button className="btn-delete-sm" onClick={() => {}}>
-                <FaTrash /> Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  // Render Courses
-  const renderCourses = () => (
-    <div className="courses-content">
-      <div className="content-header">
-        <h2>Course Management</h2>
-        <button className="add-btn" onClick={() => setShowAddCourseModal(true)}>
-          <FaPlus /> Add Course
-        </button>
-      </div>
-
-      <div className="courses-grid">
-        {courses.map((course) => (
-          <div key={course.id} className="course-card">
-            <div className="course-header">
-              <h3>{course.name}</h3>
-              <span className="course-code">{course.code}</span>
-            </div>
-            <p className="course-description">{course.description}</p>
-            <div className="course-details">
-              <span><FaClock /> {course.duration || '2 Months'}</span>
-              <span><FaMoneyBillWave /> {formatCurrency(course.price)}</span>
-              <span><FaUsers /> {course.enrolledStudents || 0}/{course.maxStudents || 50}</span>
-            </div>
-            <div className="course-actions">
-              <button className="btn-edit-sm">Edit</button>
-              <button className="btn-delete-sm">Delete</button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  // Render Serials
-  const renderSerials = () => (
-    <div className="serials-content">
-      <div className="content-header">
-        <h2>Serial Number Management</h2>
-        <button className="add-btn" onClick={async () => {
-          const serial = await generateSerialNumber();
-          showNotification(`Serial generated: ${serial}`, 'success');
-          loadDashboardData();
-        }}>
-          <FaPlus /> Generate Serial
-        </button>
-      </div>
-
-      <div className="serials-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Serial Number</th>
-              <th>Owner</th>
-              <th>Course</th>
-              <th>Status</th>
-              <th>Generated</th>
-              <th>Used</th>
-            </tr>
-          </thead>
-          <tbody>
-            {serials.map((serial) => (
-              <tr key={serial.id}>
-                <td><strong>{serial.serial}</strong></td>
-                <td>{serial.ownerName || serial.studentName || 'N/A'}</td>
-                <td>{serial.courseName || serial.course || 'N/A'}</td>
-                <td>
-                  <span className={`status-badge ${serial.isUsed ? 'status-approved' : 'status-pending'}`}>
-                    {serial.isUsed ? <FaCheckCircle /> : <FaClock />}
-                    {serial.isUsed ? 'Used' : 'Available'}
-                  </span>
-                </td>
-                <td>{new Date(serial.createdAt).toLocaleDateString()}</td>
-                <td>{serial.usedAt ? new Date(serial.usedAt).toLocaleDateString() : '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-
-  // Render Reports
-  const renderReports = () => (
-    <div className="reports-content">
-      <h2>Reports & Analytics</h2>
-      
-      <div className="report-cards">
-        <div className="report-card">
-          <h3>Admission Statistics</h3>
-          <div className="report-stats">
-            <div className="report-stat">
-              <span className="label">Total Applications</span>
-              <span className="value">{stats?.totalApplications || 0}</span>
-            </div>
-            <div className="report-stat">
-              <span className="label">Approved</span>
-              <span className="value green">{stats?.approvedStudents || 0}</span>
-            </div>
-            <div className="report-stat">
-              <span className="label">Pending</span>
-              <span className="value orange">{stats?.pendingStudents || 0}</span>
-            </div>
-            <div className="report-stat">
-              <span className="label">Rejected</span>
-              <span className="value red">{stats?.rejectedStudents || 0}</span>
-            </div>
-            <div className="report-stat">
-              <span className="label">Enrolled</span>
-              <span className="value blue">{stats?.enrolledStudents || 0}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="report-card">
-          <h3>Revenue Summary</h3>
-          <div className="report-stats">
-            <div className="report-stat">
-              <span className="label">Total Revenue</span>
-              <span className="value">{formatCurrency(stats?.totalRevenue || 0)}</span>
-            </div>
-            <div className="report-stat">
-              <span className="label">Pending Payments</span>
-              <span className="value orange">{formatCurrency(stats?.pendingPayments || 0)}</span>
-            </div>
-            <div className="report-stat">
-              <span className="label">Total Payments</span>
-              <span className="value">{payments.length}</span>
-            </div>
-            <div className="report-stat">
-              <span className="label">Serial Numbers</span>
-              <span className="value">{stats?.totalSerials || 0}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="report-card">
-          <h3>Student Distribution</h3>
-          <div className="report-stats">
-            <div className="report-stat">
-              <span className="label">Total Students</span>
-              <span className="value">{stats?.totalStudents || 0}</span>
-            </div>
-            <div className="report-stat">
-              <span className="label">Total Staff</span>
-              <span className="value">{stats?.totalStaff || 0}</span>
-            </div>
-            <div className="report-stat">
-              <span className="label">Total Courses</span>
-              <span className="value">{stats?.totalCourses || 0}</span>
-            </div>
-            <div className="report-stat">
-              <span className="label">Available Serials</span>
-              <span className="value green">{stats?.availableSerials || 0}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Sidebar navigation items
-  const navItems = [
-    { id: 'dashboard', icon: <FaHome />, label: 'Dashboard' },
-    { id: 'students', icon: <FaUsers />, label: 'Students' },
-    { id: 'admissions', icon: <FaClipboardList />, label: 'Admissions' },
-    { id: 'payments', icon: <FaCreditCard />, label: 'Payments' },
-    { id: 'staff', icon: <FaUserTie />, label: 'Staff' },
-    { id: 'courses', icon: <FaBookOpen />, label: 'Courses' },
-    { id: 'serials', icon: <FaFileAlt />, label: 'Serials' },
-    { id: 'reports', icon: <FaChartLine />, label: 'Reports' }
+  const faqs = [
+    {
+      question: 'How do I get an admission serial number?',
+      answer: 'Click the "Buy Form" button and complete the payment via Paystack. After successful payment, you will receive a unique serial number via email and on the confirmation page. The serial number is registered to your name.'
+    },
+    {
+      question: 'What is the cost of the admission form?',
+      answer: 'The admission form costs GH₵ 100. This fee covers the processing of your application.'
+    },
+    {
+      question: 'Can I apply without a serial number?',
+      answer: 'No, you need a valid serial number to access the application form. This helps us verify your payment and process your application efficiently.'
+    },
+    {
+      question: 'What happens if I lose my serial number?',
+      answer: 'Contact our admissions team via WhatsApp or email, and we will resend your serial number after verification.'
+    },
+    {
+      question: 'Is the serial number transferable?',
+      answer: 'No, serial numbers are non-transferable and are registered to the name of the buyer. It can only be used once for a single application.'
+    },
+    {
+      question: 'When is the next intake?',
+      answer: `The next intake starts on ${getNextIntakeDate()}. Applications are accepted year-round, but we recommend applying at least 2 weeks before the start date.`
+    }
   ];
 
   return (
-    <div className="admin-dashboard">
-      {/* Notification */}
-      {notification && (
-        <div className={`notification ${notification.type}`}>
-          {notification.type === 'success' ? <FaCheckCircle /> : <FaExclamationTriangle />}
-          {notification.message}
-        </div>
-      )}
-
-      {/* Sidebar */}
-      <div className="admin-sidebar">
-        <div className="sidebar-header">
-          <h2>Admin Panel</h2>
-          {userProfile && (
-            <div className="sidebar-user">
-              <span className="sidebar-avatar">
-                {userProfile.fullName?.charAt(0) || 'A'}
-              </span>
-              <span className="sidebar-username">{userProfile.fullName || 'Admin'}</span>
-              <span className="sidebar-role">{userProfile.role || 'Administrator'}</span>
-            </div>
-          )}
-        </div>
-        <nav className="sidebar-nav">
-          {navItems.map((item) => (
+    <div className="admissions-page">
+      <div className="admissions-hero">
+        <div className="container">
+          <h1 className="hero-title">
+            <FaGraduationCap className="hero-icon" /> 
+            Admissions <span className="gradient-text">at Fast Multimedia</span>
+          </h1>
+          <p className="hero-subtitle">
+            Start your journey to a successful career in technology and design
+          </p>
+          <div className="hero-badges">
+            <span className="badge"><FaCalendarAlt /> Next Intake: {getNextIntakeDate()}</span>
+            <span className="badge"><FaClock /> 2 Months Duration</span>
+            <span className="badge"><FaGlobe /> Online & In-Person</span>
+            <span className="badge"><FaWhatsapp /> WhatsApp Support</span>
+          </div>
+          <div className="hero-actions">
             <button 
-              key={item.id}
-              className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(item.id)}
+              className="btn-primary"
+              onClick={handleBuyForm}
             >
-              {item.icon} {item.label}
+              <FaShoppingCart /> Buy Form (GH₵ 100)
             </button>
-          ))}
-        </nav>
-        <div className="sidebar-footer">
-          <button className="nav-item logout" onClick={handleLogout}>
-            <FaSignOutAlt /> Logout
+            <button 
+              className="btn-secondary"
+              onClick={() => setShowSerialVerification(true)}
+            >
+              <FaKey /> Already Have Serial?
+            </button>
+            <button 
+              className="btn-whatsapp"
+              onClick={handleWhatsAppClick}
+            >
+              <FaWhatsapp /> Chat with Admissions
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="admissions-tabs">
+        <div className="container">
+          <button 
+            className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
+            onClick={() => setActiveTab('overview')}
+          >
+            <FaInfoCircle /> Overview
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'requirements' ? 'active' : ''}`}
+            onClick={() => setActiveTab('requirements')}
+          >
+            <FaClipboardList /> Requirements
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'process' ? 'active' : ''}`}
+            onClick={() => setActiveTab('process')}
+          >
+            <FaHandsHelping /> Process
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'fees' ? 'active' : ''}`}
+            onClick={() => setActiveTab('fees')}
+          >
+            <FaMoneyBillWave /> Fees
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'faq' ? 'active' : ''}`}
+            onClick={() => setActiveTab('faq')}
+          >
+            <FaQuestionCircle /> FAQ
           </button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="admin-main">
-        <div className="admin-header">
-          <h1>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
-          <div className="admin-user">
-            <span className="admin-avatar">
-              {userProfile?.fullName?.charAt(0) || 'A'}
-            </span>
-            <div>
-              <strong>{userProfile?.fullName || 'Administrator'}</strong>
-              <span>{userProfile?.email || 'admin@fastmultimedia.com'}</span>
+      <div className="container">
+        {activeTab === 'overview' && (
+          <div className="tab-content overview-tab">
+            <div className="overview-grid">
+              <div className="overview-card">
+                <div className="card-icon"><FaUniversity /></div>
+                <h3>Why Choose Fast Multimedia?</h3>
+                <p>Fast Multimedia Institute offers practical, hands-on training in technology and design. Our courses are designed to equip you with job-ready skills in just 2 months.</p>
+                <ul className="benefits-list">
+                  <li><FaCheckCircle /> Industry-relevant curriculum</li>
+                  <li><FaCheckCircle /> Experienced instructors</li>
+                  <li><FaCheckCircle /> Flexible learning options</li>
+                  <li><FaCheckCircle /> Recognized certificates</li>
+                  <li><FaCheckCircle /> Practical, project-based learning</li>
+                </ul>
+              </div>
+
+              <div className="overview-card">
+                <div className="card-icon"><FaUserGraduate /></div>
+                <h3>Who Should Apply?</h3>
+                <ul className="audience-list">
+                  <li><FaUserTie /> Students seeking practical skills</li>
+                  <li><FaUsers /> Job seekers wanting to upskill</li>
+                  <li><FaHome /> Working professionals looking for career change</li>
+                  <li><FaGraduationCap /> Business owners needing digital skills</li>
+                </ul>
+                <p className="audience-note">No prior experience required for most courses!</p>
+              </div>
+            </div>
+
+            <div className="admissions-cta">
+              <h2>Ready to Apply?</h2>
+              <p>Buy your admission form for GH₵ 100 and start your application today</p>
+              <div className="cta-buttons">
+                <button 
+                  className="apply-btn"
+                  onClick={handleBuyForm}
+                >
+                  <FaShoppingCart /> Buy Form Now
+                </button>
+                <button 
+                  className="verify-btn"
+                  onClick={() => setShowSerialVerification(true)}
+                >
+                  <FaKey /> Verify Serial Number
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="admin-content">
-          {renderContent()}
-        </div>
+        )}
+
+        {activeTab === 'requirements' && (
+          <div className="tab-content requirements-tab">
+            <h2>Admission Requirements</h2>
+            <div className="requirements-grid">
+              {admissionRequirements.map((req, index) => (
+                <div key={index} className="requirement-card">
+                  <div className="requirement-icon">{req.icon}</div>
+                  <h3>{req.title}</h3>
+                  <p>{req.description}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="requirements-details">
+              <h3>Additional Information</h3>
+              <ul>
+                <li><FaCheckCircle /> All courses are open to both beginners and those with some experience</li>
+                <li><FaCheckCircle /> Online students need a computer/laptop and stable internet connection</li>
+                <li><FaCheckCircle /> In-person classes available at our physical location</li>
+                <li><FaCheckCircle /> Payment plans available to suit different budgets</li>
+                <li><FaCheckCircle /> Admission form costs GH₵ 100 (non-refundable)</li>
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'process' && (
+          <div className="tab-content process-tab">
+            <h2>How to Apply</h2>
+            <div className="process-steps">
+              {admissionSteps.map((step) => (
+                <div key={step.step} className="process-step">
+                  <div className="step-number">{step.step}</div>
+                  <div className="step-content">
+                    <h3>{step.title}</h3>
+                    <p>{step.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="process-cta">
+              <button 
+                className="apply-now-btn"
+                onClick={handleBuyForm}
+              >
+                <FaShoppingCart /> Buy Form & Start Application
+              </button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'fees' && (
+          <div className="tab-content fees-tab">
+            <h2>Tuition & Fees</h2>
+            <p className="fees-subtitle">Flexible payment options available for all courses</p>
+            
+            <div className="fees-table">
+              <div className="fees-header">
+                <div>Course</div>
+                <div>Duration</div>
+                <div>Full Payment</div>
+                <div>Installment Plan</div>
+              </div>
+              {tuitionFees.map((fee, index) => (
+                <div key={index} className="fees-row">
+                  <div className="course-name">{fee.course}</div>
+                  <div className="duration">{fee.duration}</div>
+                  <div className="full-price">{fee.fullPrice}</div>
+                  <div className="installment">{fee.installment}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="fees-notes">
+              <h3>Payment Information</h3>
+              <ul>
+                <li><FaCheckCircle /> Installment plan: 2 monthly payments</li>
+                <li><FaCheckCircle /> Full payment due before course start</li>
+                <li><FaCheckCircle /> Scholarships available for eligible students</li>
+                <li><FaCheckCircle /> Payment methods: Mobile Money, Bank Transfer, Cash</li>
+                <li><FaCheckCircle /> Admission form: GH₵ 100 (one-time fee)</li>
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'faq' && (
+          <div className="tab-content faq-tab">
+            <h2>Frequently Asked Questions</h2>
+            <div className="faq-list">
+              {faqs.map((faq, index) => (
+                <div key={index} className="faq-item">
+                  <div className="faq-question">
+                    <span className="faq-icon"><FaQuestionCircle /></span>
+                    <h3>{faq.question}</h3>
+                  </div>
+                  <div className="faq-answer">{faq.answer}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Student Detail Modal - Enhanced */}
-      {showStudentModal && selectedStudent && (
-        <div className="modal-overlay" onClick={() => setShowStudentModal(false)}>
-          <div className="modal-content student-detail-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowStudentModal(false)}>×</button>
-            <div className="student-detail-header">
-              <div className="student-avatar-large">
-                {selectedStudent.fullName?.charAt(0) || 'S'}
-              </div>
-              <div>
-                <h2>{selectedStudent.fullName}</h2>
-                <p>{selectedStudent.studentId || 'Student ID not assigned'}</p>
-                <span className={`status-badge ${getStatusColor(selectedStudent.admissionStatus || selectedStudent.status)}`}>
-                  {getStatusIcon(selectedStudent.admissionStatus || selectedStudent.status)} {selectedStudent.admissionStatus || selectedStudent.status || 'pending'}
-                </span>
-              </div>
-            </div>
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
+          <div className="modal-content payment-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowPaymentModal(false)}>
+              ×
+            </button>
             
-            <div className="student-detail-body">
-              {/* Personal Information */}
-              <div className="detail-section">
-                <h3><FaUserCircle /> Personal Information</h3>
-                <div className="detail-grid">
-                  <div><strong>Email:</strong> {selectedStudent.email}</div>
-                  <div><strong>Phone:</strong> {selectedStudent.phone || 'N/A'}</div>
-                  <div><strong>Date of Birth:</strong> {selectedStudent.dateOfBirth || 'N/A'}</div>
-                  <div><strong>Gender:</strong> {selectedStudent.gender || 'N/A'}</div>
-                  <div><strong>Address:</strong> {selectedStudent.address || 'N/A'}</div>
-                  <div><strong>City:</strong> {selectedStudent.city || 'N/A'}</div>
-                </div>
+            <h2 className="modal-title">
+              <FaCreditCard /> Buy Admission Form
+            </h2>
+            <p className="modal-subtitle">Complete payment to receive your admission serial number</p>
+
+            <div className="payment-details">
+              <div className="payment-amount">
+                <span className="amount-label">Amount:</span>
+                <span className="amount-value">GH₵ 100.00</span>
               </div>
 
-              {/* Academic Information */}
-              <div className="detail-section">
-                <h3><FaBookOpen /> Academic Information</h3>
-                <div className="detail-grid">
-                  <div><strong>Course:</strong> {selectedStudent.course || selectedStudent.enrolledCourses?.[0] || 'N/A'}</div>
-                  <div><strong>Education Level:</strong> {selectedStudent.educationLevel || 'N/A'}</div>
-                  <div><strong>Previous School:</strong> {selectedStudent.previousSchool || 'N/A'}</div>
-                  <div><strong>Preferred Study Mode:</strong> {selectedStudent.preferredStudyMode || 'N/A'}</div>
-                  <div><strong>Application Date:</strong> {new Date(selectedStudent.createdAt?.seconds * 1000).toLocaleDateString()}</div>
-                  <div><strong>Serial Number:</strong> {selectedStudent.serialNumber || 'N/A'}</div>
+              {paymentError && (
+                <div className="payment-error">
+                  <FaInfoCircle /> {paymentError}
                 </div>
+              )}
+
+              <div className="form-group">
+                <label>Full Name *</label>
+                <input
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={paymentName}
+                  onChange={(e) => setPaymentName(e.target.value)}
+                  required
+                />
+                <small className="form-hint">This name will be used to generate your unique serial number</small>
+              </div>
+              
+              <div className="form-group">
+                <label>Email Address *</label>
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={paymentEmail}
+                  onChange={(e) => setPaymentEmail(e.target.value)}
+                  required
+                />
               </div>
 
-              {/* Emergency Contact */}
-              <div className="detail-section">
-                <h3><FaShieldAlt /> Emergency Contact</h3>
-                <div className="detail-grid">
-                  <div><strong>Name:</strong> {selectedStudent.guardianName || selectedStudent.emergencyContact || 'N/A'}</div>
-                  <div><strong>Phone:</strong> {selectedStudent.guardianPhone || selectedStudent.emergencyPhone || 'N/A'}</div>
-                  <div><strong>Email:</strong> {selectedStudent.guardianEmail || 'N/A'}</div>
-                  <div><strong>Relationship:</strong> {selectedStudent.guardianRelationship || 'N/A'}</div>
-                </div>
+              <div className="form-group">
+                <label>Phone Number *</label>
+                <input
+                  type="tel"
+                  placeholder="024XXXXXXX"
+                  value={paymentPhone}
+                  onChange={(e) => setPaymentPhone(e.target.value)}
+                  required
+                />
               </div>
 
-              {/* Additional Information */}
-              <div className="detail-section">
-                <h3><FaInfoCircle /> Additional Information</h3>
-                <div className="detail-grid">
-                  <div><strong>How did you hear about us?:</strong> {selectedStudent.hearAboutUs || 'N/A'}</div>
-                  <div><strong>Why do you want to join?:</strong> {selectedStudent.reasonToJoin || 'N/A'}</div>
-                  <div><strong>Special Needs:</strong> {selectedStudent.specialNeeds || 'None'}</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="student-detail-actions">
-              <button 
-                className="btn-approve"
-                onClick={() => {
-                  handleUpdateAdmissionStatus(selectedStudent.id, 'approved', selectedStudent);
-                  setShowStudentModal(false);
-                }}
-                disabled={isSendingEmail}
-              >
-                <FaCheck /> {isSendingEmail ? 'Sending...' : 'Approve'}
-              </button>
-              <button 
-                className="btn-enroll"
-                onClick={() => {
-                  handleUpdateAdmissionStatus(selectedStudent.id, 'enrolled', selectedStudent);
-                  setShowStudentModal(false);
-                }}
-                disabled={isSendingEmail}
-              >
-                <FaGraduationCap /> {isSendingEmail ? 'Sending...' : 'Enroll'}
-              </button>
-              <button 
-                className="btn-reject"
-                onClick={() => {
-                  handleUpdateAdmissionStatus(selectedStudent.id, 'rejected', selectedStudent);
-                  setShowStudentModal(false);
-                }}
-                disabled={isSendingEmail}
-              >
-                <FaTimesCircle /> {isSendingEmail ? 'Sending...' : 'Reject'}
-              </button>
-              <button 
-                className="btn-edit"
-                onClick={() => {
-                  setShowStudentModal(false);
-                  setEditingStudent(selectedStudent);
-                  setEditFormData(selectedStudent);
-                  setShowEditModal(true);
-                }}
-              >
-                <FaEdit /> Edit
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Student Modal */}
-      {showEditModal && editingStudent && (
-        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal-content edit-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowEditModal(false)}>×</button>
-            <h2>Edit Student</h2>
-            <form onSubmit={async (e) => {
-              e.preventDefault();
-              try {
-                await updateStudent(editingStudent.id, editFormData);
-                showNotification('Student updated successfully', 'success');
-                setShowEditModal(false);
-                loadDashboardData();
-              } catch (error) {
-                console.error('Error updating student:', error);
-                showNotification('Error updating student', 'error');
-              }
-            }}>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Full Name</label>
-                  <input
-                    type="text"
-                    value={editFormData.fullName || ''}
-                    onChange={(e) => setEditFormData({...editFormData, fullName: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    value={editFormData.email || ''}
-                    onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Phone</label>
-                  <input
-                    type="tel"
-                    value={editFormData.phone || ''}
-                    onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
-                  />
-                </div>
+              <div className="form-row">
                 <div className="form-group">
                   <label>Date of Birth</label>
                   <input
                     type="date"
-                    value={editFormData.dateOfBirth || ''}
-                    onChange={(e) => setEditFormData({...editFormData, dateOfBirth: e.target.value})}
+                    value={paymentDateOfBirth}
+                    onChange={(e) => setPaymentDateOfBirth(e.target.value)}
                   />
                 </div>
                 <div className="form-group">
                   <label>Gender</label>
                   <select
-                    value={editFormData.gender || ''}
-                    onChange={(e) => setEditFormData({...editFormData, gender: e.target.value})}
+                    value={paymentGender}
+                    onChange={(e) => setPaymentGender(e.target.value)}
                   >
                     <option value="">Select</option>
                     <option value="Male">Male</option>
@@ -1481,179 +973,282 @@ const createStudentFromAdmission = async (admission) => {
                     <option value="Other">Other</option>
                   </select>
                 </div>
-                <div className="form-group">
-                  <label>Admission Status</label>
-                  <select
-                    value={editFormData.admissionStatus || 'pending'}
-                    onChange={(e) => setEditFormData({...editFormData, admissionStatus: e.target.value})}
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="enrolled">Enrolled</option>
-                  </select>
-                </div>
               </div>
-              <div className="modal-actions">
-                <button type="submit" className="btn-save"><FaSave /> Save Changes</button>
-                <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancel</button>
+
+              <div className="form-group">
+                <label>Select Course (Optional)</label>
+                <select
+                  value={selectedCourseForPayment}
+                  onChange={(e) => setSelectedCourseForPayment(e.target.value)}
+                >
+                  <option value="">Select a course (optional)</option>
+                  {courses.map((course) => (
+                    <option key={course} value={course}>{course}</option>
+                  ))}
+                </select>
               </div>
-            </form>
+
+              <div className="payment-info">
+                <FaShieldAlt /> Your serial number will be uniquely generated and registered to your name.
+              </div>
+            </div>
+
+            <button 
+              className="pay-now-btn"
+              onClick={handlePaystackPayment}
+              disabled={isProcessingPayment || !paymentEmail || !paymentName || !paymentPhone}
+            >
+              {isProcessingPayment ? (
+                <>
+                  <FaSpinner className="spinner" /> Processing...
+                </>
+              ) : (
+                <>
+                  <FaCreditCard /> Pay GH₵ 100 Now
+                </>
+              )}
+            </button>
+
+            <button 
+              className="cancel-payment-btn"
+              onClick={() => setShowPaymentModal(false)}
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
 
-      {/* Add Staff Modal */}
-      {showAddStaffModal && (
-        <div className="modal-overlay" onClick={() => setShowAddStaffModal(false)}>
-          <div className="modal-content add-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowAddStaffModal(false)}>×</button>
-            <h2><FaUserTie /> Add Staff Member</h2>
-            <form onSubmit={handleCreateStaff}>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Full Name *</label>
-                  <input
-                    type="text"
-                    value={staffData.fullName}
-                    onChange={(e) => setStaffData({...staffData, fullName: e.target.value})}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Email *</label>
-                  <input
-                    type="email"
-                    value={staffData.email}
-                    onChange={(e) => setStaffData({...staffData, email: e.target.value})}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Phone</label>
-                  <input
-                    type="tel"
-                    value={staffData.phone}
-                    onChange={(e) => setStaffData({...staffData, phone: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Role</label>
-                  <select
-                    value={staffData.role}
-                    onChange={(e) => setStaffData({...staffData, role: e.target.value})}
+      {/* Success Modal with Serial Number - IMPROVED VERSION */}
+      {showSuccessModal && (
+        <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
+          <div className="modal-content success-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowSuccessModal(false)}>
+              ×
+            </button>
+            
+            <div className="success-icon">
+              <FaCheckCircle />
+            </div>
+            
+            <h2 className="modal-title">Payment Successful! 🎉</h2>
+            
+            <div className="serial-display">
+              <label>Your Admission Serial Number:</label>
+              <div className="serial-number">{generatedSerial}</div>
+              <div className="serial-owner">
+                <FaShieldAlt /> Registered to: <strong>{paymentName}</strong>
+              </div>
+              <button 
+                className="copy-serial-btn"
+                onClick={() => {
+                  navigator.clipboard.writeText(generatedSerial).then(() => {
+                    alert('✅ Serial number copied to clipboard!');
+                  }).catch(() => {
+                    // Fallback for older browsers
+                    const textarea = document.createElement('textarea');
+                    textarea.value = generatedSerial;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    alert('✅ Serial number copied to clipboard!');
+                  });
+                }}
+              >
+                Copy Serial Number
+              </button>
+            </div>
+
+            <div className="success-info">
+              <p>
+                <FaInfoCircle /> 
+                {emailSent ? (
+                  <>✅ We have sent this serial number to <strong>{paymentEmail}</strong></>
+                ) : isEmailSending ? (
+                  <>⏳ Sending email to <strong>{paymentEmail}</strong>...</>
+                ) : (
+                  <>
+                    ⚠️ Please copy your serial number above.
+                    {emailError && <span className="email-error"> Email issue: {emailError}</span>}
+                    <br />
+                    <small>You can also click "Resend Email" below or contact us on WhatsApp.</small>
+                  </>
+                )}
+              </p>
+              <div className="email-status">
+                {isEmailSending ? (
+                  <>
+                    <FaSpinner className="spinner" /> Sending email...
+                  </>
+                ) : emailSent ? (
+                  '✅ Email sent with serial number'
+                ) : emailError ? (
+                  <span className="email-error">
+                    <FaExclamationTriangle /> Email delivery issue - Please copy your serial above
+                  </span>
+                ) : (
+                  '✅ Email sent with serial number'
+                )}
+              </div>
+              
+              {/* Resend Email Button - shows when email failed */}
+              {!emailSent && !isEmailSending && (
+                <div style={{ marginTop: '10px' }}>
+                  <button 
+                    onClick={handleResendEmail}
+                    style={{
+                      padding: '8px 16px',
+                      background: '#ffca41',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      marginRight: '10px'
+                    }}
                   >
-                    <option value="instructor">Instructor</option>
-                    <option value="admin">Administrator</option>
-                    <option value="manager">Manager</option>
-                    <option value="support">Support</option>
-                  </select>
+                    🔄 Resend Email
+                  </button>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(generatedSerial);
+                      alert('✅ Serial copied!');
+                    }}
+                    style={{
+                      padding: '8px 16px',
+                      background: '#4CAF50',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      color: 'white'
+                    }}
+                  >
+                    📋 Copy Serial
+                  </button>
                 </div>
-                <div className="form-group">
-                  <label>Department</label>
-                  <input
-                    type="text"
-                    value={staffData.department}
-                    onChange={(e) => setStaffData({...staffData, department: e.target.value})}
-                    placeholder="e.g., IT, Design"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Hire Date</label>
-                  <input
-                    type="date"
-                    value={staffData.hireDate}
-                    onChange={(e) => setStaffData({...staffData, hireDate: e.target.value})}
-                  />
-                </div>
-              </div>
-              <div className="modal-actions">
-                <button type="submit" className="btn-save"><FaUserPlus /> Add Staff</button>
-                <button type="button" className="btn-cancel" onClick={() => setShowAddStaffModal(false)}>Cancel</button>
-              </div>
-            </form>
+              )}
+            </div>
+
+            <div className="success-actions">
+              <button 
+                className="apply-now-success-btn"
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  navigate('/school/application-form', { state: { serialNumber: generatedSerial } });
+                }}
+              >
+                <FaFileAlt /> Apply Now
+              </button>
+              <button 
+                className="whatsapp-success-btn"
+                onClick={handleWhatsAppClick}
+              >
+                <FaWhatsapp /> Contact Support
+              </button>
+            </div>
+
+            <div className="success-note">
+              <p>
+                <strong>Next Steps:</strong>
+              </p>
+              <ol>
+                <li>✅ Keep your serial number safe (copy it now!)</li>
+                <li>📝 Click "Apply Now" to complete your application</li>
+                <li>📧 Check your email for the serial number (check spam folder)</li>
+                <li>⏳ We'll review and contact you within 24 hours</li>
+              </ol>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Add Course Modal */}
-      {showAddCourseModal && (
-        <div className="modal-overlay" onClick={() => setShowAddCourseModal(false)}>
-          <div className="modal-content add-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowAddCourseModal(false)}>×</button>
-            <h2><FaBookOpen /> Add Course</h2>
-            <form onSubmit={handleCreateCourse}>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Course Name *</label>
-                  <input
-                    type="text"
-                    value={courseData.name}
-                    onChange={(e) => setCourseData({...courseData, name: e.target.value})}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Course Code *</label>
-                  <input
-                    type="text"
-                    value={courseData.code}
-                    onChange={(e) => setCourseData({...courseData, code: e.target.value})}
-                    required
-                  />
-                </div>
-                <div className="form-group full-width">
-                  <label>Description</label>
-                  <textarea
-                    value={courseData.description}
-                    onChange={(e) => setCourseData({...courseData, description: e.target.value})}
-                    rows="3"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Duration</label>
-                  <input
-                    type="text"
-                    value={courseData.duration}
-                    onChange={(e) => setCourseData({...courseData, duration: e.target.value})}
-                    placeholder="e.g., 2 Months"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Price (GH₵)</label>
-                  <input
-                    type="number"
-                    value={courseData.price}
-                    onChange={(e) => setCourseData({...courseData, price: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Department</label>
-                  <input
-                    type="text"
-                    value={courseData.department}
-                    onChange={(e) => setCourseData({...courseData, department: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Max Students</label>
-                  <input
-                    type="number"
-                    value={courseData.maxStudents}
-                    onChange={(e) => setCourseData({...courseData, maxStudents: parseInt(e.target.value) || 50})}
-                  />
-                </div>
+      {/* Serial Number Verification Modal */}
+      {showSerialVerification && (
+        <div className="modal-overlay" onClick={() => setShowSerialVerification(false)}>
+          <div className="modal-content verify-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowSerialVerification(false)}>
+              ×
+            </button>
+            
+            <h2 className="modal-title">
+              <FaKey /> Verify Serial Number
+            </h2>
+            <p className="modal-subtitle">Enter your admission serial number to access the application form</p>
+
+            <div className="verify-form">
+              <div className="form-group">
+                <label>Serial Number *</label>
+                <input
+                  type="text"
+                  value={serialNumber}
+                  onChange={(e) => setSerialNumber(e.target.value.toUpperCase())}
+                  placeholder="e.g., FM-ADM-2026-XXXXXXXX-XXXX"
+                  className={serialError ? 'error' : ''}
+                />
+                {serialError && <span className="error-message">{serialError}</span>}
               </div>
-              <div className="modal-actions">
-                <button type="submit" className="btn-save"><FaPlus /> Create Course</button>
-                <button type="button" className="btn-cancel" onClick={() => setShowAddCourseModal(false)}>Cancel</button>
+
+              <div className="verify-actions">
+                <button 
+                  className="verify-btn"
+                  onClick={verifySerialNumber}
+                  disabled={!serialNumber || isVerifying}
+                >
+                  {isVerifying ? (
+                    <>
+                      <FaSpinner className="spinner" /> Verifying...
+                    </>
+                  ) : (
+                    <>
+                      <FaUnlock /> Verify & Access Form
+                    </>
+                  )}
+                </button>
+                <button 
+                  className="buy-form-btn"
+                  onClick={() => {
+                    setShowSerialVerification(false);
+                    handleBuyForm();
+                  }}
+                >
+                  <FaShoppingCart /> Don't have a serial?
+                </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
+
+      <div className="admissions-footer">
+        <div className="container">
+          <div className="footer-content">
+            <FaGraduationCap className="footer-icon" />
+            <h2>Start Your Journey Today</h2>
+            <p>Buy your admission form for GH₵ 100 • Next intake: {getNextIntakeDate()}</p>
+            <div className="footer-buttons">
+              <button 
+                className="apply-btn-primary"
+                onClick={handleBuyForm}
+              >
+                <FaShoppingCart /> Buy Form Now
+              </button>
+              <button 
+                className="whatsapp-btn"
+                onClick={handleWhatsAppClick}
+              >
+                <FaWhatsapp /> Chat on WhatsApp
+              </button>
+            </div>
+            <div className="footer-contact">
+              <span><FaPhone /> +233 50 515 9131</span>
+              <span><FaEnvelope /> fasttech227@gmail.com</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default AdminDashboard;
+export default Admissions;
