@@ -15,7 +15,7 @@ import BlogPage from './pages/BlogPage';
 import ArticlePage from './pages/ArticlePage';
 import ContactPage from './pages/ContactPage';
 
-// Admin Pages
+// Admin Pages - FIXED: Import AdminDashboard correctly
 import AdminPanel from './pages/AdminPanel';
 import AdminDashboard from './pages/AdminDashboard';
 import LoginPage from './pages/LoginPage';
@@ -135,7 +135,7 @@ const ProtectedRoute = ({ children, adminOnly = false, requireAuth = true }) => 
     };
     
     checkAuth();
-  }, [location.pathname]); // Re-check when path changes
+  }, [location.pathname]);
 
   if (authState.loading) {
     return (
@@ -250,7 +250,7 @@ function AppContent() {
             } 
           />
           
-          {/* ===== ADMIN DASHBOARD PAGES ===== */}
+          {/* ===== ADMIN DASHBOARD PAGES - FIXED ===== */}
           <Route 
             path="/admin" 
             element={
@@ -261,6 +261,54 @@ function AppContent() {
           />
           <Route 
             path="/admin/dashboard" 
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/admissions" 
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/students" 
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/courses" 
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/serials" 
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/payments" 
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/staff" 
             element={
               <ProtectedRoute adminOnly={true}>
                 <AdminDashboard />
@@ -411,7 +459,7 @@ function AppContent() {
                     <li><a href="/student/login">Student Login</a></li>
                     <li><a href="/login">Login</a></li>
                     <li><a href="/register">Register</a></li>
-                    <li><a href="/admin/dashboard">Admin Dashboard</a></li>
+                    <li><a href="/admin">Admin Dashboard</a></li>
                   </ul>
                 </div>
                 <a href="/" className="back-home-btn">Back to Home</a>
