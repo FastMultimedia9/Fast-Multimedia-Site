@@ -176,11 +176,13 @@ const StudentPortal = () => {
           return;
         }
         
+        // Set student data BEFORE loading other data
         setStudent(studentData);
         setEditFormData(studentData);
         setPaymentEmail(studentData.email || '');
         setPaymentName(studentData.fullName || '');
         
+        // Load all data
         await loadStudentData(studentData);
         
         setIsLoading(false);
@@ -197,7 +199,11 @@ const StudentPortal = () => {
   // Load all student data
   const loadStudentData = async (studentData) => {
     try {
-      const studentId = studentData.studentId || studentData.id;
+      const studentId = studentData?.studentId || studentData?.id;
+      if (!studentId) {
+        console.warn('No student ID found');
+        return;
+      }
       
       // Get grades
       try {
@@ -316,6 +322,12 @@ const StudentPortal = () => {
     setIsEditing(true);
     
     try {
+      if (!student?.id) {
+        showNotification('Student ID not found', 'error');
+        setIsEditing(false);
+        return;
+      }
+      
       await updateStudent(student.id, editFormData);
       setStudent({ ...student, ...editFormData });
       showNotification('Profile updated successfully!', 'success');
@@ -357,6 +369,12 @@ const StudentPortal = () => {
     }
     
     try {
+      if (!student?.email) {
+        showNotification('Student email not found', 'error');
+        setIsChangingPassword(false);
+        return;
+      }
+      
       try {
         await signInWithEmailAndPassword(auth, student.email, passwordData.currentPassword);
       } catch (error) {
@@ -451,16 +469,16 @@ const StudentPortal = () => {
 
     try {
       // Generate reference
-      const reference = `PAY-${Date.now()}-${student.studentId}`;
+      const reference = `PAY-${Date.now()}-${student?.studentId || 'STU'}`;
       setPaymentReference(reference);
 
       // Create payment record in Firestore
       const paymentData = {
-        studentId: student.id,
-        studentName: student.fullName,
-        studentEmail: student.email,
+        studentId: student?.id || '',
+        studentName: student?.fullName || '',
+        studentEmail: student?.email || '',
         amount: parseFloat(paymentAmount),
-        description: `School Fees Payment - ${student.course}`,
+        description: `School Fees Payment - ${student?.course || 'Course'}`,
         reference: reference,
         status: 'pending',
         paymentType: 'school_fees',
@@ -473,7 +491,7 @@ const StudentPortal = () => {
       // Initialize Paystack
       const handler = window.PaystackPop.setup({
         key: PAYSTACK_PUBLIC_KEY,
-        email: paymentEmail || student.email,
+        email: paymentEmail || student?.email || '',
         amount: parseFloat(paymentAmount) * 100, // Convert to pesewas
         currency: 'GHS',
         ref: reference,
@@ -485,9 +503,9 @@ const StudentPortal = () => {
           
           // Send notification
           await sendNotification({
-            userId: student.id,
+            userId: student?.id || '',
             title: 'Payment Successful',
-            message: `Your payment of ${formatCurrency(parseFloat(paymentAmount))} for ${student.course} has been confirmed.`,
+            message: `Your payment of ${formatCurrency(parseFloat(paymentAmount))} for ${student?.course || 'Course'} has been confirmed.`,
             type: 'payment',
             link: '/student/portal'
           });
@@ -495,7 +513,9 @@ const StudentPortal = () => {
           showNotification(`Payment of ${formatCurrency(parseFloat(paymentAmount))} successful!`, 'success');
           
           // Reload data
-          await loadStudentData(student);
+          if (student) {
+            await loadStudentData(student);
+          }
           setShowPaymentModal(false);
           setPaymentAmount('');
           setIsProcessingPayment(false);
@@ -518,140 +538,144 @@ const StudentPortal = () => {
   };
 
   // Render Dashboard
-  const renderDashboard = () => (
-    <div className="dashboard-content">
-      {/* Welcome Section */}
-      <div className="welcome-section">
-        <div className="welcome-text">
-          <h2>Welcome back, {student.fullName}!</h2>
-          <p>Student ID: <strong>{student.studentId}</strong> | Course: <strong>{student.course}</strong></p>
+  const renderDashboard = () => {
+    if (!student) return null;
+    
+    return (
+      <div className="dashboard-content">
+        {/* Welcome Section */}
+        <div className="welcome-section">
+          <div className="welcome-text">
+            <h2>Welcome back, {student.fullName || 'Student'}!</h2>
+            <p>Student ID: <strong>{student.studentId || 'N/A'}</strong> | Course: <strong>{student.course || 'Not Enrolled'}</strong></p>
+          </div>
+          <div className="welcome-date">
+            <FaCalendarAlt />
+            <span>{new Date().toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}</span>
+          </div>
         </div>
-        <div className="welcome-date">
-          <FaCalendarAlt />
-          <span>{new Date().toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}</span>
-        </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon blue">
-            <FaUserGraduate />
-          </div>
-          <div className="stat-info">
-            <h3>{student.studentId}</h3>
-            <p>Student ID</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon green">
-            <FaBookOpen />
-          </div>
-          <div className="stat-info">
-            <h3>{student.course || 'Not Enrolled'}</h3>
-            <p>Current Course</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon purple">
-            <FaChartLine />
-          </div>
-          <div className="stat-info">
-            <h3>{gradeStats.average}%</h3>
-            <p>Average Grade</p>
-            <div className="stat-detail">
-              {gradeStats.total} Subjects
+        {/* Stats Cards */}
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-icon blue">
+              <FaUserGraduate />
+            </div>
+            <div className="stat-info">
+              <h3>{student.studentId || 'N/A'}</h3>
+              <p>Student ID</p>
             </div>
           </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon orange">
-            <FaMoneyBillWave />
-          </div>
-          <div className="stat-info">
-            <h3>{formatCurrency(paymentStats.totalPaid)}</h3>
-            <p>Total Paid</p>
-            <div className="stat-detail">
-              Outstanding: {formatCurrency(paymentStats.outstanding)}
+          <div className="stat-card">
+            <div className="stat-icon green">
+              <FaBookOpen />
+            </div>
+            <div className="stat-info">
+              <h3>{student.course || 'Not Enrolled'}</h3>
+              <p>Current Course</p>
             </div>
           </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon teal">
-            <FaWallet />
-          </div>
-          <div className="stat-info">
-            <h3>{formatCurrency(paymentStats.outstanding)}</h3>
-            <p>Outstanding Balance</p>
-            <div className="stat-detail">
-              Course Fee: {formatCurrency(student.courseFee || 600)}
+          <div className="stat-card">
+            <div className="stat-icon purple">
+              <FaChartLine />
             </div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon red">
-            <FaReceipt />
-          </div>
-          <div className="stat-info">
-            <h3>{paymentStats.completed}</h3>
-            <p>Payments Made</p>
-            <div className="stat-detail">
-              {paymentStats.pending} Pending
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="quick-actions">
-        <h3>Quick Actions</h3>
-        <div className="action-grid">
-          <button className="action-btn" onClick={() => setActiveTab('account')}>
-            <FaWallet /> Pay Fees
-          </button>
-          <button className="action-btn" onClick={() => setActiveTab('grades')}>
-            <FaChartLine /> Check Grades
-          </button>
-          <button className="action-btn" onClick={() => setActiveTab('account')}>
-            <FaReceipt /> Payment History
-          </button>
-          <button className="action-btn" onClick={() => setActiveTab('profile')}>
-            <FaUserCircle /> Edit Profile
-          </button>
-        </div>
-      </div>
-
-      {/* Recent Payments */}
-      <div className="recent-activity">
-        <h3>Recent Payments</h3>
-        <div className="activity-list">
-          {payments.slice(0, 5).map((payment, index) => (
-            <div key={index} className="activity-item">
-              <div className={`activity-icon ${payment.status}`}>
-                {getStatusIcon(payment.status)}
-              </div>
-              <div className="activity-content">
-                <p>
-                  <strong>{formatCurrency(payment.amount)}</strong> - {payment.description || 'Payment'}
-                </p>
-                <span className="activity-date">
-                  {new Date(payment.createdAt?.seconds * 1000 || payment.createdAt).toLocaleDateString()}
-                </span>
+            <div className="stat-info">
+              <h3>{gradeStats.average}%</h3>
+              <p>Average Grade</p>
+              <div className="stat-detail">
+                {gradeStats.total} Subjects
               </div>
             </div>
-          ))}
-          {payments.length === 0 && (
-            <p className="no-activity">No payment records found</p>
-          )}
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon orange">
+              <FaMoneyBillWave />
+            </div>
+            <div className="stat-info">
+              <h3>{formatCurrency(paymentStats.totalPaid)}</h3>
+              <p>Total Paid</p>
+              <div className="stat-detail">
+                Outstanding: {formatCurrency(paymentStats.outstanding)}
+              </div>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon teal">
+              <FaWallet />
+            </div>
+            <div className="stat-info">
+              <h3>{formatCurrency(paymentStats.outstanding)}</h3>
+              <p>Outstanding Balance</p>
+              <div className="stat-detail">
+                Course Fee: {formatCurrency(student.courseFee || 600)}
+              </div>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon red">
+              <FaReceipt />
+            </div>
+            <div className="stat-info">
+              <h3>{paymentStats.completed}</h3>
+              <p>Payments Made</p>
+              <div className="stat-detail">
+                {paymentStats.pending} Pending
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="quick-actions">
+          <h3>Quick Actions</h3>
+          <div className="action-grid">
+            <button className="action-btn" onClick={() => setActiveTab('account')}>
+              <FaWallet /> Pay Fees
+            </button>
+            <button className="action-btn" onClick={() => setActiveTab('grades')}>
+              <FaChartLine /> Check Grades
+            </button>
+            <button className="action-btn" onClick={() => setActiveTab('account')}>
+              <FaReceipt /> Payment History
+            </button>
+            <button className="action-btn" onClick={() => setActiveTab('profile')}>
+              <FaUserCircle /> Edit Profile
+            </button>
+          </div>
+        </div>
+
+        {/* Recent Payments */}
+        <div className="recent-activity">
+          <h3>Recent Payments</h3>
+          <div className="activity-list">
+            {payments.slice(0, 5).map((payment, index) => (
+              <div key={index} className="activity-item">
+                <div className={`activity-icon ${payment.status}`}>
+                  {getStatusIcon(payment.status)}
+                </div>
+                <div className="activity-content">
+                  <p>
+                    <strong>{formatCurrency(payment.amount)}</strong> - {payment.description || 'Payment'}
+                  </p>
+                  <span className="activity-date">
+                    {new Date(payment.createdAt?.seconds * 1000 || payment.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            ))}
+            {payments.length === 0 && (
+              <p className="no-activity">No payment records found</p>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Render Grades
   const renderGrades = () => (
@@ -718,476 +742,484 @@ const StudentPortal = () => {
   );
 
   // Render Account (Payments + Fees)
-  const renderAccount = () => (
-    <div className="account-content">
-      <div className="content-header">
-        <h2>Account & Fees</h2>
-        <div className="header-actions">
-          <button className="btn-pay-fees" onClick={() => setShowPaymentModal(true)}>
-            <FaPlus /> Pay Fees
-          </button>
+  const renderAccount = () => {
+    if (!student) return null;
+    
+    return (
+      <div className="account-content">
+        <div className="content-header">
+          <h2>Account & Fees</h2>
+          <div className="header-actions">
+            <button className="btn-pay-fees" onClick={() => setShowPaymentModal(true)}>
+              <FaPlus /> Pay Fees
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Fee Summary */}
-      <div className="fee-summary">
-        <div className="fee-card">
-          <div className="fee-icon blue">
-            <FaWallet />
+        {/* Fee Summary */}
+        <div className="fee-summary">
+          <div className="fee-card">
+            <div className="fee-icon blue">
+              <FaWallet />
+            </div>
+            <div className="fee-info">
+              <h3>{formatCurrency(student.courseFee || 600)}</h3>
+              <p>Course Fee</p>
+            </div>
           </div>
-          <div className="fee-info">
-            <h3>{formatCurrency(student.courseFee || 600)}</h3>
-            <p>Course Fee</p>
+          <div className="fee-card">
+            <div className="fee-icon green">
+              <FaCheckCircle />
+            </div>
+            <div className="fee-info">
+              <h3>{formatCurrency(paymentStats.totalPaid)}</h3>
+              <p>Total Paid</p>
+            </div>
+          </div>
+          <div className="fee-card">
+            <div className="fee-icon orange">
+              <FaClock />
+            </div>
+            <div className="fee-info">
+              <h3>{formatCurrency(paymentStats.outstanding)}</h3>
+              <p>Outstanding Balance</p>
+            </div>
+          </div>
+          <div className="fee-card">
+            <div className="fee-icon purple">
+              <FaReceipt />
+            </div>
+            <div className="fee-info">
+              <h3>{paymentStats.completed}</h3>
+              <p>Payments Made</p>
+            </div>
           </div>
         </div>
-        <div className="fee-card">
-          <div className="fee-icon green">
-            <FaCheckCircle />
-          </div>
-          <div className="fee-info">
-            <h3>{formatCurrency(paymentStats.totalPaid)}</h3>
-            <p>Total Paid</p>
-          </div>
-        </div>
-        <div className="fee-card">
-          <div className="fee-icon orange">
-            <FaClock />
-          </div>
-          <div className="fee-info">
-            <h3>{formatCurrency(paymentStats.outstanding)}</h3>
-            <p>Outstanding Balance</p>
-          </div>
-        </div>
-        <div className="fee-card">
-          <div className="fee-icon purple">
-            <FaReceipt />
-          </div>
-          <div className="fee-info">
-            <h3>{paymentStats.completed}</h3>
-            <p>Payments Made</p>
-          </div>
-        </div>
-      </div>
 
-      {/* Fee Breakdown */}
-      <div className="fee-breakdown">
-        <h3>Fee Breakdown</h3>
-        <div className="breakdown-item">
-          <span>Course Fee</span>
-          <span>{formatCurrency(student.courseFee || 600)}</span>
+        {/* Fee Breakdown */}
+        <div className="fee-breakdown">
+          <h3>Fee Breakdown</h3>
+          <div className="breakdown-item">
+            <span>Course Fee</span>
+            <span>{formatCurrency(student.courseFee || 600)}</span>
+          </div>
+          <div className="breakdown-item">
+            <span>Registration Fee</span>
+            <span>{formatCurrency(0)}</span>
+          </div>
+          <div className="breakdown-item">
+            <span>Total Paid</span>
+            <span className="paid">{formatCurrency(paymentStats.totalPaid)}</span>
+          </div>
+          <div className="breakdown-item total">
+            <span>Outstanding Balance</span>
+            <span className="outstanding">{formatCurrency(paymentStats.outstanding)}</span>
+          </div>
         </div>
-        <div className="breakdown-item">
-          <span>Registration Fee</span>
-          <span>{formatCurrency(0)}</span>
-        </div>
-        <div className="breakdown-item">
-          <span>Total Paid</span>
-          <span className="paid">{formatCurrency(paymentStats.totalPaid)}</span>
-        </div>
-        <div className="breakdown-item total">
-          <span>Outstanding Balance</span>
-          <span className="outstanding">{formatCurrency(paymentStats.outstanding)}</span>
-        </div>
-      </div>
 
-      {/* Payment History */}
-      <div className="payment-history">
-        <h3>Payment History</h3>
-        <div className="payments-grid">
-          {payments.map((payment, index) => (
-            <div key={index} className="payment-card">
-              <div className="payment-header">
-                <div className="payment-icon">
-                  {payment.status === 'completed' || payment.status === 'paid' ? 
-                    <FaCheckCircle className="icon-success" /> : 
-                    <FaClock className="icon-pending" />
-                  }
-                </div>
-                <div className="payment-info">
-                  <h4>{payment.description || payment.paymentType || 'Payment'}</h4>
-                  <p className="payment-date">
-                    {new Date(payment.createdAt?.seconds * 1000 || payment.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <span className={`payment-amount ${payment.status === 'completed' || payment.status === 'paid' ? 'paid' : 'pending'}`}>
-                  {formatCurrency(payment.amount)}
-                </span>
-              </div>
-              <div className="payment-details">
-                <p><strong>Method:</strong> {payment.method || 'N/A'}</p>
-                <p><strong>Reference:</strong> {payment.reference || payment.paymentId || 'N/A'}</p>
-                <p><strong>Status:</strong> 
-                  <span className={`status-badge ${getStatusColor(payment.status)}`}>
-                    {getStatusIcon(payment.status)} {payment.status}
+        {/* Payment History */}
+        <div className="payment-history">
+          <h3>Payment History</h3>
+          <div className="payments-grid">
+            {payments.map((payment, index) => (
+              <div key={index} className="payment-card">
+                <div className="payment-header">
+                  <div className="payment-icon">
+                    {payment.status === 'completed' || payment.status === 'paid' ? 
+                      <FaCheckCircle className="icon-success" /> : 
+                      <FaClock className="icon-pending" />
+                    }
+                  </div>
+                  <div className="payment-info">
+                    <h4>{payment.description || payment.paymentType || 'Payment'}</h4>
+                    <p className="payment-date">
+                      {new Date(payment.createdAt?.seconds * 1000 || payment.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <span className={`payment-amount ${payment.status === 'completed' || payment.status === 'paid' ? 'paid' : 'pending'}`}>
+                    {formatCurrency(payment.amount)}
                   </span>
-                </p>
-                {payment.remarks && <p><strong>Remarks:</strong> {payment.remarks}</p>}
+                </div>
+                <div className="payment-details">
+                  <p><strong>Method:</strong> {payment.method || 'N/A'}</p>
+                  <p><strong>Reference:</strong> {payment.reference || payment.paymentId || 'N/A'}</p>
+                  <p><strong>Status:</strong> 
+                    <span className={`status-badge ${getStatusColor(payment.status)}`}>
+                      {getStatusIcon(payment.status)} {payment.status}
+                    </span>
+                  </p>
+                  {payment.remarks && <p><strong>Remarks:</strong> {payment.remarks}</p>}
+                </div>
               </div>
-            </div>
-          ))}
-          {payments.length === 0 && (
-            <div className="no-data-message">
-              <FaInfoCircle /> No payment records found
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Payment Modal */}
-      {showPaymentModal && (
-        <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
-          <div className="modal-content payment-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowPaymentModal(false)}>×</button>
-            <h2><FaWallet /> Make Payment</h2>
-            
-            <div className="payment-summary-info">
-              <p><strong>Student:</strong> {student.fullName}</p>
-              <p><strong>Course:</strong> {student.course}</p>
-              <p><strong>Outstanding Balance:</strong> {formatCurrency(paymentStats.outstanding)}</p>
-            </div>
-
-            <form onSubmit={(e) => { e.preventDefault(); initializePayment(); }}>
-              <div className="form-group">
-                <label>Amount to Pay (GH₵)</label>
-                <input
-                  type="number"
-                  value={paymentAmount}
-                  onChange={(e) => setPaymentAmount(e.target.value)}
-                  placeholder="Enter amount"
-                  required
-                  min="1"
-                  max={paymentStats.outstanding || 600}
-                />
-                <small>Max: {formatCurrency(paymentStats.outstanding || 600)}</small>
+            ))}
+            {payments.length === 0 && (
+              <div className="no-data-message">
+                <FaInfoCircle /> No payment records found
               </div>
-
-              <div className="form-group">
-                <label>Email (for receipt)</label>
-                <input
-                  type="email"
-                  value={paymentEmail}
-                  onChange={(e) => setPaymentEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Full Name</label>
-                <input
-                  type="text"
-                  value={paymentName}
-                  onChange={(e) => setPaymentName(e.target.value)}
-                  placeholder="Your full name"
-                  required
-                />
-              </div>
-
-              <div className="payment-info-note">
-                <FaInfoCircle /> You will be redirected to Paystack to complete your payment securely.
-              </div>
-
-              <div className="modal-actions">
-                <button 
-                  type="submit" 
-                  className="btn-pay-now"
-                  disabled={isProcessingPayment}
-                >
-                  {isProcessingPayment ? (
-                    <>
-                      <FaSpinner className="spinner" /> Processing...
-                    </>
-                  ) : (
-                    <>
-                      <FaCreditCard /> Pay Now
-                    </>
-                  )}
-                </button>
-                <button 
-                  type="button" 
-                  className="btn-cancel" 
-                  onClick={() => setShowPaymentModal(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  // Render Profile
-  const renderProfile = () => (
-    <div className="profile-content">
-      <div className="profile-header">
-        <div className="profile-avatar">
-          <FaUserGraduate size={60} />
-        </div>
-        <div className="profile-info">
-          <h2>{student.fullName}</h2>
-          <p>Student ID: <strong>{student.studentId}</strong></p>
-          <p>Course: <strong>{student.course}</strong></p>
-          <p>Status: 
-            <span className={`status-badge ${getStatusColor(student.status)}`}>
-              {getStatusIcon(student.status)} {student.status || 'Active'}
-            </span>
-          </p>
-        </div>
-        <div className="profile-actions">
-          <button className="btn-edit-profile" onClick={() => setShowEditProfile(true)}>
-            <FaEdit /> Edit Profile
-          </button>
-          <button className="btn-change-password" onClick={() => setShowChangePassword(true)}>
-            <FaLock /> Change Password
-          </button>
-        </div>
-      </div>
-
-      <div className="profile-details">
-        <div className="detail-section">
-          <h3><FaUserCircle /> Personal Information</h3>
-          <div className="detail-grid">
-            <div className="detail-item">
-              <label>Full Name</label>
-              <p>{student.fullName}</p>
-            </div>
-            <div className="detail-item">
-              <label>Email</label>
-              <p>{student.email}</p>
-            </div>
-            <div className="detail-item">
-              <label>Phone</label>
-              <p>{student.phone || 'N/A'}</p>
-            </div>
-            <div className="detail-item">
-              <label>Date of Birth</label>
-              <p>{student.dateOfBirth || 'N/A'}</p>
-            </div>
-            <div className="detail-item">
-              <label>Gender</label>
-              <p>{student.gender || 'N/A'}</p>
-            </div>
-            <div className="detail-item">
-              <label>Address</label>
-              <p>{student.address || 'N/A'}</p>
-            </div>
+            )}
           </div>
         </div>
 
-        <div className="detail-section">
-          <h3><FaBookOpen /> Academic Information</h3>
-          <div className="detail-grid">
-            <div className="detail-item">
-              <label>Course</label>
-              <p>{student.course}</p>
-            </div>
-            <div className="detail-item">
-              <label>Student ID</label>
-              <p>{student.studentId}</p>
-            </div>
-            <div className="detail-item">
-              <label>Admission Status</label>
-              <p>
-                <span className={`status-badge ${getStatusColor(student.admissionStatus)}`}>
-                  {getStatusIcon(student.admissionStatus)} {student.admissionStatus || 'Pending'}
-                </span>
-              </p>
-            </div>
-            <div className="detail-item">
-              <label>Enrolled Date</label>
-              <p>{new Date(student.createdAt?.seconds * 1000 || student.createdAt).toLocaleDateString()}</p>
-            </div>
-          </div>
-        </div>
+        {/* Payment Modal */}
+        {showPaymentModal && (
+          <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
+            <div className="modal-content payment-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={() => setShowPaymentModal(false)}>×</button>
+              <h2><FaWallet /> Make Payment</h2>
+              
+              <div className="payment-summary-info">
+                <p><strong>Student:</strong> {student.fullName || 'N/A'}</p>
+                <p><strong>Course:</strong> {student.course || 'N/A'}</p>
+                <p><strong>Outstanding Balance:</strong> {formatCurrency(paymentStats.outstanding)}</p>
+              </div>
 
-        <div className="detail-section">
-          <h3><FaShieldAlt /> Emergency Contact</h3>
-          <div className="detail-grid">
-            <div className="detail-item">
-              <label>Name</label>
-              <p>{student.guardianName || 'N/A'}</p>
-            </div>
-            <div className="detail-item">
-              <label>Phone</label>
-              <p>{student.guardianPhone || 'N/A'}</p>
-            </div>
-            <div className="detail-item">
-              <label>Email</label>
-              <p>{student.guardianEmail || 'N/A'}</p>
-            </div>
-            <div className="detail-item">
-              <label>Relationship</label>
-              <p>{student.guardianRelationship || 'N/A'}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+              <form onSubmit={(e) => { e.preventDefault(); initializePayment(); }}>
+                <div className="form-group">
+                  <label>Amount to Pay (GH₵)</label>
+                  <input
+                    type="number"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                    placeholder="Enter amount"
+                    required
+                    min="1"
+                    max={paymentStats.outstanding || 600}
+                  />
+                  <small>Max: {formatCurrency(paymentStats.outstanding || 600)}</small>
+                </div>
 
-      {/* Edit Profile Modal */}
-      {showEditProfile && (
-        <div className="modal-overlay" onClick={() => setShowEditProfile(false)}>
-          <div className="modal-content edit-profile-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowEditProfile(false)}>×</button>
-            <h2>Edit Profile</h2>
-            <form onSubmit={handleUpdateProfile}>
-              <div className="form-grid">
+                <div className="form-group">
+                  <label>Email (for receipt)</label>
+                  <input
+                    type="email"
+                    value={paymentEmail}
+                    onChange={(e) => setPaymentEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+
                 <div className="form-group">
                   <label>Full Name</label>
                   <input
                     type="text"
-                    value={editFormData.fullName || ''}
-                    onChange={(e) => setEditFormData({...editFormData, fullName: e.target.value})}
+                    value={paymentName}
+                    onChange={(e) => setPaymentName(e.target.value)}
+                    placeholder="Your full name"
                     required
                   />
                 </div>
-                <div className="form-group">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    value={editFormData.email || ''}
-                    onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
-                    required
-                    disabled
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Phone</label>
-                  <input
-                    type="tel"
-                    value={editFormData.phone || ''}
-                    onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Date of Birth</label>
-                  <input
-                    type="date"
-                    value={editFormData.dateOfBirth || ''}
-                    onChange={(e) => setEditFormData({...editFormData, dateOfBirth: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Gender</label>
-                  <select
-                    value={editFormData.gender || ''}
-                    onChange={(e) => setEditFormData({...editFormData, gender: e.target.value})}
-                  >
-                    <option value="">Select</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Address</label>
-                  <input
-                    type="text"
-                    value={editFormData.address || ''}
-                    onChange={(e) => setEditFormData({...editFormData, address: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Guardian Name</label>
-                  <input
-                    type="text"
-                    value={editFormData.guardianName || ''}
-                    onChange={(e) => setEditFormData({...editFormData, guardianName: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Guardian Phone</label>
-                  <input
-                    type="tel"
-                    value={editFormData.guardianPhone || ''}
-                    onChange={(e) => setEditFormData({...editFormData, guardianPhone: e.target.value})}
-                  />
-                </div>
-              </div>
-              <div className="modal-actions">
-                <button type="submit" className="btn-save" disabled={isEditing}>
-                  {isEditing ? <FaSpinner className="spinner" /> : <FaSave />} 
-                  {isEditing ? 'Saving...' : 'Save Changes'}
-                </button>
-                <button type="button" className="btn-cancel" onClick={() => setShowEditProfile(false)}>
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* Change Password Modal */}
-      {showChangePassword && (
-        <div className="modal-overlay" onClick={() => setShowChangePassword(false)}>
-          <div className="modal-content change-password-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowChangePassword(false)}>×</button>
-            <h2><FaLock /> Change Password</h2>
-            <form onSubmit={handleChangePassword}>
-              <div className="form-group">
-                <label>Current Password</label>
-                <div className="password-input-wrapper">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={passwordData.currentPassword}
-                    onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                    required
-                  />
+                <div className="payment-info-note">
+                  <FaInfoCircle /> You will be redirected to Paystack to complete your payment securely.
+                </div>
+
+                <div className="modal-actions">
                   <button 
-                    type="button"
-                    className="toggle-password"
-                    onClick={() => setShowPassword(!showPassword)}
+                    type="submit" 
+                    className="btn-pay-now"
+                    disabled={isProcessingPayment}
                   >
-                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    {isProcessingPayment ? (
+                      <>
+                        <FaSpinner className="spinner" /> Processing...
+                      </>
+                    ) : (
+                      <>
+                        <FaCreditCard /> Pay Now
+                      </>
+                    )}
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-cancel" 
+                    onClick={() => setShowPaymentModal(false)}
+                  >
+                    Cancel
                   </button>
                 </div>
-              </div>
-              <div className="form-group">
-                <label>New Password</label>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={passwordData.newPassword}
-                  onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                  required
-                  minLength={8}
-                />
-              </div>
-              <div className="form-group">
-                <label>Confirm New Password</label>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={passwordData.confirmPassword}
-                  onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                  required
-                  minLength={8}
-                />
-              </div>
-              <div className="password-requirements">
-                <p>Password must:</p>
-                <ul>
-                  <li>Be at least 8 characters long</li>
-                  <li>Include at least one uppercase letter</li>
-                  <li>Include at least one number</li>
-                  <li>Include at least one special character</li>
-                </ul>
-              </div>
-              <div className="modal-actions">
-                <button type="submit" className="btn-save" disabled={isChangingPassword}>
-                  {isChangingPassword ? <FaSpinner className="spinner" /> : <FaLock />}
-                  {isChangingPassword ? 'Changing...' : 'Change Password'}
-                </button>
-                <button type="button" className="btn-cancel" onClick={() => setShowChangePassword(false)}>
-                  Cancel
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render Profile
+  const renderProfile = () => {
+    if (!student) return null;
+    
+    return (
+      <div className="profile-content">
+        <div className="profile-header">
+          <div className="profile-avatar">
+            <FaUserGraduate size={60} />
+          </div>
+          <div className="profile-info">
+            <h2>{student.fullName || 'Student'}</h2>
+            <p>Student ID: <strong>{student.studentId || 'N/A'}</strong></p>
+            <p>Course: <strong>{student.course || 'Not Enrolled'}</strong></p>
+            <p>Status: 
+              <span className={`status-badge ${getStatusColor(student.status)}`}>
+                {getStatusIcon(student.status)} {student.status || 'Active'}
+              </span>
+            </p>
+          </div>
+          <div className="profile-actions">
+            <button className="btn-edit-profile" onClick={() => setShowEditProfile(true)}>
+              <FaEdit /> Edit Profile
+            </button>
+            <button className="btn-change-password" onClick={() => setShowChangePassword(true)}>
+              <FaLock /> Change Password
+            </button>
           </div>
         </div>
-      )}
-    </div>
-  );
+
+        <div className="profile-details">
+          <div className="detail-section">
+            <h3><FaUserCircle /> Personal Information</h3>
+            <div className="detail-grid">
+              <div className="detail-item">
+                <label>Full Name</label>
+                <p>{student.fullName || 'N/A'}</p>
+              </div>
+              <div className="detail-item">
+                <label>Email</label>
+                <p>{student.email || 'N/A'}</p>
+              </div>
+              <div className="detail-item">
+                <label>Phone</label>
+                <p>{student.phone || 'N/A'}</p>
+              </div>
+              <div className="detail-item">
+                <label>Date of Birth</label>
+                <p>{student.dateOfBirth || 'N/A'}</p>
+              </div>
+              <div className="detail-item">
+                <label>Gender</label>
+                <p>{student.gender || 'N/A'}</p>
+              </div>
+              <div className="detail-item">
+                <label>Address</label>
+                <p>{student.address || 'N/A'}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="detail-section">
+            <h3><FaBookOpen /> Academic Information</h3>
+            <div className="detail-grid">
+              <div className="detail-item">
+                <label>Course</label>
+                <p>{student.course || 'N/A'}</p>
+              </div>
+              <div className="detail-item">
+                <label>Student ID</label>
+                <p>{student.studentId || 'N/A'}</p>
+              </div>
+              <div className="detail-item">
+                <label>Admission Status</label>
+                <p>
+                  <span className={`status-badge ${getStatusColor(student.admissionStatus)}`}>
+                    {getStatusIcon(student.admissionStatus)} {student.admissionStatus || 'Pending'}
+                  </span>
+                </p>
+              </div>
+              <div className="detail-item">
+                <label>Enrolled Date</label>
+                <p>{student.createdAt ? new Date(student.createdAt?.seconds * 1000 || student.createdAt).toLocaleDateString() : 'N/A'}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="detail-section">
+            <h3><FaShieldAlt /> Emergency Contact</h3>
+            <div className="detail-grid">
+              <div className="detail-item">
+                <label>Name</label>
+                <p>{student.guardianName || 'N/A'}</p>
+              </div>
+              <div className="detail-item">
+                <label>Phone</label>
+                <p>{student.guardianPhone || 'N/A'}</p>
+              </div>
+              <div className="detail-item">
+                <label>Email</label>
+                <p>{student.guardianEmail || 'N/A'}</p>
+              </div>
+              <div className="detail-item">
+                <label>Relationship</label>
+                <p>{student.guardianRelationship || 'N/A'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Edit Profile Modal */}
+        {showEditProfile && (
+          <div className="modal-overlay" onClick={() => setShowEditProfile(false)}>
+            <div className="modal-content edit-profile-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={() => setShowEditProfile(false)}>×</button>
+              <h2>Edit Profile</h2>
+              <form onSubmit={handleUpdateProfile}>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Full Name</label>
+                    <input
+                      type="text"
+                      value={editFormData.fullName || ''}
+                      onChange={(e) => setEditFormData({...editFormData, fullName: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      value={editFormData.email || ''}
+                      onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
+                      required
+                      disabled
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Phone</label>
+                    <input
+                      type="tel"
+                      value={editFormData.phone || ''}
+                      onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Date of Birth</label>
+                    <input
+                      type="date"
+                      value={editFormData.dateOfBirth || ''}
+                      onChange={(e) => setEditFormData({...editFormData, dateOfBirth: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Gender</label>
+                    <select
+                      value={editFormData.gender || ''}
+                      onChange={(e) => setEditFormData({...editFormData, gender: e.target.value})}
+                    >
+                      <option value="">Select</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Address</label>
+                    <input
+                      type="text"
+                      value={editFormData.address || ''}
+                      onChange={(e) => setEditFormData({...editFormData, address: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Guardian Name</label>
+                    <input
+                      type="text"
+                      value={editFormData.guardianName || ''}
+                      onChange={(e) => setEditFormData({...editFormData, guardianName: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Guardian Phone</label>
+                    <input
+                      type="tel"
+                      value={editFormData.guardianPhone || ''}
+                      onChange={(e) => setEditFormData({...editFormData, guardianPhone: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="modal-actions">
+                  <button type="submit" className="btn-save" disabled={isEditing}>
+                    {isEditing ? <FaSpinner className="spinner" /> : <FaSave />} 
+                    {isEditing ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <button type="button" className="btn-cancel" onClick={() => setShowEditProfile(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Change Password Modal */}
+        {showChangePassword && (
+          <div className="modal-overlay" onClick={() => setShowChangePassword(false)}>
+            <div className="modal-content change-password-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={() => setShowChangePassword(false)}>×</button>
+              <h2><FaLock /> Change Password</h2>
+              <form onSubmit={handleChangePassword}>
+                <div className="form-group">
+                  <label>Current Password</label>
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={passwordData.currentPassword}
+                      onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                      required
+                    />
+                    <button 
+                      type="button"
+                      className="toggle-password"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>New Password</label>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                    required
+                    minLength={8}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Confirm New Password</label>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                    required
+                    minLength={8}
+                  />
+                </div>
+                <div className="password-requirements">
+                  <p>Password must:</p>
+                  <ul>
+                    <li>Be at least 8 characters long</li>
+                    <li>Include at least one uppercase letter</li>
+                    <li>Include at least one number</li>
+                    <li>Include at least one special character</li>
+                  </ul>
+                </div>
+                <div className="modal-actions">
+                  <button type="submit" className="btn-save" disabled={isChangingPassword}>
+                    {isChangingPassword ? <FaSpinner className="spinner" /> : <FaLock />}
+                    {isChangingPassword ? 'Changing...' : 'Change Password'}
+                  </button>
+                  <button type="button" className="btn-cancel" onClick={() => setShowChangePassword(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // Sidebar navigation items
   const navItems = [
@@ -1196,6 +1228,32 @@ const StudentPortal = () => {
     { id: 'grades', icon: <FaChartLine />, label: 'Grades' },
     { id: 'profile', icon: <FaUserCircle />, label: 'Profile' }
   ];
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="student-portal-loading">
+        <div className="loading-spinner">
+          <FaSpinner className="spinner" />
+        </div>
+        <p>Loading your dashboard...</p>
+      </div>
+    );
+  }
+
+  // No student data
+  if (!student) {
+    return (
+      <div className="student-portal-error">
+        <FaExclamationTriangle className="error-icon" />
+        <h2>Student Data Not Found</h2>
+        <p>We couldn't find your student profile. Please contact support.</p>
+        <button className="btn-primary" onClick={() => navigate('/student/login')}>
+          Go to Login
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="student-portal">
@@ -1219,8 +1277,8 @@ const StudentPortal = () => {
               {student.fullName?.charAt(0) || 'S'}
             </div>
             <div className="sidebar-user-info">
-              <span className="sidebar-username">{student.fullName}</span>
-              <span className="sidebar-userid">{student.studentId}</span>
+              <span className="sidebar-username">{student.fullName || 'Student'}</span>
+              <span className="sidebar-userid">{student.studentId || 'N/A'}</span>
             </div>
           </div>
         </div>
@@ -1251,8 +1309,8 @@ const StudentPortal = () => {
               {student.fullName?.charAt(0) || 'S'}
             </span>
             <div>
-              <strong>{student.fullName}</strong>
-              <span>{student.studentId}</span>
+              <strong>{student.fullName || 'Student'}</strong>
+              <span>{student.studentId || 'N/A'}</span>
             </div>
           </div>
         </div>
