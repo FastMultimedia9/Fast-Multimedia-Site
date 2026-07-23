@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   FaUserGraduate, 
@@ -19,21 +19,18 @@ import {
   FaUniversity
 } from 'react-icons/fa';
 import { 
-  getStudentAdmissionStatus, 
   getStudentByEmail,
-  updateStudent,
   getUserByEmail,
   getStudentByStudentId,
-  verifyStudentPassword,
   updateStudentPassword,
   getAdmissionBySerial,
   getAdmissionByEmail,
   createStudent,
-  generateStudentId,
-  getStudent
+  generateStudentId
 } from '../services/firebaseService';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '../firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import './StudentLogin.css';
 
 const StudentLogin = () => {
@@ -47,6 +44,7 @@ const StudentLogin = () => {
   
   // Student data states
   const [studentData, setStudentData] = useState(null);
+  const studentDataRef = useRef(null);
   
   // Admission status states
   const [admissionStatus, setAdmissionStatus] = useState(null);
@@ -62,27 +60,57 @@ const StudentLogin = () => {
   const [passwordChangeSuccess, setPasswordChangeSuccess] = useState(false);
   const [isPasswordUpdating, setIsPasswordUpdating] = useState(false);
   
-  // Track if we're still creating the student
-  const [isCreatingStudent, setIsCreatingStudent] = useState(false);
-  // Track if student was just created
-  const [studentJustCreated, setStudentJustCreated] = useState(false);
+  // Track student creation
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
   // Default password for all users
   const DEFAULT_PASSWORD = 'FastMultimedia2024@';
 
-  // Check student admission status - FIXED to properly handle student creation
+  // Create Firebase Auth user for student
+  const createFirebaseAuthUser = async (email, password, studentData) => {
+    try {
+      // Create the auth user
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Update user profile
+      await updateProfile(user, {
+        displayName: studentData.fullName || 'Student'
+      });
+      
+      // Create user document in Firestore
+      const userRef = doc(db, 'users', user.uid);
+      await setDoc(userRef, {
+        uid: user.uid,
+        email: email,
+        fullName: studentData.fullName,
+        role: 'student',
+        studentId: studentData.studentId,
+        course: studentData.course,
+        admissionStatus: studentData.admissionStatus || 'approved',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
+      console.log('✅ Firebase Auth user created for student:', user.uid);
+      return user;
+    } catch (error) {
+      console.error('Error creating Firebase Auth user:', error);
+      throw error;
+    }
+  };
+
+  // Check student admission status and ensure Firebase Auth exists
   const checkStudentAccess = async (identifier) => {
     setError('');
     setAdmissionStatus(null);
     setStatusChecked(false);
     setStudentData(null);
-    setStudentJustCreated(false);
+    studentDataRef.current = null;
 
     try {
-      // Check if identifier is a student ID or email
       let student = null;
       let admissionData = null;
-      let isFromAdmission = false;
       
       // Try to find by student ID first
       if (!identifier.includes('@')) {
@@ -93,8 +121,7 @@ const StudentLogin = () => {
           const admission = await getAdmissionBySerial(identifier.toUpperCase());
           if (admission) {
             admissionData = admission;
-            isFromAdmission = true;
-            // Check if student already exists for this admission
+            // Check if student already exists
             const existingStudent = await getStudentByEmail(admission.email);
             if (existingStudent) {
               student = existingStudent;
@@ -113,7 +140,6 @@ const StudentLogin = () => {
         const admission = await getAdmissionByEmail(identifier);
         if (admission) {
           admissionData = admission;
-          isFromAdmission = true;
           const existingStudent = await getStudentByEmail(admission.email);
           if (existingStudent) {
             student = existingStudent;
@@ -123,20 +149,17 @@ const StudentLogin = () => {
 
       // If we have admission data but no student, create the student
       if (admissionData && !student) {
-        setIsCreatingStudent(true);
+        setIsCreatingAccount(true);
         try {
-          // Check if admission is approved or enrolled
           if (admissionData.status !== 'approved' && admissionData.status !== 'enrolled') {
-            setError(`Your application is ${admissionData.status || 'pending'}. Please wait for approval before logging in.`);
+            setError(`Your application is ${admissionData.status || 'pending'}. Please wait for approval.`);
             setStatusChecked(true);
-            setIsCreatingStudent(false);
+            setIsCreatingAccount(false);
             return null;
           }
 
-          // Generate student ID
           const generatedStudentId = await generateStudentId(admissionData.fullName);
           
-          // Create student data
           const newStudentData = {
             fullName: admissionData.fullName || 'N/A',
             email: admissionData.email || 'N/A',
@@ -159,26 +182,21 @@ const StudentLogin = () => {
             updatedAt: new Date().toISOString()
           };
 
-          // Create the student in Firebase
           await createStudent(newStudentData);
-          console.log('✅ Student created successfully:', generatedStudentId);
           
-          // Fetch the created student
+          // Create Firebase Auth user
+          await createFirebaseAuthUser(admissionData.email, DEFAULT_PASSWORD, newStudentData);
+          
           student = await getStudentByStudentId(generatedStudentId);
-          console.log('✅ Student fetched after creation:', student);
-          
-          if (student) {
-            setStudentJustCreated(true);
-          }
           
         } catch (createError) {
-          console.error('Error creating student from admission:', createError);
+          console.error('Error creating student:', createError);
           setError('Error creating student account. Please contact support.');
           setStatusChecked(true);
-          setIsCreatingStudent(false);
+          setIsCreatingAccount(false);
           return null;
         }
-        setIsCreatingStudent(false);
+        setIsCreatingAccount(false);
       }
 
       if (!student) {
@@ -197,36 +215,32 @@ const StudentLogin = () => {
         student.studentId = student.id || `STU${Date.now().toString().slice(-6)}`;
       }
 
-      // Set student data in state
       setStudentData(student);
+      studentDataRef.current = student;
 
-      // Check admission status
       const status = student.admissionStatus || 'pending';
       const statusMessages = {
         pending: 'Your application is pending review. Please wait for approval before logging in.',
         approved: 'Your application has been approved! You can now log in.',
-        rejected: 'Your application was not approved. Please contact admissions for more information.',
+        rejected: 'Your application was not approved. Please contact admissions.',
         enrolled: 'You are enrolled! Welcome to Fast Multimedia Institute.'
       };
 
-      const admissionInfo = {
+      setAdmissionStatus({
         exists: true,
         status: status,
         message: statusMessages[status] || 'Application status unknown.',
         data: student
-      };
-
-      setAdmissionStatus(admissionInfo);
+      });
       setStatusChecked(true);
 
-      // Check if student can login
       if (status === 'pending') {
-        setError('Your application is pending review. Please wait for approval before logging in.');
+        setError('Your application is pending review. Please wait for approval.');
         return null;
       }
 
       if (status === 'rejected') {
-        setError('Your application was not approved. Please contact admissions for more information.');
+        setError('Your application was not approved. Please contact admissions.');
         return null;
       }
 
@@ -248,7 +262,6 @@ const StudentLogin = () => {
     e.preventDefault();
     setError('');
     
-    // Validate identifier and password are not empty
     if (!identifier.trim()) {
       setError('Please enter your Student ID or Email Address.');
       return;
@@ -262,49 +275,88 @@ const StudentLogin = () => {
     setIsLoading(true);
 
     try {
-      // Check student access - this will create the student if needed
-      const student = await checkStudentAccess(identifier);
-      
+      // First, check if student exists and get their data
+      let student = studentDataRef.current;
       if (!student) {
-        setIsLoading(false);
-        return;
+        student = await checkStudentAccess(identifier);
+        if (!student) {
+          setIsLoading(false);
+          return;
+        }
       }
 
-      // Get the student from state (should be set by checkStudentAccess)
-      const currentStudent = studentData || student;
-      
-      if (!currentStudent) {
-        setError('Student data not found. Please try again.');
+      // Now try to sign in with Firebase Auth
+      try {
+        // Use email to sign in
+        const userCredential = await signInWithEmailAndPassword(auth, student.email, password);
+        console.log('✅ Firebase Auth login successful:', userCredential.user.uid);
+        
+        // Login successful
+        if (rememberMe) {
+          localStorage.setItem('studentLogin', 'true');
+          localStorage.setItem('studentId', student.studentId || student.id);
+          localStorage.setItem('studentEmail', student.email);
+          localStorage.setItem('studentName', student.fullName);
+        }
+        
         setIsLoading(false);
+        navigate('/student/portal');
         return;
+      } catch (authError) {
+        console.error('Firebase Auth login error:', authError);
+        
+        if (authError.code === 'auth/user-not-found') {
+          // Student doesn't have Firebase Auth account - create one
+          try {
+            setIsCreatingAccount(true);
+            await createFirebaseAuthUser(student.email, DEFAULT_PASSWORD, student);
+            
+            // Update student record to mark that auth was created
+            await updateStudentPassword(student.id, DEFAULT_PASSWORD);
+            
+            setIsCreatingAccount(false);
+            
+            // Try login again with the new account
+            const userCredential = await signInWithEmailAndPassword(auth, student.email, password);
+            console.log('✅ Firebase Auth login successful after creation:', userCredential.user.uid);
+            
+            if (rememberMe) {
+              localStorage.setItem('studentLogin', 'true');
+              localStorage.setItem('studentId', student.studentId || student.id);
+              localStorage.setItem('studentEmail', student.email);
+              localStorage.setItem('studentName', student.fullName);
+            }
+            
+            setIsLoading(false);
+            navigate('/student/portal');
+            return;
+          } catch (createError) {
+            console.error('Error creating auth user:', createError);
+            setError('Error creating login account. Please contact support.');
+            setIsLoading(false);
+            return;
+          }
+        } else if (authError.code === 'auth/wrong-password') {
+          setError('Invalid password. Please try again.');
+          setIsLoading(false);
+          return;
+        } else if (authError.code === 'auth/invalid-credential') {
+          // Check if using default password
+          if (password === DEFAULT_PASSWORD) {
+            setShowPasswordChange(true);
+            setError('');
+            setIsLoading(false);
+            return;
+          }
+          setError('Invalid credentials. Please try again.');
+          setIsLoading(false);
+          return;
+        } else {
+          setError('Login failed: ' + (authError.message || 'Please try again.'));
+          setIsLoading(false);
+          return;
+        }
       }
-
-      // Check if using default password
-      if (password === DEFAULT_PASSWORD) {
-        // User is using default password - force password change
-        setShowPasswordChange(true);
-        setError('');
-        setIsLoading(false);
-        return;
-      }
-
-      // Verify password with stored password
-      const storedPassword = currentStudent.password || '';
-      if (password !== storedPassword) {
-        setError('Invalid password. Please try again.');
-        setIsLoading(false);
-        return;
-      }
-
-      // Login successful - redirect to student portal
-      if (rememberMe) {
-        localStorage.setItem('studentLogin', 'true');
-        localStorage.setItem('studentId', currentStudent.studentId || currentStudent.id);
-        localStorage.setItem('studentEmail', currentStudent.email);
-        localStorage.setItem('studentName', currentStudent.fullName);
-      }
-      
-      redirectToPortal();
     } catch (error) {
       console.error('Login error:', error);
       setError('An error occurred during login. Please try again.');
@@ -323,25 +375,21 @@ const StudentLogin = () => {
     setPasswordChangeError('');
     setPasswordChangeSuccess(false);
 
-    // Validate new password
     if (newPassword.length < 8) {
       setPasswordChangeError('Password must be at least 8 characters long.');
       return;
     }
 
-    // Check for uppercase letter
     if (!/[A-Z]/.test(newPassword)) {
       setPasswordChangeError('Password must include at least one uppercase letter.');
       return;
     }
 
-    // Check for number
     if (!/[0-9]/.test(newPassword)) {
       setPasswordChangeError('Password must include at least one number.');
       return;
     }
 
-    // Check for special character
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
       setPasswordChangeError('Password must include at least one special character.');
       return;
@@ -360,7 +408,7 @@ const StudentLogin = () => {
     setIsPasswordUpdating(true);
 
     try {
-      const student = studentData;
+      const student = studentDataRef.current || studentData;
       
       if (!student) {
         setPasswordChangeError('Student data not found. Please try again.');
@@ -368,14 +416,33 @@ const StudentLogin = () => {
         return;
       }
       
-      // Update student password
+      // Update password in Firestore
       await updateStudentPassword(student.id, newPassword);
+
+      // Update Firebase Auth password
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          await user.updatePassword(newPassword);
+          console.log('✅ Firebase Auth password updated');
+        }
+      } catch (authError) {
+        console.warn('Could not update Firebase Auth password:', authError);
+      }
+
+      const updatedStudent = {
+        ...student,
+        password: newPassword,
+        passwordUpdated: true
+      };
+      
+      setStudentData(updatedStudent);
+      studentDataRef.current = updatedStudent;
 
       setTimeout(() => {
         setIsPasswordUpdating(false);
         setPasswordChangeSuccess(true);
         
-        // After success, redirect after 2 seconds
         setTimeout(() => {
           setShowPasswordChange(false);
           redirectToPortal();
@@ -387,6 +454,12 @@ const StudentLogin = () => {
       setIsPasswordUpdating(false);
     }
   };
+
+  const getDisplayStudent = () => {
+    return studentDataRef.current || studentData;
+  };
+
+  const displayStudent = getDisplayStudent();
 
   return (
     <div className="student-login-page">
@@ -406,34 +479,26 @@ const StudentLogin = () => {
             </div>
           )}
 
-          {isCreatingStudent && (
+          {isCreatingAccount && (
             <div className="login-info creating">
-              <FaSpinner className="spinner" /> Creating your student account...
+              <FaSpinner className="spinner" /> Setting up your account...
             </div>
           )}
 
-          {studentJustCreated && (
-            <div className="login-info success">
-              <FaCheckCircle /> Student account created successfully! Please login with the default password.
-            </div>
-          )}
-
-          {/* Student Info Display */}
-          {statusChecked && studentData && (
+          {statusChecked && displayStudent && (
             <div className="student-info-badge">
               <div className="student-info-icon">
                 <FaUserGraduate />
               </div>
               <div className="student-info-content">
-                <h4>Welcome, <strong>{studentData.fullName}</strong></h4>
-                <p>Student ID: <strong>{studentData.studentId || studentData.id}</strong></p>
-                <p>Course: <strong>{studentData.course || 'Not assigned'}</strong></p>
-                <p>Email: <strong>{studentData.email}</strong></p>
+                <h4>Welcome, <strong>{displayStudent.fullName}</strong></h4>
+                <p>Student ID: <strong>{displayStudent.studentId || displayStudent.id}</strong></p>
+                <p>Course: <strong>{displayStudent.course || 'Not assigned'}</strong></p>
+                <p>Email: <strong>{displayStudent.email}</strong></p>
               </div>
             </div>
           )}
 
-          {/* Admission Status Display */}
           {statusChecked && admissionStatus && (
             <div className={`admission-status ${admissionStatus.status}`}>
               <div className="status-icon">
@@ -449,7 +514,6 @@ const StudentLogin = () => {
             </div>
           )}
 
-          {/* Password Change Form - Shown when default password is used */}
           {showPasswordChange ? (
             <div className="password-change-container">
               <div className="password-change-header">
@@ -571,7 +635,7 @@ const StudentLogin = () => {
                         setAdmissionStatus(null);
                         setError('');
                         setStudentData(null);
-                        setStudentJustCreated(false);
+                        studentDataRef.current = null;
                       }}
                       placeholder="Enter your Student ID or Email"
                       required
@@ -623,11 +687,11 @@ const StudentLogin = () => {
                 <button 
                   type="submit" 
                   className="login-btn"
-                  disabled={isLoading || isCreatingStudent}
+                  disabled={isLoading || isCreatingAccount}
                 >
-                  {isLoading || isCreatingStudent ? (
+                  {isLoading || isCreatingAccount ? (
                     <>
-                      <FaSpinner className="spinner" /> {isCreatingStudent ? 'Creating Account...' : 'Checking...'}
+                      <FaSpinner className="spinner" /> {isCreatingAccount ? 'Setting up...' : 'Signing in...'}
                     </>
                   ) : (
                     <>
@@ -645,7 +709,7 @@ const StudentLogin = () => {
                   <FaInfoCircle /> Default password: <strong>{DEFAULT_PASSWORD}</strong>
                 </p>
                 <p className="login-help-note">
-                  First time logging in? Use the default password above and you'll be prompted to change it.
+                  First time logging in? Use the default password above.
                 </p>
                 <p className="login-help-note">
                   <FaInfoCircle /> Need help? Contact us at <strong>fasttech227@gmail.com</strong>
