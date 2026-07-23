@@ -64,26 +64,28 @@ const StudentLogin = () => {
   
   // Track if we're still creating the student
   const [isCreatingStudent, setIsCreatingStudent] = useState(false);
+  // Track if student was just created
+  const [studentJustCreated, setStudentJustCreated] = useState(false);
 
   // Default password for all users
   const DEFAULT_PASSWORD = 'FastMultimedia2024@';
 
-  // Check student admission status
+  // Check student admission status - FIXED to properly handle student creation
   const checkStudentAccess = async (identifier) => {
     setError('');
     setAdmissionStatus(null);
     setStatusChecked(false);
     setStudentData(null);
+    setStudentJustCreated(false);
 
     try {
       // Check if identifier is a student ID or email
       let student = null;
-      let isFromAdmission = false;
       let admissionData = null;
+      let isFromAdmission = false;
       
-      // Try to find by student ID first (this works for both studentId and admission serial)
+      // Try to find by student ID first
       if (!identifier.includes('@')) {
-        // Check by studentId field
         student = await getStudentByStudentId(identifier.toUpperCase());
         
         // If not found, try to find by serial number in admissions
@@ -96,7 +98,7 @@ const StudentLogin = () => {
             const existingStudent = await getStudentByEmail(admission.email);
             if (existingStudent) {
               student = existingStudent;
-            } 
+            }
           }
         }
       }
@@ -164,6 +166,10 @@ const StudentLogin = () => {
           // Fetch the created student
           student = await getStudentByStudentId(generatedStudentId);
           console.log('✅ Student fetched after creation:', student);
+          
+          if (student) {
+            setStudentJustCreated(true);
+          }
           
         } catch (createError) {
           console.error('Error creating student from admission:', createError);
@@ -253,25 +259,21 @@ const StudentLogin = () => {
       return;
     }
     
-    // First, check student access
-    if (!statusChecked) {
-      setIsLoading(true);
-      const student = await checkStudentAccess(identifier);
-      setIsLoading(false);
-      
-      if (!student) {
-        return;
-      }
-    }
-
-    // Now validate password - use the studentData from state
     setIsLoading(true);
 
     try {
-      // Get the student from state (should be set by checkStudentAccess)
-      const student = studentData;
+      // Check student access - this will create the student if needed
+      const student = await checkStudentAccess(identifier);
       
       if (!student) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Get the student from state (should be set by checkStudentAccess)
+      const currentStudent = studentData || student;
+      
+      if (!currentStudent) {
         setError('Student data not found. Please try again.');
         setIsLoading(false);
         return;
@@ -287,7 +289,7 @@ const StudentLogin = () => {
       }
 
       // Verify password with stored password
-      const storedPassword = student.password || '';
+      const storedPassword = currentStudent.password || '';
       if (password !== storedPassword) {
         setError('Invalid password. Please try again.');
         setIsLoading(false);
@@ -297,16 +299,15 @@ const StudentLogin = () => {
       // Login successful - redirect to student portal
       if (rememberMe) {
         localStorage.setItem('studentLogin', 'true');
-        localStorage.setItem('studentId', student.studentId || student.id);
-        localStorage.setItem('studentEmail', student.email);
-        localStorage.setItem('studentName', student.fullName);
+        localStorage.setItem('studentId', currentStudent.studentId || currentStudent.id);
+        localStorage.setItem('studentEmail', currentStudent.email);
+        localStorage.setItem('studentName', currentStudent.fullName);
       }
       
       redirectToPortal();
     } catch (error) {
       console.error('Login error:', error);
       setError('An error occurred during login. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -406,8 +407,14 @@ const StudentLogin = () => {
           )}
 
           {isCreatingStudent && (
-            <div className="login-info">
+            <div className="login-info creating">
               <FaSpinner className="spinner" /> Creating your student account...
+            </div>
+          )}
+
+          {studentJustCreated && (
+            <div className="login-info success">
+              <FaCheckCircle /> Student account created successfully! Please login with the default password.
             </div>
           )}
 
@@ -564,16 +571,17 @@ const StudentLogin = () => {
                         setAdmissionStatus(null);
                         setError('');
                         setStudentData(null);
+                        setStudentJustCreated(false);
                       }}
                       placeholder="Enter your Student ID or Email"
                       required
                     />
                   </div>
                   <div className="input-hint">
-                    <FaInfoCircle /> Enter your Student ID (e.g., JOHN260001) or Email Address
+                    <FaInfoCircle /> Enter your Student ID (e.g., KIKI260001) or Email Address
                   </div>
                   <div className="input-hint">
-                    <FaInfoCircle /> You can also use your Admission Serial Number (e.g., FM-ADM-2026-XXXXXXXX-XXXX)
+                    <FaInfoCircle /> You can also use your Admission Serial Number
                   </div>
                 </div>
 
