@@ -16,7 +16,8 @@ import {
   FaCheck,
   FaIdCard,
   FaShieldAlt,
-  FaUniversity
+  FaUniversity,
+  FaSync
 } from 'react-icons/fa';
 import { 
   getStudentByEmail,
@@ -27,12 +28,15 @@ import {
   getAdmissionByEmail,
   createStudent,
   generateStudentId,
-  updateUserProfile
+  updateUserProfile,
+  updateStudent
 } from '../services/firebaseService';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
-  updateProfile 
+  updateProfile,
+  fetchSignInMethodsForEmail,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -67,6 +71,7 @@ const StudentLogin = () => {
   
   // Track student creation
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   // Default password for all users
   const DEFAULT_PASSWORD = 'FastMultimedia2024@';
@@ -75,6 +80,17 @@ const StudentLogin = () => {
   const createFirebaseAuthUser = async (email, password, studentData) => {
     try {
       console.log('🔐 Creating Firebase Auth user for:', email);
+      
+      // Check if user already exists
+      try {
+        const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+        if (signInMethods && signInMethods.length > 0) {
+          console.log('⚠️ Auth user already exists for:', email);
+          return null;
+        }
+      } catch (checkError) {
+        console.log('Could not check existing user:', checkError.message);
+      }
       
       // Create the auth user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -103,8 +119,90 @@ const StudentLogin = () => {
       console.log('✅ User document created in Firestore');
       return user;
     } catch (error) {
+      if (error.code === 'auth/email-already-in-use') {
+        console.log('⚠️ Auth user already exists for:', email);
+        return null;
+      }
       console.error('Error creating Firebase Auth user:', error);
       throw error;
+    }
+  };
+
+  // Reset password for student (send reset email)
+  const resetStudentPassword = async (email) => {
+    setIsResettingPassword(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showNotification('Password reset email sent! Check your inbox.', 'success');
+      return true;
+    } catch (error) {
+      console.error('Error sending reset email:', error);
+      if (error.code === 'auth/user-not-found') {
+        // User doesn't exist, try to create them
+        try {
+          const student = studentDataRef.current;
+          if (student) {
+            await createFirebaseAuthUser(email, DEFAULT_PASSWORD, student);
+            showNotification('Account created! Check your email for password reset.', 'success');
+            return true;
+          }
+        } catch (createError) {
+          console.error('Error creating user:', createError);
+        }
+      }
+      showNotification('Error sending reset email: ' + error.message, 'error');
+      return false;
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
+  // Force reset password in Firebase Auth
+  const forceResetPassword = async (student) => {
+    setIsResettingPassword(true);
+    try {
+      console.log('🔄 Force resetting password for:', student.email);
+      
+      // Try to set password directly by creating a new user (if user doesn't exist)
+      try {
+        // First check if user exists
+        const signInMethods = await fetchSignInMethodsForEmail(auth, student.email);
+        if (!signInMethods || signInMethods.length === 0) {
+          // User doesn't exist, create them
+          await createFirebaseAuthUser(student.email, DEFAULT_PASSWORD, student);
+          showNotification('Account created! Try logging in with default password.', 'success');
+          setIsResettingPassword(false);
+          return true;
+        }
+      } catch (checkError) {
+        console.log('Could not check user:', checkError.message);
+      }
+      
+      // If user exists, try to reset password via email
+      try {
+        await sendPasswordResetEmail(auth, student.email);
+        showNotification('Password reset email sent to ' + student.email, 'success');
+        setIsResettingPassword(false);
+        return true;
+      } catch (resetError) {
+        console.error('Error sending reset email:', resetError);
+        // If email reset fails, try to re-create user
+        try {
+          // Delete and re-create (this is a fallback)
+          // Note: This requires admin privileges, might not work in client
+          showNotification('Please contact admin to reset your password.', 'warning');
+        } catch (recreateError) {
+          console.error('Error recreating user:', recreateError);
+        }
+      }
+      
+      setIsResettingPassword(false);
+      return false;
+    } catch (error) {
+      console.error('Error in forceResetPassword:', error);
+      setIsResettingPassword(false);
+      showNotification('Error resetting password. Please contact support.', 'error');
+      return false;
     }
   };
 
@@ -191,6 +289,7 @@ const StudentLogin = () => {
             status: 'active',
             password: DEFAULT_PASSWORD,
             passwordUpdated: false,
+            authCreated: false,
             paymentHistory: [],
             attendance: { total: 0, present: 0, absent: 0 },
             grades: {},
@@ -204,6 +303,9 @@ const StudentLogin = () => {
           // Create Firebase Auth user
           await createFirebaseAuthUser(admissionData.email, DEFAULT_PASSWORD, newStudentData);
           console.log('✅ Firebase Auth user created');
+          
+          // Update authCreated status
+          await updateStudent(generatedStudentId, { authCreated: true });
           
           student = await getStudentByStudentId(generatedStudentId);
           console.log('✅ Student fetched after creation');
@@ -319,7 +421,6 @@ const StudentLogin = () => {
           localStorage.setItem('studentName', student.fullName);
         }
         
-        // Set session cookie or storage to persist login
         sessionStorage.setItem('studentAuthenticated', 'true');
         sessionStorage.setItem('studentId', student.studentId || student.id);
         
@@ -331,21 +432,19 @@ const StudentLogin = () => {
       } catch (authError) {
         console.error('Firebase Auth login error:', authError.code, authError.message);
         
+        // Handle specific auth errors
         if (authError.code === 'auth/user-not-found') {
           // Student doesn't have Firebase Auth account - create one
           console.log('🆕 Auth user not found, creating...');
           try {
             setIsCreatingAccount(true);
             await createFirebaseAuthUser(student.email, DEFAULT_PASSWORD, student);
-            
-            // Update student record to mark that auth was created
-            await updateStudentPassword(student.id, DEFAULT_PASSWORD);
-            
+            await updateStudent(student.id, { authCreated: true });
             setIsCreatingAccount(false);
             console.log('✅ Auth user created, trying login again...');
             
             // Try login again with the new account
-            const userCredential = await signInWithEmailAndPassword(auth, student.email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, student.email, DEFAULT_PASSWORD);
             console.log('✅ Firebase Auth login successful after creation:', userCredential.user.uid);
             
             if (rememberMe) {
@@ -365,25 +464,66 @@ const StudentLogin = () => {
             
           } catch (createError) {
             console.error('Error creating auth user:', createError);
-            setError('Error creating login account. Please contact support.');
+            setError('Error creating login account. Please use "Forgot Password" or contact support.');
+            setIsCreatingAccount(false);
             setIsLoading(false);
             return;
           }
         } else if (authError.code === 'auth/wrong-password') {
-          // Check if using default password and password hasn't been updated
+          // Check if using default password
           if (password === DEFAULT_PASSWORD && !student.passwordUpdated) {
             setShowPasswordChange(true);
             setError('');
             setIsLoading(false);
             return;
           }
-          setError('Invalid password. Please try again.');
+          setError('Invalid password. Please try again or use "Forgot Password".');
           setIsLoading(false);
           return;
         } else if (authError.code === 'auth/invalid-credential') {
-          setError('Invalid credentials. Please try again.');
-          setIsLoading(false);
-          return;
+          // This often means the password in Firebase Auth doesn't match
+          // Try to reset/sync the password
+          console.log('⚠️ Invalid credential, attempting to reset password...');
+          try {
+            // Check if this is the default password
+            if (password === DEFAULT_PASSWORD) {
+              // Try to create a new auth user (if email not in use)
+              try {
+                await createFirebaseAuthUser(student.email, DEFAULT_PASSWORD, student);
+                await updateStudent(student.id, { authCreated: true });
+                
+                // Try login again
+                const userCredential = await signInWithEmailAndPassword(auth, student.email, DEFAULT_PASSWORD);
+                console.log('✅ Login successful after recreation');
+                
+                if (rememberMe) {
+                  localStorage.setItem('studentLogin', 'true');
+                  localStorage.setItem('studentId', student.studentId || student.id);
+                  localStorage.setItem('studentEmail', student.email);
+                  localStorage.setItem('studentName', student.fullName);
+                }
+                
+                sessionStorage.setItem('studentAuthenticated', 'true');
+                sessionStorage.setItem('studentId', student.studentId || student.id);
+                
+                setIsLoading(false);
+                navigate('/student/portal', { replace: true });
+                return;
+              } catch (recreateError) {
+                console.error('Error recreating auth user:', recreateError);
+              }
+            }
+            
+            // If we can't fix it, offer password reset
+            setError('Invalid credentials. Please use "Forgot Password" to reset your password.');
+            setIsLoading(false);
+            return;
+          } catch (resetError) {
+            console.error('Error during credential fix:', resetError);
+            setError('Invalid credentials. Please use "Forgot Password" to reset your password.');
+            setIsLoading(false);
+            return;
+          }
         } else {
           setError('Login failed: ' + (authError.message || 'Please try again.'));
           setIsLoading(false);
@@ -395,6 +535,14 @@ const StudentLogin = () => {
       setError('An error occurred during login. Please try again.');
       setIsLoading(false);
     }
+  };
+
+  // Show notification helper
+  const showNotification = (message, type = 'success') => {
+    // You can implement a proper notification system here
+    console.log(`${type}: ${message}`);
+    // For now, we'll use alert for demo
+    alert(message);
   };
 
   const redirectToPortal = () => {
@@ -462,15 +610,26 @@ const StudentLogin = () => {
           // If no current user, try to sign in first
           console.log('⚠️ No current user, signing in to update password...');
           try {
-            const userCredential = await signInWithEmailAndPassword(auth, student.email, DEFAULT_PASSWORD);
+            // First try with default password
+            let userCredential;
+            try {
+              userCredential = await signInWithEmailAndPassword(auth, student.email, DEFAULT_PASSWORD);
+            } catch (defaultLoginError) {
+              // If default doesn't work, try the new password
+              userCredential = await signInWithEmailAndPassword(auth, student.email, newPassword);
+            }
             await userCredential.user.updatePassword(newPassword);
             console.log('✅ Firebase Auth password updated after sign in');
           } catch (signInError) {
             console.error('Error signing in to update password:', signInError);
+            // Try to create auth user as fallback
+            await createFirebaseAuthUser(student.email, newPassword, student);
           }
         }
       } catch (authError) {
         console.warn('Could not update Firebase Auth password:', authError);
+        // Try to create auth user as fallback
+        await createFirebaseAuthUser(student.email, newPassword, student);
       }
 
       const updatedStudent = {
@@ -548,6 +707,7 @@ const StudentLogin = () => {
                 <p>Course: <strong>{displayStudent.course || 'Not assigned'}</strong></p>
                 <p>Email: <strong>{displayStudent.email}</strong></p>
                 <p>Password Status: <strong>{displayStudent.passwordUpdated ? '✅ Changed' : '⚠️ Default'}</strong></p>
+                <p>Auth Status: <strong>{displayStudent.authCreated ? '✅ Active' : '⚠️ Not Created'}</strong></p>
               </div>
             </div>
           )}
@@ -695,7 +855,7 @@ const StudentLogin = () => {
                     />
                   </div>
                   <div className="input-hint">
-                    <FaInfoCircle /> Enter your Student ID (e.g., KIKI260001) or Email Address
+                    <FaInfoCircle /> Enter your Student ID (e.g., TEYE260001) or Email Address
                   </div>
                   <div className="input-hint">
                     <FaInfoCircle /> You can also use your Admission Serial Number
@@ -754,7 +914,50 @@ const StudentLogin = () => {
                 </button>
               </form>
 
+              {/* Forgot Password / Reset Password Section */}
               <div className="login-footer">
+                <div className="password-reset-section">
+                  <button 
+                    type="button"
+                    className="forgot-password-btn"
+                    onClick={async () => {
+                      if (!identifier.trim()) {
+                        setError('Please enter your Student ID or Email first.');
+                        return;
+                      }
+                      
+                      try {
+                        let student = studentDataRef.current;
+                        if (!student) {
+                          student = await checkStudentAccess(identifier);
+                          if (!student) {
+                            setError('Student not found. Please check your Student ID or Email.');
+                            return;
+                          }
+                        }
+                        
+                        if (window.confirm(`Send password reset email to ${student.email}?`)) {
+                          await resetStudentPassword(student.email);
+                        }
+                      } catch (error) {
+                        console.error('Error during password reset:', error);
+                        setError('Error sending reset email. Please contact support.');
+                      }
+                    }}
+                    disabled={isResettingPassword}
+                  >
+                    {isResettingPassword ? (
+                      <>
+                        <FaSpinner className="spinner" /> Sending...
+                      </>
+                    ) : (
+                      <>
+                        <FaKey /> Forgot Password?
+                      </>
+                    )}
+                  </button>
+                </div>
+
                 <p className="login-note">
                   <FaShieldAlt /> Secured by Firebase Authentication
                 </p>
