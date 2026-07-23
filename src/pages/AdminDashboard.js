@@ -64,6 +64,7 @@ import {
   getStudentByEmail,
   updateStudent,
   createStudent,
+  deleteStudent as deleteStudentService,
   getAllAdmissions,
   getAdmission,
   updateAdmissionStatus,
@@ -89,6 +90,13 @@ import {
   db
 } from '../services/firebaseService';
 import { sendAdmissionStatusEmail } from '../services/emailService';
+import { 
+  createUserWithEmailAndPassword, 
+  updateProfile,
+  deleteUser
+} from 'firebase/auth';
+import { auth } from '../firebase';
+import { serverTimestamp, setDoc } from 'firebase/firestore';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -115,6 +123,7 @@ const AdminDashboard = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [expandedCourses, setExpandedCourses] = useState({});
+  const [isDeleting, setIsDeleting] = useState(false);
   const [staffData, setStaffData] = useState({
     fullName: '',
     email: '',
@@ -137,6 +146,9 @@ const AdminDashboard = () => {
     startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0]
   });
+
+  // Default password for students
+  const DEFAULT_PASSWORD = 'FastMultimedia2024@';
 
   // Check authentication on mount
   useEffect(() => {
@@ -217,7 +229,6 @@ const AdminDashboard = () => {
   // Format currency - FIXED: Convert from pesewas to GHS
   const formatCurrency = (amount) => {
     if (!amount) return 'GH₵ 0.00';
-    // If amount is in pesewas (like 10000 for GH₵ 100.00), divide by 100
     const amountInGHS = amount > 100 ? amount / 100 : amount;
     return new Intl.NumberFormat('en-GH', {
       style: 'currency',
@@ -225,6 +236,92 @@ const AdminDashboard = () => {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amountInGHS || 0);
+  };
+
+  // ============================================
+  // CREATE FIREBASE AUTH USER FOR STUDENT
+  // ============================================
+  const createFirebaseAuthUser = async (email, password, studentData) => {
+    try {
+      console.log('🔐 Creating Firebase Auth user for:', email);
+      
+      // Create the auth user
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log('✅ Firebase Auth user created:', user.uid);
+      
+      // Update user profile
+      await updateProfile(user, {
+        displayName: studentData.fullName || 'Student'
+      });
+      
+      // Create user document in Firestore
+      const userRef = doc(db, 'users', user.uid);
+      await setDoc(userRef, {
+        uid: user.uid,
+        email: email,
+        fullName: studentData.fullName,
+        role: 'student',
+        studentId: studentData.studentId,
+        course: studentData.course,
+        admissionStatus: studentData.admissionStatus || 'approved',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
+      console.log('✅ User document created in Firestore');
+      return user;
+    } catch (error) {
+      if (error.code === 'auth/email-already-in-use') {
+        console.log('⚠️ Auth user already exists for:', email);
+        return null;
+      }
+      console.error('Error creating Firebase Auth user:', error);
+      throw error;
+    }
+  };
+
+  // ============================================
+  // ENSURE AUTH USER EXISTS
+  // ============================================
+  const ensureAuthUserExists = async (admission, student) => {
+    try {
+      // Try to create auth user
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        admission.email,
+        DEFAULT_PASSWORD
+      );
+      console.log(`✅ Auth user created for ${admission.email}`);
+      
+      // Update profile
+      await updateProfile(userCredential.user, {
+        displayName: admission.fullName || 'Student'
+      });
+      
+      // Create user doc
+      const userRef = doc(db, 'users', userCredential.user.uid);
+      await setDoc(userRef, {
+        uid: userCredential.user.uid,
+        email: admission.email,
+        fullName: admission.fullName,
+        role: 'student',
+        studentId: student.studentId || student.id,
+        course: admission.course,
+        admissionStatus: 'approved',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
+      return true;
+    } catch (authError) {
+      if (authError.code === 'auth/email-already-in-use') {
+        console.log(`ℹ️ Auth user already exists for ${admission.email}`);
+        return true;
+      }
+      console.error('❌ Error creating auth user:', authError);
+      throw authError;
+    }
   };
 
   // ============================================
@@ -257,7 +354,7 @@ const AdminDashboard = () => {
   };
 
   // ============================================
-  // CREATE STUDENT FROM ADMISSION DATA
+  // CREATE STUDENT FROM ADMISSION DATA WITH AUTH
   // ============================================
   const createStudentFromAdmission = async (admission) => {
     try {
@@ -290,16 +387,31 @@ const AdminDashboard = () => {
         applicationDate: admission.applicationDate || new Date().toISOString(),
         enrolledCourses: [admission.course || 'Not specified'],
         status: 'active',
+        studentId: studentId,
+        password: DEFAULT_PASSWORD,
+        passwordUpdated: false,
         paymentHistory: [],
         attendance: { total: 0, present: 0, absent: 0 },
         grades: {},
-        passwordUpdated: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
 
+      // 1. Create student in Firestore
       await createStudent(studentData);
       console.log(`✅ Student created successfully with ID: ${studentId}`);
+      
+      // 2. Create Firebase Auth user
+      try {
+        await createFirebaseAuthUser(admission.email, DEFAULT_PASSWORD, studentData);
+        console.log(`✅ Firebase Auth user created for ${admission.email}`);
+      } catch (authError) {
+        if (authError.code === 'auth/email-already-in-use') {
+          console.log(`⚠️ Auth user already exists for ${admission.email}`);
+        } else {
+          console.error('❌ Error creating Firebase Auth user:', authError);
+        }
+      }
       
       return studentId;
     } catch (error) {
@@ -347,7 +459,7 @@ const AdminDashboard = () => {
       // Only create student if status is approved or enrolled
       if (status === 'approved' || status === 'enrolled') {
         try {
-          let existingStudent = students.find(s => s.id === studentId);
+          let existingStudent = students.find(s => s.email === admission.email);
           if (!existingStudent && admission.email) {
             existingStudent = await getStudentByEmail(admission.email);
           }
@@ -360,13 +472,19 @@ const AdminDashboard = () => {
             });
             console.log('✅ Existing student updated:', existingStudent.id);
             studentIdCreated = existingStudent.id;
+            
+            // Make sure auth user exists
+            await ensureAuthUserExists(admission, existingStudent);
           } else {
+            // Create new student with auth
             studentIdCreated = await createStudentFromAdmission(admission);
             studentCreated = true;
-            console.log('✅ New student created:', studentIdCreated);
+            console.log('✅ New student created with auth:', studentIdCreated);
           }
         } catch (studentError) {
           console.error('Error handling student record:', studentError);
+          showNotification('Error creating student account: ' + studentError.message, 'error');
+          return;
         }
       }
 
@@ -388,7 +506,7 @@ const AdminDashboard = () => {
         rejected: 'rejected ❌'
       };
 
-      const studentMessage = studentCreated ? ' Student record created!' : studentIdCreated ? ' Student record updated!' : '';
+      const studentMessage = studentCreated ? ' Student record created with Auth!' : studentIdCreated ? ' Student record updated!' : '';
 
       showNotification(
         `Admission ${statusMessages[status] || status}. ${emailSent ? 'Email sent!' : 'Email failed to send.'}${studentMessage}`,
@@ -419,17 +537,78 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle student deletion
+  // ============================================
+  // DELETE STUDENT WITH AUTH USER
+  // ============================================
   const handleDeleteStudent = async (studentId) => {
-    if (window.confirm('Are you sure you want to delete this student?')) {
+    if (isDeleting) return;
+    
+    const studentToDelete = students.find(s => s.id === studentId) || 
+                           admissions.find(a => a.id === studentId);
+    
+    if (!studentToDelete) {
+      showNotification('Student not found', 'error');
+      return;
+    }
+
+    const confirmMessage = studentToDelete.email 
+      ? `⚠️ Are you sure you want to delete ${studentToDelete.fullName} (${studentToDelete.email})? This will also delete their Firebase Auth account and cannot be undone.`
+      : `⚠️ Are you sure you want to delete ${studentToDelete.fullName}? This action cannot be undone.`;
+
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    setIsDeleting(true);
+    
+    try {
+      // 1. Delete from Firestore students collection
+      await deleteStudentService(studentId);
+      console.log(`✅ Student deleted from Firestore: ${studentId}`);
+
+      // 2. Try to delete Firebase Auth user
       try {
-        await deleteStudent(studentId);
-        showNotification('Student deleted successfully', 'success');
-        await loadDashboardData();
-      } catch (error) {
-        console.error('Error deleting student:', error);
-        showNotification('Error deleting student', 'error');
+        // Find the user by email
+        const userCredential = await auth.signInWithEmailAndPassword(
+          studentToDelete.email, 
+          DEFAULT_PASSWORD
+        );
+        
+        if (userCredential.user) {
+          await deleteUser(userCredential.user);
+          console.log(`✅ Auth user deleted: ${studentToDelete.email}`);
+        }
+      } catch (authError) {
+        if (authError.code === 'auth/user-not-found') {
+          console.log(`ℹ️ Auth user not found for ${studentToDelete.email}, skipping`);
+        } else if (authError.code === 'auth/wrong-password') {
+          // Try to find user by admin
+          console.log('⚠️ Wrong password for auth deletion, trying admin method...');
+          // Option: You can add admin SDK call here if needed
+        } else {
+          console.warn('⚠️ Could not delete auth user:', authError.message);
+        }
       }
+
+      // 3. Delete from admissions if it exists
+      try {
+        const admission = admissions.find(a => a.email === studentToDelete.email);
+        if (admission) {
+          await deleteDoc(doc(db, 'admissions', admission.id));
+          console.log(`✅ Admission deleted: ${admission.id}`);
+        }
+      } catch (admissionError) {
+        console.warn('⚠️ Could not delete admission:', admissionError.message);
+      }
+
+      showNotification(`Student ${studentToDelete.fullName} deleted successfully`, 'success');
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error deleting student:', error);
+      showNotification('Error deleting student: ' + error.message, 'error');
+    } finally {
+      setIsDeleting(false);
+      setShowStudentModal(false);
     }
   };
 
@@ -859,8 +1038,9 @@ const AdminDashboard = () => {
                                     <button 
                                       className="action-btn-icon delete"
                                       onClick={() => handleDeleteStudent(student.id)}
+                                      disabled={isDeleting}
                                     >
-                                      <FaTrash />
+                                      {isDeleting ? <FaSpinner className="spinner" /> : <FaTrash />}
                                     </button>
                                   </div>
                                 </td>
@@ -1529,6 +1709,16 @@ const AdminDashboard = () => {
                 }}
               >
                 <FaEdit /> Edit
+              </button>
+              <button 
+                className="btn-delete-student"
+                onClick={() => {
+                  setShowStudentModal(false);
+                  handleDeleteStudent(selectedStudent.id);
+                }}
+                disabled={isDeleting}
+              >
+                {isDeleting ? <FaSpinner className="spinner" /> : <FaTrash />} Delete
               </button>
             </div>
           </div>
