@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   FaUserGraduate, 
@@ -19,16 +19,11 @@ import {
   FaUniversity
 } from 'react-icons/fa';
 import { 
-  getStudentAdmissionStatus, 
   getStudentByEmail,
-  updateStudent,
   getUserByEmail,
   getStudentByStudentId,
-  verifyStudentPassword,
   updateStudentPassword
 } from '../services/firebaseService';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
 import './StudentLogin.css';
 
 const StudentLogin = () => {
@@ -42,6 +37,7 @@ const StudentLogin = () => {
   
   // Student data states
   const [studentData, setStudentData] = useState(null);
+  const studentDataRef = useRef(null); // Use ref to persist data
   
   // Admission status states
   const [admissionStatus, setAdmissionStatus] = useState(null);
@@ -59,9 +55,6 @@ const StudentLogin = () => {
 
   // Default password for all users
   const DEFAULT_PASSWORD = 'FastMultimedia2024@';
-  
-  // Store student data in a ref to access it in handleLogin
-  const [cachedStudent, setCachedStudent] = useState(null);
 
   // Check student admission status
   const checkStudentAccess = async (identifier) => {
@@ -69,10 +62,9 @@ const StudentLogin = () => {
     setAdmissionStatus(null);
     setStatusChecked(false);
     setStudentData(null);
-    setCachedStudent(null);
+    studentDataRef.current = null;
 
     try {
-      // Check if identifier is a student ID or email
       let student = null;
       
       // Try to find by student ID first
@@ -89,7 +81,6 @@ const StudentLogin = () => {
       if (!student) {
         const user = await getUserByEmail(identifier);
         if (user && user.role === 'student') {
-          // Convert user to student format
           student = {
             id: user.id,
             studentId: user.studentId || user.id,
@@ -114,9 +105,9 @@ const StudentLogin = () => {
         student.password = DEFAULT_PASSWORD;
       }
 
-      // Set student data in state AND cache
+      // Store student data in both state and ref
       setStudentData(student);
-      setCachedStudent(student);
+      studentDataRef.current = student;
 
       // Check admission status
       const status = student.admissionStatus || 'pending';
@@ -166,7 +157,6 @@ const StudentLogin = () => {
     e.preventDefault();
     setError('');
     
-    // Validate identifier and password are not empty
     if (!identifier.trim()) {
       setError('Please enter your Student ID or Email Address.');
       return;
@@ -188,12 +178,11 @@ const StudentLogin = () => {
       }
     }
 
-    // Now validate password - use the cached student data
     setIsLoading(true);
 
     try {
-      // Get the student from cache or state
-      const student = cachedStudent || studentData;
+      // Get student from ref (most reliable) or state
+      const student = studentDataRef.current || studentData;
       
       if (!student) {
         setError('Student data not found. Please try again.');
@@ -201,7 +190,7 @@ const StudentLogin = () => {
         return;
       }
 
-      // IMPORTANT: Check if password has been updated
+      // Check if password has been updated
       const isDefaultPassword = password === DEFAULT_PASSWORD;
       const hasPasswordBeenUpdated = student.passwordUpdated === true;
       
@@ -228,7 +217,7 @@ const StudentLogin = () => {
         return;
       }
 
-      // Login successful - redirect to student portal
+      // Login successful
       if (rememberMe) {
         localStorage.setItem('studentLogin', 'true');
         localStorage.setItem('studentId', student.studentId || student.id);
@@ -255,25 +244,21 @@ const StudentLogin = () => {
     setPasswordChangeError('');
     setPasswordChangeSuccess(false);
 
-    // Validate new password
     if (newPassword.length < 8) {
       setPasswordChangeError('Password must be at least 8 characters long.');
       return;
     }
 
-    // Check for uppercase letter
     if (!/[A-Z]/.test(newPassword)) {
       setPasswordChangeError('Password must include at least one uppercase letter.');
       return;
     }
 
-    // Check for number
     if (!/[0-9]/.test(newPassword)) {
       setPasswordChangeError('Password must include at least one number.');
       return;
     }
 
-    // Check for special character
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
       setPasswordChangeError('Password must include at least one special character.');
       return;
@@ -292,7 +277,7 @@ const StudentLogin = () => {
     setIsPasswordUpdating(true);
 
     try {
-      const student = cachedStudent || studentData;
+      const student = studentDataRef.current || studentData;
       
       if (!student) {
         setPasswordChangeError('Student data not found. Please try again.');
@@ -300,10 +285,9 @@ const StudentLogin = () => {
         return;
       }
       
-      // Update student password
       await updateStudentPassword(student.id, newPassword);
 
-      // Update local student data to reflect password change
+      // Update local student data
       const updatedStudent = {
         ...student,
         password: newPassword,
@@ -311,13 +295,12 @@ const StudentLogin = () => {
       };
       
       setStudentData(updatedStudent);
-      setCachedStudent(updatedStudent);
+      studentDataRef.current = updatedStudent;
 
       setTimeout(() => {
         setIsPasswordUpdating(false);
         setPasswordChangeSuccess(true);
         
-        // After success, redirect after 2 seconds
         setTimeout(() => {
           setShowPasswordChange(false);
           redirectToPortal();
@@ -329,6 +312,13 @@ const StudentLogin = () => {
       setIsPasswordUpdating(false);
     }
   };
+
+  // Get student for display
+  const getDisplayStudent = () => {
+    return studentDataRef.current || studentData;
+  };
+
+  const displayStudent = getDisplayStudent();
 
   return (
     <div className="student-login-page">
@@ -349,16 +339,16 @@ const StudentLogin = () => {
           )}
 
           {/* Student Info Display */}
-          {statusChecked && (cachedStudent || studentData) && (
+          {statusChecked && displayStudent && (
             <div className="student-info-badge">
               <div className="student-info-icon">
                 <FaUserGraduate />
               </div>
               <div className="student-info-content">
-                <h4>Welcome, <strong>{(cachedStudent || studentData).fullName}</strong></h4>
-                <p>Student ID: <strong>{(cachedStudent || studentData).studentId || (cachedStudent || studentData).id}</strong></p>
-                <p>Course: <strong>{(cachedStudent || studentData).course || 'Not assigned'}</strong></p>
-                <p>Password Status: <strong>{(cachedStudent || studentData).passwordUpdated ? '✅ Changed' : '⚠️ Default'}</strong></p>
+                <h4>Welcome, <strong>{displayStudent.fullName}</strong></h4>
+                <p>Student ID: <strong>{displayStudent.studentId || displayStudent.id}</strong></p>
+                <p>Course: <strong>{displayStudent.course || 'Not assigned'}</strong></p>
+                <p>Password Status: <strong>{displayStudent.passwordUpdated ? '✅ Changed' : '⚠️ Default'}</strong></p>
               </div>
             </div>
           )}
@@ -379,7 +369,7 @@ const StudentLogin = () => {
             </div>
           )}
 
-          {/* Password Change Form - Shown when default password is used */}
+          {/* Password Change Form */}
           {showPasswordChange ? (
             <div className="password-change-container">
               <div className="password-change-header">
@@ -501,7 +491,7 @@ const StudentLogin = () => {
                         setAdmissionStatus(null);
                         setError('');
                         setStudentData(null);
-                        setCachedStudent(null);
+                        studentDataRef.current = null;
                       }}
                       placeholder="Enter your Student ID or Email"
                       required
