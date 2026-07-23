@@ -29,7 +29,8 @@ import {
   getAdmissionBySerial,
   getAdmissionByEmail,
   createStudent,
-  generateStudentId
+  generateStudentId,
+  getStudent
 } from '../services/firebaseService';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -60,6 +61,9 @@ const StudentLogin = () => {
   const [passwordChangeError, setPasswordChangeError] = useState('');
   const [passwordChangeSuccess, setPasswordChangeSuccess] = useState(false);
   const [isPasswordUpdating, setIsPasswordUpdating] = useState(false);
+  
+  // Track if we're still creating the student
+  const [isCreatingStudent, setIsCreatingStudent] = useState(false);
 
   // Default password for all users
   const DEFAULT_PASSWORD = 'FastMultimedia2024@';
@@ -75,6 +79,7 @@ const StudentLogin = () => {
       // Check if identifier is a student ID or email
       let student = null;
       let isFromAdmission = false;
+      let admissionData = null;
       
       // Try to find by student ID first (this works for both studentId and admission serial)
       if (!identifier.includes('@')) {
@@ -85,41 +90,13 @@ const StudentLogin = () => {
         if (!student) {
           const admission = await getAdmissionBySerial(identifier.toUpperCase());
           if (admission) {
+            admissionData = admission;
             isFromAdmission = true;
             // Check if student already exists for this admission
             const existingStudent = await getStudentByEmail(admission.email);
             if (existingStudent) {
               student = existingStudent;
-            } else {
-              // Create a student object from admission data
-              student = {
-                id: admission.admissionId || admission.id,
-                studentId: admission.serialNumber || identifier.toUpperCase(),
-                fullName: admission.fullName,
-                email: admission.email,
-                phone: admission.phone || '',
-                course: admission.course || 'Not specified',
-                admissionStatus: admission.status || 'pending',
-                password: DEFAULT_PASSWORD,
-                passwordUpdated: false,
-                enrolledCourses: [admission.course || 'Not specified']
-              };
-              
-              // Actually create the student in Firebase
-              try {
-                const generatedStudentId = await generateStudentId(admission.fullName);
-                const newStudentData = {
-                  ...student,
-                  studentId: generatedStudentId,
-                  admissionId: admission.admissionId || admission.id
-                };
-                await createStudent(newStudentData);
-                student.studentId = generatedStudentId;
-                console.log('✅ Student created from admission:', generatedStudentId);
-              } catch (createError) {
-                console.error('Error creating student from admission:', createError);
-              }
-            }
+            } 
           }
         }
       }
@@ -133,41 +110,69 @@ const StudentLogin = () => {
       if (!student) {
         const admission = await getAdmissionByEmail(identifier);
         if (admission) {
+          admissionData = admission;
           isFromAdmission = true;
-          // Check if student already exists for this admission
           const existingStudent = await getStudentByEmail(admission.email);
           if (existingStudent) {
             student = existingStudent;
-          } else {
-            student = {
-              id: admission.admissionId || admission.id,
-              studentId: admission.serialNumber || `STU${Date.now().toString().slice(-6)}`,
-              fullName: admission.fullName,
-              email: admission.email,
-              phone: admission.phone || '',
-              course: admission.course || 'Not specified',
-              admissionStatus: admission.status || 'pending',
-              password: DEFAULT_PASSWORD,
-              passwordUpdated: false,
-              enrolledCourses: [admission.course || 'Not specified']
-            };
-            
-            // Actually create the student in Firebase
-            try {
-              const generatedStudentId = await generateStudentId(admission.fullName);
-              const newStudentData = {
-                ...student,
-                studentId: generatedStudentId,
-                admissionId: admission.admissionId || admission.id
-              };
-              await createStudent(newStudentData);
-              student.studentId = generatedStudentId;
-              console.log('✅ Student created from admission (email):', generatedStudentId);
-            } catch (createError) {
-              console.error('Error creating student from admission:', createError);
-            }
           }
         }
+      }
+
+      // If we have admission data but no student, create the student
+      if (admissionData && !student) {
+        setIsCreatingStudent(true);
+        try {
+          // Check if admission is approved or enrolled
+          if (admissionData.status !== 'approved' && admissionData.status !== 'enrolled') {
+            setError(`Your application is ${admissionData.status || 'pending'}. Please wait for approval before logging in.`);
+            setStatusChecked(true);
+            setIsCreatingStudent(false);
+            return null;
+          }
+
+          // Generate student ID
+          const generatedStudentId = await generateStudentId(admissionData.fullName);
+          
+          // Create student data
+          const newStudentData = {
+            fullName: admissionData.fullName || 'N/A',
+            email: admissionData.email || 'N/A',
+            phone: admissionData.phone || 'N/A',
+            dateOfBirth: admissionData.dateOfBirth || '',
+            gender: admissionData.gender || '',
+            course: admissionData.course || 'Not specified',
+            admissionStatus: admissionData.status || 'approved',
+            serialNumber: admissionData.serialNumber || '',
+            studentId: generatedStudentId,
+            admissionId: admissionData.admissionId || admissionData.id,
+            enrolledCourses: [admissionData.course || 'Not specified'],
+            status: 'active',
+            password: DEFAULT_PASSWORD,
+            passwordUpdated: false,
+            paymentHistory: [],
+            attendance: { total: 0, present: 0, absent: 0 },
+            grades: {},
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+
+          // Create the student in Firebase
+          await createStudent(newStudentData);
+          console.log('✅ Student created successfully:', generatedStudentId);
+          
+          // Fetch the created student
+          student = await getStudentByStudentId(generatedStudentId);
+          console.log('✅ Student fetched after creation:', student);
+          
+        } catch (createError) {
+          console.error('Error creating student from admission:', createError);
+          setError('Error creating student account. Please contact support.');
+          setStatusChecked(true);
+          setIsCreatingStudent(false);
+          return null;
+        }
+        setIsCreatingStudent(false);
       }
 
       if (!student) {
@@ -400,6 +405,12 @@ const StudentLogin = () => {
             </div>
           )}
 
+          {isCreatingStudent && (
+            <div className="login-info">
+              <FaSpinner className="spinner" /> Creating your student account...
+            </div>
+          )}
+
           {/* Student Info Display */}
           {statusChecked && studentData && (
             <div className="student-info-badge">
@@ -604,11 +615,11 @@ const StudentLogin = () => {
                 <button 
                   type="submit" 
                   className="login-btn"
-                  disabled={isLoading}
+                  disabled={isLoading || isCreatingStudent}
                 >
-                  {isLoading ? (
+                  {isLoading || isCreatingStudent ? (
                     <>
-                      <FaSpinner className="spinner" /> Checking...
+                      <FaSpinner className="spinner" /> {isCreatingStudent ? 'Creating Account...' : 'Checking...'}
                     </>
                   ) : (
                     <>

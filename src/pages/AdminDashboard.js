@@ -180,7 +180,11 @@ const AdminDashboard = () => {
       ]);
       
       setStats(statsData);
-      setStudents(studentsData || []);
+      // Only show approved/enrolled students in the students list
+      const approvedStudents = (studentsData || []).filter(s => 
+        s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
+      );
+      setStudents(approvedStudents);
       setAdmissions(admissionsData || []);
       setPayments(paymentsData || []);
       setStaff(staffData || []);
@@ -212,6 +216,7 @@ const AdminDashboard = () => {
 
   // Format currency - FIXED: Convert from pesewas to GHS
   const formatCurrency = (amount) => {
+    if (!amount) return 'GH₵ 0.00';
     // If amount is in pesewas (like 10000 for GH₵ 100.00), divide by 100
     const amountInGHS = amount > 100 ? amount / 100 : amount;
     return new Intl.NumberFormat('en-GH', {
@@ -251,64 +256,57 @@ const AdminDashboard = () => {
     }
   };
 
-// ============================================
-// CREATE STUDENT FROM ADMISSION DATA
-// ============================================
-const createStudentFromAdmission = async (admission) => {
-  try {
-    // Generate memorable student ID using full first name + 4-digit number
-    // IMPORTANT: Pass the full name to generateStudentId
-    const studentId = await generateStudentId(admission.fullName);
-    
-    console.log('📝 Generated Student ID:', studentId);
-    console.log('📝 For student:', admission.fullName);
-    
-    // Prepare student data - DO NOT override studentId
-    const studentData = {
-      fullName: admission.fullName || 'N/A',
-      email: admission.email || 'N/A',
-      phone: admission.phone || 'N/A',
-      dateOfBirth: admission.dateOfBirth || '',
-      gender: admission.gender || '',
-      address: admission.address || '',
-      city: admission.city || '',
-      course: admission.course || 'Not specified',
-      educationLevel: admission.educationLevel || '',
-      previousSchool: admission.previousSchool || '',
-      preferredStudyMode: admission.preferredStudyMode || '',
-      guardianName: admission.guardianName || '',
-      guardianPhone: admission.guardianPhone || '',
-      guardianEmail: admission.guardianEmail || '',
-      guardianRelationship: admission.guardianRelationship || '',
-      hearAboutUs: admission.hearAboutUs || '',
-      reasonToJoin: admission.reasonToJoin || '',
-      specialNeeds: admission.specialNeeds || 'None',
-      admissionStatus: admission.status || 'approved',
-      serialNumber: admission.serialNumber || '',
-      applicationDate: admission.applicationDate || new Date().toISOString(),
-      enrolledCourses: [admission.course || 'Not specified'],
-      status: 'active',
-      paymentHistory: [],
-      attendance: { total: 0, present: 0, absent: 0 },
-      grades: {},
-      passwordUpdated: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+  // ============================================
+  // CREATE STUDENT FROM ADMISSION DATA
+  // ============================================
+  const createStudentFromAdmission = async (admission) => {
+    try {
+      const studentId = await generateStudentId(admission.fullName);
+      
+      console.log('📝 Generated Student ID:', studentId);
+      console.log('📝 For student:', admission.fullName);
+      
+      const studentData = {
+        fullName: admission.fullName || 'N/A',
+        email: admission.email || 'N/A',
+        phone: admission.phone || 'N/A',
+        dateOfBirth: admission.dateOfBirth || '',
+        gender: admission.gender || '',
+        address: admission.address || '',
+        city: admission.city || '',
+        course: admission.course || 'Not specified',
+        educationLevel: admission.educationLevel || '',
+        previousSchool: admission.previousSchool || '',
+        preferredStudyMode: admission.preferredStudyMode || '',
+        guardianName: admission.guardianName || '',
+        guardianPhone: admission.guardianPhone || '',
+        guardianEmail: admission.guardianEmail || '',
+        guardianRelationship: admission.guardianRelationship || '',
+        hearAboutUs: admission.hearAboutUs || '',
+        reasonToJoin: admission.reasonToJoin || '',
+        specialNeeds: admission.specialNeeds || 'None',
+        admissionStatus: 'approved',
+        serialNumber: admission.serialNumber || '',
+        applicationDate: admission.applicationDate || new Date().toISOString(),
+        enrolledCourses: [admission.course || 'Not specified'],
+        status: 'active',
+        paymentHistory: [],
+        attendance: { total: 0, present: 0, absent: 0 },
+        grades: {},
+        passwordUpdated: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
 
-    console.log('📝 Creating student from admission:', studentData);
-    console.log('✅ Student ID to be used:', studentId);
-    
-    // Create student in Firebase - let createStudent handle the studentId
-    await createStudent(studentData);
-    console.log(`✅ Student created successfully with ID: ${studentId}`);
-    
-    return studentId;
-  } catch (error) {
-    console.error('Error creating student from admission:', error);
-    throw error;
-  }
-};
+      await createStudent(studentData);
+      console.log(`✅ Student created successfully with ID: ${studentId}`);
+      
+      return studentId;
+    } catch (error) {
+      console.error('Error creating student from admission:', error);
+      throw error;
+    }
+  };
 
   // ============================================
   // HANDLE ADMISSION STATUS UPDATE - WITH STUDENT CREATION
@@ -317,13 +315,10 @@ const createStudentFromAdmission = async (admission) => {
     try {
       console.log(`🔄 Updating admission status to ${status} for:`, studentId);
       
-      // Get admission data
       let admission = studentData;
       if (!admission) {
-        // Find admission in the list
         admission = admissions.find(a => a.id === studentId);
         if (!admission) {
-          // Try to fetch from API
           try {
             const admissionById = await getAdmission(studentId);
             if (admissionById) {
@@ -346,20 +341,18 @@ const createStudentFromAdmission = async (admission) => {
       // Update admission status
       await updateAdmissionStatus(studentId, status);
 
-      // If status is approved or enrolled, create student record
       let studentCreated = false;
       let studentIdCreated = null;
 
+      // Only create student if status is approved or enrolled
       if (status === 'approved' || status === 'enrolled') {
         try {
-          // Check if student already exists
           let existingStudent = students.find(s => s.id === studentId);
           if (!existingStudent && admission.email) {
             existingStudent = await getStudentByEmail(admission.email);
           }
 
           if (existingStudent) {
-            // Update existing student
             await updateStudent(existingStudent.id, { 
               admissionStatus: status,
               course: admission.course || existingStudent.course,
@@ -368,14 +361,12 @@ const createStudentFromAdmission = async (admission) => {
             console.log('✅ Existing student updated:', existingStudent.id);
             studentIdCreated = existingStudent.id;
           } else {
-            // Create new student from admission
             studentIdCreated = await createStudentFromAdmission(admission);
             studentCreated = true;
             console.log('✅ New student created:', studentIdCreated);
           }
         } catch (studentError) {
           console.error('Error handling student record:', studentError);
-          // Continue even if student creation fails
         }
       }
 
@@ -404,7 +395,8 @@ const createStudentFromAdmission = async (admission) => {
         emailSent ? 'success' : 'warning'
       );
       
-      loadDashboardData();
+      // Reload data to reflect changes
+      await loadDashboardData();
     } catch (error) {
       console.error('Error updating admission status:', error);
       showNotification('Error updating admission status: ' + error.message, 'error');
@@ -417,10 +409,9 @@ const createStudentFromAdmission = async (admission) => {
   const handleDeleteAdmission = async (admissionId) => {
     if (window.confirm('⚠️ Are you sure you want to delete this admission? This action cannot be undone.')) {
       try {
-        // Delete the admission document
         await deleteDoc(doc(db, 'admissions', admissionId));
         showNotification('Admission deleted successfully', 'success');
-        loadDashboardData();
+        await loadDashboardData();
       } catch (error) {
         console.error('Error deleting admission:', error);
         showNotification('Error deleting admission: ' + error.message, 'error');
@@ -434,7 +425,7 @@ const createStudentFromAdmission = async (admission) => {
       try {
         await deleteStudent(studentId);
         showNotification('Student deleted successfully', 'success');
-        loadDashboardData();
+        await loadDashboardData();
       } catch (error) {
         console.error('Error deleting student:', error);
         showNotification('Error deleting student', 'error');
@@ -457,7 +448,7 @@ const createStudentFromAdmission = async (admission) => {
         department: '',
         hireDate: ''
       });
-      loadDashboardData();
+      await loadDashboardData();
     } catch (error) {
       console.error('Error creating staff:', error);
       showNotification('Error creating staff', 'error');
@@ -480,7 +471,7 @@ const createStudentFromAdmission = async (admission) => {
         department: '',
         maxStudents: 50
       });
-      loadDashboardData();
+      await loadDashboardData();
     } catch (error) {
       console.error('Error creating course:', error);
       showNotification('Error creating course', 'error');
@@ -512,16 +503,20 @@ const createStudentFromAdmission = async (admission) => {
   };
 
   // ============================================
-  // GROUP STUDENTS BY COURSE
+  // GROUP STUDENTS BY COURSE - ONLY APPROVED/ENROLLED
   // ============================================
   const getStudentsGroupedByCourse = () => {
     const grouped = {};
     
-    // Get all unique courses from students
-    const allCourses = [...new Set(students.map(s => s.course || s.enrolledCourses?.[0] || 'Not Assigned'))];
+    // Only include approved or enrolled students
+    const approvedStudents = students.filter(s => 
+      s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
+    );
+    
+    const allCourses = [...new Set(approvedStudents.map(s => s.course || s.enrolledCourses?.[0] || 'Not Assigned'))];
     
     allCourses.forEach(course => {
-      grouped[course] = students.filter(s => 
+      grouped[course] = approvedStudents.filter(s => 
         (s.course || s.enrolledCourses?.[0] || 'Not Assigned') === course
       );
     });
@@ -723,17 +718,17 @@ const createStudentFromAdmission = async (admission) => {
       <div className="recent-activity">
         <h2>Recent Activity</h2>
         <div className="activity-list">
-          {students?.slice(0, 5).map((student, index) => (
+          {admissions?.slice(0, 5).map((admission, index) => (
             <div key={index} className="activity-item">
               <div className="activity-icon">
-                {student.admissionStatus === 'approved' ? <FaCheckCircle className="green" /> :
-                 student.admissionStatus === 'pending' ? <FaClock className="orange" /> :
+                {admission.status === 'approved' ? <FaCheckCircle className="green" /> :
+                 admission.status === 'pending' ? <FaClock className="orange" /> :
                  <FaTimesCircle className="red" />}
               </div>
               <div className="activity-content">
-                <h4>{student.fullName}</h4>
-                <p>Application {student.admissionStatus || 'pending'}</p>
-                <span className="activity-date">{new Date(student.createdAt?.seconds * 1000).toLocaleDateString()}</span>
+                <h4>{admission.fullName}</h4>
+                <p>Application {admission.status || 'pending'}</p>
+                <span className="activity-date">{new Date(admission.createdAt?.seconds * 1000).toLocaleDateString()}</span>
               </div>
             </div>
           ))}
@@ -742,7 +737,9 @@ const createStudentFromAdmission = async (admission) => {
     </div>
   );
 
-  // Render Students - GROUPED BY COURSE
+  // ============================================
+  // RENDER STUDENTS - ONLY APPROVED/ENROLLED
+  // ============================================
   const renderStudents = () => {
     const groupedStudents = getStudentsGroupedByCourse();
     
@@ -766,9 +763,7 @@ const createStudentFromAdmission = async (admission) => {
               onChange={(e) => setFilterStatus(e.target.value)}
             >
               <option value="all">All Status</option>
-              <option value="pending">Pending</option>
               <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
               <option value="enrolled">Enrolled</option>
             </select>
             <button className="export-btn" onClick={() => exportToCSV(students, 'students')}>
@@ -783,7 +778,6 @@ const createStudentFromAdmission = async (admission) => {
             const isExpanded = expandedCourses[courseName] || false;
             const studentCount = filteredStudents.length;
             
-            // Skip empty courses when searching
             if (searchQuery && studentCount === 0) return null;
             
             return (
@@ -884,7 +878,7 @@ const createStudentFromAdmission = async (admission) => {
           
           {Object.keys(groupedStudents).length === 0 && (
             <div className="no-students-message">
-              <FaInfoCircle /> No students found
+              <FaInfoCircle /> No approved students found. Please approve admissions first.
             </div>
           )}
         </div>
@@ -892,90 +886,222 @@ const createStudentFromAdmission = async (admission) => {
     );
   };
 
-  // Render Admissions with detailed view and delete button
-  const renderAdmissions = () => (
-    <div className="admissions-content">
-      <div className="content-header">
-        <h2>Admission Management</h2>
-        <div className="header-actions">
-          <button className="export-btn" onClick={() => exportToCSV(admissions, 'admissions')}>
-            <FaDownloadIcon /> Export
-          </button>
+  // ============================================
+  // RENDER ADMISSIONS - WITH APPROVE/REJECT/DELETE
+  // ============================================
+  const renderAdmissions = () => {
+    // Filter admissions - show pending first, then approved, then rejected
+    const pendingAdmissions = admissions.filter(a => a.status === 'pending' || a.status === 'under_review');
+    const approvedAdmissions = admissions.filter(a => a.status === 'approved' || a.status === 'enrolled');
+    const rejectedAdmissions = admissions.filter(a => a.status === 'rejected');
+
+    return (
+      <div className="admissions-content">
+        <div className="content-header">
+          <h2>Admission Management</h2>
+          <div className="header-actions">
+            <div className="admission-stats">
+              <span className="stat-pending">Pending: {pendingAdmissions.length}</span>
+              <span className="stat-approved">Approved: {approvedAdmissions.length}</span>
+              <span className="stat-rejected">Rejected: {rejectedAdmissions.length}</span>
+            </div>
+            <button className="export-btn" onClick={() => exportToCSV(admissions, 'admissions')}>
+              <FaDownloadIcon /> Export
+            </button>
+          </div>
+        </div>
+
+        <div className="admissions-list">
+          {/* Pending Admissions */}
+          {pendingAdmissions.length > 0 && (
+            <div className="admission-group">
+              <h3 className="group-title pending">Pending Applications ({pendingAdmissions.length})</h3>
+              <div className="admissions-grid">
+                {pendingAdmissions.map((admission) => (
+                  <div key={admission.id} className="admission-card">
+                    <div className="admission-header">
+                      <div className="admission-user">
+                        <div className="user-avatar">
+                          {admission.fullName?.charAt(0) || 'A'}
+                        </div>
+                        <div>
+                          <h4>{admission.fullName}</h4>
+                          <p>{admission.email}</p>
+                        </div>
+                      </div>
+                      <span className={`status-badge ${getStatusColor(admission.status)}`}>
+                        {getStatusIcon(admission.status)} {admission.status || 'pending'}
+                      </span>
+                    </div>
+                    <div className="admission-details">
+                      <p><FaPhone /> {admission.phone || 'N/A'}</p>
+                      <p><FaCalendarAlt /> {new Date(admission.createdAt?.seconds * 1000).toLocaleDateString()}</p>
+                      <p><FaBookOpen /> {admission.course || 'Not specified'}</p>
+                      <p><FaCalendarCheck /> {admission.dateOfBirth || 'N/A'}</p>
+                      <p><FaUserCircle /> {admission.gender || 'N/A'}</p>
+                    </div>
+                    <div className="admission-actions">
+                      <button
+                        className="btn-approve"
+                        onClick={() => handleUpdateAdmissionStatus(admission.id, 'approved', admission)}
+                        disabled={isSendingEmail}
+                      >
+                        <FaCheck /> {isSendingEmail ? 'Sending...' : 'Approve'}
+                      </button>
+                      <button
+                        className="btn-enroll"
+                        onClick={() => handleUpdateAdmissionStatus(admission.id, 'enrolled', admission)}
+                        disabled={isSendingEmail}
+                      >
+                        <FaGraduationCap /> {isSendingEmail ? 'Sending...' : 'Enroll'}
+                      </button>
+                      <button
+                        className="btn-reject"
+                        onClick={() => handleUpdateAdmissionStatus(admission.id, 'rejected', admission)}
+                        disabled={isSendingEmail}
+                      >
+                        <FaTimesCircle /> {isSendingEmail ? 'Sending...' : 'Reject'}
+                      </button>
+                      <button
+                        className="btn-view"
+                        onClick={() => {
+                          setSelectedStudent(admission);
+                          setShowStudentModal(true);
+                        }}
+                      >
+                        <FaEye /> View
+                      </button>
+                      <button
+                        className="btn-delete"
+                        onClick={() => handleDeleteAdmission(admission.id)}
+                      >
+                        <FaTrash /> Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Approved Admissions */}
+          {approvedAdmissions.length > 0 && (
+            <div className="admission-group">
+              <h3 className="group-title approved">Approved Applications ({approvedAdmissions.length})</h3>
+              <div className="admissions-grid">
+                {approvedAdmissions.map((admission) => (
+                  <div key={admission.id} className="admission-card approved-card">
+                    <div className="admission-header">
+                      <div className="admission-user">
+                        <div className="user-avatar">
+                          {admission.fullName?.charAt(0) || 'A'}
+                        </div>
+                        <div>
+                          <h4>{admission.fullName}</h4>
+                          <p>{admission.email}</p>
+                        </div>
+                      </div>
+                      <span className={`status-badge ${getStatusColor(admission.status)}`}>
+                        {getStatusIcon(admission.status)} {admission.status || 'approved'}
+                      </span>
+                    </div>
+                    <div className="admission-details">
+                      <p><FaPhone /> {admission.phone || 'N/A'}</p>
+                      <p><FaCalendarAlt /> {new Date(admission.createdAt?.seconds * 1000).toLocaleDateString()}</p>
+                      <p><FaBookOpen /> {admission.course || 'Not specified'}</p>
+                      {admission.studentId && <p><FaIdCard /> Student ID: {admission.studentId}</p>}
+                    </div>
+                    <div className="admission-actions">
+                      <div className="approved-message">
+                        <FaCheckCircle className="approved-icon" />
+                        <span>✓ Approved on {new Date(admission.approvedAt?.seconds * 1000 || admission.updatedAt?.seconds * 1000).toLocaleDateString()}</span>
+                      </div>
+                      <button
+                        className="btn-view"
+                        onClick={() => {
+                          setSelectedStudent(admission);
+                          setShowStudentModal(true);
+                        }}
+                      >
+                        <FaEye /> View
+                      </button>
+                      <button
+                        className="btn-delete"
+                        onClick={() => handleDeleteAdmission(admission.id)}
+                      >
+                        <FaTrash /> Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Rejected Admissions */}
+          {rejectedAdmissions.length > 0 && (
+            <div className="admission-group">
+              <h3 className="group-title rejected">Rejected Applications ({rejectedAdmissions.length})</h3>
+              <div className="admissions-grid">
+                {rejectedAdmissions.map((admission) => (
+                  <div key={admission.id} className="admission-card rejected-card">
+                    <div className="admission-header">
+                      <div className="admission-user">
+                        <div className="user-avatar">
+                          {admission.fullName?.charAt(0) || 'A'}
+                        </div>
+                        <div>
+                          <h4>{admission.fullName}</h4>
+                          <p>{admission.email}</p>
+                        </div>
+                      </div>
+                      <span className={`status-badge ${getStatusColor(admission.status)}`}>
+                        {getStatusIcon(admission.status)} {admission.status || 'rejected'}
+                      </span>
+                    </div>
+                    <div className="admission-details">
+                      <p><FaPhone /> {admission.phone || 'N/A'}</p>
+                      <p><FaCalendarAlt /> {new Date(admission.createdAt?.seconds * 1000).toLocaleDateString()}</p>
+                      <p><FaBookOpen /> {admission.course || 'Not specified'}</p>
+                    </div>
+                    <div className="admission-actions">
+                      <div className="rejected-message">
+                        <FaTimesCircle className="rejected-icon" />
+                        <span>✗ Rejected on {new Date(admission.rejectedAt?.seconds * 1000 || admission.updatedAt?.seconds * 1000).toLocaleDateString()}</span>
+                      </div>
+                      <button
+                        className="btn-view"
+                        onClick={() => {
+                          setSelectedStudent(admission);
+                          setShowStudentModal(true);
+                        }}
+                      >
+                        <FaEye /> View
+                      </button>
+                      <button
+                        className="btn-delete"
+                        onClick={() => handleDeleteAdmission(admission.id)}
+                      >
+                        <FaTrash /> Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {admissions.length === 0 && (
+            <div className="no-admissions-message">
+              <FaInfoCircle /> No admissions found
+            </div>
+          )}
         </div>
       </div>
+    );
+  };
 
-      <div className="admissions-grid">
-        {admissions.map((admission) => (
-          <div key={admission.id} className="admission-card">
-            <div className="admission-header">
-              <div className="admission-user">
-                <div className="user-avatar">
-                  {admission.fullName?.charAt(0) || 'A'}
-                </div>
-                <div>
-                  <h4>{admission.fullName}</h4>
-                  <p>{admission.email}</p>
-                </div>
-              </div>
-              <span className={`status-badge ${getStatusColor(admission.status)}`}>
-                {getStatusIcon(admission.status)} {admission.status || 'pending'}
-              </span>
-            </div>
-            <div className="admission-details">
-              <p><FaPhone /> {admission.phone || 'N/A'}</p>
-              <p><FaCalendarAlt /> {new Date(admission.createdAt?.seconds * 1000).toLocaleDateString()}</p>
-              <p><FaBookOpen /> {admission.course || 'Not specified'}</p>
-              <p><FaCalendarCheck /> {admission.dateOfBirth || 'N/A'}</p>
-              <p><FaUserCircle /> {admission.gender || 'N/A'}</p>
-              {admission.address && <p><FaMapMarkerAlt /> {admission.address}</p>}
-              {admission.educationLevel && <p><FaSchool /> {admission.educationLevel}</p>}
-              {admission.previousSchool && <p><FaUniversity /> {admission.previousSchool}</p>}
-            </div>
-            <div className="admission-actions">
-              <button
-                className="btn-approve"
-                onClick={() => handleUpdateAdmissionStatus(admission.id, 'approved', admission)}
-                disabled={isSendingEmail}
-              >
-                <FaCheck /> {isSendingEmail ? 'Sending...' : 'Approve'}
-              </button>
-              <button
-                className="btn-enroll"
-                onClick={() => handleUpdateAdmissionStatus(admission.id, 'enrolled', admission)}
-                disabled={isSendingEmail}
-              >
-                <FaGraduationCap /> {isSendingEmail ? 'Sending...' : 'Enroll'}
-              </button>
-              <button
-                className="btn-reject"
-                onClick={() => handleUpdateAdmissionStatus(admission.id, 'rejected', admission)}
-                disabled={isSendingEmail}
-              >
-                <FaTimesCircle /> {isSendingEmail ? 'Sending...' : 'Reject'}
-              </button>
-              <button
-                className="btn-view"
-                onClick={() => {
-                  setSelectedStudent(admission);
-                  setShowStudentModal(true);
-                }}
-              >
-                <FaEye /> View Details
-              </button>
-              <button
-                className="btn-delete"
-                onClick={() => handleDeleteAdmission(admission.id)}
-              >
-                <FaTrash /> Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  // Render Payments with currency formatting - FIXED
+  // Render Payments
   const renderPayments = () => (
     <div className="payments-content">
       <div className="content-header">
@@ -1112,7 +1238,7 @@ const createStudentFromAdmission = async (admission) => {
         <button className="add-btn" onClick={async () => {
           const serial = await generateSerialNumber();
           showNotification(`Serial generated: ${serial}`, 'success');
-          loadDashboardData();
+          await loadDashboardData();
         }}>
           <FaPlus /> Generate Serial
         </button>
@@ -1304,7 +1430,7 @@ const createStudentFromAdmission = async (admission) => {
         </div>
       </div>
 
-      {/* Student Detail Modal - Enhanced */}
+      {/* Student Detail Modal */}
       {showStudentModal && selectedStudent && (
         <div className="modal-overlay" onClick={() => setShowStudentModal(false)}>
           <div className="modal-content student-detail-modal" onClick={(e) => e.stopPropagation()}>
@@ -1323,7 +1449,6 @@ const createStudentFromAdmission = async (admission) => {
             </div>
             
             <div className="student-detail-body">
-              {/* Personal Information */}
               <div className="detail-section">
                 <h3><FaUserCircle /> Personal Information</h3>
                 <div className="detail-grid">
@@ -1336,7 +1461,6 @@ const createStudentFromAdmission = async (admission) => {
                 </div>
               </div>
 
-              {/* Academic Information */}
               <div className="detail-section">
                 <h3><FaBookOpen /> Academic Information</h3>
                 <div className="detail-grid">
@@ -1349,59 +1473,52 @@ const createStudentFromAdmission = async (admission) => {
                 </div>
               </div>
 
-              {/* Emergency Contact */}
               <div className="detail-section">
                 <h3><FaShieldAlt /> Emergency Contact</h3>
                 <div className="detail-grid">
-                  <div><strong>Name:</strong> {selectedStudent.guardianName || selectedStudent.emergencyContact || 'N/A'}</div>
-                  <div><strong>Phone:</strong> {selectedStudent.guardianPhone || selectedStudent.emergencyPhone || 'N/A'}</div>
+                  <div><strong>Name:</strong> {selectedStudent.guardianName || 'N/A'}</div>
+                  <div><strong>Phone:</strong> {selectedStudent.guardianPhone || 'N/A'}</div>
                   <div><strong>Email:</strong> {selectedStudent.guardianEmail || 'N/A'}</div>
                   <div><strong>Relationship:</strong> {selectedStudent.guardianRelationship || 'N/A'}</div>
-                </div>
-              </div>
-
-              {/* Additional Information */}
-              <div className="detail-section">
-                <h3><FaInfoCircle /> Additional Information</h3>
-                <div className="detail-grid">
-                  <div><strong>How did you hear about us?:</strong> {selectedStudent.hearAboutUs || 'N/A'}</div>
-                  <div><strong>Why do you want to join?:</strong> {selectedStudent.reasonToJoin || 'N/A'}</div>
-                  <div><strong>Special Needs:</strong> {selectedStudent.specialNeeds || 'None'}</div>
                 </div>
               </div>
             </div>
 
             <div className="student-detail-actions">
-              <button 
-                className="btn-approve"
-                onClick={() => {
-                  handleUpdateAdmissionStatus(selectedStudent.id, 'approved', selectedStudent);
-                  setShowStudentModal(false);
-                }}
-                disabled={isSendingEmail}
-              >
-                <FaCheck /> {isSendingEmail ? 'Sending...' : 'Approve'}
-              </button>
-              <button 
-                className="btn-enroll"
-                onClick={() => {
-                  handleUpdateAdmissionStatus(selectedStudent.id, 'enrolled', selectedStudent);
-                  setShowStudentModal(false);
-                }}
-                disabled={isSendingEmail}
-              >
-                <FaGraduationCap /> {isSendingEmail ? 'Sending...' : 'Enroll'}
-              </button>
-              <button 
-                className="btn-reject"
-                onClick={() => {
-                  handleUpdateAdmissionStatus(selectedStudent.id, 'rejected', selectedStudent);
-                  setShowStudentModal(false);
-                }}
-                disabled={isSendingEmail}
-              >
-                <FaTimesCircle /> {isSendingEmail ? 'Sending...' : 'Reject'}
-              </button>
+              {selectedStudent.admissionStatus !== 'approved' && selectedStudent.admissionStatus !== 'enrolled' && (
+                <>
+                  <button 
+                    className="btn-approve"
+                    onClick={() => {
+                      handleUpdateAdmissionStatus(selectedStudent.id, 'approved', selectedStudent);
+                      setShowStudentModal(false);
+                    }}
+                    disabled={isSendingEmail}
+                  >
+                    <FaCheck /> {isSendingEmail ? 'Sending...' : 'Approve'}
+                  </button>
+                  <button 
+                    className="btn-enroll"
+                    onClick={() => {
+                      handleUpdateAdmissionStatus(selectedStudent.id, 'enrolled', selectedStudent);
+                      setShowStudentModal(false);
+                    }}
+                    disabled={isSendingEmail}
+                  >
+                    <FaGraduationCap /> {isSendingEmail ? 'Sending...' : 'Enroll'}
+                  </button>
+                  <button 
+                    className="btn-reject"
+                    onClick={() => {
+                      handleUpdateAdmissionStatus(selectedStudent.id, 'rejected', selectedStudent);
+                      setShowStudentModal(false);
+                    }}
+                    disabled={isSendingEmail}
+                  >
+                    <FaTimesCircle /> {isSendingEmail ? 'Sending...' : 'Reject'}
+                  </button>
+                </>
+              )}
               <button 
                 className="btn-edit"
                 onClick={() => {
@@ -1430,7 +1547,7 @@ const createStudentFromAdmission = async (admission) => {
                 await updateStudent(editingStudent.id, editFormData);
                 showNotification('Student updated successfully', 'success');
                 setShowEditModal(false);
-                loadDashboardData();
+                await loadDashboardData();
               } catch (error) {
                 console.error('Error updating student:', error);
                 showNotification('Error updating student', 'error');
