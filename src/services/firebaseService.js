@@ -625,6 +625,14 @@ export const updateAdmissionStatus = async (admissionId, status, notes = null) =
       updatedAt: serverTimestamp()
     };
     
+    if (status === 'approved') {
+      updateData.approvedAt = serverTimestamp();
+    }
+    
+    if (status === 'rejected') {
+      updateData.rejectedAt = serverTimestamp();
+    }
+    
     if (notes) {
       updateData.notes = arrayUnion({
         text: notes,
@@ -636,6 +644,21 @@ export const updateAdmissionStatus = async (admissionId, status, notes = null) =
     return true;
   } catch (error) {
     console.error('Error updating admission status:', error);
+    throw error;
+  }
+};
+
+// Update admission (general update)
+export const updateAdmission = async (admissionId, updateData) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.ADMISSIONS, admissionId);
+    await updateDoc(docRef, {
+      ...updateData,
+      updatedAt: serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating admission:', error);
     throw error;
   }
 };
@@ -1515,11 +1538,11 @@ export const registerUser = async (email, password, userData) => {
   }
 };
 
-// Login user - FIXED to return full userCredential
+// Login user
 export const loginUser = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential; // Return the full credential object, not just user
+    return userCredential;
   } catch (error) {
     console.error('Error logging in:', error);
     throw error;
@@ -1737,7 +1760,6 @@ export default {
   getStudent,
   getStudentByEmail,
   getStudentByStudentId,
-  getStudentByStudentId,
   getStudentByEmailOrStudentId,
   verifyStudentPassword,
   updateStudentPassword,
@@ -1764,6 +1786,7 @@ export default {
   getAllAdmissions,
   updateAdmissionStatus,
   deleteAdmission,
+  updateAdmission,
   
   // Admission Status functions
   getStudentAdmissionStatus,
