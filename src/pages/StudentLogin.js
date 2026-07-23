@@ -26,9 +26,14 @@ import {
   getAdmissionBySerial,
   getAdmissionByEmail,
   createStudent,
-  generateStudentId
+  generateStudentId,
+  updateUserProfile
 } from '../services/firebaseService';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  updateProfile 
+} from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import './StudentLogin.css';
@@ -69,9 +74,12 @@ const StudentLogin = () => {
   // Create Firebase Auth user for student
   const createFirebaseAuthUser = async (email, password, studentData) => {
     try {
+      console.log('🔐 Creating Firebase Auth user for:', email);
+      
       // Create the auth user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      console.log('✅ Firebase Auth user created:', user.uid);
       
       // Update user profile
       await updateProfile(user, {
@@ -92,7 +100,7 @@ const StudentLogin = () => {
         updatedAt: serverTimestamp()
       });
       
-      console.log('✅ Firebase Auth user created for student:', user.uid);
+      console.log('✅ User document created in Firestore');
       return user;
     } catch (error) {
       console.error('Error creating Firebase Auth user:', error);
@@ -100,7 +108,7 @@ const StudentLogin = () => {
     }
   };
 
-  // Check student admission status and ensure Firebase Auth exists
+  // Check student admission status
   const checkStudentAccess = async (identifier) => {
     setError('');
     setAdmissionStatus(null);
@@ -112,19 +120,22 @@ const StudentLogin = () => {
       let student = null;
       let admissionData = null;
       
+      console.log('🔍 Checking student access for:', identifier);
+      
       // Try to find by student ID first
       if (!identifier.includes('@')) {
         student = await getStudentByStudentId(identifier.toUpperCase());
+        console.log('📚 Student lookup by ID result:', student ? 'Found' : 'Not found');
         
-        // If not found, try to find by serial number in admissions
         if (!student) {
           const admission = await getAdmissionBySerial(identifier.toUpperCase());
           if (admission) {
+            console.log('📚 Admission found by serial');
             admissionData = admission;
-            // Check if student already exists
             const existingStudent = await getStudentByEmail(admission.email);
             if (existingStudent) {
               student = existingStudent;
+              console.log('📚 Existing student found from admission');
             }
           }
         }
@@ -133,22 +144,26 @@ const StudentLogin = () => {
       // If not found by student ID, try by email
       if (!student) {
         student = await getStudentByEmail(identifier);
+        console.log('📚 Student lookup by email result:', student ? 'Found' : 'Not found');
       }
 
       // If student still not found, check if they exist in admissions
       if (!student) {
         const admission = await getAdmissionByEmail(identifier);
         if (admission) {
+          console.log('📚 Admission found by email');
           admissionData = admission;
           const existingStudent = await getStudentByEmail(admission.email);
           if (existingStudent) {
             student = existingStudent;
+            console.log('📚 Existing student found from admission');
           }
         }
       }
 
       // If we have admission data but no student, create the student
       if (admissionData && !student) {
+        console.log('🆕 Creating new student from admission');
         setIsCreatingAccount(true);
         try {
           if (admissionData.status !== 'approved' && admissionData.status !== 'enrolled') {
@@ -159,6 +174,7 @@ const StudentLogin = () => {
           }
 
           const generatedStudentId = await generateStudentId(admissionData.fullName);
+          console.log('📝 Generated Student ID:', generatedStudentId);
           
           const newStudentData = {
             fullName: admissionData.fullName || 'N/A',
@@ -183,11 +199,14 @@ const StudentLogin = () => {
           };
 
           await createStudent(newStudentData);
+          console.log('✅ Student created in Firestore');
           
           // Create Firebase Auth user
           await createFirebaseAuthUser(admissionData.email, DEFAULT_PASSWORD, newStudentData);
+          console.log('✅ Firebase Auth user created');
           
           student = await getStudentByStudentId(generatedStudentId);
+          console.log('✅ Student fetched after creation');
           
         } catch (createError) {
           console.error('Error creating student:', createError);
@@ -285,13 +304,14 @@ const StudentLogin = () => {
         }
       }
 
-      // Now try to sign in with Firebase Auth
+      console.log('🔐 Attempting Firebase Auth login for:', student.email);
+      
+      // Try to sign in with Firebase Auth
       try {
-        // Use email to sign in
         const userCredential = await signInWithEmailAndPassword(auth, student.email, password);
         console.log('✅ Firebase Auth login successful:', userCredential.user.uid);
         
-        // Login successful
+        // Login successful - store session
         if (rememberMe) {
           localStorage.setItem('studentLogin', 'true');
           localStorage.setItem('studentId', student.studentId || student.id);
@@ -299,14 +319,21 @@ const StudentLogin = () => {
           localStorage.setItem('studentName', student.fullName);
         }
         
+        // Set session cookie or storage to persist login
+        sessionStorage.setItem('studentAuthenticated', 'true');
+        sessionStorage.setItem('studentId', student.studentId || student.id);
+        
         setIsLoading(false);
-        navigate('/student/portal');
+        console.log('🚀 Redirecting to /student/portal');
+        navigate('/student/portal', { replace: true });
         return;
+        
       } catch (authError) {
-        console.error('Firebase Auth login error:', authError);
+        console.error('Firebase Auth login error:', authError.code, authError.message);
         
         if (authError.code === 'auth/user-not-found') {
           // Student doesn't have Firebase Auth account - create one
+          console.log('🆕 Auth user not found, creating...');
           try {
             setIsCreatingAccount(true);
             await createFirebaseAuthUser(student.email, DEFAULT_PASSWORD, student);
@@ -315,6 +342,7 @@ const StudentLogin = () => {
             await updateStudentPassword(student.id, DEFAULT_PASSWORD);
             
             setIsCreatingAccount(false);
+            console.log('✅ Auth user created, trying login again...');
             
             // Try login again with the new account
             const userCredential = await signInWithEmailAndPassword(auth, student.email, password);
@@ -327,9 +355,14 @@ const StudentLogin = () => {
               localStorage.setItem('studentName', student.fullName);
             }
             
+            sessionStorage.setItem('studentAuthenticated', 'true');
+            sessionStorage.setItem('studentId', student.studentId || student.id);
+            
             setIsLoading(false);
-            navigate('/student/portal');
+            console.log('🚀 Redirecting to /student/portal');
+            navigate('/student/portal', { replace: true });
             return;
+            
           } catch (createError) {
             console.error('Error creating auth user:', createError);
             setError('Error creating login account. Please contact support.');
@@ -337,17 +370,17 @@ const StudentLogin = () => {
             return;
           }
         } else if (authError.code === 'auth/wrong-password') {
-          setError('Invalid password. Please try again.');
-          setIsLoading(false);
-          return;
-        } else if (authError.code === 'auth/invalid-credential') {
-          // Check if using default password
-          if (password === DEFAULT_PASSWORD) {
+          // Check if using default password and password hasn't been updated
+          if (password === DEFAULT_PASSWORD && !student.passwordUpdated) {
             setShowPasswordChange(true);
             setError('');
             setIsLoading(false);
             return;
           }
+          setError('Invalid password. Please try again.');
+          setIsLoading(false);
+          return;
+        } else if (authError.code === 'auth/invalid-credential') {
           setError('Invalid credentials. Please try again.');
           setIsLoading(false);
           return;
@@ -367,7 +400,7 @@ const StudentLogin = () => {
   const redirectToPortal = () => {
     setIsLoading(false);
     setError('');
-    navigate('/student/portal');
+    navigate('/student/portal', { replace: true });
   };
 
   const handlePasswordChange = async (e) => {
@@ -425,6 +458,16 @@ const StudentLogin = () => {
         if (user) {
           await user.updatePassword(newPassword);
           console.log('✅ Firebase Auth password updated');
+        } else {
+          // If no current user, try to sign in first
+          console.log('⚠️ No current user, signing in to update password...');
+          try {
+            const userCredential = await signInWithEmailAndPassword(auth, student.email, DEFAULT_PASSWORD);
+            await userCredential.user.updatePassword(newPassword);
+            console.log('✅ Firebase Auth password updated after sign in');
+          } catch (signInError) {
+            console.error('Error signing in to update password:', signInError);
+          }
         }
       } catch (authError) {
         console.warn('Could not update Firebase Auth password:', authError);
@@ -445,7 +488,16 @@ const StudentLogin = () => {
         
         setTimeout(() => {
           setShowPasswordChange(false);
-          redirectToPortal();
+          // Try to sign in with new password
+          signInWithEmailAndPassword(auth, student.email, newPassword)
+            .then(() => {
+              console.log('✅ Auto-login after password change successful');
+              redirectToPortal();
+            })
+            .catch(() => {
+              // If auto-login fails, just redirect to login
+              navigate('/student/login');
+            });
         }, 2000);
       }, 1500);
     } catch (error) {
@@ -495,6 +547,7 @@ const StudentLogin = () => {
                 <p>Student ID: <strong>{displayStudent.studentId || displayStudent.id}</strong></p>
                 <p>Course: <strong>{displayStudent.course || 'Not assigned'}</strong></p>
                 <p>Email: <strong>{displayStudent.email}</strong></p>
+                <p>Password Status: <strong>{displayStudent.passwordUpdated ? '✅ Changed' : '⚠️ Default'}</strong></p>
               </div>
             </div>
           )}
