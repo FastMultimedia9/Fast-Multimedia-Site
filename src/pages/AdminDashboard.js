@@ -56,7 +56,8 @@ import {
   FaSchool,
   FaChevronDown,
   FaChevronRight,
-  FaUser
+  FaUser,
+  FaKey
 } from 'react-icons/fa';
 import {
   getAllStudents,
@@ -93,7 +94,8 @@ import { sendAdmissionStatusEmail } from '../services/emailService';
 import { 
   createUserWithEmailAndPassword, 
   updateProfile,
-  deleteUser
+  deleteUser,
+  fetchSignInMethodsForEmail
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { serverTimestamp, setDoc } from 'firebase/firestore';
@@ -124,6 +126,7 @@ const AdminDashboard = () => {
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [expandedCourses, setExpandedCourses] = useState({});
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCreatingAuth, setIsCreatingAuth] = useState(false);
   const [staffData, setStaffData] = useState({
     fullName: '',
     email: '',
@@ -245,6 +248,17 @@ const AdminDashboard = () => {
     try {
       console.log('🔐 Creating Firebase Auth user for:', email);
       
+      // Check if user already exists
+      try {
+        const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+        if (signInMethods && signInMethods.length > 0) {
+          console.log('⚠️ Auth user already exists for:', email);
+          return null;
+        }
+      } catch (checkError) {
+        console.log('Could not check existing user:', checkError.message);
+      }
+      
       // Create the auth user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -282,10 +296,113 @@ const AdminDashboard = () => {
   };
 
   // ============================================
+  // MANUALLY CREATE AUTH USER FOR EXISTING STUDENT
+  // ============================================
+  const manuallyCreateAuthUser = async (student) => {
+    if (!student || !student.email) {
+      showNotification('Student email not found', 'error');
+      return;
+    }
+
+    setIsCreatingAuth(true);
+    try {
+      console.log('🔐 Manually creating auth user for:', student.email);
+      
+      // Check if auth user already exists
+      try {
+        const methods = await fetchSignInMethodsForEmail(auth, student.email);
+        if (methods && methods.length > 0) {
+          showNotification(`✅ Auth user already exists for ${student.email}`, 'success');
+          setIsCreatingAuth(false);
+          // Update student record
+          await updateStudent(student.id, {
+            authCreated: true,
+            updatedAt: new Date().toISOString()
+          });
+          await loadDashboardData();
+          return;
+        }
+      } catch (checkError) {
+        console.log('Could not check existing user:', checkError.message);
+      }
+
+      // Create auth user
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        student.email,
+        DEFAULT_PASSWORD
+      );
+      
+      const user = userCredential.user;
+      console.log('✅ Auth user created:', user.uid);
+      
+      // Update profile
+      await updateProfile(user, {
+        displayName: student.fullName || 'Student'
+      });
+      
+      // Create user document
+      const userRef = doc(db, 'users', user.uid);
+      await setDoc(userRef, {
+        uid: user.uid,
+        email: student.email,
+        fullName: student.fullName,
+        role: 'student',
+        studentId: student.studentId || student.id,
+        course: student.course,
+        admissionStatus: student.admissionStatus || 'approved',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
+      // Update student record
+      await updateStudent(student.id, {
+        authCreated: true,
+        password: DEFAULT_PASSWORD,
+        passwordUpdated: false,
+        updatedAt: new Date().toISOString()
+      });
+      
+      showNotification(`✅ Auth user created for ${student.email}. Password: ${DEFAULT_PASSWORD}`, 'success');
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error creating auth user:', error);
+      if (error.code === 'auth/email-already-in-use') {
+        showNotification(`✅ Auth user already exists for ${student.email}`, 'warning');
+        // Update student record
+        try {
+          await updateStudent(student.id, {
+            authCreated: true,
+            updatedAt: new Date().toISOString()
+          });
+          await loadDashboardData();
+        } catch (updateError) {
+          console.error('Error updating student:', updateError);
+        }
+      } else {
+        showNotification('Error creating auth user: ' + error.message, 'error');
+      }
+    } finally {
+      setIsCreatingAuth(false);
+    }
+  };
+
+  // ============================================
   // ENSURE AUTH USER EXISTS
   // ============================================
   const ensureAuthUserExists = async (admission, student) => {
     try {
+      // Check if auth user already exists
+      try {
+        const methods = await fetchSignInMethodsForEmail(auth, admission.email);
+        if (methods && methods.length > 0) {
+          console.log(`ℹ️ Auth user already exists for ${admission.email}`);
+          return true;
+        }
+      } catch (checkError) {
+        console.log('Could not check existing user:', checkError.message);
+      }
+
       // Try to create auth user
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -311,6 +428,14 @@ const AdminDashboard = () => {
         admissionStatus: 'approved',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
+      });
+      
+      // Update student record
+      await updateStudent(student.id, {
+        authCreated: true,
+        password: DEFAULT_PASSWORD,
+        passwordUpdated: false,
+        updatedAt: new Date().toISOString()
       });
       
       return true;
@@ -390,6 +515,7 @@ const AdminDashboard = () => {
         studentId: studentId,
         password: DEFAULT_PASSWORD,
         passwordUpdated: false,
+        authCreated: false,
         paymentHistory: [],
         attendance: { total: 0, present: 0, absent: 0 },
         grades: {},
@@ -402,15 +528,23 @@ const AdminDashboard = () => {
       console.log(`✅ Student created successfully with ID: ${studentId}`);
       
       // 2. Create Firebase Auth user
+      let authCreated = false;
       try {
         await createFirebaseAuthUser(admission.email, DEFAULT_PASSWORD, studentData);
+        authCreated = true;
         console.log(`✅ Firebase Auth user created for ${admission.email}`);
       } catch (authError) {
         if (authError.code === 'auth/email-already-in-use') {
           console.log(`⚠️ Auth user already exists for ${admission.email}`);
+          authCreated = true;
         } else {
           console.error('❌ Error creating Firebase Auth user:', authError);
         }
+      }
+      
+      // Update authCreated status
+      if (authCreated) {
+        await updateStudent(studentId, { authCreated: true });
       }
       
       return studentId;
@@ -568,7 +702,7 @@ const AdminDashboard = () => {
 
       // 2. Try to delete Firebase Auth user
       try {
-        // Find the user by email
+        // Try to sign in and delete
         const userCredential = await auth.signInWithEmailAndPassword(
           studentToDelete.email, 
           DEFAULT_PASSWORD
@@ -582,9 +716,15 @@ const AdminDashboard = () => {
         if (authError.code === 'auth/user-not-found') {
           console.log(`ℹ️ Auth user not found for ${studentToDelete.email}, skipping`);
         } else if (authError.code === 'auth/wrong-password') {
-          // Try to find user by admin
           console.log('⚠️ Wrong password for auth deletion, trying admin method...');
-          // Option: You can add admin SDK call here if needed
+          // Try to find the user by email through admin
+          try {
+            // Note: This requires Firebase Admin SDK which is not available in client
+            // We'll just log and continue
+            console.log('ℹ️ Could not delete auth user, but student record removed');
+          } catch (e) {
+            console.log('Could not delete auth user:', e.message);
+          }
         } else {
           console.warn('⚠️ Could not delete auth user:', authError.message);
         }
@@ -792,7 +932,6 @@ const AdminDashboard = () => {
   // Render Dashboard
   const renderDashboard = () => (
     <div className="dashboard-content">
-      {/* Stats Cards */}
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-icon blue">
@@ -801,9 +940,6 @@ const AdminDashboard = () => {
           <div className="stat-info">
             <h3>{stats?.totalStudents || 0}</h3>
             <p>Total Students</p>
-            <div className="stat-change positive">
-              <FaArrowRight /> +12% this month
-            </div>
           </div>
         </div>
         <div className="stat-card">
@@ -813,9 +949,6 @@ const AdminDashboard = () => {
           <div className="stat-info">
             <h3>{stats?.approvedStudents || 0}</h3>
             <p>Approved Students</p>
-            <div className="stat-change positive">
-              <FaArrowRight /> +5% this month
-            </div>
           </div>
         </div>
         <div className="stat-card">
@@ -825,9 +958,6 @@ const AdminDashboard = () => {
           <div className="stat-info">
             <h3>{stats?.pendingStudents || 0}</h3>
             <p>Pending Applications</p>
-            <div className="stat-change neutral">
-              <FaArrowRight /> Awaiting review
-            </div>
           </div>
         </div>
         <div className="stat-card">
@@ -837,9 +967,6 @@ const AdminDashboard = () => {
           <div className="stat-info">
             <h3>{formatCurrency(stats?.totalRevenue || 0)}</h3>
             <p>Total Revenue</p>
-            <div className="stat-change positive">
-              <FaArrowRight /> +8% this month
-            </div>
           </div>
         </div>
         <div className="stat-card">
@@ -849,9 +976,6 @@ const AdminDashboard = () => {
           <div className="stat-info">
             <h3>{stats?.rejectedStudents || 0}</h3>
             <p>Rejected Applications</p>
-            <div className="stat-change neutral">
-              <FaArrowRight /> Needs attention
-            </div>
           </div>
         </div>
         <div className="stat-card">
@@ -861,14 +985,10 @@ const AdminDashboard = () => {
           <div className="stat-info">
             <h3>{stats?.enrolledStudents || 0}</h3>
             <p>Enrolled Students</p>
-            <div className="stat-change positive">
-              <FaArrowRight /> +3% this month
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
       <div className="quick-actions">
         <h2>Quick Actions</h2>
         <div className="action-grid">
@@ -892,32 +1012,11 @@ const AdminDashboard = () => {
           </button>
         </div>
       </div>
-
-      {/* Recent Activity */}
-      <div className="recent-activity">
-        <h2>Recent Activity</h2>
-        <div className="activity-list">
-          {admissions?.slice(0, 5).map((admission, index) => (
-            <div key={index} className="activity-item">
-              <div className="activity-icon">
-                {admission.status === 'approved' ? <FaCheckCircle className="green" /> :
-                 admission.status === 'pending' ? <FaClock className="orange" /> :
-                 <FaTimesCircle className="red" />}
-              </div>
-              <div className="activity-content">
-                <h4>{admission.fullName}</h4>
-                <p>Application {admission.status || 'pending'}</p>
-                <span className="activity-date">{new Date(admission.createdAt?.seconds * 1000).toLocaleDateString()}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 
   // ============================================
-  // RENDER STUDENTS - ONLY APPROVED/ENROLLED
+  // RENDER STUDENTS - WITH AUTH FIX BUTTON
   // ============================================
   const renderStudents = () => {
     const groupedStudents = getStudentsGroupedByCourse();
@@ -996,6 +1095,7 @@ const AdminDashboard = () => {
                               <th>Name</th>
                               <th>Email</th>
                               <th>Phone</th>
+                              <th>Auth</th>
                               <th>Status</th>
                               <th>Date</th>
                               <th>Actions</th>
@@ -1008,6 +1108,11 @@ const AdminDashboard = () => {
                                 <td>{student.fullName}</td>
                                 <td>{student.email}</td>
                                 <td>{student.phone}</td>
+                                <td>
+                                  <span className={`auth-status ${student.authCreated ? 'auth-yes' : 'auth-no'}`}>
+                                    {student.authCreated ? '✅ Yes' : '❌ No'}
+                                  </span>
+                                </td>
                                 <td>
                                   <span className={`status-badge ${getStatusColor(student.admissionStatus)}`}>
                                     {getStatusIcon(student.admissionStatus)} {student.admissionStatus || 'pending'}
@@ -1035,6 +1140,17 @@ const AdminDashboard = () => {
                                     >
                                       <FaEdit />
                                     </button>
+                                    {!student.authCreated && (
+                                      <button 
+                                        className="action-btn-icon auth"
+                                        onClick={() => manuallyCreateAuthUser(student)}
+                                        disabled={isCreatingAuth}
+                                        title="Create Firebase Auth account"
+                                        style={{ color: '#9b59b6' }}
+                                      >
+                                        {isCreatingAuth ? <FaSpinner className="spinner" /> : <FaKey />}
+                                      </button>
+                                    )}
                                     <button 
                                       className="action-btn-icon delete"
                                       onClick={() => handleDeleteStudent(student.id)}
@@ -1067,10 +1183,9 @@ const AdminDashboard = () => {
   };
 
   // ============================================
-  // RENDER ADMISSIONS - WITH APPROVE/REJECT/DELETE
+  // RENDER ADMISSIONS
   // ============================================
   const renderAdmissions = () => {
-    // Filter admissions - show pending first, then approved, then rejected
     const pendingAdmissions = admissions.filter(a => a.status === 'pending' || a.status === 'under_review');
     const approvedAdmissions = admissions.filter(a => a.status === 'approved' || a.status === 'enrolled');
     const rejectedAdmissions = admissions.filter(a => a.status === 'rejected');
@@ -1092,7 +1207,6 @@ const AdminDashboard = () => {
         </div>
 
         <div className="admissions-list">
-          {/* Pending Admissions */}
           {pendingAdmissions.length > 0 && (
             <div className="admission-group">
               <h3 className="group-title pending">Pending Applications ({pendingAdmissions.length})</h3>
@@ -1164,7 +1278,6 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* Approved Admissions */}
           {approvedAdmissions.length > 0 && (
             <div className="admission-group">
               <h3 className="group-title approved">Approved Applications ({approvedAdmissions.length})</h3>
@@ -1218,7 +1331,6 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* Rejected Admissions */}
           {rejectedAdmissions.length > 0 && (
             <div className="admission-group">
               <h3 className="group-title rejected">Rejected Applications ({rejectedAdmissions.length})</h3>
@@ -1625,6 +1737,9 @@ const AdminDashboard = () => {
                 <span className={`status-badge ${getStatusColor(selectedStudent.admissionStatus || selectedStudent.status)}`}>
                   {getStatusIcon(selectedStudent.admissionStatus || selectedStudent.status)} {selectedStudent.admissionStatus || selectedStudent.status || 'pending'}
                 </span>
+                <span className={`auth-status ${selectedStudent.authCreated ? 'auth-yes' : 'auth-no'}`}>
+                  Auth: {selectedStudent.authCreated ? '✅ Active' : '❌ Not Created'}
+                </span>
               </div>
             </div>
             
@@ -1699,6 +1814,35 @@ const AdminDashboard = () => {
                   </button>
                 </>
               )}
+              
+              {/* Create Auth User Button */}
+              {!selectedStudent.authCreated && selectedStudent.email && (
+                <button 
+                  className="btn-create-auth"
+                  onClick={() => {
+                    if (window.confirm(`Create Firebase Auth account for ${selectedStudent.fullName} (${selectedStudent.email})?`)) {
+                      manuallyCreateAuthUser(selectedStudent);
+                      setShowStudentModal(false);
+                    }
+                  }}
+                  disabled={isCreatingAuth}
+                  style={{
+                    background: '#9b59b6',
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  {isCreatingAuth ? <FaSpinner className="spinner" /> : <FaKey />} 
+                  Create Auth Account
+                </button>
+              )}
+              
               <button 
                 className="btn-edit"
                 onClick={() => {
@@ -1717,6 +1861,17 @@ const AdminDashboard = () => {
                   handleDeleteStudent(selectedStudent.id);
                 }}
                 disabled={isDeleting}
+                style={{
+                  background: '#e74c3c',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
               >
                 {isDeleting ? <FaSpinner className="spinner" /> : <FaTrash />} Delete
               </button>
