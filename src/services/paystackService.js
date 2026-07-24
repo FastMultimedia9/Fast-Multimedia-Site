@@ -1,218 +1,160 @@
 // src/services/paystackService.js
-import { 
-  db, 
-  COLLECTIONS,
-  doc, 
-  setDoc, 
-  getDoc, 
-  updateDoc,
-  collection,
-  query,
-  where,
-  getDocs
-} from '../firebase';
 
-const PAYSTACK_PUBLIC_KEY = process.env.REACT_APP_PAYSTACK_PUBLIC_KEY || 'pk_test_your_public_key_here';
-const PAYSTACK_SECRET_KEY = process.env.REACT_APP_PAYSTACK_SECRET_KEY || 'sk_test_your_secret_key_here';
+// ============================================
+// PAYSTACK LIVE MODE CONFIGURATION
+// ============================================
 
-// Initialize Paystack payment with customer details
-export const initializePayment = (email, amount, metadata = {}) => {
-  return new Promise((resolve, reject) => {
-    if (typeof window.PaystackPop === 'undefined') {
-      reject(new Error('Paystack not loaded. Please check your internet connection.'));
-      return;
-    }
+// IMPORTANT: Replace these with your LIVE Paystack keys
+// Get your keys from: https://dashboard.paystack.com/#/settings/developer
+const PAYSTACK_LIVE_PUBLIC_KEY = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY || 'pk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+const PAYSTACK_SECRET_KEY = process.env.REACT_APP_PAYSTACK_SECRET_KEY || 'sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
-    const handler = window.PaystackPop.setup({
-      key: PAYSTACK_PUBLIC_KEY,
-      email: email,
-      amount: amount * 100,
-      currency: 'GHS',
-      ref: `ADM-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      customer: {
-        email: email,
-        name: metadata.name || 'Applicant',
-        phone: metadata.phone || ''
-      },
-      metadata: {
-        ...metadata,
-        custom_fields: [
-          {
-            display_name: "Application Fee",
-            variable_name: "application_fee",
-            value: `GH₵ ${amount}`
-          },
-          {
-            display_name: "Payment Type",
-            variable_name: "payment_type",
-            value: "Admission Form"
-          },
-          {
-            display_name: "Course",
-            variable_name: "course",
-            value: metadata.course || 'Not specified'
-          }
-        ]
-      },
-      callback: function(response) {
-        // Payment successful - send serial number via email
-        sendSerialEmail(response, metadata, email);
-        resolve(response);
-      },
-      onClose: function() {
-        reject(new Error('Payment window closed by user'));
-      }
-    });
-    handler.openIframe();
-  });
-};
+// API URL for live transactions
+const PAYSTACK_API_URL = 'https://api.paystack.co';
 
-// Function to send serial number via email using Paystack's API
-const sendSerialEmail = async (response, metadata, email) => {
+// Check if we're in production mode
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+console.log(`🔐 Paystack running in ${IS_PRODUCTION ? 'LIVE' : 'DEVELOPMENT'} mode`);
+
+/**
+ * Initialize a payment transaction
+ * @param {string} email - Customer email
+ * @param {number} amount - Amount in GHS
+ * @param {object} metadata - Additional metadata
+ * @returns {Promise} - Paystack transaction data
+ */
+export const initializePayment = async (email, amount, metadata = {}) => {
   try {
-    // Generate serial number
-    const serial = `FM-ADM-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
-    
-    // Store the serial number in Firebase
-    await storeSerialNumber(serial, metadata, email, response.reference);
-    
-    console.log('Serial number generated:', serial);
-    console.log('Email should be sent to:', email);
-    
-    return serial;
-    
-  } catch (error) {
-    console.error('Error sending serial email:', error);
-    throw error;
-  }
-};
-
-// Store serial number in Firebase
-const storeSerialNumber = async (serial, metadata, email, reference) => {
-  try {
-    // Use the imported db directly
-    await setDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, serial), {
-      serial: serial,
-      course: metadata.course || '',
-      studentName: metadata.name || '',
-      email: email,
-      phone: metadata.phone || '',
-      isUsed: false,
-      generatedAt: new Date().toISOString(),
-      status: 'available',
-      paymentReference: reference || metadata.reference || '',
-      amount: metadata.amount || 100
-    });
-    
-    console.log('Serial number stored successfully in Firebase');
-    return serial;
-    
-  } catch (error) {
-    console.error('Error storing serial number:', error);
-    throw error;
-  }
-};
-
-// Verify payment and get serial number
-export const verifyPaymentAndGetSerial = async (reference) => {
-  try {
-    const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-      method: 'GET',
+    const response = await fetch(`${PAYSTACK_API_URL}/transaction/initialize`, {
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        amount: amount * 100, // Convert to pesewas (GHS to kobo)
+        currency: 'GHS',
+        callback_url: `${window.location.origin}/payment-callback`,
+        metadata: {
+          ...metadata,
+          environment: IS_PRODUCTION ? 'production' : 'test',
+          payment_type: 'admission_form',
+          timestamp: new Date().toISOString()
+        },
+        // Live mode channels
+        channels: ['card', 'mobile_money', 'bank_transfer', 'qr'],
+        // Add this to prevent test mode
+        ...(IS_PRODUCTION && { 
+          // Additional production-specific parameters
+          plan: undefined,
+          invoice_limit: undefined,
+        })
+      }),
     });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
+
     const data = await response.json();
     
     if (!data.status) {
-      throw new Error(data.message || 'Payment verification failed');
+      throw new Error(data.message || 'Payment initialization failed');
     }
+
+    console.log('✅ Payment initialized successfully:', data.data.reference);
+    return data.data;
+  } catch (error) {
+    console.error('❌ Payment initialization error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Verify a transaction
+ * @param {string} reference - Transaction reference
+ * @returns {Promise} - Verification result
+ */
+export const verifyTransaction = async (reference) => {
+  try {
+    const response = await fetch(`${PAYSTACK_API_URL}/transaction/verify/${reference}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
     
+    if (!data.status) {
+      throw new Error(data.message || 'Transaction verification failed');
+    }
+
+    console.log('✅ Transaction verified:', data.data.status);
     return data;
-    
   } catch (error) {
-    console.error('Payment verification error:', error);
+    console.error('❌ Transaction verification error:', error);
     throw error;
   }
 };
 
-// Helper function to check if serial number exists
-export const checkSerialNumber = async (serial) => {
+/**
+ * List all transactions (for admin purposes)
+ * @param {object} params - Query parameters
+ * @returns {Promise} - List of transactions
+ */
+export const listTransactions = async (params = {}) => {
   try {
-    const docRef = doc(db, COLLECTIONS.SERIAL_NUMBERS, serial);
-    const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-      return {
-        exists: true,
-        data: docSnap.data()
-      };
-    } else {
-      return {
-        exists: false,
-        data: null
-      };
-    }
-  } catch (error) {
-    console.error('Error checking serial number:', error);
-    throw error;
-  }
-};
-
-// Helper function to mark serial number as used
-export const markSerialNumberAsUsed = async (serial) => {
-  try {
-    const docRef = doc(db, COLLECTIONS.SERIAL_NUMBERS, serial);
-    
-    await updateDoc(docRef, {
-      isUsed: true,
-      usedAt: new Date().toISOString(),
-      status: 'used'
+    const queryString = new URLSearchParams(params).toString();
+    const response = await fetch(`${PAYSTACK_API_URL}/transaction?${queryString}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json',
+      },
     });
-    
-    return true;
+
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error('Error marking serial number as used:', error);
+    console.error('Error listing transactions:', error);
     throw error;
   }
 };
 
-// Get serial number by email
-export const getSerialNumberByEmail = async (email) => {
-  try {
-    const serialNumbersRef = collection(db, COLLECTIONS.SERIAL_NUMBERS);
-    const q = query(serialNumbersRef, where('email', '==', email));
-    const querySnapshot = await getDocs(q);
-    
-    const serials = [];
-    querySnapshot.forEach((doc) => {
-      serials.push({
-        id: doc.id,
-        ...doc.data()
-      });
-    });
-    
-    return serials;
-  } catch (error) {
-    console.error('Error getting serial numbers by email:', error);
-    throw error;
-  }
+/**
+ * Check if Paystack is configured for live mode
+ * @returns {boolean} - True if live mode is configured
+ */
+export const isLiveModeConfigured = () => {
+  const publicKey = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY;
+  const secretKey = process.env.REACT_APP_PAYSTACK_SECRET_KEY;
+  
+  // Check if keys are set and not the default test keys
+  const isLivePublic = publicKey && publicKey.startsWith('pk_live_') && publicKey !== 'pk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+  const isLiveSecret = secretKey && secretKey.startsWith('sk_live_') && secretKey !== 'sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+  
+  return isLivePublic && isLiveSecret;
 };
 
-// Create a named object for default export (fixes no-anonymous-default-export ESLint warning)
+/**
+ * Get current mode
+ * @returns {string} - 'live' or 'test'
+ */
+export const getCurrentMode = () => {
+  return isLiveModeConfigured() ? 'live' : 'test';
+};
+
+// Export all functions as a service object
 const paystackService = {
   initializePayment,
-  verifyPaymentAndGetSerial,
-  checkSerialNumber,
-  markSerialNumberAsUsed,
-  getSerialNumberByEmail
+  verifyTransaction,
+  listTransactions,
+  isLiveModeConfigured,
+  getCurrentMode,
+  PAYSTACK_LIVE_PUBLIC_KEY,
+  PAYSTACK_SECRET_KEY,
+  PAYSTACK_API_URL,
+  IS_PRODUCTION
 };
 
-// Export default object with all functions - using named variable
 export default paystackService;
