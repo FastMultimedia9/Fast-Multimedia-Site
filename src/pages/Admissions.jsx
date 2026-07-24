@@ -41,7 +41,7 @@ import {
   markSerialAsUsed,
   getSerialCount
 } from '../services/firebaseService';
-import { initializePayment } from '../services/paystackService';
+import { initializePayment, verifyTransaction } from '../services/paystackService';
 import { sendSerialEmail } from '../services/emailService';
 import './Admissions.css';
 
@@ -76,6 +76,7 @@ const Admissions = () => {
   const [isEmailSending, setIsEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [paymentReference, setPaymentReference] = useState('');
 
   const whatsappNumber = '233505159131';
   const displayWhatsappNumber = '+233 50 515 9131';
@@ -89,6 +90,7 @@ const Admissions = () => {
   ];
 
   useEffect(() => {
+    // Load Paystack inline script
     const script = document.createElement('script');
     script.src = 'https://js.paystack.co/v1/inline.js';
     script.async = true;
@@ -332,7 +334,7 @@ const Admissions = () => {
   };
 
   // ============================================
-  // PAYSTACK PAYMENT HANDLER
+  // PAYSTACK PAYMENT HANDLER - LIVE MODE
   // ============================================
   
   const handlePaystackPayment = async () => {
@@ -358,7 +360,7 @@ const Admissions = () => {
       setGeneratedSerial(newSerial);
       console.log('✅ Secure serial generated:', newSerial);
 
-      // Initialize Paystack payment
+      // Initialize Paystack payment with LIVE mode
       const response = await initializePayment(
         paymentEmail,
         100, // GH₵ 100
@@ -369,23 +371,89 @@ const Admissions = () => {
           type: 'admission_form',
           dateOfBirth: paymentDateOfBirth,
           gender: paymentGender,
-          serialNumber: newSerial
+          serialNumber: newSerial,
+          environment: 'production' // Explicitly set to production
         }
       );
 
-      await handlePaymentSuccess(response, newSerial);
+      // Store the reference for verification
+      setPaymentReference(response.reference);
+
+      // Open Paystack popup with live key
+      if (typeof window.PaystackPop !== 'undefined') {
+        const paystack = new window.PaystackPop();
+        paystack.newTransaction({
+          key: process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY || 'pk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+          email: paymentEmail,
+          amount: 100 * 100, // GH₵ 100 in pesewas
+          currency: 'GHS',
+          ref: response.reference,
+          metadata: {
+            custom_fields: [
+              {
+                display_name: "Student Name",
+                variable_name: "student_name",
+                value: paymentName
+              },
+              {
+                display_name: "Course",
+                variable_name: "course",
+                value: selectedCourseForPayment || 'Not specified'
+              },
+              {
+                display_name: "Serial Number",
+                variable_name: "serial_number",
+                value: newSerial
+              },
+              {
+                display_name: "Environment",
+                variable_name: "environment",
+                value: "production"
+              }
+            ]
+          },
+          onSuccess: (transaction) => {
+            console.log('✅ Payment successful:', transaction);
+            // Verify the transaction before proceeding
+            verifyAndProcessPayment(transaction.reference, newSerial);
+          },
+          onCancel: () => {
+            setPaymentError('Payment was cancelled.');
+            setIsProcessingPayment(false);
+          }
+        });
+      } else {
+        throw new Error('Paystack library not loaded');
+      }
+
     } catch (error) {
       console.error('Payment error:', error);
-      setPaymentError('Payment was cancelled or failed. Please try again.');
-      // If payment fails, we might want to delete the generated serial
-      if (generatedSerial) {
-        try {
-          console.log('Deleting generated serial due to payment failure:', generatedSerial);
-        } catch (deleteError) {
-          console.warn('Could not delete serial:', deleteError);
-        }
+      setPaymentError(error.message || 'Payment failed. Please try again.');
+      setIsProcessingPayment(false);
+    }
+  };
+
+  // ============================================
+  // VERIFY AND PROCESS PAYMENT
+  // ============================================
+  
+  const verifyAndProcessPayment = async (reference, serial) => {
+    try {
+      console.log('🔍 Verifying transaction:', reference);
+      
+      // Verify the transaction with Paystack
+      const verification = await verifyTransaction(reference);
+      
+      if (verification.data && verification.data.status === 'success') {
+        // Payment is verified - process the success
+        await handlePaymentSuccess({ reference, ...verification.data }, serial);
+      } else {
+        setPaymentError('Payment verification failed. Please contact support.');
+        setIsProcessingPayment(false);
       }
-    } finally {
+    } catch (error) {
+      console.error('Verification error:', error);
+      setPaymentError('Error verifying payment. Please contact support.');
       setIsProcessingPayment(false);
     }
   };
@@ -411,7 +479,8 @@ const Admissions = () => {
         paymentType: 'admission_form',
         status: 'completed',
         serialNumber: serial,
-        serialOwner: paymentName
+        serialOwner: paymentName,
+        environment: 'production'
       });
 
       // Create admission record
@@ -427,11 +496,13 @@ const Admissions = () => {
         status: 'pending',
         paymentReference: response.reference,
         applicationDate: new Date().toISOString(),
-        serialOwner: paymentName
+        serialOwner: paymentName,
+        environment: 'production'
       });
 
       // 🔥 IMPORTANT: Show success modal FIRST so user sees the serial
       setShowSuccessModal(true);
+      setIsProcessingPayment(false);
       
       // Then try to send email in the background (don't await - let it run)
       console.log('📧 Attempting to send email in background...');
@@ -466,6 +537,7 @@ const Admissions = () => {
     } catch (error) {
       console.error('❌ Payment processing error:', error);
       setPaymentError('There was an error processing your payment. Please contact support.');
+      setIsProcessingPayment(false);
       
       // Still show the serial if we have it
       if (serial) {
@@ -483,6 +555,7 @@ const Admissions = () => {
     setPaymentGender('');
     setSelectedCourseForPayment('');
     setPaymentError('');
+    setPaymentReference('');
   };
 
   // Verify Serial Number
