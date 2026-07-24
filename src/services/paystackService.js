@@ -90,36 +90,42 @@ export const initializePayment = async (email, amount, metadata = {}) => {
 };
 
 /**
- * Open Paystack payment popup
+ * Open Paystack payment popup - RETURNS PROMISE
  * @param {Object} config - Paystack configuration
- * @param {Function} onSuccess - Success callback
- * @param {Function} onCancel - Cancel callback
+ * @returns {Promise} - Resolves when payment is successful, rejects on cancel/error
  */
-export const openPaystackPopup = (config, onSuccess, onCancel) => {
-  // Check if Paystack is loaded
-  if (typeof window.PaystackPop === 'undefined') {
-    console.error('❌ Paystack not loaded');
-    throw new Error('Payment system is not loaded. Please refresh and try again.');
-  }
-
-  const paystack = window.PaystackPop;
-
-  // Use newTransaction method (correct for inline.js)
-  paystack.newTransaction({
-    key: config.key || PAYSTACK_LIVE_PUBLIC_KEY,
-    email: config.email,
-    amount: config.amount,
-    currency: config.currency || 'GHS',
-    ref: config.reference,
-    metadata: config.metadata || {},
-    onSuccess: function(transaction) {
-      console.log('✅ Payment successful:', transaction);
-      if (onSuccess) onSuccess(transaction);
-    },
-    onCancel: function() {
-      console.log('❌ Payment cancelled by user');
-      if (onCancel) onCancel();
+export const openPaystackPopup = (config) => {
+  return new Promise((resolve, reject) => {
+    // Check if Paystack is loaded
+    if (typeof window.PaystackPop === 'undefined') {
+      console.error('❌ Paystack not loaded');
+      reject(new Error('Payment system is not loaded. Please refresh and try again.'));
+      return;
     }
+
+    const paystack = window.PaystackPop;
+
+    // Use newTransaction method (correct for inline.js)
+    paystack.newTransaction({
+      key: config.key || PAYSTACK_LIVE_PUBLIC_KEY,
+      email: config.email,
+      amount: config.amount,
+      currency: config.currency || 'GHS',
+      ref: config.reference,
+      metadata: config.metadata || {},
+      onSuccess: function(transaction) {
+        console.log('✅ Payment successful:', transaction);
+        resolve(transaction);
+      },
+      onCancel: function() {
+        console.log('❌ Payment cancelled by user');
+        reject(new Error('Payment was cancelled'));
+      },
+      onError: function(error) {
+        console.error('❌ Payment error:', error);
+        reject(new Error(error.message || 'Payment failed'));
+      }
+    });
   });
 };
 
