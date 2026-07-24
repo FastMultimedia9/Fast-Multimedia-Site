@@ -39,7 +39,7 @@ if (!HAS_VALID_KEYS) {
 }
 
 /**
- * Initialize a payment transaction
+ * Initialize a payment transaction on Paystack server
  * @param {string} email - Customer email
  * @param {number} amount - Amount in GHS
  * @param {object} metadata - Additional metadata
@@ -87,6 +87,40 @@ export const initializePayment = async (email, amount, metadata = {}) => {
     console.error('❌ Payment initialization error:', error);
     throw error;
   }
+};
+
+/**
+ * Open Paystack payment popup
+ * @param {Object} config - Paystack configuration
+ * @param {Function} onSuccess - Success callback
+ * @param {Function} onCancel - Cancel callback
+ */
+export const openPaystackPopup = (config, onSuccess, onCancel) => {
+  // Check if Paystack is loaded
+  if (typeof window.PaystackPop === 'undefined') {
+    console.error('❌ Paystack not loaded');
+    throw new Error('Payment system is not loaded. Please refresh and try again.');
+  }
+
+  const paystack = window.PaystackPop;
+
+  // Use newTransaction method (correct for inline.js)
+  paystack.newTransaction({
+    key: config.key || PAYSTACK_LIVE_PUBLIC_KEY,
+    email: config.email,
+    amount: config.amount,
+    currency: config.currency || 'GHS',
+    ref: config.reference,
+    metadata: config.metadata || {},
+    onSuccess: function(transaction) {
+      console.log('✅ Payment successful:', transaction);
+      if (onSuccess) onSuccess(transaction);
+    },
+    onCancel: function() {
+      console.log('❌ Payment cancelled by user');
+      if (onCancel) onCancel();
+    }
+  });
 };
 
 /**
@@ -170,13 +204,24 @@ export const getCurrentMode = () => {
   return HAS_VALID_KEYS ? 'live' : 'test';
 };
 
+/**
+ * Check if Paystack script is loaded
+ * @returns {boolean} - True if Paystack is loaded
+ */
+export const isPaystackLoaded = () => {
+  return typeof window.PaystackPop !== 'undefined';
+};
+
 // Export all functions as a service object
 const paystackService = {
   initializePayment,
+  openPaystackPopup,
   verifyTransaction,
   listTransactions,
   isLiveModeConfigured,
   getCurrentMode,
+  isPaystackLoaded,
+  PAYSTACK_LIVE_PUBLIC_KEY,
 };
 
 export default paystackService;
