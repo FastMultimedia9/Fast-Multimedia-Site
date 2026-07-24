@@ -4,22 +4,21 @@
 // PAYSTACK LIVE MODE CONFIGURATION
 // ============================================
 
-// IMPORTANT: Always use environment variables for sensitive keys!
-// NEVER hardcode keys in your source code
-// Get your keys from: https://dashboard.paystack.com/#/settings/developer
-// Add them to your .env file:
+// IMPORTANT: Environment variables MUST be set in .env file
+// NEVER hardcode keys in source code - even as defaults!
+// .env file should contain:
 // REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY=pk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 // REACT_APP_PAYSTACK_SECRET_KEY=sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-// Load keys from environment variables - NEVER hardcode!
-const PAYSTACK_LIVE_PUBLIC_KEY = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY || '';
-const PAYSTACK_SECRET_KEY = process.env.REACT_APP_PAYSTACK_SECRET_KEY || '';
+// Load keys from environment variables - NO FALLBACK DEFAULTS!
+const PAYSTACK_LIVE_PUBLIC_KEY = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY;
+const PAYSTACK_SECRET_KEY = process.env.REACT_APP_PAYSTACK_SECRET_KEY;
 
-// Check if keys are configured
-const HAS_VALID_KEYS = PAYSTACK_LIVE_PUBLIC_KEY && 
-                       PAYSTACK_LIVE_PUBLIC_KEY.startsWith('pk_live_') &&
-                       PAYSTACK_SECRET_KEY && 
-                       PAYSTACK_SECRET_KEY.startsWith('sk_live_');
+// Check if keys are configured and valid
+const HAS_VALID_KEYS = !!(PAYSTACK_LIVE_PUBLIC_KEY && 
+                         PAYSTACK_LIVE_PUBLIC_KEY.startsWith('pk_live_') &&
+                         PAYSTACK_SECRET_KEY && 
+                         PAYSTACK_SECRET_KEY.startsWith('sk_live_'));
 
 // API URL for live transactions
 const PAYSTACK_API_URL = 'https://api.paystack.co';
@@ -27,9 +26,17 @@ const PAYSTACK_API_URL = 'https://api.paystack.co';
 // Check if we're in production mode
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
-// Log status (but NEVER log the actual keys!)
+// Log status (NEVER log the actual keys!)
 console.log(`🔐 Paystack configured: ${HAS_VALID_KEYS ? '✅ LIVE MODE READY' : '⚠️ Missing or invalid keys'}`);
 console.log(`🔐 Environment: ${IS_PRODUCTION ? 'PRODUCTION' : 'DEVELOPMENT'}`);
+
+// If keys are missing, show a clear warning
+if (!HAS_VALID_KEYS) {
+  console.warn('⚠️ Paystack keys not found or invalid. Please check your .env file.');
+  console.warn('Required environment variables:');
+  console.warn('  - REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY (starts with pk_live_)');
+  console.warn('  - REACT_APP_PAYSTACK_SECRET_KEY (starts with sk_live_)');
+}
 
 /**
  * Initialize a payment transaction
@@ -41,7 +48,8 @@ console.log(`🔐 Environment: ${IS_PRODUCTION ? 'PRODUCTION' : 'DEVELOPMENT'}`)
 export const initializePayment = async (email, amount, metadata = {}) => {
   // Validate that keys are configured
   if (!HAS_VALID_KEYS) {
-    throw new Error('Paystack is not properly configured. Please check your environment variables.');
+    console.error('❌ Paystack payment attempted but keys are not configured');
+    throw new Error('Payment system is not properly configured. Please contact support.');
   }
 
   try {
@@ -64,11 +72,6 @@ export const initializePayment = async (email, amount, metadata = {}) => {
         },
         // Live mode channels
         channels: ['card', 'mobile_money', 'bank_transfer', 'qr'],
-        // Additional production-specific parameters
-        ...(IS_PRODUCTION && { 
-          plan: undefined,
-          invoice_limit: undefined,
-        })
       }),
     });
 
@@ -94,7 +97,8 @@ export const initializePayment = async (email, amount, metadata = {}) => {
 export const verifyTransaction = async (reference) => {
   // Validate that keys are configured
   if (!HAS_VALID_KEYS) {
-    throw new Error('Paystack is not properly configured. Please check your environment variables.');
+    console.error('❌ Transaction verification attempted but keys are not configured');
+    throw new Error('Payment system is not properly configured. Please contact support.');
   }
 
   try {
@@ -128,7 +132,8 @@ export const verifyTransaction = async (reference) => {
 export const listTransactions = async (params = {}) => {
   // Validate that keys are configured
   if (!HAS_VALID_KEYS) {
-    throw new Error('Paystack is not properly configured. Please check your environment variables.');
+    console.error('❌ Listing transactions attempted but keys are not configured');
+    throw new Error('Payment system is not properly configured. Please contact support.');
   }
 
   try {
@@ -172,7 +177,6 @@ const paystackService = {
   listTransactions,
   isLiveModeConfigured,
   getCurrentMode,
-  // IMPORTANT: Don't export the keys! They should only be used internally
 };
 
 export default paystackService;
