@@ -41,7 +41,7 @@ import {
   markSerialAsUsed,
   getSerialCount
 } from '../services/firebaseService';
-import { initializePayment, verifyTransaction } from '../services/paystackService';
+import { initializePayment, verifyTransaction, isPaystackLoaded } from '../services/paystackService';
 import { sendSerialEmail } from '../services/emailService';
 import './Admissions.css';
 
@@ -365,7 +365,7 @@ const Admissions = () => {
   };
 
   // ============================================
-  // PAYSTACK PAYMENT HANDLER - FIXED
+  // PAYSTACK PAYMENT HANDLER - FIXED VERSION
   // ============================================
   
   const handlePaystackPayment = async () => {
@@ -409,28 +409,43 @@ const Admissions = () => {
       const reference = `ADM-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
       setPaymentReference(reference);
 
-      // Initialize Paystack payment
-      const response = await initializePayment(
-        paymentEmail,
-        100, // GH₵ 100
-        {
-          name: paymentName,
-          phone: paymentPhone,
-          course: selectedCourseForPayment || 'Not specified',
-          type: 'admission_form',
-          dateOfBirth: paymentDateOfBirth,
-          gender: paymentGender,
-          serialNumber: newSerial,
-          environment: 'production',
-          reference: reference
-        }
-      );
+      // Prepare payment data
+      const paymentData = {
+        email: paymentEmail,
+        amount: 100,
+        name: paymentName,
+        phone: paymentPhone,
+        course: selectedCourseForPayment || 'Not specified',
+        type: 'admission_form',
+        dateOfBirth: paymentDateOfBirth,
+        gender: paymentGender,
+        serialNumber: newSerial,
+        reference: reference
+      };
 
-      // Open Paystack popup using the correct method
+      // Initialize Paystack payment on the server (optional - can skip this)
+      // This creates a transaction record on Paystack
+      try {
+        await initializePayment(
+          paymentEmail,
+          100,
+          paymentData
+        );
+        console.log('💰 Paystack transaction initialized');
+      } catch (initError) {
+        console.warn('⚠️ Transaction initialization warning:', initError.message);
+        // Continue anyway - the popup will handle it
+      }
+
+      // Open Paystack popup using the service
       const paystack = window.PaystackPop;
       
-      // Use the setup method instead of newTransaction
-      paystack.setup({
+      if (!paystack || typeof paystack.newTransaction !== 'function') {
+        throw new Error('Paystack is not properly loaded. Please refresh and try again.');
+      }
+
+      // Open the payment popup using newTransaction
+      paystack.newTransaction({
         key: publicKey,
         email: paymentEmail,
         amount: 100 * 100, // GH₵ 100 in pesewas
@@ -460,17 +475,19 @@ const Admissions = () => {
             }
           ]
         },
-        callback: function(transaction) {
+        onSuccess: function(transaction) {
           console.log('✅ Payment successful:', transaction);
           // Verify the transaction before proceeding
           verifyAndProcessPayment(transaction.reference, newSerial);
         },
-        onClose: function() {
-          console.log('Payment window closed');
+        onCancel: function() {
+          console.log('Payment window closed by user');
           setPaymentError('Payment was cancelled.');
           setIsProcessingPayment(false);
         }
       });
+
+      console.log('✅ Paystack popup opened');
 
     } catch (error) {
       console.error('Payment error:', error);
