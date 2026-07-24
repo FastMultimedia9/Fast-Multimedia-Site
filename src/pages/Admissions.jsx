@@ -77,6 +77,7 @@ const Admissions = () => {
   const [emailSent, setEmailSent] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [paymentReference, setPaymentReference] = useState('');
+  const [paystackLoaded, setPaystackLoaded] = useState(false);
 
   const whatsappNumber = '233505159131';
   const displayWhatsappNumber = '+233 50 515 9131';
@@ -89,17 +90,47 @@ const Admissions = () => {
     'Full I.T Support - GH₵ 850'
   ];
 
+  // Load Paystack script
   useEffect(() => {
-    // Load Paystack inline script
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
-    script.async = true;
-    document.body.appendChild(script);
+    const loadPaystackScript = () => {
+      // Check if Paystack is already loaded
+      if (typeof window.PaystackPop !== 'undefined') {
+        setPaystackLoaded(true);
+        console.log('✅ Paystack already loaded');
+        return;
+      }
 
-    return () => {
-      document.body.removeChild(script);
+      // Create script element
+      const script = document.createElement('script');
+      script.src = 'https://js.paystack.co/v1/inline.js';
+      script.async = true;
+      
+      // Handle script load
+      script.onload = () => {
+        setPaystackLoaded(true);
+        console.log('✅ Paystack script loaded successfully');
+      };
+      
+      script.onerror = () => {
+        console.error('❌ Failed to load Paystack script');
+        setPaystackLoaded(false);
+      };
+
+      document.body.appendChild(script);
+      
+      // Cleanup
+      return () => {
+        document.body.removeChild(script);
+      };
     };
+
+    loadPaystackScript();
   }, []);
+
+  // Additional check for Paystack availability
+  const isPaystackReady = () => {
+    return typeof window.PaystackPop !== 'undefined' || paystackLoaded;
+  };
 
   const getNextIntakeDate = () => {
     const date = new Date();
@@ -334,10 +365,11 @@ const Admissions = () => {
   };
 
   // ============================================
-  // PAYSTACK PAYMENT HANDLER - LIVE MODE
+  // PAYSTACK PAYMENT HANDLER - FIXED
   // ============================================
   
   const handlePaystackPayment = async () => {
+    // Validate form fields
     if (!paymentEmail || !paymentName || !paymentPhone) {
       setPaymentError('Please fill in all required fields (Name, Email, Phone).');
       return;
@@ -347,6 +379,12 @@ const Admissions = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(paymentEmail)) {
       setPaymentError('Please enter a valid email address.');
+      return;
+    }
+
+    // Check if Paystack is loaded
+    if (!isPaystackReady()) {
+      setPaymentError('Payment system is loading. Please try again in a moment.');
       return;
     }
 
@@ -360,7 +398,18 @@ const Admissions = () => {
       setGeneratedSerial(newSerial);
       console.log('✅ Secure serial generated:', newSerial);
 
-      // Initialize Paystack payment with LIVE mode
+      // Get the Paystack public key from environment
+      const publicKey = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY;
+      
+      if (!publicKey || !publicKey.startsWith('pk_live_')) {
+        throw new Error('Paystack public key is not properly configured');
+      }
+
+      // Generate a unique reference
+      const reference = `ADM-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+      setPaymentReference(reference);
+
+      // Initialize Paystack payment
       const response = await initializePayment(
         paymentEmail,
         100, // GH₵ 100
@@ -372,59 +421,56 @@ const Admissions = () => {
           dateOfBirth: paymentDateOfBirth,
           gender: paymentGender,
           serialNumber: newSerial,
-          environment: 'production' // Explicitly set to production
+          environment: 'production',
+          reference: reference
         }
       );
 
-      // Store the reference for verification
-      setPaymentReference(response.reference);
-
-      // Open Paystack popup with live key
-      if (typeof window.PaystackPop !== 'undefined') {
-        const paystack = new window.PaystackPop();
-        paystack.newTransaction({
-          key: process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY || 'pk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-          email: paymentEmail,
-          amount: 100 * 100, // GH₵ 100 in pesewas
-          currency: 'GHS',
-          ref: response.reference,
-          metadata: {
-            custom_fields: [
-              {
-                display_name: "Student Name",
-                variable_name: "student_name",
-                value: paymentName
-              },
-              {
-                display_name: "Course",
-                variable_name: "course",
-                value: selectedCourseForPayment || 'Not specified'
-              },
-              {
-                display_name: "Serial Number",
-                variable_name: "serial_number",
-                value: newSerial
-              },
-              {
-                display_name: "Environment",
-                variable_name: "environment",
-                value: "production"
-              }
-            ]
-          },
-          onSuccess: (transaction) => {
-            console.log('✅ Payment successful:', transaction);
-            // Verify the transaction before proceeding
-            verifyAndProcessPayment(transaction.reference, newSerial);
-          },
-          onCancel: () => {
-            setPaymentError('Payment was cancelled.');
-            setIsProcessingPayment(false);
-          }
-        });
-      } else {
-        throw new Error('Paystack library not loaded');
-      }
+      // Open Paystack popup using the correct method
+      const paystack = window.PaystackPop;
+      
+      // Use the setup method instead of newTransaction
+      paystack.setup({
+        key: publicKey,
+        email: paymentEmail,
+        amount: 100 * 100, // GH₵ 100 in pesewas
+        currency: 'GHS',
+        ref: reference,
+        metadata: {
+          custom_fields: [
+            {
+              display_name: "Student Name",
+              variable_name: "student_name",
+              value: paymentName
+            },
+            {
+              display_name: "Course",
+              variable_name: "course",
+              value: selectedCourseForPayment || 'Not specified'
+            },
+            {
+              display_name: "Serial Number",
+              variable_name: "serial_number",
+              value: newSerial
+            },
+            {
+              display_name: "Environment",
+              variable_name: "environment",
+              value: "production"
+            }
+          ]
+        },
+        callback: function(transaction) {
+          console.log('✅ Payment successful:', transaction);
+          // Verify the transaction before proceeding
+          verifyAndProcessPayment(transaction.reference, newSerial);
+        },
+        onClose: function() {
+          console.log('Payment window closed');
+          setPaymentError('Payment was cancelled.');
+          setIsProcessingPayment(false);
+        }
+      });
 
     } catch (error) {
       console.error('Payment error:', error);
@@ -1062,7 +1108,7 @@ const Admissions = () => {
             <button 
               className="pay-now-btn"
               onClick={handlePaystackPayment}
-              disabled={isProcessingPayment || !paymentEmail || !paymentName || !paymentPhone}
+              disabled={isProcessingPayment || !paymentEmail || !paymentName || !paymentPhone || !paystackLoaded}
             >
               {isProcessingPayment ? (
                 <>
