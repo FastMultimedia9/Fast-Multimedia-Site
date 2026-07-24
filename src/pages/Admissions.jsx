@@ -48,10 +48,6 @@ import './Admissions.css';
 // Import Firebase for fallback
 import { db, COLLECTIONS, doc, setDoc, serverTimestamp } from '../firebase';
 
-// ============================================
-// SECURE SERIAL GENERATION - OBFUSCATED
-// ============================================
-
 const Admissions = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
@@ -76,6 +72,7 @@ const Admissions = () => {
   const [emailError, setEmailError] = useState('');
   const [paymentReference, setPaymentReference] = useState('');
   const [paystackReady, setPaystackReady] = useState(false);
+  const [checkingPaystack, setCheckingPaystack] = useState(true);
 
   const whatsappNumber = '233505159131';
   const displayWhatsappNumber = '+233 50 515 9131';
@@ -88,73 +85,92 @@ const Admissions = () => {
     'Full I.T Support - GH₵ 850'
   ];
 
-  // Load Paystack script - SIMPLIFIED VERSION
+  // Load Paystack script - IMPROVED VERSION
   useEffect(() => {
-    let scriptLoaded = false;
-    let loadAttempts = 0;
-    const maxAttempts = 5;
+    let mounted = true;
+    let checkInterval = null;
 
-    const loadPaystack = () => {
-      // Check if already loaded
-      if (typeof window.PaystackPop !== 'undefined' && window.PaystackPop.newTransaction) {
-        setPaystackReady(true);
-        console.log('✅ Paystack is ready');
-        return;
+    const checkPaystack = () => {
+      if (typeof window.PaystackPop !== 'undefined' && 
+          typeof window.PaystackPop.newTransaction === 'function') {
+        if (mounted) {
+          setPaystackReady(true);
+          setCheckingPaystack(false);
+          console.log('✅ Paystack is ready');
+        }
+        return true;
       }
+      return false;
+    };
 
-      // Check if script already exists
-      const existingScript = document.querySelector('script[src="https://js.paystack.co/v1/inline.js"]');
-      if (existingScript) {
-        // Wait for it to load
-        const checkReady = setInterval(() => {
-          if (typeof window.PaystackPop !== 'undefined' && window.PaystackPop.newTransaction) {
-            setPaystackReady(true);
-            clearInterval(checkReady);
-            console.log('✅ Paystack became ready');
-          }
-        }, 500);
-        return;
-      }
+    // Check if already loaded
+    if (checkPaystack()) {
+      return;
+    }
 
+    // Check if script already exists
+    const existingScript = document.querySelector('script[src="https://js.paystack.co/v1/inline.js"]');
+    if (!existingScript) {
       // Create and load script
       const script = document.createElement('script');
       script.src = 'https://js.paystack.co/v1/inline.js';
       script.async = true;
       
       script.onload = () => {
-        scriptLoaded = true;
-        // Check if ready
-        const checkReady = setInterval(() => {
-          if (typeof window.PaystackPop !== 'undefined' && window.PaystackPop.newTransaction) {
-            setPaystackReady(true);
-            clearInterval(checkReady);
-            console.log('✅ Paystack script loaded and ready');
+        console.log('Paystack script loaded, waiting for initialization...');
+        // Check every 500ms for up to 5 seconds
+        let attempts = 0;
+        const maxAttempts = 10;
+        checkInterval = setInterval(() => {
+          attempts++;
+          if (checkPaystack()) {
+            clearInterval(checkInterval);
+          } else if (attempts >= maxAttempts) {
+            clearInterval(checkInterval);
+            if (mounted) {
+              setCheckingPaystack(false);
+              console.warn('⚠️ Paystack did not initialize after multiple attempts');
+            }
           }
         }, 500);
-        
-        // Stop checking after 5 seconds
-        setTimeout(() => clearInterval(checkReady), 5000);
       };
       
       script.onerror = () => {
         console.error('❌ Failed to load Paystack script');
-        // Retry if under max attempts
-        if (loadAttempts < maxAttempts) {
-          loadAttempts++;
-          setTimeout(loadPaystack, 2000);
+        if (mounted) {
+          setCheckingPaystack(false);
         }
       };
 
       document.body.appendChild(script);
-    };
+    } else {
+      // Script exists, check if it's ready
+      let attempts = 0;
+      const maxAttempts = 10;
+      checkInterval = setInterval(() => {
+        attempts++;
+        if (checkPaystack()) {
+          clearInterval(checkInterval);
+        } else if (attempts >= maxAttempts) {
+          clearInterval(checkInterval);
+          if (mounted) {
+            setCheckingPaystack(false);
+            console.warn('⚠️ Paystack script exists but not initialized');
+          }
+        }
+      }, 500);
+    }
 
-    loadPaystack();
-
-    // Cleanup
     return () => {
-      // Don't remove the script as other components might need it
+      mounted = false;
+      if (checkInterval) {
+        clearInterval(checkInterval);
+      }
     };
   }, []);
+
+  // Rest of your functions remain the same...
+  // (All the serial generation, email, and other functions stay unchanged)
 
   const getNextIntakeDate = () => {
     const date = new Date();
@@ -184,7 +200,6 @@ const Admissions = () => {
   // SECURE SERIAL GENERATION - MULTI-LAYER ENCODING
   // ============================================
   
-  // Layer 1: Character transformation map (obfuscated)
   const _x = (a) => {
     const b = ['A','B','C','D','E','F','G','H','I','J','K','L','M',
                'N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
@@ -205,7 +220,6 @@ const Admissions = () => {
     return d;
   };
 
-  // Layer 2: Reverse and shift
   const _y = (a) => {
     const b = a.split('').reverse().join('');
     const c = [];
@@ -217,11 +231,9 @@ const Admissions = () => {
     return c.join('');
   };
 
-  // Layer 3: Base64-like encoding (custom)
   const _z = (a) => {
     const b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
     const c = [];
-    let d = 0;
     for(let e = 0; e < a.length; e++) {
       const f = a.charCodeAt(e);
       c.push(f.toString(16).padStart(2, '0'));
@@ -237,7 +249,6 @@ const Admissions = () => {
     return h.join('');
   };
 
-  // Generate secure serial number
   const _generateSecureSerial = (name, course) => {
     try {
       const timestamp = Date.now().toString(36);
@@ -260,10 +271,6 @@ const Admissions = () => {
     }
   };
 
-  // ============================================
-  // GENERATE SERIAL - USING FIREBASE SERVICE
-  // ============================================
-  
   const generateSerial = async () => {
     try {
       const secureSerial = _generateSecureSerial(paymentName, selectedCourseForPayment);
@@ -312,7 +319,6 @@ const Admissions = () => {
     }
   };
 
-  // Simple hash function for serial verification
   const _generateHash = async (text) => {
     try {
       const encoder = new TextEncoder();
@@ -332,10 +338,6 @@ const Admissions = () => {
     }
   };
 
-  // ============================================
-  // SEND SERIAL EMAIL
-  // ============================================
-  
   const sendSerialEmailToUser = async (email, name, serial, course) => {
     setIsEmailSending(true);
     setEmailSent(false);
@@ -394,32 +396,28 @@ const Admissions = () => {
     setIsProcessingPayment(true);
 
     try {
-      // Generate serial number first with buyer's name
       console.log('🔄 Generating secure serial number...');
       const newSerial = await generateSerial();
       setGeneratedSerial(newSerial);
       console.log('✅ Secure serial generated:', newSerial);
 
-      // Get the Paystack public key from environment
       const publicKey = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY;
       
       if (!publicKey || !publicKey.startsWith('pk_live_')) {
         throw new Error('Paystack public key is not properly configured');
       }
 
-      // Generate a unique reference
       const reference = `ADM-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
       setPaymentReference(reference);
 
       console.log('💰 Opening Paystack popup...');
 
-      // Open the payment popup using newTransaction
       const paystack = window.PaystackPop;
       
       paystack.newTransaction({
         key: publicKey,
         email: paymentEmail,
-        amount: 100 * 100, // GH₵ 100 in pesewas
+        amount: 100 * 100,
         currency: 'GHS',
         ref: reference,
         metadata: {
@@ -466,10 +464,6 @@ const Admissions = () => {
     }
   };
 
-  // ============================================
-  // VERIFY AND PROCESS PAYMENT
-  // ============================================
-  
   const verifyAndProcessPayment = async (reference, serial) => {
     try {
       console.log('🔍 Verifying transaction:', reference);
@@ -489,10 +483,6 @@ const Admissions = () => {
     }
   };
 
-  // ============================================
-  // PAYMENT SUCCESS HANDLER
-  // ============================================
-  
   const handlePaymentSuccess = async (response, serial) => {
     try {
       console.log('💰 Payment successful, saving records...');
@@ -581,7 +571,6 @@ const Admissions = () => {
     setPaymentReference('');
   };
 
-  // Verify Serial Number
   const verifySerialNumber = async () => {
     setIsVerifying(true);
     setSerialError('');
@@ -605,7 +594,6 @@ const Admissions = () => {
     }
   };
 
-  // Buy Form Button Handler
   const handleBuyForm = () => {
     resetPaymentForm();
     setPaymentError('');
@@ -615,7 +603,6 @@ const Admissions = () => {
     setShowPaymentModal(true);
   };
 
-  // Resend Email Function
   const handleResendEmail = async () => {
     if (!paymentEmail || !generatedSerial) {
       alert('Missing email or serial number');
@@ -754,6 +741,7 @@ const Admissions = () => {
 
   return (
     <div className="admissions-page">
+      {/* Hero Section */}
       <div className="admissions-hero">
         <div className="container">
           <h1 className="hero-title">
@@ -792,6 +780,7 @@ const Admissions = () => {
         </div>
       </div>
 
+      {/* Tabs */}
       <div className="admissions-tabs">
         <div className="container">
           <button 
@@ -827,6 +816,7 @@ const Admissions = () => {
         </div>
       </div>
 
+      {/* Tab Content */}
       <div className="container">
         {activeTab === 'overview' && (
           <div className="tab-content overview-tab">
@@ -1085,15 +1075,19 @@ const Admissions = () => {
             <button 
               className="pay-now-btn"
               onClick={handlePaystackPayment}
-              disabled={isProcessingPayment || !paymentEmail || !paymentName || !paymentPhone || !paystackReady}
+              disabled={isProcessingPayment || !paymentEmail || !paymentName || !paymentPhone || !paystackReady || checkingPaystack}
             >
               {isProcessingPayment ? (
                 <>
                   <FaSpinner className="spinner" /> Processing...
                 </>
-              ) : !paystackReady ? (
+              ) : checkingPaystack ? (
                 <>
                   <FaSpinner className="spinner" /> Loading payment...
+                </>
+              ) : !paystackReady ? (
+                <>
+                  <FaExclamationTriangle /> Payment unavailable
                 </>
               ) : (
                 <>
@@ -1112,7 +1106,7 @@ const Admissions = () => {
         </div>
       )}
 
-      {/* Success Modal with Serial Number */}
+      {/* Success Modal */}
       {showSuccessModal && (
         <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
           <div className="modal-content success-modal" onClick={(e) => e.stopPropagation()}>
