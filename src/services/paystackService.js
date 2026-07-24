@@ -91,6 +91,7 @@ export const initializePayment = async (email, amount, metadata = {}) => {
 
 /**
  * Open Paystack payment popup - RETURNS PROMISE
+ * Using the correct PaystackPop method
  * @param {Object} config - Paystack configuration
  * @returns {Promise} - Resolves when payment is successful, rejects on cancel/error
  */
@@ -105,27 +106,92 @@ export const openPaystackPopup = (config) => {
 
     const paystack = window.PaystackPop;
 
-    // Use newTransaction method (correct for inline.js)
-    paystack.newTransaction({
-      key: config.key || PAYSTACK_LIVE_PUBLIC_KEY,
-      email: config.email,
-      amount: config.amount,
-      currency: config.currency || 'GHS',
-      ref: config.reference,
-      metadata: config.metadata || {},
-      onSuccess: function(transaction) {
-        console.log('✅ Payment successful:', transaction);
-        resolve(transaction);
-      },
-      onCancel: function() {
-        console.log('❌ Payment cancelled by user');
-        reject(new Error('Payment was cancelled'));
-      },
-      onError: function(error) {
-        console.error('❌ Payment error:', error);
-        reject(new Error(error.message || 'Payment failed'));
+    // The correct method is 'openTransaction' or just 'transaction'
+    // Let's try the most common method
+    try {
+      // Method 1: Using openTransaction (most common)
+      if (typeof paystack.openTransaction === 'function') {
+        paystack.openTransaction({
+          key: config.key || PAYSTACK_LIVE_PUBLIC_KEY,
+          email: config.email,
+          amount: config.amount,
+          currency: config.currency || 'GHS',
+          ref: config.reference,
+          metadata: config.metadata || {},
+          onSuccess: function(transaction) {
+            console.log('✅ Payment successful:', transaction);
+            resolve(transaction);
+          },
+          onCancel: function() {
+            console.log('❌ Payment cancelled by user');
+            reject(new Error('Payment was cancelled'));
+          },
+          onError: function(error) {
+            console.error('❌ Payment error:', error);
+            reject(new Error(error.message || 'Payment failed'));
+          }
+        });
+        return;
       }
-    });
+
+      // Method 2: Using newTransaction
+      if (typeof paystack.newTransaction === 'function') {
+        paystack.newTransaction({
+          key: config.key || PAYSTACK_LIVE_PUBLIC_KEY,
+          email: config.email,
+          amount: config.amount,
+          currency: config.currency || 'GHS',
+          ref: config.reference,
+          metadata: config.metadata || {},
+          onSuccess: function(transaction) {
+            console.log('✅ Payment successful:', transaction);
+            resolve(transaction);
+          },
+          onCancel: function() {
+            console.log('❌ Payment cancelled by user');
+            reject(new Error('Payment was cancelled'));
+          },
+          onError: function(error) {
+            console.error('❌ Payment error:', error);
+            reject(new Error(error.message || 'Payment failed'));
+          }
+        });
+        return;
+      }
+
+      // Method 3: Direct transaction call
+      if (typeof paystack === 'function') {
+        paystack({
+          key: config.key || PAYSTACK_LIVE_PUBLIC_KEY,
+          email: config.email,
+          amount: config.amount,
+          currency: config.currency || 'GHS',
+          ref: config.reference,
+          metadata: config.metadata || {},
+          onSuccess: function(transaction) {
+            console.log('✅ Payment successful:', transaction);
+            resolve(transaction);
+          },
+          onCancel: function() {
+            console.log('❌ Payment cancelled by user');
+            reject(new Error('Payment was cancelled'));
+          },
+          onError: function(error) {
+            console.error('❌ Payment error:', error);
+            reject(new Error(error.message || 'Payment failed'));
+          }
+        });
+        return;
+      }
+
+      // If none of the methods work, throw error
+      console.error('❌ No valid Paystack method found. Available methods:', Object.keys(paystack));
+      reject(new Error('Paystack not properly initialized. Please contact support.'));
+
+    } catch (error) {
+      console.error('❌ Error opening Paystack popup:', error);
+      reject(new Error(error.message || 'Failed to open payment window'));
+    }
   });
 };
 
