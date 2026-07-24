@@ -4,10 +4,22 @@
 // PAYSTACK LIVE MODE CONFIGURATION
 // ============================================
 
-// IMPORTANT: Replace these with your LIVE Paystack keys
+// IMPORTANT: Always use environment variables for sensitive keys!
+// NEVER hardcode keys in your source code
 // Get your keys from: https://dashboard.paystack.com/#/settings/developer
-const PAYSTACK_LIVE_PUBLIC_KEY = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY || 'pk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
-const PAYSTACK_SECRET_KEY = process.env.REACT_APP_PAYSTACK_SECRET_KEY || 'sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+// Add them to your .env file:
+// REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY=pk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+// REACT_APP_PAYSTACK_SECRET_KEY=sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+// Load keys from environment variables - NEVER hardcode!
+const PAYSTACK_LIVE_PUBLIC_KEY = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY || '';
+const PAYSTACK_SECRET_KEY = process.env.REACT_APP_PAYSTACK_SECRET_KEY || '';
+
+// Check if keys are configured
+const HAS_VALID_KEYS = PAYSTACK_LIVE_PUBLIC_KEY && 
+                       PAYSTACK_LIVE_PUBLIC_KEY.startsWith('pk_live_') &&
+                       PAYSTACK_SECRET_KEY && 
+                       PAYSTACK_SECRET_KEY.startsWith('sk_live_');
 
 // API URL for live transactions
 const PAYSTACK_API_URL = 'https://api.paystack.co';
@@ -15,7 +27,9 @@ const PAYSTACK_API_URL = 'https://api.paystack.co';
 // Check if we're in production mode
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
-console.log(`🔐 Paystack running in ${IS_PRODUCTION ? 'LIVE' : 'DEVELOPMENT'} mode`);
+// Log status (but NEVER log the actual keys!)
+console.log(`🔐 Paystack configured: ${HAS_VALID_KEYS ? '✅ LIVE MODE READY' : '⚠️ Missing or invalid keys'}`);
+console.log(`🔐 Environment: ${IS_PRODUCTION ? 'PRODUCTION' : 'DEVELOPMENT'}`);
 
 /**
  * Initialize a payment transaction
@@ -25,6 +39,11 @@ console.log(`🔐 Paystack running in ${IS_PRODUCTION ? 'LIVE' : 'DEVELOPMENT'} 
  * @returns {Promise} - Paystack transaction data
  */
 export const initializePayment = async (email, amount, metadata = {}) => {
+  // Validate that keys are configured
+  if (!HAS_VALID_KEYS) {
+    throw new Error('Paystack is not properly configured. Please check your environment variables.');
+  }
+
   try {
     const response = await fetch(`${PAYSTACK_API_URL}/transaction/initialize`, {
       method: 'POST',
@@ -45,9 +64,8 @@ export const initializePayment = async (email, amount, metadata = {}) => {
         },
         // Live mode channels
         channels: ['card', 'mobile_money', 'bank_transfer', 'qr'],
-        // Add this to prevent test mode
+        // Additional production-specific parameters
         ...(IS_PRODUCTION && { 
-          // Additional production-specific parameters
           plan: undefined,
           invoice_limit: undefined,
         })
@@ -74,6 +92,11 @@ export const initializePayment = async (email, amount, metadata = {}) => {
  * @returns {Promise} - Verification result
  */
 export const verifyTransaction = async (reference) => {
+  // Validate that keys are configured
+  if (!HAS_VALID_KEYS) {
+    throw new Error('Paystack is not properly configured. Please check your environment variables.');
+  }
+
   try {
     const response = await fetch(`${PAYSTACK_API_URL}/transaction/verify/${reference}`, {
       method: 'GET',
@@ -103,6 +126,11 @@ export const verifyTransaction = async (reference) => {
  * @returns {Promise} - List of transactions
  */
 export const listTransactions = async (params = {}) => {
+  // Validate that keys are configured
+  if (!HAS_VALID_KEYS) {
+    throw new Error('Paystack is not properly configured. Please check your environment variables.');
+  }
+
   try {
     const queryString = new URLSearchParams(params).toString();
     const response = await fetch(`${PAYSTACK_API_URL}/transaction?${queryString}`, {
@@ -126,14 +154,7 @@ export const listTransactions = async (params = {}) => {
  * @returns {boolean} - True if live mode is configured
  */
 export const isLiveModeConfigured = () => {
-  const publicKey = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY;
-  const secretKey = process.env.REACT_APP_PAYSTACK_SECRET_KEY;
-  
-  // Check if keys are set and not the default test keys
-  const isLivePublic = publicKey && publicKey.startsWith('pk_live_') && publicKey !== 'pk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
-  const isLiveSecret = secretKey && secretKey.startsWith('sk_live_') && secretKey !== 'sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
-  
-  return isLivePublic && isLiveSecret;
+  return HAS_VALID_KEYS;
 };
 
 /**
@@ -141,7 +162,7 @@ export const isLiveModeConfigured = () => {
  * @returns {string} - 'live' or 'test'
  */
 export const getCurrentMode = () => {
-  return isLiveModeConfigured() ? 'live' : 'test';
+  return HAS_VALID_KEYS ? 'live' : 'test';
 };
 
 // Export all functions as a service object
@@ -151,10 +172,7 @@ const paystackService = {
   listTransactions,
   isLiveModeConfigured,
   getCurrentMode,
-  PAYSTACK_LIVE_PUBLIC_KEY,
-  PAYSTACK_SECRET_KEY,
-  PAYSTACK_API_URL,
-  IS_PRODUCTION
+  // IMPORTANT: Don't export the keys! They should only be used internally
 };
 
 export default paystackService;
