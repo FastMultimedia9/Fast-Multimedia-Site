@@ -339,6 +339,10 @@ const Admissions = () => {
 // PAYSTACK PAYMENT HANDLER - FIXED
 // ============================================
   
+// ============================================
+// PAYSTACK PAYMENT HANDLER - FIXED
+// ============================================
+  
 const handlePaystackPayment = async () => {
   if (!paymentEmail || !paymentName || !paymentPhone) {
     setPaymentError('Please fill in all required fields (Name, Email, Phone).');
@@ -398,6 +402,42 @@ const handlePaystackPayment = async () => {
         gender: paymentGender
       }
     });
+
+    console.log('✅ Payment successful:', paymentResult);
+
+    // Step 3: ONLY NOW - Payment was successful, generate the serial number
+    console.log('💰 Payment verified, generating serial number...');
+    
+    const newSerial = await generateSerial();
+    setGeneratedSerial(newSerial);
+    console.log('✅ Secure serial generated:', newSerial);
+
+    // Step 4: Save records and send email
+    await handlePaymentSuccess(paymentResult, newSerial);
+    
+  } catch (error) {
+    console.error('❌ Payment error:', error);
+    
+    if (error.message === 'Payment was cancelled') {
+      setPaymentError('Payment was cancelled. You can try again when ready.');
+    } else {
+      setPaymentError(error.message || 'Payment failed. Please try again.');
+    }
+    
+    // If payment fails, clean up any serial that might have been generated
+    if (generatedSerial) {
+      try {
+        console.log('🧹 Cleaning up serial due to payment failure:', generatedSerial);
+        // You might want to delete the serial from Firebase here
+        // await deleteDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, generatedSerial));
+      } catch (deleteError) {
+        console.warn('Could not clean up serial:', deleteError);
+      }
+    }
+  } finally {
+    setIsProcessingPayment(false);
+  }
+};
 
     console.log('✅ Payment successful:', paymentResult);
 
