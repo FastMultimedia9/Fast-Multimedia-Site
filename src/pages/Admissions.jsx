@@ -41,7 +41,7 @@ import {
   markSerialAsUsed,
   getSerialCount
 } from '../services/firebaseService';
-import { initializePayment, openPaystackPopup } from '../services/paystackService';
+import { initializePayment } from '../services/paystackService';
 import { sendSerialEmail } from '../services/emailService';
 import './Admissions.css';
 
@@ -332,151 +332,148 @@ const Admissions = () => {
   };
 
   // ============================================
-  // PAYSTACK PAYMENT HANDLER - FIXED
+  // PAYSTACK PAYMENT HANDLER - COMPLETE FIXED VERSION
   // ============================================
   
-  // ============================================
-// PAYSTACK PAYMENT HANDLER - FIXED
-// ============================================
-  
-// ============================================
-// PAYSTACK PAYMENT HANDLER - FIXED
-// ============================================
-  
-// ============================================
-// PAYSTACK PAYMENT HANDLER - FIXED
-// ============================================
-  
-const handlePaystackPayment = async () => {
-  if (!paymentEmail || !paymentName || !paymentPhone) {
-    setPaymentError('Please fill in all required fields (Name, Email, Phone).');
-    return;
-  }
-
-  // Validate email format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(paymentEmail)) {
-    setPaymentError('Please enter a valid email address.');
-    return;
-  }
-
-  setPaymentError('');
-  setIsProcessingPayment(true);
-
-  try {
-    // Step 1: Initialize the payment with Paystack
-    console.log('🔄 Initializing Paystack payment...');
-    
-    const paymentResponse = await initializePayment(
-      paymentEmail,
-      100, // GH₵ 100
-      {
-        name: paymentName,
-        phone: paymentPhone,
-        course: selectedCourseForPayment || 'Not specified',
-        type: 'admission_form',
-        dateOfBirth: paymentDateOfBirth,
-        gender: paymentGender
-      }
-    );
-
-    console.log('✅ Payment initialized, reference:', paymentResponse.reference);
-
-    // Step 2: Open Paystack popup using the correct setup method
-    console.log('🔄 Opening Paystack popup...');
-    
-    // Make sure the key is available
-    const publicKey = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY;
-    if (!publicKey) {
-      throw new Error('Paystack public key is not configured');
+  const handlePaystackPayment = async () => {
+    if (!paymentEmail || !paymentName || !paymentPhone) {
+      setPaymentError('Please fill in all required fields (Name, Email, Phone).');
+      return;
     }
 
-    // Check if Paystack is loaded
-    if (typeof window.PaystackPop === 'undefined') {
-      throw new Error('Paystack not loaded. Please refresh and try again.');
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(paymentEmail)) {
+      setPaymentError('Please enter a valid email address.');
+      return;
     }
 
-    // Use the correct setup method
-    const paystack = window.PaystackPop;
-    console.log('🔍 Available Paystack methods:', Object.keys(paystack));
+    setPaymentError('');
+    setIsProcessingPayment(true);
 
-    if (typeof paystack.setup !== 'function') {
-      throw new Error('Paystack not properly initialized. Please contact support.');
-    }
-
-    // Open payment popup and wait for result
-    const paymentResult = await new Promise((resolve, reject) => {
-      const handler = paystack.setup({
-        key: publicKey,
-        email: paymentEmail,
-        amount: 100 * 100, // Convert to pesewas
-        currency: 'GHS',
-        ref: paymentResponse.reference,
-        metadata: {
+    try {
+      // Step 1: Initialize the payment with Paystack
+      console.log('🔄 Initializing Paystack payment...');
+      
+      const paymentResponse = await initializePayment(
+        paymentEmail,
+        100, // GH₵ 100
+        {
           name: paymentName,
           phone: paymentPhone,
           course: selectedCourseForPayment || 'Not specified',
           type: 'admission_form',
           dateOfBirth: paymentDateOfBirth,
           gender: paymentGender
-        },
-        callback: function(response) {
-          console.log('✅ Payment successful:', response);
-          resolve(response);
-        },
-        onClose: function() {
-          console.log('❌ Payment window closed by user');
-          reject(new Error('Payment was cancelled'));
+        }
+      );
+
+      console.log('✅ Payment initialized, reference:', paymentResponse.reference);
+
+      // Step 2: Open Paystack popup using the correct setup method
+      console.log('🔄 Opening Paystack popup...');
+      
+      // Make sure the key is available
+      const publicKey = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY;
+      if (!publicKey) {
+        throw new Error('Paystack public key is not configured');
+      }
+
+      // Check if Paystack is loaded
+      if (typeof window.PaystackPop === 'undefined') {
+        throw new Error('Paystack not loaded. Please refresh and try again.');
+      }
+
+      // Use the correct setup method
+      const paystack = window.PaystackPop;
+      console.log('🔍 Available Paystack methods:', Object.keys(paystack));
+
+      if (typeof paystack.setup !== 'function') {
+        throw new Error('Paystack not properly initialized. Please contact support.');
+      }
+
+      // Open payment popup and wait for result
+      const paymentResult = await new Promise((resolve, reject) => {
+        const handler = paystack.setup({
+          key: publicKey,
+          email: paymentEmail,
+          amount: 100 * 100, // Convert to pesewas
+          currency: 'GHS',
+          ref: paymentResponse.reference,
+          metadata: {
+            name: paymentName,
+            phone: paymentPhone,
+            course: selectedCourseForPayment || 'Not specified',
+            type: 'admission_form',
+            dateOfBirth: paymentDateOfBirth,
+            gender: paymentGender
+          },
+          callback: function(response) {
+            console.log('✅ Payment successful:', response);
+            resolve(response);
+          },
+          onClose: function() {
+            console.log('❌ Payment window closed by user');
+            reject(new Error('Payment was cancelled'));
+          }
+        });
+
+        // Open the payment iframe
+        if (typeof handler.openIframe === 'function') {
+          handler.openIframe();
+        } else if (typeof handler.open === 'function') {
+          handler.open();
+        } else if (typeof handler === 'function') {
+          handler();
+        } else {
+          reject(new Error('Could not open payment window'));
         }
       });
 
-      // Open the payment iframe
-      if (typeof handler.openIframe === 'function') {
-        handler.openIframe();
-      } else if (typeof handler.open === 'function') {
-        handler.open();
-      } else if (typeof handler === 'function') {
-        handler();
+      console.log('✅ Payment successful:', paymentResult);
+
+      // Step 3: ONLY NOW - Payment was successful, generate the serial number
+      console.log('💰 Payment verified, generating serial number...');
+      
+      const newSerial = await generateSerial();
+      setGeneratedSerial(newSerial);
+      console.log('✅ Secure serial generated:', newSerial);
+
+      // Step 4: Save records and send email
+      await handlePaymentSuccess(paymentResult, newSerial);
+      
+    } catch (error) {
+      console.error('❌ Payment error:', error);
+      
+      // Check for specific Paystack errors
+      const errorMessage = error.message || 'Payment failed. Please try again.';
+      
+      if (errorMessage.includes('cancelled')) {
+        setPaymentError('Payment was cancelled. You can try again when ready.');
+      } else if (errorMessage.includes('limit')) {
+        setPaymentError('The mobile money number has reached its transaction limit. Please try:\n• A different mobile money number\n• Pay with Card\n• Pay with Bank Transfer');
+      } else if (errorMessage.includes('insufficient')) {
+        setPaymentError('Insufficient balance. Please check your mobile money balance or try a different payment method.');
+      } else if (errorMessage.includes('Paystack not loaded')) {
+        setPaymentError('Payment system is loading. Please refresh and try again.');
       } else {
-        reject(new Error('Could not open payment window'));
+        setPaymentError(errorMessage);
       }
-    });
-
-    console.log('✅ Payment successful:', paymentResult);
-
-    // Step 3: ONLY NOW - Payment was successful, generate the serial number
-    console.log('💰 Payment verified, generating serial number...');
-    
-    const newSerial = await generateSerial();
-    setGeneratedSerial(newSerial);
-    console.log('✅ Secure serial generated:', newSerial);
-
-    // Step 4: Save records and send email
-    await handlePaymentSuccess(paymentResult, newSerial);
-    
-  } catch (error) {
-    console.error('❌ Payment error:', error);
-    
-    if (error.message === 'Payment was cancelled') {
-      setPaymentError('Payment was cancelled. You can try again when ready.');
-    } else {
-      setPaymentError(error.message || 'Payment failed. Please try again.');
-    }
-    
-    // If payment fails, clean up any serial that might have been generated
-    if (generatedSerial) {
-      try {
-        console.log('🧹 Cleaning up serial due to payment failure:', generatedSerial);
-        // You might want to delete the serial from Firebase here
-        // await deleteDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, generatedSerial));
-      } catch (deleteError) {
-        console.warn('Could not clean up serial:', deleteError);
+      
+      // If payment fails, clean up any serial that might have been generated
+      if (generatedSerial) {
+        try {
+          console.log('🧹 Cleaning up serial due to payment failure:', generatedSerial);
+          // You might want to delete the serial from Firebase here
+          // await deleteDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, generatedSerial));
+        } catch (deleteError) {
+          console.warn('Could not clean up serial:', deleteError);
+        }
       }
+    } finally {
+      setIsProcessingPayment(false);
     }
-  } finally {
-    setIsProcessingPayment(false);
-  }
-};
+  };
 
   // ============================================
   // PAYMENT SUCCESS HANDLER
@@ -994,7 +991,7 @@ const handlePaystackPayment = async () => {
               </div>
 
               {paymentError && (
-                <div className="payment-error">
+                <div className="payment-error" style={{whiteSpace: 'pre-line'}}>
                   <FaInfoCircle /> {paymentError}
                 </div>
               )}
