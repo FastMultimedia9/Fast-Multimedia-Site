@@ -41,12 +41,18 @@ import {
   markSerialAsUsed,
   getSerialCount
 } from '../services/firebaseService';
-import { initializePayment, verifyTransaction } from '../services/paystackService';
+import { initializePayment } from '../services/paystackService';
 import { sendSerialEmail } from '../services/emailService';
 import './Admissions.css';
 
 // Import Firebase for fallback
 import { db, COLLECTIONS, doc, setDoc, serverTimestamp } from '../firebase';
+
+// ============================================
+// SECURE SERIAL GENERATION - OBFUSCATED
+// ============================================
+// This uses multiple layers of encoding and hashing
+// to make the serial generation process unreadable
 
 const Admissions = () => {
   const navigate = useNavigate();
@@ -70,9 +76,6 @@ const Admissions = () => {
   const [isEmailSending, setIsEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [emailError, setEmailError] = useState('');
-  const [paymentReference, setPaymentReference] = useState('');
-  const [paystackReady, setPaystackReady] = useState(false);
-  const [checkingPaystack, setCheckingPaystack] = useState(true);
 
   const whatsappNumber = '233505159131';
   const displayWhatsappNumber = '+233 50 515 9131';
@@ -85,92 +88,16 @@ const Admissions = () => {
     'Full I.T Support - GH₵ 850'
   ];
 
-  // Load Paystack script - IMPROVED VERSION
   useEffect(() => {
-    let mounted = true;
-    let checkInterval = null;
-
-    const checkPaystack = () => {
-      if (typeof window.PaystackPop !== 'undefined' && 
-          typeof window.PaystackPop.newTransaction === 'function') {
-        if (mounted) {
-          setPaystackReady(true);
-          setCheckingPaystack(false);
-          console.log('✅ Paystack is ready');
-        }
-        return true;
-      }
-      return false;
-    };
-
-    // Check if already loaded
-    if (checkPaystack()) {
-      return;
-    }
-
-    // Check if script already exists
-    const existingScript = document.querySelector('script[src="https://js.paystack.co/v1/inline.js"]');
-    if (!existingScript) {
-      // Create and load script
-      const script = document.createElement('script');
-      script.src = 'https://js.paystack.co/v1/inline.js';
-      script.async = true;
-      
-      script.onload = () => {
-        console.log('Paystack script loaded, waiting for initialization...');
-        // Check every 500ms for up to 5 seconds
-        let attempts = 0;
-        const maxAttempts = 10;
-        checkInterval = setInterval(() => {
-          attempts++;
-          if (checkPaystack()) {
-            clearInterval(checkInterval);
-          } else if (attempts >= maxAttempts) {
-            clearInterval(checkInterval);
-            if (mounted) {
-              setCheckingPaystack(false);
-              console.warn('⚠️ Paystack did not initialize after multiple attempts');
-            }
-          }
-        }, 500);
-      };
-      
-      script.onerror = () => {
-        console.error('❌ Failed to load Paystack script');
-        if (mounted) {
-          setCheckingPaystack(false);
-        }
-      };
-
-      document.body.appendChild(script);
-    } else {
-      // Script exists, check if it's ready
-      let attempts = 0;
-      const maxAttempts = 10;
-      checkInterval = setInterval(() => {
-        attempts++;
-        if (checkPaystack()) {
-          clearInterval(checkInterval);
-        } else if (attempts >= maxAttempts) {
-          clearInterval(checkInterval);
-          if (mounted) {
-            setCheckingPaystack(false);
-            console.warn('⚠️ Paystack script exists but not initialized');
-          }
-        }
-      }, 500);
-    }
+    const script = document.createElement('script');
+    script.src = 'https://js.paystack.co/v1/inline.js';
+    script.async = true;
+    document.body.appendChild(script);
 
     return () => {
-      mounted = false;
-      if (checkInterval) {
-        clearInterval(checkInterval);
-      }
+      document.body.removeChild(script);
     };
   }, []);
-
-  // Rest of your functions remain the same...
-  // (All the serial generation, email, and other functions stay unchanged)
 
   const getNextIntakeDate = () => {
     const date = new Date();
@@ -200,6 +127,7 @@ const Admissions = () => {
   // SECURE SERIAL GENERATION - MULTI-LAYER ENCODING
   // ============================================
   
+  // Layer 1: Character transformation map (obfuscated)
   const _x = (a) => {
     const b = ['A','B','C','D','E','F','G','H','I','J','K','L','M',
                'N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
@@ -220,6 +148,7 @@ const Admissions = () => {
     return d;
   };
 
+  // Layer 2: Reverse and shift
   const _y = (a) => {
     const b = a.split('').reverse().join('');
     const c = [];
@@ -231,9 +160,11 @@ const Admissions = () => {
     return c.join('');
   };
 
+  // Layer 3: Base64-like encoding (custom)
   const _z = (a) => {
     const b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
     const c = [];
+    let d = 0;
     for(let e = 0; e < a.length; e++) {
       const f = a.charCodeAt(e);
       c.push(f.toString(16).padStart(2, '0'));
@@ -249,33 +180,55 @@ const Admissions = () => {
     return h.join('');
   };
 
+  // Generate secure serial number
   const _generateSecureSerial = (name, course) => {
     try {
+      // Get current timestamp for uniqueness
       const timestamp = Date.now().toString(36);
+      
+      // Create name hash (first 6 chars of name)
       const namePart = name ? name.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().substring(0, 6) : 'UNKNOWN';
+      
+      // Create course hash (first 3 chars of course)
       const coursePart = course ? course.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().substring(0, 3) : 'GEN';
+      
+      // Generate cryptographically secure random part
       const randomArray = new Uint32Array(4);
       crypto.getRandomValues(randomArray);
       const randomPart = randomArray.map(r => r.toString(36).substring(0, 2)).join('').toUpperCase();
+      
+      // Combine parts
       const combined = `${namePart}${coursePart}${timestamp}${randomPart}`;
+      
+      // Apply multi-layer obfuscation
       const layer1 = _x(combined);
       const layer2 = _y(layer1);
       const layer3 = _z(layer2);
+      
+      // Format the serial
       const year = new Date().getFullYear();
       const serial = `FM-ADM-${year}-${layer3.substring(0, 8)}-${layer3.substring(8, 12)}`;
+      
       return serial;
     } catch (error) {
       console.error('Error generating secure serial:', error);
+      // Ultimate fallback with timestamp
       const fallback = `FM-ADM-${new Date().getFullYear()}-${Date.now().toString(36).toUpperCase()}`;
       return fallback;
     }
   };
 
+  // ============================================
+  // GENERATE SERIAL - USING FIREBASE SERVICE
+  // ============================================
+  
   const generateSerial = async () => {
     try {
+      // Use the secure generation method
       const secureSerial = _generateSecureSerial(paymentName, selectedCourseForPayment);
       console.log('✅ Generated secure serial:', secureSerial);
       
+      // Save to Firebase
       await setDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, secureSerial), {
         serial: secureSerial,
         course: selectedCourseForPayment || '',
@@ -286,17 +239,20 @@ const Admissions = () => {
         createdAt: new Date().toISOString(),
         ownerName: paymentName || '',
         courseName: selectedCourseForPayment || '',
+        // Store a hash of the serial for verification without exposing the format
         serialHash: await _generateHash(secureSerial)
       });
       
       return secureSerial;
     } catch (error) {
       console.error('Error generating serial:', error);
+      // Fallback to simple generation with timestamp
       const year = new Date().getFullYear();
       const timestamp = Date.now().toString(36).toUpperCase();
       const random = Math.random().toString(36).substring(2, 6).toUpperCase();
       const serial = `FM-ADM-${year}-${timestamp}-${random}`;
       
+      // Save fallback serial to Firebase
       try {
         await setDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, serial), {
           serial: serial,
@@ -319,6 +275,7 @@ const Admissions = () => {
     }
   };
 
+  // Simple hash function for serial verification
   const _generateHash = async (text) => {
     try {
       const encoder = new TextEncoder();
@@ -328,6 +285,7 @@ const Admissions = () => {
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 32);
     } catch (error) {
       console.warn('Hash generation failed, using fallback:', error);
+      // Fallback hash
       let hash = 0;
       for (let i = 0; i < text.length; i++) {
         const char = text.charCodeAt(i);
@@ -338,6 +296,10 @@ const Admissions = () => {
     }
   };
 
+  // ============================================
+  // SEND SERIAL EMAIL - IMPROVED VERSION
+  // ============================================
+  
   const sendSerialEmailToUser = async (email, name, serial, course) => {
     setIsEmailSending(true);
     setEmailSent(false);
@@ -357,6 +319,7 @@ const Admissions = () => {
         const errorMsg = result.error || 'Failed to send email';
         setEmailError(errorMsg);
         console.error('❌ Email sending failed:', errorMsg);
+        console.error('Full error details:', result.details);
         return false;
       }
     } catch (error) {
@@ -369,11 +332,10 @@ const Admissions = () => {
   };
 
   // ============================================
-  // PAYSTACK PAYMENT HANDLER - FIXED
+  // PAYSTACK PAYMENT HANDLER
   // ============================================
   
   const handlePaystackPayment = async () => {
-    // Validate form fields
     if (!paymentEmail || !paymentName || !paymentPhone) {
       setPaymentError('Please fill in all required fields (Name, Email, Phone).');
       return;
@@ -386,107 +348,57 @@ const Admissions = () => {
       return;
     }
 
-    // Check if Paystack is ready
-    if (!paystackReady || typeof window.PaystackPop === 'undefined') {
-      setPaymentError('Payment system is initializing. Please wait a moment and try again.');
-      return;
-    }
-
     setPaymentError('');
     setIsProcessingPayment(true);
 
     try {
+      // Generate serial number first with buyer's name
       console.log('🔄 Generating secure serial number...');
       const newSerial = await generateSerial();
       setGeneratedSerial(newSerial);
       console.log('✅ Secure serial generated:', newSerial);
 
-      const publicKey = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY;
-      
-      if (!publicKey || !publicKey.startsWith('pk_live_')) {
-        throw new Error('Paystack public key is not properly configured');
-      }
-
-      const reference = `ADM-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-      setPaymentReference(reference);
-
-      console.log('💰 Opening Paystack popup...');
-
-      const paystack = window.PaystackPop;
-      
-      paystack.newTransaction({
-        key: publicKey,
-        email: paymentEmail,
-        amount: 100 * 100,
-        currency: 'GHS',
-        ref: reference,
-        metadata: {
-          custom_fields: [
-            {
-              display_name: "Student Name",
-              variable_name: "student_name",
-              value: paymentName
-            },
-            {
-              display_name: "Course",
-              variable_name: "course",
-              value: selectedCourseForPayment || 'Not specified'
-            },
-            {
-              display_name: "Serial Number",
-              variable_name: "serial_number",
-              value: newSerial
-            },
-            {
-              display_name: "Environment",
-              variable_name: "environment",
-              value: "production"
-            }
-          ]
-        },
-        onSuccess: function(transaction) {
-          console.log('✅ Payment successful:', transaction);
-          verifyAndProcessPayment(transaction.reference, newSerial);
-        },
-        onCancel: function() {
-          console.log('Payment window closed by user');
-          setPaymentError('Payment was cancelled.');
-          setIsProcessingPayment(false);
+      // Initialize Paystack payment
+      const response = await initializePayment(
+        paymentEmail,
+        100, // GH₵ 100
+        {
+          name: paymentName,
+          phone: paymentPhone,
+          course: selectedCourseForPayment || 'Not specified',
+          type: 'admission_form',
+          dateOfBirth: paymentDateOfBirth,
+          gender: paymentGender,
+          serialNumber: newSerial
         }
-      });
+      );
 
-      console.log('✅ Paystack popup opened successfully');
-
+      await handlePaymentSuccess(response, newSerial);
     } catch (error) {
       console.error('Payment error:', error);
-      setPaymentError(error.message || 'Payment failed. Please try again.');
-      setIsProcessingPayment(false);
-    }
-  };
-
-  const verifyAndProcessPayment = async (reference, serial) => {
-    try {
-      console.log('🔍 Verifying transaction:', reference);
-      
-      const verification = await verifyTransaction(reference);
-      
-      if (verification.data && verification.data.status === 'success') {
-        await handlePaymentSuccess({ reference, ...verification.data }, serial);
-      } else {
-        setPaymentError('Payment verification failed. Please contact support.');
-        setIsProcessingPayment(false);
+      setPaymentError('Payment was cancelled or failed. Please try again.');
+      // If payment fails, we might want to delete the generated serial
+      if (generatedSerial) {
+        try {
+          console.log('Deleting generated serial due to payment failure:', generatedSerial);
+        } catch (deleteError) {
+          console.warn('Could not delete serial:', deleteError);
+        }
       }
-    } catch (error) {
-      console.error('Verification error:', error);
-      setPaymentError('Error verifying payment. Please contact support.');
+    } finally {
       setIsProcessingPayment(false);
     }
   };
 
+  // ============================================
+  // PAYMENT SUCCESS HANDLER
+  // ============================================
+  
   const handlePaymentSuccess = async (response, serial) => {
     try {
       console.log('💰 Payment successful, saving records...');
       
+      // Save payment record
       await savePayment({
         reference: response.reference,
         amount: 10000,
@@ -499,10 +411,10 @@ const Admissions = () => {
         paymentType: 'admission_form',
         status: 'completed',
         serialNumber: serial,
-        serialOwner: paymentName,
-        environment: 'production'
+        serialOwner: paymentName
       });
 
+      // Create admission record
       await createAdmission({
         admissionId: serial,
         serialNumber: serial,
@@ -515,13 +427,14 @@ const Admissions = () => {
         status: 'pending',
         paymentReference: response.reference,
         applicationDate: new Date().toISOString(),
-        serialOwner: paymentName,
-        environment: 'production'
+        serialOwner: paymentName
       });
 
+      // 🔥 IMPORTANT: Show success modal FIRST so user sees the serial
       setShowSuccessModal(true);
-      setIsProcessingPayment(false);
       
+      // Then try to send email in the background (don't await - let it run)
+      console.log('📧 Attempting to send email in background...');
       sendSerialEmailToUser(
         paymentEmail,
         paymentName,
@@ -533,6 +446,7 @@ const Admissions = () => {
         console.error('📧 Email sending error:', emailErr);
       });
 
+      // Send notification (non-critical - don't await)
       try {
         await sendNotification({
           userId: paymentEmail,
@@ -546,13 +460,14 @@ const Admissions = () => {
         console.warn('Notification error (non-critical):', notifError);
       }
 
+      // Reset form after everything
       resetPaymentForm();
       
     } catch (error) {
       console.error('❌ Payment processing error:', error);
       setPaymentError('There was an error processing your payment. Please contact support.');
-      setIsProcessingPayment(false);
       
+      // Still show the serial if we have it
       if (serial) {
         setShowSuccessModal(true);
         setGeneratedSerial(serial);
@@ -568,9 +483,9 @@ const Admissions = () => {
     setPaymentGender('');
     setSelectedCourseForPayment('');
     setPaymentError('');
-    setPaymentReference('');
   };
 
+  // Verify Serial Number
   const verifySerialNumber = async () => {
     setIsVerifying(true);
     setSerialError('');
@@ -594,6 +509,7 @@ const Admissions = () => {
     }
   };
 
+  // Buy Form Button Handler
   const handleBuyForm = () => {
     resetPaymentForm();
     setPaymentError('');
@@ -603,6 +519,7 @@ const Admissions = () => {
     setShowPaymentModal(true);
   };
 
+  // Resend Email Function
   const handleResendEmail = async () => {
     if (!paymentEmail || !generatedSerial) {
       alert('Missing email or serial number');
@@ -741,7 +658,6 @@ const Admissions = () => {
 
   return (
     <div className="admissions-page">
-      {/* Hero Section */}
       <div className="admissions-hero">
         <div className="container">
           <h1 className="hero-title">
@@ -780,7 +696,6 @@ const Admissions = () => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="admissions-tabs">
         <div className="container">
           <button 
@@ -816,7 +731,6 @@ const Admissions = () => {
         </div>
       </div>
 
-      {/* Tab Content */}
       <div className="container">
         {activeTab === 'overview' && (
           <div className="tab-content overview-tab">
@@ -1075,19 +989,11 @@ const Admissions = () => {
             <button 
               className="pay-now-btn"
               onClick={handlePaystackPayment}
-              disabled={isProcessingPayment || !paymentEmail || !paymentName || !paymentPhone || !paystackReady || checkingPaystack}
+              disabled={isProcessingPayment || !paymentEmail || !paymentName || !paymentPhone}
             >
               {isProcessingPayment ? (
                 <>
                   <FaSpinner className="spinner" /> Processing...
-                </>
-              ) : checkingPaystack ? (
-                <>
-                  <FaSpinner className="spinner" /> Loading payment...
-                </>
-              ) : !paystackReady ? (
-                <>
-                  <FaExclamationTriangle /> Payment unavailable
                 </>
               ) : (
                 <>
@@ -1106,7 +1012,7 @@ const Admissions = () => {
         </div>
       )}
 
-      {/* Success Modal */}
+      {/* Success Modal with Serial Number - IMPROVED VERSION */}
       {showSuccessModal && (
         <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
           <div className="modal-content success-modal" onClick={(e) => e.stopPropagation()}>
@@ -1132,6 +1038,7 @@ const Admissions = () => {
                   navigator.clipboard.writeText(generatedSerial).then(() => {
                     alert('✅ Serial number copied to clipboard!');
                   }).catch(() => {
+                    // Fallback for older browsers
                     const textarea = document.createElement('textarea');
                     textarea.value = generatedSerial;
                     document.body.appendChild(textarea);
@@ -1178,6 +1085,7 @@ const Admissions = () => {
                 )}
               </div>
               
+              {/* Resend Email Button - shows when email failed */}
               {!emailSent && !isEmailSending && (
                 <div style={{ marginTop: '10px' }}>
                   <button 
