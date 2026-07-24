@@ -41,7 +41,7 @@ import {
   markSerialAsUsed,
   getSerialCount
 } from '../services/firebaseService';
-import { initializePayment } from '../services/paystackService';
+import { initializePayment, openPaystackPopup } from '../services/paystackService';
 import { sendSerialEmail } from '../services/emailService';
 import './Admissions.css';
 
@@ -332,7 +332,7 @@ const Admissions = () => {
   };
 
   // ============================================
-  // PAYSTACK PAYMENT HANDLER
+  // PAYSTACK PAYMENT HANDLER - FIXED
   // ============================================
   
   const handlePaystackPayment = async () => {
@@ -352,14 +352,10 @@ const Admissions = () => {
     setIsProcessingPayment(true);
 
     try {
-      // Generate serial number first with buyer's name
-      console.log('🔄 Generating secure serial number...');
-      const newSerial = await generateSerial();
-      setGeneratedSerial(newSerial);
-      console.log('✅ Secure serial generated:', newSerial);
-
-      // Initialize Paystack payment
-      const response = await initializePayment(
+      // Step 1: Initialize the payment with Paystack
+      console.log('🔄 Initializing Paystack payment...');
+      
+      const paymentResponse = await initializePayment(
         paymentEmail,
         100, // GH₵ 100
         {
@@ -368,21 +364,60 @@ const Admissions = () => {
           course: selectedCourseForPayment || 'Not specified',
           type: 'admission_form',
           dateOfBirth: paymentDateOfBirth,
-          gender: paymentGender,
-          serialNumber: newSerial
+          gender: paymentGender
         }
       );
 
-      await handlePaymentSuccess(response, newSerial);
+      console.log('✅ Payment initialized, reference:', paymentResponse.reference);
+
+      // Step 2: Open Paystack popup and wait for user to complete payment
+      console.log('🔄 Opening Paystack popup...');
+      
+      const paymentResult = await openPaystackPopup({
+        key: process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY,
+        email: paymentEmail,
+        amount: 100 * 100, // Convert to pesewas
+        currency: 'GHS',
+        reference: paymentResponse.reference,
+        metadata: {
+          name: paymentName,
+          phone: paymentPhone,
+          course: selectedCourseForPayment || 'Not specified',
+          type: 'admission_form',
+          dateOfBirth: paymentDateOfBirth,
+          gender: paymentGender
+        }
+      });
+
+      console.log('✅ Payment successful:', paymentResult);
+
+      // Step 3: ONLY NOW - Payment was successful, generate the serial number
+      console.log('💰 Payment verified, generating serial number...');
+      
+      const newSerial = await generateSerial();
+      setGeneratedSerial(newSerial);
+      console.log('✅ Secure serial generated:', newSerial);
+
+      // Step 4: Save records and send email
+      await handlePaymentSuccess(paymentResult, newSerial);
+      
     } catch (error) {
-      console.error('Payment error:', error);
-      setPaymentError('Payment was cancelled or failed. Please try again.');
-      // If payment fails, we might want to delete the generated serial
+      console.error('❌ Payment error:', error);
+      
+      if (error.message === 'Payment was cancelled') {
+        setPaymentError('Payment was cancelled. You can try again when ready.');
+      } else {
+        setPaymentError(error.message || 'Payment failed. Please try again.');
+      }
+      
+      // If payment fails, clean up any serial that might have been generated
       if (generatedSerial) {
         try {
-          console.log('Deleting generated serial due to payment failure:', generatedSerial);
+          console.log('🧹 Cleaning up serial due to payment failure:', generatedSerial);
+          // You might want to delete the serial from Firebase here
+          // await deleteDoc(doc(db, COLLECTIONS.SERIAL_NUMBERS, generatedSerial));
         } catch (deleteError) {
-          console.warn('Could not delete serial:', deleteError);
+          console.warn('Could not clean up serial:', deleteError);
         }
       }
     } finally {
@@ -400,8 +435,8 @@ const Admissions = () => {
       
       // Save payment record
       await savePayment({
-        reference: response.reference,
-        amount: 10000,
+        reference: response.reference || response.transRef || 'unknown',
+        amount: 10000, // 100 GHS in pesewas
         email: paymentEmail,
         course: selectedCourseForPayment,
         name: paymentName,
@@ -425,7 +460,7 @@ const Admissions = () => {
         gender: paymentGender,
         course: selectedCourseForPayment,
         status: 'pending',
-        paymentReference: response.reference,
+        paymentReference: response.reference || response.transRef || 'unknown',
         applicationDate: new Date().toISOString(),
         serialOwner: paymentName
       });
