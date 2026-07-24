@@ -75,8 +75,7 @@ const Admissions = () => {
   const [emailSent, setEmailSent] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [paymentReference, setPaymentReference] = useState('');
-  const [paystackLoaded, setPaystackLoaded] = useState(false);
-  const [paystackLoading, setPaystackLoading] = useState(true);
+  const [paystackReady, setPaystackReady] = useState(false);
 
   const whatsappNumber = '233505159131';
   const displayWhatsappNumber = '+233 50 515 9131';
@@ -89,81 +88,73 @@ const Admissions = () => {
     'Full I.T Support - GH₵ 850'
   ];
 
-  // Load Paystack script with improved handling
+  // Load Paystack script - SIMPLIFIED VERSION
   useEffect(() => {
-    const loadPaystackScript = () => {
-      // Check if Paystack is already loaded
+    let scriptLoaded = false;
+    let loadAttempts = 0;
+    const maxAttempts = 5;
+
+    const loadPaystack = () => {
+      // Check if already loaded
       if (typeof window.PaystackPop !== 'undefined' && window.PaystackPop.newTransaction) {
-        setPaystackLoaded(true);
-        setPaystackLoading(false);
-        console.log('✅ Paystack already loaded');
+        setPaystackReady(true);
+        console.log('✅ Paystack is ready');
         return;
       }
 
-      // Create script element
+      // Check if script already exists
+      const existingScript = document.querySelector('script[src="https://js.paystack.co/v1/inline.js"]');
+      if (existingScript) {
+        // Wait for it to load
+        const checkReady = setInterval(() => {
+          if (typeof window.PaystackPop !== 'undefined' && window.PaystackPop.newTransaction) {
+            setPaystackReady(true);
+            clearInterval(checkReady);
+            console.log('✅ Paystack became ready');
+          }
+        }, 500);
+        return;
+      }
+
+      // Create and load script
       const script = document.createElement('script');
       script.src = 'https://js.paystack.co/v1/inline.js';
       script.async = true;
       
-      // Handle script load
       script.onload = () => {
-        // Wait a moment for the script to fully initialize
-        setTimeout(() => {
+        scriptLoaded = true;
+        // Check if ready
+        const checkReady = setInterval(() => {
           if (typeof window.PaystackPop !== 'undefined' && window.PaystackPop.newTransaction) {
-            setPaystackLoaded(true);
+            setPaystackReady(true);
+            clearInterval(checkReady);
             console.log('✅ Paystack script loaded and ready');
-          } else {
-            console.warn('⚠️ Paystack loaded but not fully initialized');
-            // Try loading again
-            loadPaystackScript();
           }
-          setPaystackLoading(false);
         }, 500);
+        
+        // Stop checking after 5 seconds
+        setTimeout(() => clearInterval(checkReady), 5000);
       };
       
       script.onerror = () => {
         console.error('❌ Failed to load Paystack script');
-        setPaystackLoading(false);
-        setPaystackLoaded(false);
+        // Retry if under max attempts
+        if (loadAttempts < maxAttempts) {
+          loadAttempts++;
+          setTimeout(loadPaystack, 2000);
+        }
       };
 
       document.body.appendChild(script);
-      
-      // Cleanup
-      return () => {
-        if (script.parentNode) {
-          document.body.removeChild(script);
-        }
-      };
     };
 
-    loadPaystackScript();
+    loadPaystack();
 
-    // Also check periodically if Paystack becomes available
-    const checkInterval = setInterval(() => {
-      if (typeof window.PaystackPop !== 'undefined' && window.PaystackPop.newTransaction) {
-        setPaystackLoaded(true);
-        setPaystackLoading(false);
-        clearInterval(checkInterval);
-      }
-    }, 1000);
-
-    // Cleanup interval
+    // Cleanup
     return () => {
-      clearInterval(checkInterval);
+      // Don't remove the script as other components might need it
     };
   }, []);
-
-  // Check if Paystack is ready
-  const isPaystackReady = () => {
-    const isReady = typeof window.PaystackPop !== 'undefined' && 
-                   typeof window.PaystackPop.newTransaction === 'function';
-    
-    if (isReady) {
-      setPaystackLoaded(true);
-    }
-    return isReady;
-  };
 
   const getNextIntakeDate = () => {
     const date = new Date();
@@ -393,22 +384,9 @@ const Admissions = () => {
       return;
     }
 
-    // Check if Paystack is loaded - if not, try to load it
-    if (!isPaystackReady()) {
+    // Check if Paystack is ready
+    if (!paystackReady || typeof window.PaystackPop === 'undefined') {
       setPaymentError('Payment system is initializing. Please wait a moment and try again.');
-      // Try to load Paystack again
-      const script = document.createElement('script');
-      script.src = 'https://js.paystack.co/v1/inline.js';
-      script.async = true;
-      script.onload = () => {
-        setTimeout(() => {
-          if (typeof window.PaystackPop !== 'undefined') {
-            setPaystackLoaded(true);
-            console.log('✅ Paystack loaded on retry');
-          }
-        }, 500);
-      };
-      document.body.appendChild(script);
       return;
     }
 
@@ -435,10 +413,9 @@ const Admissions = () => {
 
       console.log('💰 Opening Paystack popup...');
 
-      // Directly use window.PaystackPop - this should work now
+      // Open the payment popup using newTransaction
       const paystack = window.PaystackPop;
       
-      // Open the payment popup using newTransaction
       paystack.newTransaction({
         key: publicKey,
         email: paymentEmail,
@@ -1108,13 +1085,13 @@ const Admissions = () => {
             <button 
               className="pay-now-btn"
               onClick={handlePaystackPayment}
-              disabled={isProcessingPayment || !paymentEmail || !paymentName || !paymentPhone || paystackLoading}
+              disabled={isProcessingPayment || !paymentEmail || !paymentName || !paymentPhone || !paystackReady}
             >
               {isProcessingPayment ? (
                 <>
                   <FaSpinner className="spinner" /> Processing...
                 </>
-              ) : paystackLoading ? (
+              ) : !paystackReady ? (
                 <>
                   <FaSpinner className="spinner" /> Loading payment...
                 </>
