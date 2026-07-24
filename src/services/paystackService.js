@@ -70,7 +70,7 @@ export const initializePayment = async (email, amount, metadata = {}) => {
           payment_type: 'admission_form',
           timestamp: new Date().toISOString()
         },
-        // Live mode channels
+        // Live mode channels - include all payment options
         channels: ['card', 'mobile_money', 'bank_transfer', 'qr'],
       }),
     });
@@ -89,67 +89,8 @@ export const initializePayment = async (email, amount, metadata = {}) => {
   }
 };
 
-/**
- * Open Paystack payment popup - Using the correct 'setup' method
- * @param {Object} config - Paystack configuration
- * @returns {Promise} - Resolves when payment is successful, rejects on cancel/error
- */
-export const openPaystackPopup = (config) => {
-  return new Promise((resolve, reject) => {
-    // Check if Paystack is loaded
-    if (typeof window.PaystackPop === 'undefined') {
-      console.error('❌ Paystack not loaded');
-      reject(new Error('Payment system is not loaded. Please refresh and try again.'));
-      return;
-    }
-
-    const paystack = window.PaystackPop;
-
-    // Log available methods for debugging
-    console.log('🔍 Available Paystack methods:', Object.keys(paystack));
-
-    // Check if setup method exists (this is the correct method)
-    if (typeof paystack.setup !== 'function') {
-      console.error('❌ Paystack.setup is not a function. Available methods:', Object.keys(paystack));
-      reject(new Error('Paystack not properly initialized. Please contact support.'));
-      return;
-    }
-
-    try {
-      // Use the setup method (correct for Paystack inline.js)
-      const handler = paystack.setup({
-        key: config.key || PAYSTACK_LIVE_PUBLIC_KEY,
-        email: config.email,
-        amount: config.amount,
-        currency: config.currency || 'GHS',
-        ref: config.reference,
-        metadata: config.metadata || {},
-        callback: function(response) {
-          console.log('✅ Payment successful:', response);
-          resolve(response);
-        },
-        onClose: function() {
-          console.log('❌ Payment window closed by user');
-          reject(new Error('Payment was cancelled'));
-        }
-      });
-
-      // Open the payment iframe
-      if (typeof handler.openIframe === 'function') {
-        handler.openIframe();
-      } else if (typeof handler.open === 'function') {
-        handler.open();
-      } else {
-        // Some versions use the handler directly
-        handler();
-      }
-
-    } catch (error) {
-      console.error('❌ Error opening Paystack popup:', error);
-      reject(new Error(error.message || 'Failed to open payment window'));
-    }
-  });
-};
+// Note: We're no longer exporting openPaystackPopup from here
+// The payment popup is now handled directly in the component
 
 /**
  * Verify a transaction
@@ -243,7 +184,6 @@ export const isPaystackLoaded = () => {
 // Export all functions as a service object
 const paystackService = {
   initializePayment,
-  openPaystackPopup,
   verifyTransaction,
   listTransactions,
   isLiveModeConfigured,
