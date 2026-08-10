@@ -66,6 +66,57 @@ const PortfolioPage = () => {
     },
     {
       id: 4,
+      title: 'WATER ADVERT - Product Photography',
+      category: 'print',
+      description: 'Professional water product advertisement photography and design',
+      detailedDescription: 'A stunning water product advertisement created to showcase the purity and freshness of the product. The design features professional product photography with clean, refreshing visual elements that highlight the product\'s key selling points.',
+      tags: ['Product Photography', 'Advertisement', 'Brand Identity', 'Commercial Design', 'Visual Marketing'],
+      image: 'WATER ADVERT.jpg',
+      client: 'Beverage Company',
+      year: '2026',
+      duration: '1 week',
+      role: 'Creative Designer & Photographer',
+      deliverables: ['Product Photography', 'Advertisement Design', 'Digital Assets', 'Print Materials'],
+      results: ['Compelling visual campaign', 'Enhanced brand perception', 'Effective product presentation'],
+      color: '#0097A7',
+      mockups: []
+    },
+    {
+      id: 5,
+      title: 'APRO - Brand & Product Design',
+      category: 'branding',
+      description: 'Complete brand identity and product design for APRO brand',
+      detailedDescription: 'Comprehensive brand identity development for APRO, including logo design, product packaging, and promotional materials. The design creates a strong, memorable brand presence that stands out in the market.',
+      tags: ['Brand Identity', 'Logo Design', 'Product Design', 'Packaging', 'Visual Identity'],
+      image: 'apro.jpg',
+      client: 'APRO Brand',
+      year: '2026',
+      duration: '3 weeks',
+      role: 'Lead Brand Designer',
+      deliverables: ['Brand Identity System', 'Logo Design', 'Product Packaging', 'Brand Guidelines'],
+      results: ['Strong brand presence', 'Market differentiation', 'Positive brand recognition'],
+      color: '#E65100',
+      mockups: []
+    },
+    {
+      id: 6,
+      title: 'CHOSE - Lifestyle Brand Identity',
+      category: 'branding',
+      description: 'Modern lifestyle brand design with "Choose Your Life" philosophy',
+      detailedDescription: 'Created a comprehensive brand identity for CHOSE, a lifestyle brand centered around the philosophy of "Choose Your Life." The design includes logo development, color palette, typography system, and application across various brand touchpoints.',
+      tags: ['Brand Identity', 'Lifestyle Brand', 'Logo Design', 'Typography', 'Brand Philosophy'],
+      image: 'CHOSE.jpg',
+      client: 'CHOSE Lifestyle Brand',
+      year: '2026',
+      duration: '2 weeks',
+      role: 'Brand Identity Designer',
+      deliverables: ['Logo Design', 'Brand Guidelines', 'Typography System', 'Brand Applications'],
+      results: ['Distinctive brand identity', 'Strong brand philosophy', 'Versatile brand system'],
+      color: '#7B1FA2',
+      mockups: []
+    },
+    {
+      id: 7,
       title: 'Organic Food Packaging Series',
       category: 'packaging',
       description: 'Sustainable packaging design for organic food product line across multiple categories',
@@ -82,7 +133,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 5,
+      id: 8,
       title: 'Tech Startup Corporate Website',
       category: 'web',
       description: 'Modern corporate website design with investor relations and recruitment sections',
@@ -99,7 +150,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 6,
+      id: 9,
       title: 'Fitness App UI/UX Design',
       category: 'uiux',
       description: 'Mobile fitness app design with workout tracking and community features',
@@ -116,7 +167,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 7,
+      id: 10,
       title: 'Ani\'s Serabs - Business Identity',
       category: 'branding',
       description: 'Clean, modern business card design for Ani\'s Serabs with essential contact details',
@@ -133,7 +184,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 8,
+      id: 11,
       title: 'Julie\'s Birthday Celebration Design',
       category: 'event',
       description: 'Personalized birthday graphic designed for a special celebration',
@@ -150,7 +201,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 9,
+      id: 12,
       title: 'YouTube T-Shirt Design',
       category: 'print',
       description: 'Bold, typography-focused t-shirt design featuring a modern stacked graphic',
@@ -167,7 +218,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 10,
+      id: 13,
       title: 'Mr. Wise Clothing - Brand Identity',
       category: 'branding',
       description: 'Sophisticated logo for Mr. Wise Clothing with tagline "Exclusively Different"',
@@ -184,7 +235,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 11,
+      id: 14,
       title: 'Abidan Royal Mango Ice-Cream Label',
       category: 'packaging',
       description: 'Product label design for Abidan Royal Mango Ice-Cream with clear ingredient listing',
@@ -201,7 +252,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 12,
+      id: 15,
       title: 'Methylated Spirit Label - St. Martin Hospital',
       category: 'packaging',
       description: 'Professional pharmaceutical label with clear safety warnings and usage instructions',
@@ -218,7 +269,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 13,
+      id: 16,
       title: 'Mr. Wise Mobile Money Services Flyer',
       category: 'print',
       description: 'Informative flyer for Mr. Wise Mobile Money Services with service listings',
@@ -235,7 +286,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 14,
+      id: 17,
       title: 'Funeral Program - Celebration of Life',
       category: 'print',
       description: 'Comprehensive funeral program design with ceremonial arrangements and family listings',
@@ -252,7 +303,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 15,
+      id: 18,
       title: 'St. Martin Hospital Ultrasound Unit Flyer',
       category: 'print',
       description: 'Promotional flyer for ultrasound services at St. Martin Hospital',
@@ -269,7 +320,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 16,
+      id: 19,
       title: 'St. Martin Hospital CT Scan Services',
       category: 'print',
       description: 'CT scan services information design for hospital patients',
@@ -286,7 +337,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 17,
+      id: 20,
       title: 'Anchor Grfix Business Services Flyer',
       category: 'print',
       description: 'Comprehensive business services promotion for Anchor Grfix',
@@ -303,7 +354,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 18,
+      id: 21,
       title: 'Kitchen Business Logo Design',
       category: 'branding',
       description: 'Clean and appetizing logo design for kitchen/food business',
@@ -320,7 +371,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 19,
+      id: 22,
       title: 'Valentine\'s Day Event Program Outline',
       category: 'event',
       description: 'Detailed event program outline for Valentine\'s Day workplace celebration',
@@ -337,7 +388,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 20,
+      id: 23,
       title: 'Fast Multimedia Business Promotion',
       category: 'print',
       description: 'Business promotion design for Fast Multimedia services',
@@ -354,7 +405,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 21,
+      id: 24,
       title: 'St. Martin Goes Traditional Event',
       category: 'event',
       description: 'Cultural event promotion for hospital traditional day celebration',
@@ -371,7 +422,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 22,
+      id: 25,
       title: 'Fast Multimedia Promotion Flyer',
       category: 'print',
       description: 'Promotional flyer for Fast Multimedia services with contact information',
@@ -388,7 +439,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 23,
+      id: 26,
       title: 'St. Martin Hospital Farmers Day Celebration',
       category: 'event',
       description: 'Farmers Day celebration design for St. Martin De Porres Catholic Hospital',
@@ -405,7 +456,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 24,
+      id: 27,
       title: 'Fast Multimedia Birthday Greeting Design',
       category: 'event',
       description: 'Elegant birthday greeting design with typographic focus',
@@ -422,7 +473,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 25,
+      id: 28,
       title: 'Fast Multimedia Birthday Celebration',
       category: 'event',
       description: 'Celebratory birthday design with grace, favour, and money theme',
@@ -439,7 +490,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 26,
+      id: 29,
       title: 'Fast Multimedia Corporate Identity',
       category: 'branding',
       description: 'Corporate branding and visual identity system for Fast Multimedia agency',
@@ -456,24 +507,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 27,
-      title: 'Fast Multimedia Birthday Greeting',
-      category: 'event',
-      description: 'Festive birthday celebration graphic with interactive elements',
-      detailedDescription: 'Created an engaging birthday greeting card with interactive elements for Fast Multimedia\'s celebration. The design features vibrant colors and celebratory typography.',
-      tags: ['Greeting Card', 'Event Design', 'Digital Art', 'Celebration', 'Interactive'],
-      image: 'fast-multimedia-birthday.jpg',
-      client: 'Fast Multimedia',
-      year: '2025',
-      duration: '2 days',
-      role: 'Digital Designer',
-      deliverables: ['Digital Greeting Card', 'Social Media Assets', 'Animated Version'],
-      results: ['Enhanced company celebrations', 'Increased social media engagement', 'Positive employee feedback'],
-      color: '#FF6B6B',
-      mockups: []
-    },
-    {
-      id: 28,
+      id: 30,
       title: 'Soco Wale Restaurant Menu',
       category: 'print',
       description: 'Modern restaurant menu design for Soco Wale food service',
@@ -490,24 +524,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 29,
-      title: 'Fast Multimedia Event Poster',
-      category: 'print',
-      description: 'Dynamic event poster for Fast Multimedia promotional activities',
-      detailedDescription: 'Created an eye-catching event poster featuring innovative typography and layout design. The poster effectively communicates event details while maintaining brand consistency.',
-      tags: ['Event Poster', 'Typography', 'Promotional Material', 'Graphic Design', 'Layout'],
-      image: 'fast-multimedia-event.jpg',
-      client: 'Fast Multimedia',
-      year: '2025',
-      duration: '3 days',
-      role: 'Graphic Designer',
-      deliverables: ['Event Poster', 'Social Media Graphics', 'Digital Ads'],
-      results: ['Effective event promotion', 'Consistent branding', 'High visibility'],
-      color: '#9C27B0',
-      mockups: []
-    },
-    {
-      id: 30,
+      id: 31,
       title: 'HONE7PIT Events Flyer',
       category: 'event',
       description: 'Vibrant event flyer design for HONE7PIT entertainment company',
@@ -524,7 +541,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 31,
+      id: 32,
       title: 'Fun Trip After Work Experience',
       category: 'event',
       description: 'Travel package promotional design for post-work experience trip',
@@ -541,7 +558,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 32,
+      id: 33,
       title: 'VISG PUB New Year\'s Party',
       category: 'event',
       description: 'New Year\'s Eve party promotion design for VISG PUB',
@@ -558,7 +575,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 33,
+      id: 34,
       title: 'Nancy J Closet Business Card',
       category: 'branding',
       description: 'Modern business card design for Nancy J Closet fashion brand',
@@ -575,7 +592,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 34,
+      id: 35,
       title: 'RhaySam\'s IT Solutions Flyer',
       category: 'print',
       description: 'Comprehensive IT services promotional flyer design',
@@ -592,7 +609,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 35,
+      id: 36,
       title: 'KTU Hall Week Launch',
       category: 'event',
       description: 'University hall week launch event design for KTU',
@@ -609,7 +626,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 36,
+      id: 37,
       title: 'Kumvana Hall Week Program',
       category: 'event',
       description: 'Comprehensive hall week program design and schedule',
@@ -623,23 +640,6 @@ const PortfolioPage = () => {
       deliverables: ['Program Schedule', 'Event Outline', 'Print Materials'],
       results: ['Organized event scheduling', 'Clear activity communication', 'Professional presentation'],
       color: '#4CAF50',
-      mockups: []
-    },
-    {
-      id: 37,
-      title: 'Birthday Celebration Greeting',
-      category: 'event',
-      description: 'Personalized birthday greeting card design with joyful elements',
-      detailedDescription: 'Created a heartfelt birthday greeting card featuring joyful elements, peace symbols, and celebratory typography for special occasions.',
-      tags: ['Greeting Card', 'Personal Design', 'Celebration', 'Digital Art', 'Typography'],
-      image: 'birthday-greeting-joy.jpg',
-      client: 'Personal Client',
-      year: '2025',
-      duration: '1 day',
-      role: 'Digital Designer',
-      deliverables: ['Digital Greeting Card', 'Social Media Version', 'Printable Version'],
-      results: ['Personalized celebration', 'Emotional connection', 'Memorable design'],
-      color: '#FF9800',
       mockups: []
     },
     {
@@ -661,40 +661,6 @@ const PortfolioPage = () => {
     },
     {
       id: 39,
-      title: 'Minimalist Birthday Greeting',
-      category: 'event',
-      description: 'Clean, minimalist birthday greeting design with essential elements',
-      detailedDescription: 'Created a minimalist birthday greeting focusing on essential elements, clean typography, and subtle design elements.',
-      tags: ['Minimalist Design', 'Greeting Card', 'Typography', 'Digital Art', 'Celebration'],
-      image: 'minimalist-birthday.jpg',
-      client: 'Personal Client',
-      year: '2025',
-      duration: '1 day',
-      role: 'Digital Designer',
-      deliverables: ['Digital Greeting', 'Social Media Asset', 'Clean Design'],
-      results: ['Modern aesthetic', 'Clean presentation', 'Versatile usage'],
-      color: '#607D8B',
-      mockups: []
-    },
-    {
-      id: 40,
-      title: 'Inspirational Birthday Greeting',
-      category: 'event',
-      description: 'Motivational birthday greeting with inspirational message',
-      detailedDescription: 'Designed a birthday greeting featuring inspirational messages and motivational elements for special celebrations.',
-      tags: ['Inspirational Design', 'Greeting Card', 'Typography', 'Digital Art', 'Celebration'],
-      image: 'inspirational-birthday.jpg',
-      client: 'Personal Client',
-      year: '2025',
-      duration: '2 days',
-      role: 'Digital Designer',
-      deliverables: ['Digital Greeting', 'Inspirational Design', 'Printable Version'],
-      results: ['Motivational impact', 'Personalized message', 'Emotional design'],
-      color: '#9C27B0',
-      mockups: []
-    },
-    {
-      id: 41,
       title: 'Sewahu Naming Ceremony Invitation',
       category: 'event',
       description: 'Traditional naming ceremony invitation design',
@@ -711,7 +677,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 42,
+      id: 40,
       title: 'St. Martin Hospital Monthly Outline',
       category: 'print',
       description: 'Monthly activity outline design for hospital events and campaigns',
@@ -728,7 +694,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 43,
+      id: 41,
       title: 'Funeral Appreciation Card',
       category: 'print',
       description: 'Appreciation card design for funeral service with spiritual message',
@@ -745,7 +711,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 44,
+      id: 42,
       title: 'Visual Tribute Memorial Design',
       category: 'print',
       description: 'Visual tribute design celebrating a life well-lived',
@@ -762,7 +728,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 45,
+      id: 43,
       title: 'Fast Multimedia Institute School Flyer',
       category: 'print',
       description: 'Professional marketing flyer for online certificate courses',
@@ -779,7 +745,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 46,
+      id: 44,
       title: 'Institute Celebration - Anticipate Event',
       category: 'event',
       description: 'Celebration event flyer design for Institute with anticipation theme',
@@ -796,7 +762,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 47,
+      id: 45,
       title: 'Clean-Up Exercise with Health Screening',
       category: 'event',
       description: 'Community clean-up exercise and health screening event flyer',
@@ -813,7 +779,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 48,
+      id: 46,
       title: 'St. Martin Staff Business Expo',
       category: 'event',
       description: 'Staff business expo exhibition space booking flyer',
@@ -829,9 +795,8 @@ const PortfolioPage = () => {
       color: '#C62828',
       mockups: []
     },
-    // ===== NEW 7 PROJECTS =====
     {
-      id: 49,
+      id: 47,
       title: 'Eco-Friendly Product Packaging',
       category: 'packaging',
       description: 'Sustainable packaging design for eco-conscious consumer products',
@@ -848,141 +813,136 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      
-  id: 50,
-  title: 'St. Martin Hospital - REP YOUR GHANA Jersey Event',
-  category: 'branding',
-  description: 'Complete brand identity and promotional design for hospital sports event and jersey launch',
-  detailedDescription: 'Created a comprehensive brand identity and promotional materials for St. Martin De Porres Catholic Hospital\'s "REP YOUR GHANA" jersey event. The design celebrates national pride through sports, featuring bold typography, patriotic colors, and a modern jersey design. The branding includes event posters, digital assets, jersey mockups, and wayfinding signage. The visual language combines healthcare professionalism with Ghanaian cultural elements and sporting energy.',
-  tags: ['Brand Identity', 'Event Branding', 'Sports Design', 'Jersey Design', 'Hospital Event', 'Ghana Pride'],
-  image: 'REP1.jpg',
-  client: 'St. Martin De Porres Catholic Hospital, Agomanya',
-  year: '2026',
-  duration: '3 weeks',
-  role: 'Lead Brand & Event Designer',
-  deliverables: [
-    'Event Brand Identity', 
-    'Jersey Design', 
-    'Promotional Posters', 
-    'Digital Assets',
-    'Wayfinding Signage',
-    'Social Media Graphics',
-    'Event Program Design'
-  ],
-  results: [
-    'Successfully branded hospital sports event',
-    'High community participation',
-    'Strengthened hospital-community relations',
-    'Positive brand recognition'
-  ],
-  color: '#C62828',
-  mockups: [
-    '/images/mockups/jersey-mockup-1.jpg',
-    '/images/mockups/jersey-mockup-2.jpg'
-  ]
-},
+      id: 48,
+      title: 'St. Martin Hospital - REP YOUR GHANA Jersey Event',
+      category: 'branding',
+      description: 'Complete brand identity and promotional design for hospital sports event and jersey launch',
+      detailedDescription: 'Created a comprehensive brand identity and promotional materials for St. Martin De Porres Catholic Hospital\'s "REP YOUR GHANA" jersey event. The design celebrates national pride through sports, featuring bold typography, patriotic colors, and a modern jersey design. The branding includes event posters, digital assets, jersey mockups, and wayfinding signage. The visual language combines healthcare professionalism with Ghanaian cultural elements and sporting energy.',
+      tags: ['Brand Identity', 'Event Branding', 'Sports Design', 'Jersey Design', 'Hospital Event', 'Ghana Pride'],
+      image: 'REP1.jpg',
+      client: 'St. Martin De Porres Catholic Hospital, Agomanya',
+      year: '2026',
+      duration: '3 weeks',
+      role: 'Lead Brand & Event Designer',
+      deliverables: [
+        'Event Brand Identity', 
+        'Jersey Design', 
+        'Promotional Posters', 
+        'Digital Assets',
+        'Wayfinding Signage',
+        'Social Media Graphics',
+        'Event Program Design'
+      ],
+      results: [
+        'Successfully branded hospital sports event',
+        'High community participation',
+        'Strengthened hospital-community relations',
+        'Positive brand recognition'
+      ],
+      color: '#C62828',
+      mockups: [
+        '/images/mockups/jersey-mockup-1.jpg',
+        '/images/mockups/jersey-mockup-2.jpg'
+      ]
+    },
     {
-      
-  
-  id: 51,
-  title: 'FASTMULTIMEDIA - Sports Brand Identity',
-  category: 'branding',
-  description: 'Complete brand identity system for FASTMULTIMEDIA sports division with FIFA partnership branding',
-  detailedDescription: 'Developed a comprehensive brand identity for FASTMULTIMEDIA\'s sports division, featuring official partnership branding with FIFA and CHAN. The design includes a bold, dynamic logo system, brand guidelines, and promotional materials that convey athletic excellence, professionalism, and global sporting prestige. The visual language combines modern typography with energetic sports aesthetics.',
-  tags: ['Brand Identity', 'Sports Branding', 'FIFA Partnership', 'Logo Design', 'Corporate Branding'],
-  image: 'ghana.jpg',
-  client: 'FASTMULTIMEDIA Sports Division',
-  year: '2026',
-  duration: '4 weeks',
-  role: 'Lead Brand Designer',
-  deliverables: [
-    'Logo System & Variations', 
-    'Brand Guidelines', 
-    'FIFA Partnership Assets', 
-    'Promotional Materials',
-    'Digital Assets',
-    'Merchandise Design',
-    'Event Branding'
-  ],
-  results: [
-    'Official FIFA partnership branding established',
-    'CHAN tournament brand integration',
-    'Enhanced corporate brand recognition',
-    'Successful sports division launch'
-  ],
-  color: '#1A1A2E',
-  mockups: [
-    '/images/mockups/sports-brand-1.jpg',
-    '/images/mockups/sports-brand-2.jpg'
-  ]
-},
+      id: 49,
+      title: 'FASTMULTIMEDIA - Sports Brand Identity',
+      category: 'branding',
+      description: 'Complete brand identity system for FASTMULTIMEDIA sports division with FIFA partnership branding',
+      detailedDescription: 'Developed a comprehensive brand identity for FASTMULTIMEDIA\'s sports division, featuring official partnership branding with FIFA and CHAN. The design includes a bold, dynamic logo system, brand guidelines, and promotional materials that convey athletic excellence, professionalism, and global sporting prestige. The visual language combines modern typography with energetic sports aesthetics.',
+      tags: ['Brand Identity', 'Sports Branding', 'FIFA Partnership', 'Logo Design', 'Corporate Branding'],
+      image: 'ghana.jpg',
+      client: 'FASTMULTIMEDIA Sports Division',
+      year: '2026',
+      duration: '4 weeks',
+      role: 'Lead Brand Designer',
+      deliverables: [
+        'Logo System & Variations', 
+        'Brand Guidelines', 
+        'FIFA Partnership Assets', 
+        'Promotional Materials',
+        'Digital Assets',
+        'Merchandise Design',
+        'Event Branding'
+      ],
+      results: [
+        'Official FIFA partnership branding established',
+        'CHAN tournament brand integration',
+        'Enhanced corporate brand recognition',
+        'Successful sports division launch'
+      ],
+      color: '#1A1A2E',
+      mockups: [
+        '/images/mockups/sports-brand-1.jpg',
+        '/images/mockups/sports-brand-2.jpg'
+      ]
+    },
     {
-      
-  id: 52,
-  title: 'GRNMA - St. Martin Excursion Event Design',
-  category: 'event',
-  description: 'Complete event branding and promotional design for GRNMA St. Martin chapter excursion',
-  detailedDescription: 'Designed comprehensive event branding and promotional materials for the GRNMA (Ghana Registered Nurses and Midwives Association) St. Martin, Agomanya chapter excursion. The design includes event posters, registration materials, and promotional assets that create excitement and clarity for participants. The visual identity combines professional healthcare branding with vibrant, energetic event aesthetics.',
-  tags: ['Event Design', 'Healthcare Branding', 'Promotional Design', 'Excursion', 'Registration Materials'],
-  image: 'grnma.jpg',
-  client: 'GRNMA - St. Martin, Agomanya Chapter',
-  year: '2026',
-  duration: '2 weeks',
-  role: 'Lead Event & Brand Designer',
-  deliverables: [
-    'Event Poster Design', 
-    'Registration Materials', 
-    'Promotional Graphics', 
-    'Digital Assets',
-    'Social Media Promotion',
-    'Information Materials'
-  ],
-  results: [
-    'Successful excursion promotion', 
-    'High member participation', 
-    'Positive engagement from healthcare professionals',
-    'Strengthened chapter community spirit'
-  ],
-  color: '#004D40',
-  mockups: [
-    '/images/mockups/excursion-poster.jpg'
-  ]
-},
+      id: 50,
+      title: 'GRNMA - St. Martin Excursion Event Design',
+      category: 'event',
+      description: 'Complete event branding and promotional design for GRNMA St. Martin chapter excursion',
+      detailedDescription: 'Designed comprehensive event branding and promotional materials for the GRNMA (Ghana Registered Nurses and Midwives Association) St. Martin, Agomanya chapter excursion. The design includes event posters, registration materials, and promotional assets that create excitement and clarity for participants. The visual identity combines professional healthcare branding with vibrant, energetic event aesthetics.',
+      tags: ['Event Design', 'Healthcare Branding', 'Promotional Design', 'Excursion', 'Registration Materials'],
+      image: 'grnma.jpg',
+      client: 'GRNMA - St. Martin, Agomanya Chapter',
+      year: '2026',
+      duration: '2 weeks',
+      role: 'Lead Event & Brand Designer',
+      deliverables: [
+        'Event Poster Design', 
+        'Registration Materials', 
+        'Promotional Graphics', 
+        'Digital Assets',
+        'Social Media Promotion',
+        'Information Materials'
+      ],
+      results: [
+        'Successful excursion promotion', 
+        'High member participation', 
+        'Positive engagement from healthcare professionals',
+        'Strengthened chapter community spirit'
+      ],
+      color: '#004D40',
+      mockups: [
+        '/images/mockups/excursion-poster.jpg'
+      ]
+    },
     {
-      
-  id: 53,
-  title: 'Ms. Eunice Ntownanor - Memorial Tribute Design',
-  category: 'print',
-  description: 'Dignified memorial tribute design celebrating the life of Ms. Eunice Ntownanor (Anaesthetist)',
-  detailedDescription: 'Created a respectful and dignified memorial tribute design for Ms. Eunice Ntownanor (1981-2026), a dedicated anaesthetist. The design commemorates her life and professional legacy with elegant typography, subtle visual elements, and a serene color palette. The tribute materials include funeral programs, memorial cards, and remembrance booklets that honor her contribution to healthcare and her impact on colleagues and family.',
-  tags: ['Memorial Design', 'Funeral Program', 'Healthcare Professional', 'Tribute Design', 'Print Design', 'Legacy'],
-  image: 'Eunice 2.jpg',
-  client: 'Family of Ms. Eunice Ntownanor',
-  year: '2026',
-  duration: '3 days',
-  role: 'Lead Memorial & Print Designer',
-  deliverables: [
-    'Memorial Tribute Design', 
-    'Funeral Program', 
-    'Memorial Cards', 
-    'Remembrance Booklet',
-    'Digital Tribute',
-    'Order of Service'
-  ],
-  results: [
-    'Dignified memorial tribute', 
-    'Celebrated professional legacy', 
-    'Provided comfort to family and colleagues',
-    'Honored her contribution to healthcare'
-  ],
-  color: '#5D4037',
-  mockups: [
-    '/images/mockups/memorial-tribute-1.jpg',
-    '/images/mockups/memorial-tribute-2.jpg'
-  ]
-},
+      id: 51,
+      title: 'Ms. Eunice Ntownanor - Memorial Tribute Design',
+      category: 'print',
+      description: 'Dignified memorial tribute design celebrating the life of Ms. Eunice Ntownanor (Anaesthetist)',
+      detailedDescription: 'Created a respectful and dignified memorial tribute design for Ms. Eunice Ntownanor (1981-2026), a dedicated anaesthetist. The design commemorates her life and professional legacy with elegant typography, subtle visual elements, and a serene color palette. The tribute materials include funeral programs, memorial cards, and remembrance booklets that honor her contribution to healthcare and her impact on colleagues and family.',
+      tags: ['Memorial Design', 'Funeral Program', 'Healthcare Professional', 'Tribute Design', 'Print Design', 'Legacy'],
+      image: 'Eunice 2.jpg',
+      client: 'Family of Ms. Eunice Ntownanor',
+      year: '2026',
+      duration: '3 days',
+      role: 'Lead Memorial & Print Designer',
+      deliverables: [
+        'Memorial Tribute Design', 
+        'Funeral Program', 
+        'Memorial Cards', 
+        'Remembrance Booklet',
+        'Digital Tribute',
+        'Order of Service'
+      ],
+      results: [
+        'Dignified memorial tribute', 
+        'Celebrated professional legacy', 
+        'Provided comfort to family and colleagues',
+        'Honored her contribution to healthcare'
+      ],
+      color: '#5D4037',
+      mockups: [
+        '/images/mockups/memorial-tribute-1.jpg',
+        '/images/mockups/memorial-tribute-2.jpg'
+      ]
+    },
     {
-      id: 54,
+      id: 52,
       title: 'Creative Agency Portfolio Website',
       category: 'web',
       description: 'Dynamic portfolio website design for award-winning creative agency',
@@ -999,7 +959,7 @@ const PortfolioPage = () => {
       mockups: []
     },
     {
-      id: 55,
+      id: 53,
       title: 'Craft Beer Label Collection',
       category: 'packaging',
       description: 'Bold, artistic label designs for craft beer brand\'s seasonal collection',
@@ -1017,7 +977,7 @@ const PortfolioPage = () => {
     }
   ];
 
-  // Categories with updated counts (55 projects total)
+  // Categories with updated counts (53 projects total)
   const categories = [
     { id: 'all', name: 'All Projects', icon: 'fas fa-th', count: allProjects.length },
     { id: 'web', name: 'Web Design', icon: 'fas fa-desktop', count: allProjects.filter(p => p.category === 'web').length },
