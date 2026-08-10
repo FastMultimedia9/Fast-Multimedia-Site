@@ -942,6 +942,7 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.85);
   /* backdrop-filter: blur(10px); - REMOVED to fix blur issue */
+  /* -webkit-backdrop-filter: blur(10px); - REMOVED for Safari */
   z-index: 1000;
 }
 
