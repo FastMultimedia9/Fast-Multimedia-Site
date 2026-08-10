@@ -911,6 +911,7 @@
 }
 
 /* ===== PROJECT MODAL ===== */
+/* ===== PROJECT MODAL ===== */
 .project-modal {
   position: fixed;
   top: 0;
@@ -940,9 +941,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
-  /* backdrop-filter: blur(10px); - REMOVED to fix blur issue */
-  /* -webkit-backdrop-filter: blur(10px); - REMOVED for Safari */
+  background: rgba(0, 0, 0, 0.6); /* Dark but NO blur */
+  /* NO backdrop-filter here */
   z-index: 1000;
 }
 
@@ -956,6 +956,7 @@
   overflow-y: auto;
   z-index: 1001;
   animation: modalSlideIn 0.3s ease;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); /* Add shadow instead of blur */
 }
 
 @keyframes modalSlideIn {
@@ -1043,10 +1044,13 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-.modal-image img {
+ .modal-image img {
   width: 100%;
   height: auto;
   display: block;
+  /* Ensure image is crisp */
+  image-rendering: auto;
+  backface-visibility: hidden;
 }
 
 .modal-info {
