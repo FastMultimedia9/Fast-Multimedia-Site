@@ -160,7 +160,7 @@ const AboutPage = () => {
               </div>
             </div>
             <div className="solution-section__img">
-              image: '/images/Artboard 4-1.jpg'
+              <img src="/images/Artboard 4-1.jpg" />
             </div>
           </div>
         </div>
