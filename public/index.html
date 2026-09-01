@@ -4,7 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Cache Prevention Meta Tags - ADDED THESE 3 LINES -->
+    <!-- ============================================ -->
+    <!-- GOOGLE TAG (gtag.js) - INSTALLED HERE -->
+    <!-- ============================================ -->
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z6TK7752JN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z6TK7752JN');
+        
+        // Optional: Enhanced measurement for better tracking
+        gtag('config', 'G-Z6TK7752JN', {
+            'send_page_view': true,
+            'allow_google_signals': true,
+            'allow_ad_personalization_signals': true
+        });
+    </script>
+    
+    <!-- Cache Prevention Meta Tags -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -30,7 +49,7 @@
     <meta name="twitter:description" content="Your one-stop solution for graphic design & tech support in Ghana. Brand identity, computer repair, networking solutions.">
     <meta name="twitter:image" content="https://fastmultimedia.site/images/og-image.jpg">
 
-    <!-- Favicon (keep as is) -->
+    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -70,13 +89,13 @@
     <!-- UPDATED: Better title with location and services -->
     <title>Fast Multimedia Ghana | Professional Graphic Design & Tech Support Services in Kpong</title>
     
-    <!-- FIX: Canonical tag to resolve Google Search Console error -->
+    <!-- FIX: Canonical tag -->
     <link rel="canonical" href="https://www.fastmultimedia.site/" />
     
     <!-- Theme Color -->
     <meta name="theme-color" content="#6c63ff">
     
-    <!-- UPDATED: Comprehensive Structured Data for Local Business + Services -->
+    <!-- UPDATED: Comprehensive Structured Data -->
     <script type="application/ld+json">
     [
     {
@@ -179,25 +198,50 @@
     </script>
 </head>
 <body>
-    <!-- NoScript Fallback - UPDATED with better messaging -->
+    <!-- NoScript Fallback - All emojis replaced with Font Awesome icons -->
     <noscript>
         <div style="text-align: center; padding: 50px; background: #f8f9ff; color: #333; font-family: Arial, sans-serif;">
-            <h1 style="color: #6c63ff;">Fast Multimedia Ghana</h1>
-            <h2>Professional Graphic Design & Tech Support Services</h2>
-            <p>📍 Located in Kpong, Greater Accra Region</p>
-            <p>🎨 Graphic Design Services: Brand Identity, Logo Design, UI/UX, Website Design</p>
-            <p>🔧 Tech Support Services: Computer Repair, Windows Installation, Networking Solutions</p>
-            <p>📞 Contact us directly:</p>
+            <h1 style="color: #6c63ff;">
+                <i class="fas fa-palette" style="color: #6c63ff; margin-right: 10px;"></i>
+                Fast Multimedia Ghana
+            </h1>
+            <h2>
+                <i class="fas fa-brush" style="color: #6c63ff; margin-right: 10px;"></i>
+                Professional Graphic Design & 
+                <i class="fas fa-tools" style="color: #6c63ff; margin-left: 10px; margin-right: 10px;"></i>
+                Tech Support Services
+            </h2>
+            <p>
+                <i class="fas fa-map-marker-alt" style="color: #6c63ff; margin-right: 8px;"></i>
+                Located in Kpong, Greater Accra Region
+            </p>
+            <p>
+                <i class="fas fa-paint-brush" style="color: #6c63ff; margin-right: 8px;"></i>
+                Graphic Design Services: Brand Identity, Logo Design, UI/UX, Website Design
+            </p>
+            <p>
+                <i class="fas fa-desktop" style="color: #6c63ff; margin-right: 8px;"></i>
+                Tech Support Services: Computer Repair, Windows Installation, Networking Solutions
+            </p>
+            <p>
+                <i class="fas fa-phone-alt" style="color: #6c63ff; margin-right: 8px;"></i>
+                Contact us directly:
+            </p>
             <p style="font-size: 1.2em; color: #2a2d43;">
+                <i class="fas fa-phone" style="color: #4ecdc4; margin-right: 5px;"></i>
                 <strong>Phone:</strong> +233 505-159-131 | +233 548-890-306<br>
+                <i class="fas fa-envelope" style="color: #4ecdc4; margin-right: 5px;"></i>
                 <strong>Email:</strong> fasttech227@gmail.com<br>
+                <i class="fas fa-location-dot" style="color: #4ecdc4; margin-right: 5px;"></i>
                 <strong>Location:</strong> Kpong, Tema Akosombo Road, Ghana
             </p>
             <p style="margin-top: 30px;">
-                <a href="tel:+233505159131" style="background: #6c63ff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 10px;">
+                <a href="tel:+233505159131" style="background: #6c63ff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 10px; display: inline-block;">
+                    <i class="fas fa-phone" style="margin-right: 8px;"></i>
                     Call Now
                 </a>
-                <a href="mailto:fasttech227@gmail.com" style="background: #4ecdc4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 10px;">
+                <a href="mailto:fasttech227@gmail.com" style="background: #4ecdc4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 10px; display: inline-block;">
+                    <i class="fas fa-envelope" style="margin-right: 8px;"></i>
                     Email Us
                 </a>
             </p>
@@ -207,11 +251,19 @@
     <!-- Root element for React -->
     <div id="root"></div>
     
-    <!-- Loading fallback -->
+    <!-- Loading fallback - All emojis replaced with Font Awesome icons -->
     <div id="loading-fallback" style="display: none; text-align: center; padding: 100px; font-family: 'Inter', sans-serif;">
         <div style="width: 50px; height: 50px; border: 3px solid #f3f3f3; border-top: 3px solid #6c63ff; border-radius: 50%; margin: 0 auto 20px; animation: spin 1s linear infinite;"></div>
-        <h2 style="color: #2a2d43;">Loading Fast Multimedia Ghana...</h2>
-        <p style="color: #666;">Graphic Design & Tech Support Services</p>
+        <h2 style="color: #2a2d43;">
+            <i class="fas fa-spinner fa-spin" style="color: #6c63ff; margin-right: 10px;"></i>
+            Loading Fast Multimedia Ghana...
+        </h2>
+        <p style="color: #666;">
+            <i class="fas fa-brush" style="color: #6c63ff; margin-right: 8px;"></i>
+            Graphic Design & 
+            <i class="fas fa-tools" style="color: #6c63ff; margin-left: 8px; margin-right: 8px;"></i>
+            Tech Support Services
+        </p>
         <style>
             @keyframes spin {
                 0% { transform: rotate(0deg); }
@@ -220,9 +272,7 @@
         </style>
     </div>
     
-    <!-- ============================================ -->
-    <!-- PAYSTACK SCRIPT - ADDED FOR PAYMENT INTEGRATION -->
-    <!-- ============================================ -->
+    <!-- Paystack Script -->
     <script src="https://js.paystack.co/v1/inline.js"></script>
     
     <!-- Script to show loading fallback -->
@@ -250,7 +300,7 @@
         });
     </script>
     
-    <!-- ADDED: Local business SEO script -->
+    <!-- Local business SEO script -->
     <script>
         // Set up local business data for search engines
         window.localBusinessData = {
@@ -277,16 +327,45 @@
             }
         };
         
-        // Track important interactions
+        // Track important interactions with Google Analytics
         document.addEventListener('DOMContentLoaded', function() {
-            // Phone click tracking
+            // Track phone clicks
             const phoneElements = document.querySelectorAll('a[href^="tel:"]');
             phoneElements.forEach(el => {
                 el.addEventListener('click', function() {
                     if (typeof gtag !== 'undefined') {
                         gtag('event', 'phone_click', {
                             'event_category': 'Contact',
-                            'event_label': 'Phone Call'
+                            'event_label': 'Phone Call',
+                            'value': 1
+                        });
+                    }
+                });
+            });
+            
+            // Track email clicks
+            const emailElements = document.querySelectorAll('a[href^="mailto:"]');
+            emailElements.forEach(el => {
+                el.addEventListener('click', function() {
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'email_click', {
+                            'event_category': 'Contact',
+                            'event_label': 'Email',
+                            'value': 1
+                        });
+                    }
+                });
+            });
+            
+            // Track outbound link clicks
+            const outboundLinks = document.querySelectorAll('a[target="_blank"]');
+            outboundLinks.forEach(el => {
+                el.addEventListener('click', function() {
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'outbound_link', {
+                            'event_category': 'Outbound',
+                            'event_label': this.href,
+                            'transport_type': 'beacon'
                         });
                     }
                 });
