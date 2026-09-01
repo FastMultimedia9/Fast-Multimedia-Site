@@ -5,21 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- ============================================ -->
-    <!-- GOOGLE TAG (gtag.js) - INSTALLED HERE -->
+    <!-- GOOGLE TAG (gtag.js) WITH CONSENT MODE -->
     <!-- ============================================ -->
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z6TK7752JN"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-Z6TK7752JN');
         
-        // Optional: Enhanced measurement for better tracking
+        // ============================================ -->
+        // DEFAULT CONSENT SETTINGS (GDPR COMPLIANT)
+        // ============================================ -->
+        // Set default consent to 'denied' until user chooses
+        gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'analytics_storage': 'denied',
+            'functionality_storage': 'denied',
+            'personalization_storage': 'denied',
+            'security_storage': 'granted', // Always allowed for security
+            'wait_for_update': 500
+        });
+        
+        gtag('js', new Date());
         gtag('config', 'G-Z6TK7752JN', {
             'send_page_view': true,
             'allow_google_signals': true,
-            'allow_ad_personalization_signals': true
+            'allow_ad_personalization_signals': true,
+            'cookie_flags': 'SameSite=None;Secure'
+        });
+        
+        // ============================================ -->
+        // CHECK FOR EXISTING CONSENT
+        // ============================================ -->
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const consent = localStorage.getItem('cookie_consent');
+                if (consent) {
+                    const prefs = JSON.parse(consent);
+                    
+                    // Update Google Analytics based on saved preferences
+                    gtag('consent', 'update', {
+                        'analytics_storage': prefs.analytics ? 'granted' : 'denied',
+                        'ad_storage': prefs.marketing ? 'granted' : 'denied',
+                        'functionality_storage': prefs.functional ? 'granted' : 'denied',
+                        'personalization_storage': prefs.marketing ? 'granted' : 'denied'
+                    });
+                    
+                    console.log('🍪 Cookie consent loaded:', prefs);
+                } else {
+                    console.log('🍪 No cookie consent found, using default denied settings');
+                }
+            } catch (error) {
+                console.error('Error loading cookie consent:', error);
+            }
         });
     </script>
     
@@ -327,13 +365,29 @@
             }
         };
         
-        // Track important interactions with Google Analytics
+        // ============================================ -->
+        // TRACK IMPORTANT INTERACTIONS WITH GOOGLE ANALYTICS
+        // ============================================ -->
         document.addEventListener('DOMContentLoaded', function() {
+            // Check if consent allows analytics tracking
+            function canTrack() {
+                try {
+                    const consent = localStorage.getItem('cookie_consent');
+                    if (consent) {
+                        const prefs = JSON.parse(consent);
+                        return prefs.analytics === true;
+                    }
+                    return false; // Default: no tracking without consent
+                } catch (error) {
+                    return false;
+                }
+            }
+            
             // Track phone clicks
             const phoneElements = document.querySelectorAll('a[href^="tel:"]');
             phoneElements.forEach(el => {
                 el.addEventListener('click', function() {
-                    if (typeof gtag !== 'undefined') {
+                    if (typeof gtag !== 'undefined' && canTrack()) {
                         gtag('event', 'phone_click', {
                             'event_category': 'Contact',
                             'event_label': 'Phone Call',
@@ -347,7 +401,7 @@
             const emailElements = document.querySelectorAll('a[href^="mailto:"]');
             emailElements.forEach(el => {
                 el.addEventListener('click', function() {
-                    if (typeof gtag !== 'undefined') {
+                    if (typeof gtag !== 'undefined' && canTrack()) {
                         gtag('event', 'email_click', {
                             'event_category': 'Contact',
                             'event_label': 'Email',
@@ -361,11 +415,25 @@
             const outboundLinks = document.querySelectorAll('a[target="_blank"]');
             outboundLinks.forEach(el => {
                 el.addEventListener('click', function() {
-                    if (typeof gtag !== 'undefined') {
+                    if (typeof gtag !== 'undefined' && canTrack()) {
                         gtag('event', 'outbound_link', {
                             'event_category': 'Outbound',
                             'event_label': this.href,
                             'transport_type': 'beacon'
+                        });
+                    }
+                });
+            });
+            
+            // Track form submissions (if any)
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (typeof gtag !== 'undefined' && canTrack()) {
+                        gtag('event', 'form_submit', {
+                            'event_category': 'Conversion',
+                            'event_label': this.id || 'form_submission',
+                            'value': 1
                         });
                     }
                 });

@@ -33,7 +33,7 @@ import ToolsPage from './pages/resources/ToolsPage';
 import EbooksPage from './pages/resources/EbooksPage';
 import AffiliatesPage from './pages/resources/AffiliatesPage';
 
-// Legal Pages
+// Legal Pages - CORRECTED: Import from ./pages/ not ./components/
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import CookiePolicy from './pages/CookiePolicy';
@@ -429,7 +429,7 @@ function AppContent() {
           <Route path="/resources/ebooks" element={<EbooksPage />} />
           <Route path="/resources/affiliates" element={<AffiliatesPage />} />
           
-          {/* ===== LEGAL PAGES ===== */}
+          {/* ===== LEGAL PAGES - CORRECTED ===== */}
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/cookies" element={<CookiePolicy />} />
