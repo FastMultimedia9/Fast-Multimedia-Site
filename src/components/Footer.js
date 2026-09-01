@@ -1,7 +1,7 @@
 // Footer.js
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './Footer.css';
+import styles from './Footer.module.css';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -44,7 +44,6 @@ const Footer = () => {
       url: 'https://pinterest.com/fasttech227/',
       color: '#bd081c'
     },
-   
   ];
 
   const services = [
@@ -64,35 +63,35 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="footer">
-      <div className="footer-main">
-        <div className="footer-container">
-          <div className="footer-grid">
+    <footer className={styles.footer}>
+      <div className={styles.footerMain}>
+        <div className={styles.footerContainer}>
+          <div className={styles.footerGrid}>
             {/* Company Info */}
-            <div className="footer-col footer-about">
-              <div className="footer-logo">
-                <div className="logo-icon">
+            <div className={`${styles.footerCol} ${styles.footerAbout}`}>
+              <div className={styles.footerLogo}>
+                <div className={styles.logoIcon}>
                   <i className="fas fa-palette"></i>
                 </div>
-                <div className="logo-text">
-                  <span className="logo-primary">Fast</span>
-                  <span className="logo-secondary">Multimedia</span>
+                <div className={styles.logoText}>
+                  <span className={styles.logoPrimary}>Fast</span>
+                  <span className={styles.logoSecondary}>Multimedia</span>
                 </div>
               </div>
-              <p className="footer-description">
+              <p className={styles.footerDescription}>
                 We transform ideas into stunning visual experiences. 
                 Professional graphic design services for businesses 
                 looking to elevate their brand.
               </p>
               
-              <div className="footer-social">
+              <div className={styles.footerSocial}>
                 {socialPlatforms.map((platform, index) => (
                   <a
                     key={index}
                     href={platform.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="social-link"
+                    className={styles.socialLink}
                     title={`Follow us on ${platform.name}`}
                     style={{ '--hover-color': platform.color }}
                   >
@@ -103,9 +102,9 @@ const Footer = () => {
             </div>
 
             {/* Quick Links */}
-            <div className="footer-col footer-links">
-              <h3 className="footer-title">Quick Links</h3>
-              <ul className="footer-menu">
+            <div className={`${styles.footerCol} ${styles.footerLinks}`}>
+              <h3 className={styles.footerTitle}>Quick Links</h3>
+              <ul className={styles.footerMenu}>
                 {quickLinks.map((link, index) => (
                   <li key={index}>
                     <Link to={link.path}>
@@ -118,9 +117,9 @@ const Footer = () => {
             </div>
 
             {/* Services */}
-            <div className="footer-col footer-services">
-              <h3 className="footer-title">Our Services</h3>
-              <ul className="footer-menu">
+            <div className={`${styles.footerCol} ${styles.footerServices}`}>
+              <h3 className={styles.footerTitle}>Our Services</h3>
+              <ul className={styles.footerMenu}>
                 {services.map((service, index) => (
                   <li key={index}>
                     <a href={service.path}>
@@ -133,33 +132,33 @@ const Footer = () => {
             </div>
 
             {/* Contact Info */}
-            <div className="footer-col footer-contact">
-              <h3 className="footer-title">Contact Info</h3>
-              <div className="contact-info">
-                <div className="contact-item">
-                  <div className="contact-icon">
+            <div className={`${styles.footerCol} ${styles.footerContact}`}>
+              <h3 className={styles.footerTitle}>Contact Info</h3>
+              <div className={styles.contactInfo}>
+                <div className={styles.contactItem}>
+                  <div className={styles.contactIcon}>
                     <i className="fas fa-map-marker-alt"></i>
                   </div>
-                  <div className="contact-text">
+                  <div className={styles.contactText}>
                     <span>Kpong, Tema Akosombo Road</span>
                   </div>
                 </div>
                 
-                <div className="contact-item">
-                  <div className="contact-icon">
+                <div className={styles.contactItem}>
+                  <div className={styles.contactIcon}>
                     <i className="fas fa-phone-alt"></i>
                   </div>
-                  <div className="contact-text">
+                  <div className={styles.contactText}>
                     <a href="tel:+233505159131">+233 505-159-131</a>
                     <a href="tel:+233548890306">+233 548-890-306</a>
                   </div>
                 </div>
                 
-                <div className="contact-item">
-                  <div className="contact-icon">
+                <div className={styles.contactItem}>
+                  <div className={styles.contactIcon}>
                     <i className="fas fa-envelope"></i>
                   </div>
-                  <div className="contact-text">
+                  <div className={styles.contactText}>
                     <a href="mailto:fasttech227@gmail.com">fasttech227@gmail.com</a>
                   </div>
                 </div>
@@ -170,14 +169,14 @@ const Footer = () => {
       </div>
 
       {/* Footer Bottom */}
-      <div className="footer-bottom">
-        <div className="footer-container">
-          <div className="footer-bottom-content">
-            <p className="copyright">
+      <div className={styles.footerBottom}>
+        <div className={styles.footerContainer}>
+          <div className={styles.footerBottomContent}>
+            <p className={styles.copyright}>
               <i className="far fa-copyright"></i> {currentYear} Fast Multimedia. All rights reserved.
             </p>
             
-            <div className="footer-legal">
+            <div className={styles.footerLegal}>
               <a href="/privacy-policy">
                 <i className="fas fa-shield-alt"></i> Privacy Policy
               </a>
