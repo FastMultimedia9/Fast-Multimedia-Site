@@ -49,7 +49,7 @@ const AboutPage = () => {
     },
     {
       id: 4,
-      name: 'Ama Ofor',
+      name: 'Frankline',
       role: 'UI/UX Designer',
       bio: 'Ama creates intuitive digital experiences that blend beautiful design with exceptional functionality.',
       image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
