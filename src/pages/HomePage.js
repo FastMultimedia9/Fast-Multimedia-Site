@@ -80,8 +80,8 @@ const HomePage = () => {
       points: [
         { head: 'Unlimited Requests', desc: 'Submit as many design tasks as you need — no limits' },
         { head: 'Unlimited Revisions', desc: 'We revise the designs until you\'re completely satisfied' },
-        { head: 'Cancel Anytime', desc: 'No long-term commitments — cancel your subscription anytime' },
-        { head: '7-Day Money-Back Guarantee', desc: 'If you\'re not happy within the first 7 days, you\'ll get a full refund' }
+        { head: 'Cancel Anytime', desc: 'No long-term commitments — cancel your subscription anytime' }
+        
       ]
     },
     {

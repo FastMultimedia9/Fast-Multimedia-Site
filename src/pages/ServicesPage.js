@@ -556,7 +556,6 @@ const ServicesPage = () => {
                 'Unlimited revisions',
                 'Trello Project Management',
                 'Unlimited brand profiles',
-                '7-day money-back guarantee',
                 'Native source files',
                 'Cancel anytime',
                 'Art Director',
@@ -732,10 +731,7 @@ const ServicesPage = () => {
                 q: 'Can I pause my subscription?',
                 a: 'Yes, you can pause your subscription for up to 7 days, but only during the 3rd month of your subscription.'
               },
-              {
-                q: 'What is your 7-day money-back guarantee?',
-                a: 'All our plans come with a full 7-day money-back guarantee. If, after several requests, you still don\'t think Fast Multimedia is the right fit for you, we will refund 100% of your initial membership fee.'
-              },
+              
               {
                 q: 'What are your team\'s working hours?',
                 a: 'Our team works on Monday to Friday, from 09:00 to 18:00 (GMT+2).'
