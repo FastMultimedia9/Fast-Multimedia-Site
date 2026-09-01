@@ -135,32 +135,7 @@ const AboutPage = () => {
 
   return (
     <div className="about-page">
-      {/* Hero Section */}
-      <section 
-        className="hero-section" 
-        style={{ 
-          backgroundImage: "url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat"
-        }}
-      >
-        <div className="container">
-          <div className="hero-section__box">
-            <div className="hero-section__info">
-              <h1 className="page-title page-title_small text-center">
-                Fast Multimedia: Design &amp; Tech Solutions for Your Business
-              </h1>
-              <div className="hero-section__txt text-center">
-                Founded in 2018, Fast Multimedia provides professional design and technical support services. We specialize in high-quality business solutions through a client-focused approach, serving businesses of all sizes.
-              </div>
-              <div className="hero-section__btngroup">
-                <Link to="/contact" className="btn btn-primary btn-primary_arrow">Get Started</Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Expertise Section */}
       <section className="solution-section">
@@ -185,7 +160,7 @@ const AboutPage = () => {
               </div>
             </div>
             <div className="solution-section__img">
-              <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Fast Multimedia Studio" />
+              image: '/images/Artboard 4-1.jpg'
             </div>
           </div>
         </div>
