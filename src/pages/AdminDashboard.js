@@ -84,6 +84,8 @@ import {
   deleteCourse,
   generateSerialNumber,
   getAllSerials,
+  getAllApplications,
+  updateApplicationStatus,
   logoutUser,
   getCurrentUser,
   getUserProfile,
@@ -109,6 +111,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [students, setStudents] = useState([]);
   const [admissions, setAdmissions] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [payments, setPayments] = useState([]);
   const [staff, setStaff] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -209,6 +212,7 @@ const AdminDashboard = () => {
       
       let studentsData = [];
       let admissionsData = [];
+      let applicationsData = [];
       let paymentsData = [];
       let staffData = [];
       let coursesData = [];
@@ -235,6 +239,14 @@ const AdminDashboard = () => {
       } catch (admissionsError) {
         console.error('Error loading admissions:', admissionsError);
         admissionsData = [];
+      }
+      
+      try {
+        const apps = await getAllApplications();
+        applicationsData = apps || [];
+      } catch (appsError) {
+        console.error('Error loading applications:', appsError);
+        applicationsData = [];
       }
       
       try {
@@ -275,6 +287,7 @@ const AdminDashboard = () => {
       );
       setStudents(approvedStudents);
       setAdmissions(admissionsData || []);
+      setApplications(applicationsData || []);
       setPayments(paymentsData || []);
       setStaff(staffData || []);
       setCourses(coursesData || []);
@@ -286,6 +299,7 @@ const AdminDashboard = () => {
       showNotification('Error loading dashboard data. Using default values.', 'error');
       setStudents([]);
       setAdmissions([]);
+      setApplications([]);
       setPayments([]);
       setStaff([]);
       setCourses([]);
@@ -863,6 +877,20 @@ const AdminDashboard = () => {
   };
 
   // ============================================
+  // HANDLE APPLICATION STATUS UPDATE
+  // ============================================
+  const handleUpdateApplicationStatus = async (appId, status) => {
+    try {
+      await updateApplicationStatus(appId, status);
+      showNotification(`Application ${status} successfully`, 'success');
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error updating application status:', error);
+      showNotification('Error updating application status: ' + error.message, 'error');
+    }
+  };
+
+  // ============================================
   // DELETE ADMISSION
   // ============================================
   const handleDeleteAdmission = async (admissionId) => {
@@ -1073,6 +1101,7 @@ const AdminDashboard = () => {
       case 'pending': return 'status-pending';
       case 'rejected': return 'status-rejected';
       case 'enrolled': return 'status-enrolled';
+      case 'submitted': return 'status-pending';
       default: return 'status-default';
     }
   };
@@ -1084,6 +1113,7 @@ const AdminDashboard = () => {
       case 'pending': return <FaClock />;
       case 'rejected': return <FaTimesCircle />;
       case 'enrolled': return <FaGraduationCap />;
+      case 'submitted': return <FaClock />;
       default: return <FaInfoCircle />;
     }
   };
@@ -1109,6 +1139,8 @@ const AdminDashboard = () => {
         return renderStudents();
       case 'admissions':
         return renderAdmissions();
+      case 'applications':
+        return renderApplications();
       case 'payments':
         return renderPayments();
       case 'staff':
@@ -1125,7 +1157,7 @@ const AdminDashboard = () => {
   };
 
   // ============================================
-  // RENDER DASHBOARD - WITH FIX BUTTONS
+  // RENDER DASHBOARD
   // ============================================
   const renderDashboard = () => (
     <div className="dashboard-content">
@@ -1193,7 +1225,10 @@ const AdminDashboard = () => {
             <FaUserPlus /> Manage Students
           </button>
           <button className="action-btn" onClick={() => setActiveTab('admissions')}>
-            <FaClipboardList /> Review Applications
+            <FaClipboardList /> Review Admissions
+          </button>
+          <button className="action-btn" onClick={() => setActiveTab('applications')}>
+            <FaFileAlt /> View Applications
           </button>
           <button className="action-btn" onClick={() => setShowAddStaffModal(true)}>
             <FaUserTie /> Add Staff
@@ -1208,7 +1243,6 @@ const AdminDashboard = () => {
             <FaFileAlt /> View Serials
           </button>
           
-          {/* NEW: Fix Existing Students Buttons */}
           <button 
             className="action-btn fix-students-btn" 
             onClick={fixExistingStudents}
@@ -1420,7 +1454,7 @@ const AdminDashboard = () => {
         <div className="admissions-list">
           {pendingAdmissions.length > 0 && (
             <div className="admission-group">
-              <h3 className="group-title pending">Pending Applications ({pendingAdmissions.length})</h3>
+              <h3 className="group-title pending">Pending Admissions ({pendingAdmissions.length})</h3>
               <div className="admissions-grid">
                 {pendingAdmissions.map((admission) => (
                   <div key={admission.id} className="admission-card">
@@ -1491,7 +1525,7 @@ const AdminDashboard = () => {
 
           {approvedAdmissions.length > 0 && (
             <div className="admission-group">
-              <h3 className="group-title approved">Approved Applications ({approvedAdmissions.length})</h3>
+              <h3 className="group-title approved">Approved Admissions ({approvedAdmissions.length})</h3>
               <div className="admissions-grid">
                 {approvedAdmissions.map((admission) => (
                   <div key={admission.id} className="admission-card approved-card">
@@ -1544,7 +1578,7 @@ const AdminDashboard = () => {
 
           {rejectedAdmissions.length > 0 && (
             <div className="admission-group">
-              <h3 className="group-title rejected">Rejected Applications ({rejectedAdmissions.length})</h3>
+              <h3 className="group-title rejected">Rejected Admissions ({rejectedAdmissions.length})</h3>
               <div className="admissions-grid">
                 {rejectedAdmissions.map((admission) => (
                   <div key={admission.id} className="admission-card rejected-card">
@@ -1597,6 +1631,189 @@ const AdminDashboard = () => {
           {admissions.length === 0 && (
             <div className="no-admissions-message">
               <FaInfoCircle /> No admissions found
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================
+  // RENDER APPLICATIONS - NEW TAB
+  // ============================================
+  const renderApplications = () => {
+    const pendingApps = applications.filter(a => a.status === 'pending' || a.status === 'submitted');
+    const approvedApps = applications.filter(a => a.status === 'approved');
+    const rejectedApps = applications.filter(a => a.status === 'rejected');
+
+    return (
+      <div className="applications-content">
+        <div className="content-header">
+          <h2>Student Applications</h2>
+          <div className="header-actions">
+            <div className="admission-stats">
+              <span className="stat-pending">Pending: {pendingApps.length}</span>
+              <span className="stat-approved">Approved: {approvedApps.length}</span>
+              <span className="stat-rejected">Rejected: {rejectedApps.length}</span>
+            </div>
+            <button className="export-btn" onClick={() => exportToCSV(applications, 'applications')}>
+              <FaDownloadIcon /> Export
+            </button>
+          </div>
+        </div>
+
+        <div className="admissions-list">
+          {pendingApps.length > 0 && (
+            <div className="admission-group">
+              <h3 className="group-title pending">Pending Applications ({pendingApps.length})</h3>
+              <div className="admissions-grid">
+                {pendingApps.map((app) => (
+                  <div key={app.id} className="admission-card">
+                    <div className="admission-header">
+                      <div className="admission-user">
+                        <div className="user-avatar">
+                          {app.fullName?.charAt(0) || app.studentName?.charAt(0) || 'A'}
+                        </div>
+                        <div>
+                          <h4>{app.fullName || app.studentName || 'N/A'}</h4>
+                          <p>{app.email}</p>
+                        </div>
+                      </div>
+                      <span className={`status-badge ${getStatusColor(app.status)}`}>
+                        {getStatusIcon(app.status)} {app.status || 'pending'}
+                      </span>
+                    </div>
+                    <div className="admission-details">
+                      <p><FaPhone /> {app.phone || 'N/A'}</p>
+                      <p><FaCalendarAlt /> {new Date(app.createdAt?.seconds * 1000 || app.applicationDate).toLocaleDateString()}</p>
+                      <p><FaBookOpen /> {app.course || 'Not specified'}</p>
+                      <p><FaIdCard /> Student ID: {app.studentId || 'N/A'}</p>
+                    </div>
+                    <div className="admission-actions">
+                      <button
+                        className="btn-approve"
+                        onClick={() => handleUpdateApplicationStatus(app.id, 'approved')}
+                      >
+                        <FaCheck /> Approve
+                      </button>
+                      <button
+                        className="btn-reject"
+                        onClick={() => handleUpdateApplicationStatus(app.id, 'rejected')}
+                      >
+                        <FaTimesCircle /> Reject
+                      </button>
+                      <button
+                        className="btn-view"
+                        onClick={() => {
+                          setSelectedStudent(app);
+                          setShowStudentModal(true);
+                        }}
+                      >
+                        <FaEye /> View
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {approvedApps.length > 0 && (
+            <div className="admission-group">
+              <h3 className="group-title approved">Approved Applications ({approvedApps.length})</h3>
+              <div className="admissions-grid">
+                {approvedApps.map((app) => (
+                  <div key={app.id} className="admission-card approved-card">
+                    <div className="admission-header">
+                      <div className="admission-user">
+                        <div className="user-avatar">
+                          {app.fullName?.charAt(0) || app.studentName?.charAt(0) || 'A'}
+                        </div>
+                        <div>
+                          <h4>{app.fullName || app.studentName || 'N/A'}</h4>
+                          <p>{app.email}</p>
+                        </div>
+                      </div>
+                      <span className={`status-badge ${getStatusColor(app.status)}`}>
+                        {getStatusIcon(app.status)} {app.status || 'approved'}
+                      </span>
+                    </div>
+                    <div className="admission-details">
+                      <p><FaPhone /> {app.phone || 'N/A'}</p>
+                      <p><FaCalendarAlt /> {new Date(app.createdAt?.seconds * 1000 || app.applicationDate).toLocaleDateString()}</p>
+                      <p><FaBookOpen /> {app.course || 'Not specified'}</p>
+                      <p><FaIdCard /> Student ID: {app.studentId || 'N/A'}</p>
+                    </div>
+                    <div className="admission-actions">
+                      <div className="approved-message">
+                        <FaCheckCircle className="approved-icon" />
+                        <span>✓ Approved</span>
+                      </div>
+                      <button
+                        className="btn-view"
+                        onClick={() => {
+                          setSelectedStudent(app);
+                          setShowStudentModal(true);
+                        }}
+                      >
+                        <FaEye /> View
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {rejectedApps.length > 0 && (
+            <div className="admission-group">
+              <h3 className="group-title rejected">Rejected Applications ({rejectedApps.length})</h3>
+              <div className="admissions-grid">
+                {rejectedApps.map((app) => (
+                  <div key={app.id} className="admission-card rejected-card">
+                    <div className="admission-header">
+                      <div className="admission-user">
+                        <div className="user-avatar">
+                          {app.fullName?.charAt(0) || app.studentName?.charAt(0) || 'A'}
+                        </div>
+                        <div>
+                          <h4>{app.fullName || app.studentName || 'N/A'}</h4>
+                          <p>{app.email}</p>
+                        </div>
+                      </div>
+                      <span className={`status-badge ${getStatusColor(app.status)}`}>
+                        {getStatusIcon(app.status)} {app.status || 'rejected'}
+                      </span>
+                    </div>
+                    <div className="admission-details">
+                      <p><FaPhone /> {app.phone || 'N/A'}</p>
+                      <p><FaCalendarAlt /> {new Date(app.createdAt?.seconds * 1000 || app.applicationDate).toLocaleDateString()}</p>
+                      <p><FaBookOpen /> {app.course || 'Not specified'}</p>
+                    </div>
+                    <div className="admission-actions">
+                      <div className="rejected-message">
+                        <FaTimesCircle className="rejected-icon" />
+                        <span>✗ Rejected</span>
+                      </div>
+                      <button
+                        className="btn-view"
+                        onClick={() => {
+                          setSelectedStudent(app);
+                          setShowStudentModal(true);
+                        }}
+                      >
+                        <FaEye /> View
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {applications.length === 0 && (
+            <div className="no-admissions-message">
+              <FaInfoCircle /> No applications found
             </div>
           )}
         </div>
@@ -1792,7 +2009,7 @@ const AdminDashboard = () => {
           <div className="report-stats">
             <div className="report-stat">
               <span className="label">Total Applications</span>
-              <span className="value">{stats?.totalApplications || 0}</span>
+              <span className="value">{stats?.totalApplications || applications.length || 0}</span>
             </div>
             <div className="report-stat">
               <span className="label">Approved</span>
@@ -1865,6 +2082,7 @@ const AdminDashboard = () => {
     { id: 'dashboard', icon: <FaHome />, label: 'Dashboard' },
     { id: 'students', icon: <FaUsers />, label: 'Students' },
     { id: 'admissions', icon: <FaClipboardList />, label: 'Admissions' },
+    { id: 'applications', icon: <FaFileAlt />, label: 'Applications' },
     { id: 'payments', icon: <FaCreditCard />, label: 'Payments' },
     { id: 'staff', icon: <FaUserTie />, label: 'Staff' },
     { id: 'courses', icon: <FaBookOpen />, label: 'Courses' },
@@ -1940,11 +2158,11 @@ const AdminDashboard = () => {
             <button className="modal-close" onClick={() => setShowStudentModal(false)}>×</button>
             <div className="student-detail-header">
               <div className="student-avatar-large">
-                {selectedStudent.fullName?.charAt(0) || 'S'}
+                {selectedStudent.fullName?.charAt(0) || selectedStudent.studentName?.charAt(0) || 'S'}
               </div>
               <div>
-                <h2>{selectedStudent.fullName}</h2>
-                <p>{selectedStudent.studentId || 'Student ID not assigned'}</p>
+                <h2>{selectedStudent.fullName || selectedStudent.studentName || 'N/A'}</h2>
+                <p>Student ID: {selectedStudent.studentId || 'Not assigned'}</p>
                 <span className={`status-badge ${getStatusColor(selectedStudent.admissionStatus || selectedStudent.status)}`}>
                   {getStatusIcon(selectedStudent.admissionStatus || selectedStudent.status)} {selectedStudent.admissionStatus || selectedStudent.status || 'pending'}
                 </span>
@@ -1974,7 +2192,7 @@ const AdminDashboard = () => {
                   <div><strong>Education Level:</strong> {selectedStudent.educationLevel || 'N/A'}</div>
                   <div><strong>Previous School:</strong> {selectedStudent.previousSchool || 'N/A'}</div>
                   <div><strong>Preferred Study Mode:</strong> {selectedStudent.preferredStudyMode || 'N/A'}</div>
-                  <div><strong>Application Date:</strong> {new Date(selectedStudent.createdAt?.seconds * 1000).toLocaleDateString()}</div>
+                  <div><strong>Application Date:</strong> {new Date(selectedStudent.createdAt?.seconds * 1000 || selectedStudent.applicationDate).toLocaleDateString()}</div>
                   <div><strong>Serial Number:</strong> {selectedStudent.serialNumber || 'N/A'}</div>
                 </div>
               </div>
@@ -1991,47 +2209,38 @@ const AdminDashboard = () => {
             </div>
 
             <div className="student-detail-actions">
-              {selectedStudent.admissionStatus !== 'approved' && selectedStudent.admissionStatus !== 'enrolled' && (
+              {selectedStudent.admissionStatus !== 'approved' && selectedStudent.admissionStatus !== 'enrolled' && selectedStudent.status !== 'approved' && (
                 <>
                   <button 
                     className="btn-approve"
                     onClick={() => {
-                      handleUpdateAdmissionStatus(selectedStudent.id, 'approved', selectedStudent);
+                      if (selectedStudent.id) {
+                        handleUpdateApplicationStatus(selectedStudent.id, 'approved');
+                      }
                       setShowStudentModal(false);
                     }}
-                    disabled={isSendingEmail}
                   >
-                    <FaCheck /> {isSendingEmail ? 'Sending...' : 'Approve'}
-                  </button>
-                  <button 
-                    className="btn-enroll"
-                    onClick={() => {
-                      handleUpdateAdmissionStatus(selectedStudent.id, 'enrolled', selectedStudent);
-                      setShowStudentModal(false);
-                    }}
-                    disabled={isSendingEmail}
-                  >
-                    <FaGraduationCap /> {isSendingEmail ? 'Sending...' : 'Enroll'}
+                    <FaCheck /> Approve
                   </button>
                   <button 
                     className="btn-reject"
                     onClick={() => {
-                      handleUpdateAdmissionStatus(selectedStudent.id, 'rejected', selectedStudent);
+                      if (selectedStudent.id) {
+                        handleUpdateApplicationStatus(selectedStudent.id, 'rejected');
+                      }
                       setShowStudentModal(false);
                     }}
-                    disabled={isSendingEmail}
                   >
-                    <FaTimesCircle /> {isSendingEmail ? 'Sending...' : 'Reject'}
+                    <FaTimesCircle /> Reject
                   </button>
                 </>
               )}
               
-              {/* Create Auth User Button */}
               {!selectedStudent.authCreated && selectedStudent.email && (
                 <button 
                   className="btn-create-auth"
                   onClick={() => {
-                    if (window.confirm(`Create Firebase Auth account for ${selectedStudent.fullName} (${selectedStudent.email})?`)) {
+                    if (window.confirm(`Create Firebase Auth account for ${selectedStudent.fullName || selectedStudent.studentName} (${selectedStudent.email})?`)) {
                       manuallyCreateAuthUser(selectedStudent);
                       setShowStudentModal(false);
                     }
@@ -2092,140 +2301,136 @@ const AdminDashboard = () => {
       )}
 
       {/* Edit Student Modal */}
-      // In AdminDashboard.js - Replace the Edit Student Modal section with this:
-
-{/* Edit Student Modal */}
-{showEditModal && editingStudent && (
-  <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-    <div className="modal-content edit-modal" onClick={(e) => e.stopPropagation()}>
-      <button className="modal-close" onClick={() => setShowEditModal(false)}>×</button>
-      <h2>Edit Student</h2>
-      <form onSubmit={async (e) => {
-        e.preventDefault();
-        try {
-          // Ensure studentId is saved
-          const updateData = {
-            ...editFormData,
-            studentId: editFormData.studentId || editingStudent.studentId || null,
-            updatedAt: new Date().toISOString()
-          };
-          
-          await updateStudent(editingStudent.id, updateData);
-          showNotification('Student updated successfully', 'success');
-          setShowEditModal(false);
-          await loadDashboardData();
-        } catch (error) {
-          console.error('Error updating student:', error);
-          showNotification('Error updating student', 'error');
-        }
-      }}>
-        <div className="form-grid">
-          <div className="form-group">
-            <label>Student ID</label>
-            <input
-              type="text"
-              value={editFormData.studentId || editingStudent.studentId || ''}
-              onChange={(e) => setEditFormData({...editFormData, studentId: e.target.value})}
-              placeholder="e.g., TEVE260001"
-            />
-            <small style={{ color: '#666', fontSize: '11px' }}>
-              {!editFormData.studentId && !editingStudent.studentId && (
-                <span style={{ color: '#e74c3c' }}>⚠️ Student needs an ID</span>
-              )}
-              {editFormData.studentId && (
-                <span style={{ color: '#27ae60' }}>✅ ID: {editFormData.studentId}</span>
-              )}
-            </small>
-          </div>
-          <div className="form-group">
-            <label>Full Name</label>
-            <input
-              type="text"
-              value={editFormData.fullName || ''}
-              onChange={(e) => setEditFormData({...editFormData, fullName: e.target.value})}
-            />
-          </div>
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              value={editFormData.email || ''}
-              onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
-            />
-          </div>
-          <div className="form-group">
-            <label>Phone</label>
-            <input
-              type="tel"
-              value={editFormData.phone || ''}
-              onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
-            />
-          </div>
-          <div className="form-group">
-            <label>Date of Birth</label>
-            <input
-              type="date"
-              value={editFormData.dateOfBirth || ''}
-              onChange={(e) => setEditFormData({...editFormData, dateOfBirth: e.target.value})}
-            />
-          </div>
-          <div className="form-group">
-            <label>Gender</label>
-            <select
-              value={editFormData.gender || ''}
-              onChange={(e) => setEditFormData({...editFormData, gender: e.target.value})}
-            >
-              <option value="">Select</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Course</label>
-            <input
-              type="text"
-              value={editFormData.course || ''}
-              onChange={(e) => setEditFormData({...editFormData, course: e.target.value})}
-            />
-          </div>
-          <div className="form-group">
-            <label>Admission Status</label>
-            <select
-              value={editFormData.admissionStatus || 'pending'}
-              onChange={(e) => setEditFormData({...editFormData, admissionStatus: e.target.value})}
-            >
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-              <option value="enrolled">Enrolled</option>
-            </select>
-          </div>
-          <div className="form-group full-width">
-            <label>Address</label>
-            <input
-              type="text"
-              value={editFormData.address || ''}
-              onChange={(e) => setEditFormData({...editFormData, address: e.target.value})}
-            />
-          </div>
-          <div className="form-group full-width">
-            <label>City</label>
-            <input
-              type="text"
-              value={editFormData.city || ''}
-              onChange={(e) => setEditFormData({...editFormData, city: e.target.value})}
-            />
+      {showEditModal && editingStudent && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="modal-content edit-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowEditModal(false)}>×</button>
+            <h2>Edit Student</h2>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                const updateData = {
+                  ...editFormData,
+                  studentId: editFormData.studentId || editingStudent.studentId || null,
+                  updatedAt: new Date().toISOString()
+                };
+                
+                await updateStudent(editingStudent.id, updateData);
+                showNotification('Student updated successfully', 'success');
+                setShowEditModal(false);
+                await loadDashboardData();
+              } catch (error) {
+                console.error('Error updating student:', error);
+                showNotification('Error updating student', 'error');
+              }
+            }}>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Student ID</label>
+                  <input
+                    type="text"
+                    value={editFormData.studentId || editingStudent.studentId || ''}
+                    onChange={(e) => setEditFormData({...editFormData, studentId: e.target.value})}
+                    placeholder="e.g., TEYE260001"
+                  />
+                  <small style={{ color: '#666', fontSize: '11px' }}>
+                    {!editFormData.studentId && !editingStudent.studentId && (
+                      <span style={{ color: '#e74c3c' }}>⚠️ Student needs an ID</span>
+                    )}
+                    {editFormData.studentId && (
+                      <span style={{ color: '#27ae60' }}>✅ ID: {editFormData.studentId}</span>
+                    )}
+                  </small>
+                </div>
+                <div className="form-group">
+                  <label>Full Name</label>
+                  <input
+                    type="text"
+                    value={editFormData.fullName || ''}
+                    onChange={(e) => setEditFormData({...editFormData, fullName: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    value={editFormData.email || ''}
+                    onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Phone</label>
+                  <input
+                    type="tel"
+                    value={editFormData.phone || ''}
+                    onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Date of Birth</label>
+                  <input
+                    type="date"
+                    value={editFormData.dateOfBirth || ''}
+                    onChange={(e) => setEditFormData({...editFormData, dateOfBirth: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Gender</label>
+                  <select
+                    value={editFormData.gender || ''}
+                    onChange={(e) => setEditFormData({...editFormData, gender: e.target.value})}
+                  >
+                    <option value="">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Course</label>
+                  <input
+                    type="text"
+                    value={editFormData.course || ''}
+                    onChange={(e) => setEditFormData({...editFormData, course: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Admission Status</label>
+                  <select
+                    value={editFormData.admissionStatus || 'pending'}
+                    onChange={(e) => setEditFormData({...editFormData, admissionStatus: e.target.value})}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="enrolled">Enrolled</option>
+                  </select>
+                </div>
+                <div className="form-group full-width">
+                  <label>Address</label>
+                  <input
+                    type="text"
+                    value={editFormData.address || ''}
+                    onChange={(e) => setEditFormData({...editFormData, address: e.target.value})}
+                  />
+                </div>
+                <div className="form-group full-width">
+                  <label>City</label>
+                  <input
+                    type="text"
+                    value={editFormData.city || ''}
+                    onChange={(e) => setEditFormData({...editFormData, city: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="modal-actions">
+                <button type="submit" className="btn-save"><FaSave /> Save Changes</button>
+                <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancel</button>
+              </div>
+            </form>
           </div>
         </div>
-        <div className="modal-actions">
-          <button type="submit" className="btn-save"><FaSave /> Save Changes</button>
-          <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
+      )}
 
       {/* Add Staff Modal */}
       {showAddStaffModal && (
