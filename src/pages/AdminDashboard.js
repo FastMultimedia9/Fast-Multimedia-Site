@@ -86,6 +86,7 @@ import {
   getAllSerials,
   getAllApplications,
   updateApplicationStatus,
+  createAdmission,
   logoutUser,
   getCurrentUser,
   getUserProfile,
@@ -153,6 +154,12 @@ const AdminDashboard = () => {
     startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0]
   });
+
+  // Application filter states
+  const [appSearchQuery, setAppSearchQuery] = useState('');
+  const [appDateFilter, setAppDateFilter] = useState('all');
+  const [appStatusFilter, setAppStatusFilter] = useState('all');
+  const [isDeletingApp, setIsDeletingApp] = useState(false);
 
   // Default password for students
   const DEFAULT_PASSWORD = 'FastMultimedia2024@';
@@ -877,16 +884,133 @@ const AdminDashboard = () => {
   };
 
   // ============================================
-  // HANDLE APPLICATION STATUS UPDATE
+  // HANDLE APPLICATION STATUS UPDATE - Creates Admission on Approve
   // ============================================
   const handleUpdateApplicationStatus = async (appId, status) => {
     try {
+      // Find the application
+      const app = applications.find(a => a.id === appId);
+      if (!app) {
+        showNotification('Application not found', 'error');
+        return;
+      }
+
+      // Update application status
       await updateApplicationStatus(appId, status);
-      showNotification(`Application ${status} successfully`, 'success');
+
+      // If approved, create an admission record
+      if (status === 'approved') {
+        // Check if admission already exists for this email
+        const existingAdmission = admissions.find(a => a.email === app.email);
+        
+        if (!existingAdmission) {
+          // Create new admission record
+          const admissionData = {
+            fullName: app.fullName || app.studentName || 'N/A',
+            email: app.email || 'N/A',
+            phone: app.phone || 'N/A',
+            dateOfBirth: app.dateOfBirth || '',
+            gender: app.gender || '',
+            address: app.address || '',
+            city: app.city || '',
+            course: app.course || 'Not specified',
+            educationLevel: app.educationLevel || '',
+            previousSchool: app.previousSchool || '',
+            preferredStudyMode: app.preferredStudyMode || '',
+            guardianName: app.guardianName || '',
+            guardianPhone: app.guardianPhone || '',
+            guardianEmail: app.guardianEmail || '',
+            guardianRelationship: app.guardianRelationship || '',
+            hearAboutUs: app.hearAbout || '',
+            reasonToJoin: app.motivation || '',
+            specialNeeds: app.medicalInfo || 'None',
+            serialNumber: app.serialNumber || '',
+            applicationDate: app.applicationDate || new Date().toISOString(),
+            applicationId: appId,
+            status: 'pending', // Starts as pending in admissions
+            studentId: app.studentId || '',
+            source: 'application', // Track where it came from
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          };
+
+          await createAdmission(admissionData);
+          console.log('✅ Admission created from approved application');
+          showNotification('Application approved! Admission record created. Go to Admissions tab to enroll.', 'success');
+        } else {
+          // Update existing admission
+          await updateAdmissionStatus(existingAdmission.id, 'pending');
+          showNotification('Application approved! Existing admission updated.', 'success');
+        }
+
+        // Send notification to student
+        try {
+          await sendNotification({
+            userId: app.email,
+            title: 'Application Approved!',
+            message: `Your application for ${app.course || 'the course'} has been approved. Please wait for admission processing.`,
+            type: 'application',
+            link: '/student/portal'
+          });
+        } catch (notifError) {
+          console.warn('Notification not sent:', notifError.message);
+        }
+
+        // Send email notification
+        try {
+          await sendAdmissionStatusEmail(
+            app.email,
+            app.fullName || app.studentName || 'Student',
+            'approved',
+            app.studentId || 'N/A',
+            app.course || 'Not specified',
+            app.serialNumber || 'N/A'
+          );
+          console.log('✅ Approval email sent');
+        } catch (emailError) {
+          console.warn('Email not sent:', emailError.message);
+        }
+
+      } else if (status === 'rejected') {
+        // Send rejection notification
+        try {
+          await sendNotification({
+            userId: app.email,
+            title: 'Application Update',
+            message: `Your application for ${app.course || 'the course'} has been reviewed. Please check your email for details.`,
+            type: 'application',
+            link: '/school/application-status'
+          });
+        } catch (notifError) {
+          console.warn('Notification not sent:', notifError.message);
+        }
+      }
+
       await loadDashboardData();
     } catch (error) {
       console.error('Error updating application status:', error);
       showNotification('Error updating application status: ' + error.message, 'error');
+    }
+  };
+
+  // ============================================
+  // DELETE APPLICATION
+  // ============================================
+  const handleDeleteApplication = async (appId) => {
+    if (!window.confirm('⚠️ Are you sure you want to delete this application? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsDeletingApp(true);
+    try {
+      await deleteDoc(doc(db, 'applications', appId));
+      showNotification('Application deleted successfully', 'success');
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error deleting application:', error);
+      showNotification('Error deleting application: ' + error.message, 'error');
+    } finally {
+      setIsDeletingApp(false);
     }
   };
 
@@ -1116,6 +1240,55 @@ const AdminDashboard = () => {
       case 'submitted': return <FaClock />;
       default: return <FaInfoCircle />;
     }
+  };
+
+  // Get unique dates for application filter
+  const getUniqueDates = () => {
+    const dates = applications.map(app => {
+      const date = new Date(app.createdAt?.seconds * 1000 || app.applicationDate);
+      return date.toISOString().split('T')[0];
+    });
+    return [...new Set(dates)].sort().reverse();
+  };
+
+  // Filter applications
+  const getFilteredApplications = () => {
+    let filtered = applications;
+
+    // Search filter
+    if (appSearchQuery) {
+      const query = appSearchQuery.toLowerCase();
+      filtered = filtered.filter(app =>
+        (app.fullName?.toLowerCase().includes(query) ||
+         app.studentName?.toLowerCase().includes(query) ||
+         app.email?.toLowerCase().includes(query) ||
+         app.course?.toLowerCase().includes(query) ||
+         app.studentId?.toLowerCase().includes(query) ||
+         app.phone?.includes(query))
+      );
+    }
+
+    // Status filter
+    if (appStatusFilter !== 'all') {
+      filtered = filtered.filter(app => app.status === appStatusFilter);
+    }
+
+    // Date filter
+    if (appDateFilter !== 'all') {
+      filtered = filtered.filter(app => {
+        const date = new Date(app.createdAt?.seconds * 1000 || app.applicationDate);
+        return date.toISOString().split('T')[0] === appDateFilter;
+      });
+    }
+
+    // Sort by date (newest first)
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.createdAt?.seconds * 1000 || a.applicationDate);
+      const dateB = new Date(b.createdAt?.seconds * 1000 || b.applicationDate);
+      return dateB - dateA;
+    });
+
+    return filtered;
   };
 
   // Loading state
@@ -1466,6 +1639,9 @@ const AdminDashboard = () => {
                         <div>
                           <h4>{admission.fullName}</h4>
                           <p>{admission.email}</p>
+                          {admission.source === 'application' && (
+                            <small style={{ color: '#9b59b6', fontSize: '11px' }}>📋 From Application</small>
+                          )}
                         </div>
                       </div>
                       <span className={`status-badge ${getStatusColor(admission.status)}`}>
@@ -1537,6 +1713,9 @@ const AdminDashboard = () => {
                         <div>
                           <h4>{admission.fullName}</h4>
                           <p>{admission.email}</p>
+                          {admission.source === 'application' && (
+                            <small style={{ color: '#9b59b6', fontSize: '11px' }}>📋 From Application</small>
+                          )}
                         </div>
                       </div>
                       <span className={`status-badge ${getStatusColor(admission.status)}`}>
@@ -1639,182 +1818,274 @@ const AdminDashboard = () => {
   };
 
   // ============================================
-  // RENDER APPLICATIONS - NEW TAB
+  // RENDER APPLICATIONS - WITH SEARCH, FILTERS, AND DELETE
   // ============================================
   const renderApplications = () => {
-    const pendingApps = applications.filter(a => a.status === 'pending' || a.status === 'submitted');
-    const approvedApps = applications.filter(a => a.status === 'approved');
-    const rejectedApps = applications.filter(a => a.status === 'rejected');
+    const filteredApps = getFilteredApplications();
+    const pendingApps = filteredApps.filter(a => a.status === 'pending' || a.status === 'submitted');
+    const approvedApps = filteredApps.filter(a => a.status === 'approved');
+    const rejectedApps = filteredApps.filter(a => a.status === 'rejected');
+    const uniqueDates = getUniqueDates();
 
     return (
       <div className="applications-content">
         <div className="content-header">
           <h2>Student Applications</h2>
           <div className="header-actions">
-            <div className="admission-stats">
-              <span className="stat-pending">Pending: {pendingApps.length}</span>
-              <span className="stat-approved">Approved: {approvedApps.length}</span>
-              <span className="stat-rejected">Rejected: {rejectedApps.length}</span>
+            <div className="search-box">
+              <FaSearch />
+              <input
+                type="text"
+                placeholder="Search by name, email, course, ID..."
+                value={appSearchQuery}
+                onChange={(e) => setAppSearchQuery(e.target.value)}
+              />
             </div>
-            <button className="export-btn" onClick={() => exportToCSV(applications, 'applications')}>
+            <select
+              className="filter-select"
+              value={appStatusFilter}
+              onChange={(e) => setAppStatusFilter(e.target.value)}
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="submitted">Submitted</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <select
+              className="filter-select"
+              value={appDateFilter}
+              onChange={(e) => setAppDateFilter(e.target.value)}
+            >
+              <option value="all">All Dates</option>
+              {uniqueDates.map(date => (
+                <option key={date} value={date}>
+                  {new Date(date).toLocaleDateString()}
+                </option>
+              ))}
+            </select>
+            <button className="export-btn" onClick={() => exportToCSV(filteredApps, 'applications')}>
               <FaDownloadIcon /> Export
             </button>
+            {(appSearchQuery || appStatusFilter !== 'all' || appDateFilter !== 'all') && (
+              <button 
+                className="clear-filters-btn"
+                onClick={() => {
+                  setAppSearchQuery('');
+                  setAppStatusFilter('all');
+                  setAppDateFilter('all');
+                }}
+              >
+                <FaTimesCircle /> Clear Filters
+              </button>
+            )}
           </div>
         </div>
 
+        {/* Stats Summary */}
+        <div className="admission-stats-bar">
+          <span className="stat-item total">
+            Total: {filteredApps.length}
+          </span>
+          <span className="stat-item pending">
+            Pending: {pendingApps.length}
+          </span>
+          <span className="stat-item approved">
+            Approved: {approvedApps.length}
+          </span>
+          <span className="stat-item rejected">
+            Rejected: {rejectedApps.length}
+          </span>
+        </div>
+
         <div className="admissions-list">
-          {pendingApps.length > 0 && (
-            <div className="admission-group">
-              <h3 className="group-title pending">Pending Applications ({pendingApps.length})</h3>
-              <div className="admissions-grid">
-                {pendingApps.map((app) => (
-                  <div key={app.id} className="admission-card">
-                    <div className="admission-header">
-                      <div className="admission-user">
-                        <div className="user-avatar">
-                          {app.fullName?.charAt(0) || app.studentName?.charAt(0) || 'A'}
-                        </div>
-                        <div>
-                          <h4>{app.fullName || app.studentName || 'N/A'}</h4>
-                          <p>{app.email}</p>
-                        </div>
-                      </div>
-                      <span className={`status-badge ${getStatusColor(app.status)}`}>
-                        {getStatusIcon(app.status)} {app.status || 'pending'}
-                      </span>
-                    </div>
-                    <div className="admission-details">
-                      <p><FaPhone /> {app.phone || 'N/A'}</p>
-                      <p><FaCalendarAlt /> {new Date(app.createdAt?.seconds * 1000 || app.applicationDate).toLocaleDateString()}</p>
-                      <p><FaBookOpen /> {app.course || 'Not specified'}</p>
-                      <p><FaIdCard /> Student ID: {app.studentId || 'N/A'}</p>
-                    </div>
-                    <div className="admission-actions">
-                      <button
-                        className="btn-approve"
-                        onClick={() => handleUpdateApplicationStatus(app.id, 'approved')}
-                      >
-                        <FaCheck /> Approve
-                      </button>
-                      <button
-                        className="btn-reject"
-                        onClick={() => handleUpdateApplicationStatus(app.id, 'rejected')}
-                      >
-                        <FaTimesCircle /> Reject
-                      </button>
-                      <button
-                        className="btn-view"
-                        onClick={() => {
-                          setSelectedStudent(app);
-                          setShowStudentModal(true);
-                        }}
-                      >
-                        <FaEye /> View
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {approvedApps.length > 0 && (
-            <div className="admission-group">
-              <h3 className="group-title approved">Approved Applications ({approvedApps.length})</h3>
-              <div className="admissions-grid">
-                {approvedApps.map((app) => (
-                  <div key={app.id} className="admission-card approved-card">
-                    <div className="admission-header">
-                      <div className="admission-user">
-                        <div className="user-avatar">
-                          {app.fullName?.charAt(0) || app.studentName?.charAt(0) || 'A'}
-                        </div>
-                        <div>
-                          <h4>{app.fullName || app.studentName || 'N/A'}</h4>
-                          <p>{app.email}</p>
-                        </div>
-                      </div>
-                      <span className={`status-badge ${getStatusColor(app.status)}`}>
-                        {getStatusIcon(app.status)} {app.status || 'approved'}
-                      </span>
-                    </div>
-                    <div className="admission-details">
-                      <p><FaPhone /> {app.phone || 'N/A'}</p>
-                      <p><FaCalendarAlt /> {new Date(app.createdAt?.seconds * 1000 || app.applicationDate).toLocaleDateString()}</p>
-                      <p><FaBookOpen /> {app.course || 'Not specified'}</p>
-                      <p><FaIdCard /> Student ID: {app.studentId || 'N/A'}</p>
-                    </div>
-                    <div className="admission-actions">
-                      <div className="approved-message">
-                        <FaCheckCircle className="approved-icon" />
-                        <span>✓ Approved</span>
-                      </div>
-                      <button
-                        className="btn-view"
-                        onClick={() => {
-                          setSelectedStudent(app);
-                          setShowStudentModal(true);
-                        }}
-                      >
-                        <FaEye /> View
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {rejectedApps.length > 0 && (
-            <div className="admission-group">
-              <h3 className="group-title rejected">Rejected Applications ({rejectedApps.length})</h3>
-              <div className="admissions-grid">
-                {rejectedApps.map((app) => (
-                  <div key={app.id} className="admission-card rejected-card">
-                    <div className="admission-header">
-                      <div className="admission-user">
-                        <div className="user-avatar">
-                          {app.fullName?.charAt(0) || app.studentName?.charAt(0) || 'A'}
-                        </div>
-                        <div>
-                          <h4>{app.fullName || app.studentName || 'N/A'}</h4>
-                          <p>{app.email}</p>
-                        </div>
-                      </div>
-                      <span className={`status-badge ${getStatusColor(app.status)}`}>
-                        {getStatusIcon(app.status)} {app.status || 'rejected'}
-                      </span>
-                    </div>
-                    <div className="admission-details">
-                      <p><FaPhone /> {app.phone || 'N/A'}</p>
-                      <p><FaCalendarAlt /> {new Date(app.createdAt?.seconds * 1000 || app.applicationDate).toLocaleDateString()}</p>
-                      <p><FaBookOpen /> {app.course || 'Not specified'}</p>
-                    </div>
-                    <div className="admission-actions">
-                      <div className="rejected-message">
-                        <FaTimesCircle className="rejected-icon" />
-                        <span>✗ Rejected</span>
-                      </div>
-                      <button
-                        className="btn-view"
-                        onClick={() => {
-                          setSelectedStudent(app);
-                          setShowStudentModal(true);
-                        }}
-                      >
-                        <FaEye /> View
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {applications.length === 0 && (
+          {filteredApps.length === 0 ? (
             <div className="no-admissions-message">
-              <FaInfoCircle /> No applications found
+              <FaInfoCircle /> 
+              {applications.length === 0 
+                ? 'No applications found' 
+                : 'No applications match your filters'}
             </div>
+          ) : (
+            <>
+              {pendingApps.length > 0 && (
+                <div className="admission-group">
+                  <h3 className="group-title pending">
+                    <FaClock /> Pending Applications ({pendingApps.length})
+                  </h3>
+                  <div className="admissions-grid">
+                    {pendingApps.map((app) => (
+                      <div key={app.id} className="admission-card">
+                        <div className="admission-header">
+                          <div className="admission-user">
+                            <div className="user-avatar">
+                              {app.fullName?.charAt(0) || app.studentName?.charAt(0) || 'A'}
+                            </div>
+                            <div>
+                              <h4>{app.fullName || app.studentName || 'N/A'}</h4>
+                              <p>{app.email}</p>
+                              <small className="app-id">ID: {app.id.slice(0, 12)}...</small>
+                            </div>
+                          </div>
+                          <span className={`status-badge ${getStatusColor(app.status)}`}>
+                            {getStatusIcon(app.status)} {app.status || 'pending'}
+                          </span>
+                        </div>
+                        <div className="admission-details">
+                          <p><FaPhone /> {app.phone || 'N/A'}</p>
+                          <p><FaCalendarAlt /> {new Date(app.createdAt?.seconds * 1000 || app.applicationDate).toLocaleDateString()}</p>
+                          <p><FaBookOpen /> {app.course || 'Not specified'}</p>
+                          <p><FaIdCard /> Student ID: {app.studentId || 'N/A'}</p>
+                        </div>
+                        <div className="admission-actions">
+                          <button
+                            className="btn-approve"
+                            onClick={() => handleUpdateApplicationStatus(app.id, 'approved')}
+                          >
+                            <FaCheck /> Approve
+                          </button>
+                          <button
+                            className="btn-reject"
+                            onClick={() => handleUpdateApplicationStatus(app.id, 'rejected')}
+                          >
+                            <FaTimesCircle /> Reject
+                          </button>
+                          <button
+                            className="btn-view"
+                            onClick={() => {
+                              setSelectedStudent(app);
+                              setShowStudentModal(true);
+                            }}
+                          >
+                            <FaEye /> View
+                          </button>
+                          <button
+                            className="btn-delete"
+                            onClick={() => handleDeleteApplication(app.id)}
+                            disabled={isDeletingApp}
+                          >
+                            {isDeletingApp ? <FaSpinner className="spinner" /> : <FaTrash />} Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {approvedApps.length > 0 && (
+                <div className="admission-group">
+                  <h3 className="group-title approved">
+                    <FaCheckCircle /> Approved Applications ({approvedApps.length})
+                  </h3>
+                  <div className="admissions-grid">
+                    {approvedApps.map((app) => (
+                      <div key={app.id} className="admission-card approved-card">
+                        <div className="admission-header">
+                          <div className="admission-user">
+                            <div className="user-avatar">
+                              {app.fullName?.charAt(0) || app.studentName?.charAt(0) || 'A'}
+                            </div>
+                            <div>
+                              <h4>{app.fullName || app.studentName || 'N/A'}</h4>
+                              <p>{app.email}</p>
+                              <small className="app-id">ID: {app.id.slice(0, 12)}...</small>
+                            </div>
+                          </div>
+                          <span className={`status-badge ${getStatusColor(app.status)}`}>
+                            {getStatusIcon(app.status)} {app.status || 'approved'}
+                          </span>
+                        </div>
+                        <div className="admission-details">
+                          <p><FaPhone /> {app.phone || 'N/A'}</p>
+                          <p><FaCalendarAlt /> {new Date(app.createdAt?.seconds * 1000 || app.applicationDate).toLocaleDateString()}</p>
+                          <p><FaBookOpen /> {app.course || 'Not specified'}</p>
+                          <p><FaIdCard /> Student ID: {app.studentId || 'N/A'}</p>
+                        </div>
+                        <div className="admission-actions">
+                          <div className="approved-message">
+                            <FaCheckCircle className="approved-icon" />
+                            <span>✓ Approved</span>
+                          </div>
+                          <button
+                            className="btn-view"
+                            onClick={() => {
+                              setSelectedStudent(app);
+                              setShowStudentModal(true);
+                            }}
+                          >
+                            <FaEye /> View
+                          </button>
+                          <button
+                            className="btn-delete"
+                            onClick={() => handleDeleteApplication(app.id)}
+                            disabled={isDeletingApp}
+                          >
+                            {isDeletingApp ? <FaSpinner className="spinner" /> : <FaTrash />} Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {rejectedApps.length > 0 && (
+                <div className="admission-group">
+                  <h3 className="group-title rejected">
+                    <FaTimesCircle /> Rejected Applications ({rejectedApps.length})
+                  </h3>
+                  <div className="admissions-grid">
+                    {rejectedApps.map((app) => (
+                      <div key={app.id} className="admission-card rejected-card">
+                        <div className="admission-header">
+                          <div className="admission-user">
+                            <div className="user-avatar">
+                              {app.fullName?.charAt(0) || app.studentName?.charAt(0) || 'A'}
+                            </div>
+                            <div>
+                              <h4>{app.fullName || app.studentName || 'N/A'}</h4>
+                              <p>{app.email}</p>
+                              <small className="app-id">ID: {app.id.slice(0, 12)}...</small>
+                            </div>
+                          </div>
+                          <span className={`status-badge ${getStatusColor(app.status)}`}>
+                            {getStatusIcon(app.status)} {app.status || 'rejected'}
+                          </span>
+                        </div>
+                        <div className="admission-details">
+                          <p><FaPhone /> {app.phone || 'N/A'}</p>
+                          <p><FaCalendarAlt /> {new Date(app.createdAt?.seconds * 1000 || app.applicationDate).toLocaleDateString()}</p>
+                          <p><FaBookOpen /> {app.course || 'Not specified'}</p>
+                        </div>
+                        <div className="admission-actions">
+                          <div className="rejected-message">
+                            <FaTimesCircle className="rejected-icon" />
+                            <span>✗ Rejected</span>
+                          </div>
+                          <button
+                            className="btn-view"
+                            onClick={() => {
+                              setSelectedStudent(app);
+                              setShowStudentModal(true);
+                            }}
+                          >
+                            <FaEye /> View
+                          </button>
+                          <button
+                            className="btn-delete"
+                            onClick={() => handleDeleteApplication(app.id)}
+                            disabled={isDeletingApp}
+                          >
+                            {isDeletingApp ? <FaSpinner className="spinner" /> : <FaTrash />} Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
