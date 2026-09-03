@@ -686,20 +686,62 @@ const AdminDashboard = () => {
   };
 
   // ============================================
+  // FIX: Manually Create Student from Admission
+  // ============================================
+  const fixAdmissionToStudent = async (admissionId) => {
+    try {
+      const admission = admissions.find(a => a.id === admissionId);
+      if (!admission) {
+        showNotification('Admission not found', 'error');
+        return;
+      }
+
+      // Check if student already exists
+      const existingStudent = await getStudentByEmail(admission.email);
+      if (existingStudent) {
+        showNotification(`Student already exists: ${existingStudent.studentId}`, 'warning');
+        // Update the admission with the student ID
+        await updateAdmission(admissionId, {
+          studentId: existingStudent.studentId,
+          updatedAt: new Date().toISOString()
+        });
+        return;
+      }
+
+      // Create student from admission
+      const studentId = await createStudentFromAdmission(admission);
+      showNotification(`✅ Student created with ID: ${studentId}`, 'success');
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error creating student from admission:', error);
+      showNotification('Error creating student: ' + error.message, 'error');
+    }
+  };
+
+  // ============================================
   // ENSURE AUTH USER EXISTS
   // ============================================
   const ensureAuthUserExists = async (admission, student) => {
     try {
+      // Check if auth user already exists
       try {
         const methods = await fetchSignInMethodsForEmail(auth, admission.email);
         if (methods && methods.length > 0) {
           console.log(`ℹ️ Auth user already exists for ${admission.email}`);
+          // Update student to mark auth as created
+          if (student && student.id) {
+            await updateStudent(student.id, {
+              authCreated: true,
+              updatedAt: new Date().toISOString()
+            });
+          }
           return true;
         }
       } catch (checkError) {
         console.log('Could not check existing user:', checkError.message);
       }
 
+      // Try to create auth user
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         admission.email,
@@ -707,10 +749,12 @@ const AdminDashboard = () => {
       );
       console.log(`✅ Auth user created for ${admission.email}`);
       
+      // Update profile
       await updateProfile(userCredential.user, {
         displayName: admission.fullName || 'Student'
       });
       
+      // Create user doc
       const userRef = doc(db, 'users', userCredential.user.uid);
       await setDoc(userRef, {
         uid: userCredential.user.uid,
@@ -724,17 +768,27 @@ const AdminDashboard = () => {
         updatedAt: serverTimestamp()
       });
       
-      await updateStudent(student.id, {
-        authCreated: true,
-        password: DEFAULT_PASSWORD,
-        passwordUpdated: false,
-        updatedAt: new Date().toISOString()
-      });
+      // Update student record
+      if (student && student.id) {
+        await updateStudent(student.id, {
+          authCreated: true,
+          password: DEFAULT_PASSWORD,
+          passwordUpdated: false,
+          updatedAt: new Date().toISOString()
+        });
+      }
       
       return true;
     } catch (authError) {
       if (authError.code === 'auth/email-already-in-use') {
         console.log(`ℹ️ Auth user already exists for ${admission.email}`);
+        // Update student to mark auth as created
+        if (student && student.id) {
+          await updateStudent(student.id, {
+            authCreated: true,
+            updatedAt: new Date().toISOString()
+          });
+        }
         return true;
       }
       console.error('❌ Error creating auth user:', authError);
@@ -816,9 +870,11 @@ const AdminDashboard = () => {
         updatedAt: new Date().toISOString()
       };
 
-      await createStudent(studentData);
-      console.log(`✅ Student created successfully with ID: ${studentId}`);
+      // 1. Create student in Firestore
+      const createdStudentId = await createStudent(studentData);
+      console.log(`✅ Student created successfully with ID: ${createdStudentId}`);
       
+      // 2. Create Firebase Auth user
       let authCreated = false;
       try {
         await createFirebaseAuthUser(admission.email, DEFAULT_PASSWORD, studentData);
@@ -833,11 +889,12 @@ const AdminDashboard = () => {
         }
       }
       
+      // Update authCreated status
       if (authCreated) {
-        await updateStudent(studentId, { authCreated: true });
+        await updateStudent(createdStudentId, { authCreated: true });
       }
       
-      return studentId;
+      return createdStudentId;
     } catch (error) {
       console.error('Error creating student from admission:', error);
       throw error;
@@ -845,7 +902,7 @@ const AdminDashboard = () => {
   };
 
   // ============================================
-  // HANDLE ADMISSION STATUS UPDATE
+  // HANDLE ADMISSION STATUS UPDATE - FIXED
   // ============================================
   const handleUpdateAdmissionStatus = async (studentId, status, studentData = null) => {
     try {
@@ -881,12 +938,14 @@ const AdminDashboard = () => {
 
       if (status === 'approved' || status === 'enrolled') {
         try {
+          // Check if student already exists by email
           let existingStudent = students.find(s => s.email === admission.email);
           if (!existingStudent && admission.email) {
             existingStudent = await getStudentByEmail(admission.email);
           }
 
           if (existingStudent) {
+            // ✅ Student exists - just update
             await updateStudent(existingStudent.id, { 
               admissionStatus: status,
               course: admission.course || existingStudent.course,
@@ -895,11 +954,34 @@ const AdminDashboard = () => {
             console.log('✅ Existing student updated:', existingStudent.id);
             studentIdCreated = existingStudent.id;
             
+            // ✅ Ensure auth user exists
             await ensureAuthUserExists(admission, existingStudent);
           } else {
-            studentIdCreated = await createStudentFromAdmission(admission);
-            studentCreated = true;
-            console.log('✅ New student created with auth:', studentIdCreated);
+            // ✅ No existing student - create new one
+            try {
+              studentIdCreated = await createStudentFromAdmission(admission);
+              studentCreated = true;
+              console.log('✅ New student created with auth:', studentIdCreated);
+            } catch (createError) {
+              console.error('❌ Error creating student:', createError);
+              // ✅ If student creation fails, try to find by email again
+              const retryStudent = await getStudentByEmail(admission.email);
+              if (retryStudent) {
+                console.log('✅ Student found after retry:', retryStudent.id);
+                await updateStudent(retryStudent.id, { 
+                  admissionStatus: status,
+                  course: admission.course || retryStudent.course,
+                  updatedAt: new Date().toISOString()
+                });
+                studentIdCreated = retryStudent.id;
+                studentCreated = true;
+                // Ensure auth exists
+                await ensureAuthUserExists(admission, retryStudent);
+              } else {
+                showNotification('Error creating student account: ' + createError.message, 'error');
+                return;
+              }
+            }
           }
         } catch (studentError) {
           console.error('Error handling student record:', studentError);
@@ -908,8 +990,10 @@ const AdminDashboard = () => {
         }
       }
 
+      // Send email notification
       const emailSent = await sendAdmissionStatusEmailToStudent(admission, status);
 
+      // Send in-app notification
       await sendNotification({
         userId: studentId,
         title: `Admission ${status.charAt(0).toUpperCase() + status.slice(1)}`,
@@ -1711,7 +1795,7 @@ const AdminDashboard = () => {
   };
 
   // ============================================
-  // RENDER ADMISSIONS
+  // RENDER ADMISSIONS - WITH CREATE STUDENT BUTTON
   // ============================================
   const renderAdmissions = () => {
     const pendingAdmissions = admissions.filter(a => a.status === 'pending' || a.status === 'under_review');
@@ -1795,6 +1879,25 @@ const AdminDashboard = () => {
                         }}
                       >
                         <FaEye /> View
+                      </button>
+                      <button
+                        className="btn-create-student"
+                        onClick={() => fixAdmissionToStudent(admission.id)}
+                        style={{
+                          background: '#FF6B35',
+                          color: 'white',
+                          border: 'none',
+                          padding: '6px 14px',
+                          borderRadius: '5px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '13px',
+                          fontWeight: '500'
+                        }}
+                      >
+                        <FaUserPlus /> Create Student
                       </button>
                       <button
                         className="btn-delete"
@@ -1928,7 +2031,7 @@ const AdminDashboard = () => {
   };
 
   // ============================================
-  // RENDER APPLICATIONS - WITH SEARCH, FILTERS, DELETE, AND FIX BUTTON
+  // RENDER APPLICATIONS
   // ============================================
   const renderApplications = () => {
     const filteredApps = getFilteredApplications();
@@ -1992,7 +2095,6 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Stats Summary */}
         <div className="admission-stats-bar">
           <span className="stat-item total">
             Total: {filteredApps.length}
@@ -2126,7 +2228,6 @@ const AdminDashboard = () => {
                           >
                             <FaEye /> View
                           </button>
-                          {/* NEW: Fix Admission Button */}
                           <button
                             className="btn-fix"
                             onClick={() => fixExistingApprovedApplication(app.id)}
@@ -2493,7 +2594,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-      {/* Notification */}
       {notification && (
         <div className={`notification ${notification.type}`}>
           {notification.type === 'success' ? <FaCheckCircle /> : <FaExclamationTriangle />}
@@ -2501,7 +2601,6 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Sidebar */}
       <div className="admin-sidebar">
         <div className="sidebar-header">
           <h2>Admin Panel</h2>
@@ -2533,7 +2632,6 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="admin-main">
         <div className="admin-header">
           <h1>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
