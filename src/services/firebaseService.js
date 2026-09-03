@@ -32,7 +32,7 @@ import {
   uploadBytes,
   getDownloadURL,
   deleteObject
-} from '../firebase';
+} from '/firebase';
 
 // ============================================
 // GENERATE MEMORABLE STUDENT ID
