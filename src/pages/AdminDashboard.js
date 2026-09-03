@@ -386,17 +386,34 @@ const loadDashboardData = async () => {
     }
   };
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    if (!amount) return 'GH₵ 0.00';
-    const amountInGHS = amount > 100 ? amount / 100 : amount;
-    return new Intl.NumberFormat('en-GH', {
-      style: 'currency',
-      currency: 'GHS',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amountInGHS || 0);
-  };
+  // ============================================
+// FORMAT CURRENCY - CORRECTED
+// ============================================
+const formatCurrency = (amount) => {
+  if (!amount) return 'GH₵ 0.00';
+  return new Intl.NumberFormat('en-GH', {
+    style: 'currency',
+    currency: 'GHS',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount);
+};
+
+// ============================================
+// FORMAT CURRENCY - With GHS symbol
+// ============================================
+const formatCurrencyGHS = (amount) => {
+  if (!amount) return 'GH₵ 0.00';
+  return `GH₵ ${amount.toFixed(2)}`;
+};
+
+// ============================================
+// FORMAT CURRENCY - For Paystack (amount in pesewas)
+// ============================================
+const formatPaystackAmount = (amount) => {
+  // Paystack expects amount in pesewas (GHS * 100)
+  return Math.round(amount * 100);
+};
 
   // ============================================
   // STUDENT FEES MANAGEMENT FUNCTIONS
