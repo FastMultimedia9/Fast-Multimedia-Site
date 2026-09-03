@@ -916,26 +916,74 @@ export const getAllPayments = async (filters = {}) => {
 };
 
 // Update payment status
+// src/services/firebaseService.js
+
+// ============================================
+// UPDATE PAYMENT STATUS - WITH FALLBACK
+// ============================================
 export const updatePaymentStatus = async (paymentId, status, receipt = null) => {
   try {
-    const docRef = doc(db, COLLECTIONS.PAYMENTS, paymentId);
-    const updateData = { 
-      status: status,
-      updatedAt: serverTimestamp()
-    };
+    console.log(`🔄 Updating payment status for: ${paymentId} to: ${status}`);
     
-    if (receipt) {
-      updateData.receipt = receipt;
+    // Try to find the payment by ID first
+    try {
+      const docRef = doc(db, COLLECTIONS.PAYMENTS, paymentId);
+      const updateData = { 
+        status: status,
+        updatedAt: serverTimestamp()
+      };
+      
+      if (receipt) {
+        updateData.receipt = receipt;
+      }
+      
+      if (status === 'completed') {
+        updateData.completedAt = serverTimestamp();
+      }
+      
+      await updateDoc(docRef, updateData);
+      console.log('✅ Payment status updated by ID');
+      return true;
+    } catch (idError) {
+      console.warn('⚠️ Could not update by ID, trying by reference:', idError.message);
+      
+      // If ID doesn't work, try by reference
+      try {
+        const q = query(
+          collection(db, COLLECTIONS.PAYMENTS),
+          where('reference', '==', paymentId)
+        );
+        const snapshot = await getDocs(q);
+        
+        if (!snapshot.empty) {
+          const docRef = snapshot.docs[0].ref;
+          const updateData = { 
+            status: status,
+            updatedAt: serverTimestamp()
+          };
+          
+          if (receipt) {
+            updateData.receipt = receipt;
+          }
+          
+          if (status === 'completed') {
+            updateData.completedAt = serverTimestamp();
+          }
+          
+          await updateDoc(docRef, updateData);
+          console.log('✅ Payment status updated by reference');
+          return true;
+        } else {
+          console.warn('⚠️ No payment found with reference:', paymentId);
+          return false;
+        }
+      } catch (refError) {
+        console.error('❌ Error updating by reference:', refError);
+        throw refError;
+      }
     }
-    
-    if (status === 'completed') {
-      updateData.completedAt = serverTimestamp();
-    }
-    
-    await updateDoc(docRef, updateData);
-    return true;
   } catch (error) {
-    console.error('Error updating payment status:', error);
+    console.error('❌ Error updating payment status:', error);
     throw error;
   }
 };

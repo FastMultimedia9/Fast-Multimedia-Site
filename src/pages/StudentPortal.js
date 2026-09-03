@@ -508,25 +508,25 @@ const handlePayment = async (e) => {
 
   try {
     // Generate reference
-    const reference = `PAY-${Date.now()}-${student?.studentId || 'STU'}`;
-    setPaymentReference(reference);
+    // In the handlePayment function, when creating the payment record
+const reference = `PAY-${Date.now()}-${student?.studentId || 'STU'}`;
+setPaymentReference(reference);
 
-    // Create payment record in Firestore
-    const paymentData = {
-      studentId: student?.id || '',
-      studentName: student?.fullName || '',
-      studentEmail: student?.email || '',
-      amount: parseFloat(paymentAmount),
-      description: `School Fees Payment - ${student?.course || 'Course'}`,
-      reference: reference,
-      status: 'pending',
-      paymentType: 'school_fees',
-      method: 'paystack',
-      createdAt: new Date().toISOString()
-    };
+const paymentData = {
+  studentId: student?.id || '',
+  studentName: student?.fullName || '',
+  studentEmail: student?.email || '',
+  amount: parseFloat(paymentAmount),
+  description: `School Fees Payment - ${student?.course || 'Course'}`,
+  reference: reference,  // ✅ This is the key field for lookup
+  status: 'pending',
+  paymentType: 'school_fees',
+  method: 'paystack',
+  createdAt: new Date().toISOString()
+};
 
-    await createPayment(paymentData);
-    console.log('✅ Payment record created:', reference);
+await createPayment(paymentData);
+console.log('✅ Payment record created with reference:', reference);
 
     // Check if Paystack is loaded
     if (typeof window.PaystackPop === 'undefined') {
@@ -599,16 +599,48 @@ const handlePayment = async (e) => {
   }
 };
 
-// ============================================
-// PAYMENT SUCCESS HANDLER (Separate async function)
+/// ============================================
+// PAYMENT SUCCESS HANDLER - WITH BETTER ERROR HANDLING
 // ============================================
 const handlePaymentSuccess = async (response, reference) => {
   try {
-    // Update payment status
-    await updatePaymentStatus(reference, 'completed');
-    console.log('✅ Payment status updated to completed');
+    console.log('💰 Processing payment success for reference:', reference);
+    console.log('📦 Response:', response);
     
-    // Send notification
+    // Try to update payment status
+    try {
+      await updatePaymentStatus(reference, 'completed');
+      console.log('✅ Payment status updated to completed');
+    } catch (updateError) {
+      console.error('❌ Error updating payment status:', updateError);
+      
+      // Try alternative: update payment status directly
+      try {
+        console.log('🔄 Trying alternative update method...');
+        // Try using updateDoc directly
+        const paymentQuery = query(
+          collection(db, COLLECTIONS.PAYMENTS),
+          where('reference', '==', reference)
+        );
+        const paymentSnapshot = await getDocs(paymentQuery);
+        
+        if (!paymentSnapshot.empty) {
+          const paymentDoc = paymentSnapshot.docs[0];
+          await updateDoc(doc(db, COLLECTIONS.PAYMENTS, paymentDoc.id), {
+            status: 'completed',
+            updatedAt: serverTimestamp()
+          });
+          console.log('✅ Payment updated via alternative method');
+        } else {
+          console.warn('⚠️ Payment document not found for reference:', reference);
+        }
+      } catch (altError) {
+        console.error('❌ Alternative update also failed:', altError);
+        // Don't throw - we still want to show success to the user
+      }
+    }
+    
+    // Send notification (don't block if it fails)
     try {
       await sendNotification({
         userId: student?.id || '',
@@ -617,24 +649,31 @@ const handlePaymentSuccess = async (response, reference) => {
         type: 'payment',
         link: '/student/portal'
       });
+      console.log('✅ Notification sent');
     } catch (notifError) {
-      console.warn('Notification error:', notifError);
+      console.warn('⚠️ Notification error:', notifError);
     }
 
     showNotification(`Payment of ${formatCurrency(parseFloat(paymentAmount))} successful!`, 'success');
     
-    // Reload data
+    // Reload data to show updated payment status
     if (student) {
       await loadStudentData(student);
+      console.log('✅ Data reloaded');
     }
+    
+    // Close modal and reset
     setShowPaymentModal(false);
     setPaymentAmount('');
     setIsProcessingPayment(false);
     setPaymentError('');
+    
   } catch (error) {
-    console.error('Error processing successful payment:', error);
-    showNotification('Payment was successful but there was an error updating your record. Please contact support.', 'warning');
+    console.error('❌ Error processing successful payment:', error);
+    // Show success to user anyway since payment was successful
+    showNotification('Payment was successful! We are updating your record. Please refresh if you don\'t see it.', 'info');
     setIsProcessingPayment(false);
+    setShowPaymentModal(false);
   }
 };
 
