@@ -686,37 +686,105 @@ const AdminDashboard = () => {
   };
 
   // ============================================
-  // FIX: Manually Create Student from Admission
-  // ============================================
-  const fixAdmissionToStudent = async (admissionId) => {
-    try {
-      const admission = admissions.find(a => a.id === admissionId);
-      if (!admission) {
-        showNotification('Admission not found', 'error');
-        return;
-      }
-
-      // Check if student already exists
-      const existingStudent = await getStudentByEmail(admission.email);
-      if (existingStudent) {
-        showNotification(`Student already exists: ${existingStudent.studentId}`, 'warning');
-        // Update the admission with the student ID
-        await updateAdmission(admissionId, {
-          studentId: existingStudent.studentId,
-          updatedAt: new Date().toISOString()
-        });
-        return;
-      }
-
-      // Create student from admission
-      const studentId = await createStudentFromAdmission(admission);
-      showNotification(`✅ Student created with ID: ${studentId}`, 'success');
-      await loadDashboardData();
-    } catch (error) {
-      console.error('Error creating student from admission:', error);
-      showNotification('Error creating student: ' + error.message, 'error');
+// FIX: Manually Create Student from Admission
+// ============================================
+const fixAdmissionToStudent = async (admissionId) => {
+  try {
+    const admission = admissions.find(a => a.id === admissionId);
+    if (!admission) {
+      showNotification('Admission not found', 'error');
+      return;
     }
-  };
+
+    // Check if student already exists
+    const existingStudent = await getStudentByEmail(admission.email);
+    if (existingStudent) {
+      showNotification(`Student already exists: ${existingStudent.studentId || existingStudent.id}`, 'warning');
+      // Update admission with student ID
+      await updateAdmission(admission.id, {
+        studentId: existingStudent.studentId || existingStudent.id,
+        updatedAt: new Date().toISOString()
+      });
+      await loadDashboardData();
+      return;
+    }
+
+    // Generate proper Student ID
+    const newStudentId = await generateStudentId(admission.fullName);
+    console.log('📝 Generated Student ID:', newStudentId);
+    
+    // Update admission with student ID
+    await updateAdmission(admission.id, {
+      studentId: newStudentId,
+      updatedAt: new Date().toISOString()
+    });
+    
+    // Create student
+    const studentData = {
+      fullName: admission.fullName || 'N/A',
+      email: admission.email || 'N/A',
+      phone: admission.phone || 'N/A',
+      dateOfBirth: admission.dateOfBirth || '',
+      gender: admission.gender || '',
+      address: admission.address || '',
+      city: admission.city || '',
+      course: admission.course || 'Not specified',
+      educationLevel: admission.educationLevel || '',
+      previousSchool: admission.previousSchool || '',
+      preferredStudyMode: admission.preferredStudyMode || '',
+      guardianName: admission.guardianName || '',
+      guardianPhone: admission.guardianPhone || '',
+      guardianEmail: admission.guardianEmail || '',
+      guardianRelationship: admission.guardianRelationship || '',
+      hearAboutUs: admission.hearAboutUs || '',
+      reasonToJoin: admission.reasonToJoin || '',
+      specialNeeds: admission.specialNeeds || 'None',
+      admissionStatus: admission.status || 'approved',
+      serialNumber: admission.serialNumber || '',
+      applicationDate: admission.applicationDate || new Date().toISOString(),
+      enrolledCourses: [admission.course || 'Not specified'],
+      status: 'active',
+      studentId: newStudentId,
+      password: DEFAULT_PASSWORD,
+      passwordUpdated: false,
+      authCreated: false,
+      paymentHistory: [],
+      attendance: { total: 0, present: 0, absent: 0 },
+      grades: {},
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    const studentRef = doc(db, 'students', newStudentId);
+    await setDoc(studentRef, {
+      ...studentData,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    
+    console.log(`✅ Student created with ID: ${newStudentId}`);
+    
+    // Check if auth exists
+    try {
+      const methods = await fetchSignInMethodsForEmail(auth, admission.email);
+      if (methods && methods.length > 0) {
+        await updateStudent(newStudentId, { authCreated: true });
+      } else {
+        await createFirebaseAuthUser(admission.email, DEFAULT_PASSWORD, studentData);
+      }
+    } catch (authError) {
+      if (authError.code === 'auth/email-already-in-use') {
+        await updateStudent(newStudentId, { authCreated: true });
+      }
+    }
+    
+    showNotification(`✅ Student created with ID: ${newStudentId}`, 'success');
+    await loadDashboardData();
+  } catch (error) {
+    console.error('Error creating student from admission:', error);
+    showNotification('Error creating student: ' + error.message, 'error');
+  }
+};
 
   // ============================================
   // ENSURE AUTH USER EXISTS
@@ -902,125 +970,243 @@ const AdminDashboard = () => {
   };
 
   // ============================================
-  // HANDLE ADMISSION STATUS UPDATE - FIXED
-  // ============================================
-  const handleUpdateAdmissionStatus = async (studentId, status, studentData = null) => {
-    try {
-      console.log(`🔄 Updating admission status to ${status} for:`, studentId);
-      
-      let admission = studentData;
+// HANDLE ADMISSION STATUS UPDATE - COMPLETELY FIXED
+// ============================================
+const handleUpdateAdmissionStatus = async (admissionId, status, studentData = null) => {
+  try {
+    console.log(`🔄 Updating admission status to ${status} for:`, admissionId);
+    
+    let admission = studentData;
+    if (!admission) {
+      admission = admissions.find(a => a.id === admissionId);
       if (!admission) {
-        admission = admissions.find(a => a.id === studentId);
-        if (!admission) {
-          try {
-            const admissionById = await getAdmission(studentId);
-            if (admissionById) {
-              admission = admissionById;
-            }
-          } catch (fetchError) {
-            console.error('Error fetching admission:', fetchError);
+        try {
+          const admissionById = await getAdmission(admissionId);
+          if (admissionById) {
+            admission = admissionById;
           }
+        } catch (fetchError) {
+          console.error('Error fetching admission:', fetchError);
         }
       }
+    }
 
-      if (!admission) {
-        console.error('❌ Admission not found for ID:', studentId);
-        showNotification('Admission not found', 'error');
-        return;
-      }
+    if (!admission) {
+      console.error('❌ Admission not found for ID:', admissionId);
+      showNotification('Admission not found', 'error');
+      return;
+    }
 
-      console.log('✅ Admission found:', admission);
+    console.log('✅ Admission found:', admission);
 
-      await updateAdmissionStatus(studentId, status);
+    // Update admission status
+    await updateAdmissionStatus(admissionId, status);
 
-      let studentCreated = false;
-      let studentIdCreated = null;
+    let studentCreated = false;
+    let studentIdCreated = null;
+    let existingStudent = null;
 
-      if (status === 'approved' || status === 'enrolled') {
-        try {
-          // Check if student already exists by email
-          let existingStudent = students.find(s => s.email === admission.email);
-          if (!existingStudent && admission.email) {
-            existingStudent = await getStudentByEmail(admission.email);
+    // Only process student if status is approved or enrolled
+    if (status === 'approved' || status === 'enrolled') {
+      try {
+        // FIRST: Check if student already exists by email
+        existingStudent = await getStudentByEmail(admission.email);
+        
+        if (existingStudent) {
+          // ✅ Student exists - just update
+          console.log('✅ Student already exists:', existingStudent.id);
+          
+          await updateStudent(existingStudent.id, { 
+            admissionStatus: status,
+            course: admission.course || existingStudent.course,
+            updatedAt: new Date().toISOString()
+          });
+          
+          studentIdCreated = existingStudent.id;
+          
+          // Update admission with student ID
+          await updateAdmission(admission.id, {
+            studentId: existingStudent.studentId || existingStudent.id,
+            updatedAt: new Date().toISOString()
+          });
+          
+          // Ensure auth exists (check if auth already exists)
+          try {
+            const methods = await fetchSignInMethodsForEmail(auth, admission.email);
+            if (methods && methods.length > 0) {
+              console.log('✅ Auth already exists, marking as created');
+              await updateStudent(existingStudent.id, { authCreated: true });
+            } else {
+              // Create auth if it doesn't exist
+              await createFirebaseAuthUser(admission.email, DEFAULT_PASSWORD, existingStudent);
+              await updateStudent(existingStudent.id, { authCreated: true });
+            }
+          } catch (authError) {
+            console.error('Error ensuring auth exists:', authError);
+            // Don't fail - student already exists
           }
-
-          if (existingStudent) {
-            // ✅ Student exists - just update
-            await updateStudent(existingStudent.id, { 
+          
+          showNotification(`✅ Student already exists: ${existingStudent.studentId || existingStudent.id}`, 'info');
+          
+        } else {
+          // ✅ No existing student - create new one
+          try {
+            // Generate proper Student ID
+            const newStudentId = await generateStudentId(admission.fullName);
+            console.log('📝 Generated Student ID:', newStudentId);
+            
+            // Prepare student data
+            const studentData = {
+              fullName: admission.fullName || 'N/A',
+              email: admission.email || 'N/A',
+              phone: admission.phone || 'N/A',
+              dateOfBirth: admission.dateOfBirth || '',
+              gender: admission.gender || '',
+              address: admission.address || '',
+              city: admission.city || '',
+              course: admission.course || 'Not specified',
+              educationLevel: admission.educationLevel || '',
+              previousSchool: admission.previousSchool || '',
+              preferredStudyMode: admission.preferredStudyMode || '',
+              guardianName: admission.guardianName || '',
+              guardianPhone: admission.guardianPhone || '',
+              guardianEmail: admission.guardianEmail || '',
+              guardianRelationship: admission.guardianRelationship || '',
+              hearAboutUs: admission.hearAboutUs || '',
+              reasonToJoin: admission.reasonToJoin || '',
+              specialNeeds: admission.specialNeeds || 'None',
               admissionStatus: status,
-              course: admission.course || existingStudent.course,
+              serialNumber: admission.serialNumber || '',
+              applicationDate: admission.applicationDate || new Date().toISOString(),
+              enrolledCourses: [admission.course || 'Not specified'],
+              status: 'active',
+              studentId: newStudentId,
+              password: DEFAULT_PASSWORD,
+              passwordUpdated: false,
+              authCreated: false,
+              paymentHistory: [],
+              attendance: { total: 0, present: 0, absent: 0 },
+              grades: {},
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+
+            // Create student using the studentId as the document ID
+            const studentRef = doc(db, 'students', newStudentId);
+            await setDoc(studentRef, {
+              ...studentData,
+              createdAt: serverTimestamp(),
+              updatedAt: serverTimestamp()
+            });
+            
+            console.log(`✅ Student created with ID: ${newStudentId}`);
+            studentIdCreated = newStudentId;
+            studentCreated = true;
+            
+            // Update admission with student ID
+            await updateAdmission(admission.id, {
+              studentId: newStudentId,
               updatedAt: new Date().toISOString()
             });
-            console.log('✅ Existing student updated:', existingStudent.id);
-            studentIdCreated = existingStudent.id;
             
-            // ✅ Ensure auth user exists
-            await ensureAuthUserExists(admission, existingStudent);
-          } else {
-            // ✅ No existing student - create new one
+            // Create Firebase Auth user (if not exists)
             try {
-              studentIdCreated = await createStudentFromAdmission(admission);
-              studentCreated = true;
-              console.log('✅ New student created with auth:', studentIdCreated);
-            } catch (createError) {
-              console.error('❌ Error creating student:', createError);
-              // ✅ If student creation fails, try to find by email again
-              const retryStudent = await getStudentByEmail(admission.email);
-              if (retryStudent) {
-                console.log('✅ Student found after retry:', retryStudent.id);
-                await updateStudent(retryStudent.id, { 
-                  admissionStatus: status,
-                  course: admission.course || retryStudent.course,
-                  updatedAt: new Date().toISOString()
-                });
-                studentIdCreated = retryStudent.id;
-                studentCreated = true;
-                // Ensure auth exists
-                await ensureAuthUserExists(admission, retryStudent);
+              const methods = await fetchSignInMethodsForEmail(auth, admission.email);
+              if (methods && methods.length > 0) {
+                console.log('✅ Auth already exists for', admission.email);
+                await updateStudent(newStudentId, { authCreated: true });
               } else {
-                showNotification('Error creating student account: ' + createError.message, 'error');
-                return;
+                const userCredential = await createUserWithEmailAndPassword(
+                  auth,
+                  admission.email,
+                  DEFAULT_PASSWORD
+                );
+                
+                await updateProfile(userCredential.user, {
+                  displayName: admission.fullName || 'Student'
+                });
+                
+                const userRef = doc(db, 'users', userCredential.user.uid);
+                await setDoc(userRef, {
+                  uid: userCredential.user.uid,
+                  email: admission.email,
+                  fullName: admission.fullName,
+                  role: 'student',
+                  studentId: newStudentId,
+                  course: admission.course,
+                  admissionStatus: status,
+                  createdAt: serverTimestamp(),
+                  updatedAt: serverTimestamp()
+                });
+                
+                await updateStudent(newStudentId, { authCreated: true });
+                console.log('✅ Auth created for', admission.email);
+              }
+            } catch (authError) {
+              if (authError.code === 'auth/email-already-in-use') {
+                console.log('✅ Auth already exists (caught)');
+                await updateStudent(newStudentId, { authCreated: true });
+              } else {
+                console.error('Auth error:', authError);
+                // Don't fail - student is created
               }
             }
+            
+          } catch (createError) {
+            console.error('❌ Error creating student:', createError);
+            showNotification('Error creating student account: ' + createError.message, 'error');
+            // Don't return - continue with admission approval
           }
-        } catch (studentError) {
-          console.error('Error handling student record:', studentError);
-          showNotification('Error creating student account: ' + studentError.message, 'error');
-          return;
         }
+      } catch (studentError) {
+        console.error('Error handling student record:', studentError);
+        showNotification('Error processing student: ' + studentError.message, 'error');
+        // Don't return - continue with admission approval
       }
+    }
 
-      // Send email notification
+    // Send email notification
+    try {
       const emailSent = await sendAdmissionStatusEmailToStudent(admission, status);
+      console.log('📧 Email sent:', emailSent);
+    } catch (emailError) {
+      console.error('Email error:', emailError);
+    }
 
-      // Send in-app notification
+    // Send in-app notification
+    try {
       await sendNotification({
-        userId: studentId,
+        userId: admissionId,
         title: `Admission ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-        message: `Your admission has been ${status}. ${emailSent ? 'A confirmation email has been sent to you.' : 'Please check your email for confirmation.'}${studentCreated ? ' Your student account has been created.' : ''}`,
+        message: `Your admission has been ${status}. ${existingStudent ? 'Your student account is ready.' : 'Your student account has been created.'}`,
         type: 'admission',
         link: '/student/portal'
       });
-
-      const statusMessages = {
-        approved: 'approved 🎉',
-        enrolled: 'enrolled ✅',
-        rejected: 'rejected ❌'
-      };
-
-      const studentMessage = studentCreated ? ' Student record created with Auth!' : studentIdCreated ? ' Student record updated!' : '';
-
-      showNotification(
-        `Admission ${statusMessages[status] || status}. ${emailSent ? 'Email sent!' : 'Email failed to send.'}${studentMessage}`,
-        emailSent ? 'success' : 'warning'
-      );
-      
-      await loadDashboardData();
-    } catch (error) {
-      console.error('Error updating admission status:', error);
-      showNotification('Error updating admission status: ' + error.message, 'error');
+    } catch (notifError) {
+      console.error('Notification error:', notifError);
     }
-  };
+
+    const statusMessages = {
+      approved: 'approved 🎉',
+      enrolled: 'enrolled ✅',
+      rejected: 'rejected ❌'
+    };
+
+    const studentMessage = studentCreated ? ' Student record created!' : existingStudent ? ' Student record updated!' : '';
+
+    showNotification(
+      `Admission ${statusMessages[status] || status}.${studentMessage}`,
+      'success'
+    );
+    
+    // Reload data
+    await loadDashboardData();
+    
+  } catch (error) {
+    console.error('❌ Error updating admission status:', error);
+    showNotification('Error updating admission status: ' + error.message, 'error');
+  }
+};
 
   // ============================================
   // HANDLE APPLICATION STATUS UPDATE - Creates Admission on Approve
