@@ -481,7 +481,7 @@ const StudentPortal = () => {
   };
 
   // ============================================
-// PAYMENT HANDLER - COMPLETELY FIXED
+// PAYMENT HANDLER - CORRECTED FOR PAYSTACK
 // ============================================
 const handlePayment = async (e) => {
   e.preventDefault();
@@ -536,28 +536,14 @@ const handlePayment = async (e) => {
     // Get public key from environment
     const publicKey = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY || PAYSTACK_PUBLIC_KEY;
     
-    // Open Paystack popup - Using the SAME pattern as Admissions page
+    // Initialize Paystack - Using the correct pattern from Paystack docs
     const paystack = window.PaystackPop;
     
-    // IMPORTANT: Define callbacks as regular functions (NOT async)
-    const paymentCallback = function(response) {
-      console.log('✅ Payment successful:', response);
-      
-      // Handle payment success - use a separate async function
-      handlePaymentSuccess(response, reference);
-    };
-
-    const paymentOnClose = function() {
-      console.log('❌ Payment window closed by user');
-      // Handle payment close - use a separate async function
-      handlePaymentClose(reference);
-    };
-
-    // Create the handler with proper callbacks
+    // Create the handler with proper callbacks (sync functions only)
     const handler = paystack.setup({
       key: publicKey,
       email: paymentEmail,
-      amount: parseFloat(paymentAmount) * 100, // Convert to pesewas
+      amount: parseFloat(paymentAmount) * 100, // Convert to pesewas (GHS * 100)
       currency: 'GHS',
       ref: reference,
       metadata: {
@@ -579,20 +565,21 @@ const handlePayment = async (e) => {
           }
         ]
       },
-      callback: paymentCallback,
-      onClose: paymentOnClose
+      // ⚠️ IMPORTANT: These MUST be regular functions, NOT async functions
+      callback: function(response) {
+        // This is a sync function - call an async function separately
+        console.log('✅ Payment successful:', response);
+        handlePaymentSuccess(response, reference);
+      },
+      onClose: function() {
+        // This is a sync function - call an async function separately
+        console.log('❌ Payment window closed by user');
+        handlePaymentClose(reference);
+      }
     });
 
     // Open the payment iframe
-    if (typeof handler.openIframe === 'function') {
-      handler.openIframe();
-    } else if (typeof handler.open === 'function') {
-      handler.open();
-    } else if (typeof handler === 'function') {
-      handler();
-    } else {
-      throw new Error('Could not open payment window');
-    }
+    handler.openIframe();
     
   } catch (error) {
     console.error('Payment initialization error:', error);
@@ -613,7 +600,7 @@ const handlePayment = async (e) => {
 };
 
 // ============================================
-// PAYMENT SUCCESS HANDLER (Separate function)
+// PAYMENT SUCCESS HANDLER (Separate async function)
 // ============================================
 const handlePaymentSuccess = async (response, reference) => {
   try {
@@ -652,7 +639,7 @@ const handlePaymentSuccess = async (response, reference) => {
 };
 
 // ============================================
-// PAYMENT CLOSE HANDLER (Separate function)
+// PAYMENT CLOSE HANDLER (Separate async function)
 // ============================================
 const handlePaymentClose = async (reference) => {
   console.log('Payment window closed');
