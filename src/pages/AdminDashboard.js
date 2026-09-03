@@ -194,156 +194,189 @@ const AdminDashboard = () => {
   }, [navigate]);
 
   // ============================================
-  // LOAD DASHBOARD DATA
-  // ============================================
-  const loadDashboardData = async () => {
-    setIsLoading(true);
+// LOAD DASHBOARD DATA - CORRECTED
+// ============================================
+const loadDashboardData = async () => {
+  setIsLoading(true);
+  try {
+    // Get fresh stats from the server
+    let statsData = {
+      totalStudents: 0,
+      approvedStudents: 0,
+      pendingStudents: 0,
+      rejectedStudents: 0,
+      enrolledStudents: 0,
+      totalApplications: 0,
+      pendingApplications: 0,
+      approvedApplications: 0,
+      rejectedApplications: 0,
+      totalRevenue: 0,
+      pendingPayments: 0,
+      completedPayments: 0,
+      totalStaff: 0,
+      totalCourses: 0,
+      totalSerials: 0,
+      availableSerials: 0
+    };
+    
+    let studentsData = [];
+    let admissionsData = [];
+    let applicationsData = [];
+    let paymentsData = [];
+    let staffData = [];
+    let coursesData = [];
+    let serialsData = [];
+    
+    // Fetch all data in parallel
     try {
-      let statsData = {
-        totalStudents: 0,
-        approvedStudents: 0,
-        pendingStudents: 0,
-        rejectedStudents: 0,
-        enrolledStudents: 0,
-        totalApplications: 0,
-        pendingApplications: 0,
-        approvedApplications: 0,
-        rejectedApplications: 0,
-        totalRevenue: 0,
-        pendingPayments: 0,
-        completedPayments: 0,
-        totalStaff: 0,
-        totalCourses: 0,
-        totalSerials: 0,
-        availableSerials: 0
-      };
-      
-      let studentsData = [];
-      let admissionsData = [];
-      let applicationsData = [];
-      let paymentsData = [];
-      let staffData = [];
-      let coursesData = [];
-      let serialsData = [];
-      
-      try {
-        const result = await getDashboardStats();
-        statsData = result || statsData;
-      } catch (statsError) {
-        console.error('Error loading stats:', statsError);
-      }
-      
-      try {
-        const students = await getAllStudents();
-        studentsData = students || [];
-      } catch (studentsError) {
-        console.error('Error loading students:', studentsError);
-        studentsData = [];
-      }
-      
-      try {
-        const admissions = await getAllAdmissions();
-        admissionsData = admissions || [];
-      } catch (admissionsError) {
-        console.error('Error loading admissions:', admissionsError);
-        admissionsData = [];
-      }
-      
-      try {
-        const apps = await getAllApplications();
-        applicationsData = apps || [];
-      } catch (appsError) {
-        console.error('Error loading applications:', appsError);
-        applicationsData = [];
-      }
-      
-      try {
-        const payments = await getAllPayments();
-        paymentsData = payments || [];
-      } catch (paymentsError) {
-        console.error('Error loading payments:', paymentsError);
-        paymentsData = [];
-      }
-      
-      try {
-        const staff = await getAllStaff();
-        staffData = staff || [];
-      } catch (staffError) {
-        console.error('Error loading staff:', staffError);
-        staffData = [];
-      }
-      
-      try {
-        const courses = await getAllCourses();
-        coursesData = courses || [];
-      } catch (coursesError) {
-        console.error('Error loading courses:', coursesError);
-        coursesData = [];
-      }
-      
-      try {
-        const serials = await getAllSerials();
-        serialsData = serials || [];
-      } catch (serialsError) {
-        console.error('Error loading serials:', serialsError);
-        serialsData = [];
-      }
-      
-      setStats(statsData);
-      const approvedStudents = (studentsData || []).filter(s => 
-        s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
-      );
-      setStudents(approvedStudents);
-      setAdmissions(admissionsData || []);
-      setApplications(applicationsData || []);
-      setPayments(paymentsData || []);
-      setStaff(staffData || []);
-      setCourses(coursesData || []);
-      setSerials(serialsData || []);
-      
-      showNotification('Dashboard data loaded successfully', 'success');
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
-      showNotification('Error loading dashboard data. Using default values.', 'error');
-      setStudents([]);
-      setAdmissions([]);
-      setApplications([]);
-      setPayments([]);
-      setStaff([]);
-      setCourses([]);
-      setSerials([]);
-    } finally {
-      setIsLoading(false);
+      const result = await getDashboardStats();
+      statsData = result || statsData;
+      console.log('📊 Stats loaded:', statsData);
+    } catch (statsError) {
+      console.error('Error loading stats:', statsError);
     }
-  };
-
-  const showNotification = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 5000);
-  };
-
-  // Handle logout
-  const handleLogout = async () => {
+    
     try {
-      await logoutUser();
-      navigate('/login', { state: { from: '/admin' } });
-    } catch (error) {
-      console.error('Logout error:', error);
-      showNotification('Error logging out', 'error');
+      const students = await getAllStudents();
+      studentsData = students || [];
+      console.log('📚 Students loaded:', studentsData.length);
+      // Log student statuses for debugging
+      const statusCounts = {};
+      studentsData.forEach(s => {
+        const status = s.admissionStatus || 'unknown';
+        statusCounts[status] = (statusCounts[status] || 0) + 1;
+      });
+      console.log('📊 Student status counts:', statusCounts);
+    } catch (studentsError) {
+      console.error('Error loading students:', studentsError);
+      studentsData = [];
     }
-  };
+    
+    try {
+      const admissions = await getAllAdmissions();
+      admissionsData = admissions || [];
+      console.log('📋 Admissions loaded:', admissionsData.length);
+    } catch (admissionsError) {
+      console.error('Error loading admissions:', admissionsError);
+      admissionsData = [];
+    }
+    
+    try {
+      const apps = await getAllApplications();
+      applicationsData = apps || [];
+      console.log('📄 Applications loaded:', applicationsData.length);
+    } catch (appsError) {
+      console.error('Error loading applications:', appsError);
+      applicationsData = [];
+    }
+    
+    try {
+      const payments = await getAllPayments();
+      paymentsData = payments || [];
+      console.log('💰 Payments loaded:', paymentsData.length);
+    } catch (paymentsError) {
+      console.error('Error loading payments:', paymentsError);
+      paymentsData = [];
+    }
+    
+    try {
+      const staff = await getAllStaff();
+      staffData = staff || [];
+      console.log('👤 Staff loaded:', staffData.length);
+    } catch (staffError) {
+      console.error('Error loading staff:', staffError);
+      staffData = [];
+    }
+    
+    try {
+      const courses = await getAllCourses();
+      coursesData = courses || [];
+      console.log('📚 Courses loaded:', coursesData.length);
+    } catch (coursesError) {
+      console.error('Error loading courses:', coursesError);
+      coursesData = [];
+    }
+    
+    try {
+      const serials = await getAllSerials();
+      serialsData = serials || [];
+      console.log('🔑 Serials loaded:', serialsData.length);
+    } catch (serialsError) {
+      console.error('Error loading serials:', serialsError);
+      serialsData = [];
+    }
+    
+    // Set stats
+    setStats(statsData);
+    
+    // Filter approved/enrolled students for the students list
+    const approvedStudents = (studentsData || []).filter(s => 
+      s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
+    );
+    setStudents(approvedStudents);
+    
+    // Set all other data
+    setAdmissions(admissionsData || []);
+    setApplications(applicationsData || []);
+    setPayments(paymentsData || []);
+    setStaff(staffData || []);
+    setCourses(coursesData || []);
+    setSerials(serialsData || []);
+    
+    console.log('✅ Dashboard data loaded successfully');
+    console.log('📊 Final stats:', {
+      totalStudents: statsData.totalStudents,
+      approved: statsData.approvedStudents,
+      pending: statsData.pendingStudents,
+      rejected: statsData.rejectedStudents,
+      enrolled: statsData.enrolledStudents,
+      totalApps: statsData.totalApplications,
+      pendingApps: statsData.pendingApplications
+    });
+    
+    showNotification('Dashboard data loaded successfully', 'success');
+  } catch (error) {
+    console.error('❌ Error loading dashboard data:', error);
+    showNotification('Error loading dashboard data. Using default values.', 'error');
+    setStudents([]);
+    setAdmissions([]);
+    setApplications([]);
+    setPayments([]);
+    setStaff([]);
+    setCourses([]);
+    setSerials([]);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    if (!amount) return 'GH₵ 0.00';
-    const amountInGHS = amount > 100 ? amount / 100 : amount;
-    return new Intl.NumberFormat('en-GH', {
-      style: 'currency',
-      currency: 'GHS',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amountInGHS || 0);
-  };
+const showNotification = (message, type = 'success') => {
+  setNotification({ message, type });
+  setTimeout(() => setNotification(null), 5000);
+};
+
+// Handle logout
+const handleLogout = async () => {
+  try {
+    await logoutUser();
+    navigate('/login', { state: { from: '/admin' } });
+  } catch (error) {
+    console.error('Logout error:', error);
+    showNotification('Error logging out', 'error');
+  }
+};
+
+// Format currency
+const formatCurrency = (amount) => {
+  if (!amount) return 'GH₵ 0.00';
+  const amountInGHS = amount > 100 ? amount / 100 : amount;
+  return new Intl.NumberFormat('en-GH', {
+    style: 'currency',
+    currency: 'GHS',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amountInGHS || 0);
+};
 
   // ============================================
   // CREATE FIREBASE AUTH USER FOR STUDENT

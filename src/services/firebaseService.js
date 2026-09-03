@@ -1712,9 +1712,17 @@ export const updateUser = async (userId, updateData) => {
 // ============================================
 
 // Get dashboard statistics
+// src/services/firebaseService.js
+
+// src/services/firebaseService.js
+
+// ============================================
+// DASHBOARD STATISTICS - CORRECTED
+// ============================================
+
 export const getDashboardStats = async () => {
   try {
-    const [students, staff, courses, payments, applications, serials] = await Promise.all([
+    const [studentsSnapshot, staffSnapshot, coursesSnapshot, paymentsSnapshot, applicationsSnapshot, serialsSnapshot] = await Promise.all([
       getDocs(collection(db, COLLECTIONS.STUDENTS)),
       getDocs(collection(db, COLLECTIONS.STAFF)),
       getDocs(collection(db, COLLECTIONS.COURSES)),
@@ -1723,9 +1731,20 @@ export const getDashboardStats = async () => {
       getDocs(collection(db, COLLECTIONS.SERIAL_NUMBERS))
     ]);
 
+    // Process students - count by admissionStatus
+    const students = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    // Count students by status (using admissionStatus field)
+    const totalStudents = students.length;
+    const approvedStudents = students.filter(s => s.admissionStatus === 'approved').length;
+    const pendingStudents = students.filter(s => s.admissionStatus === 'pending').length;
+    const rejectedStudents = students.filter(s => s.admissionStatus === 'rejected').length;
+    const enrolledStudents = students.filter(s => s.admissionStatus === 'enrolled').length;
+
+    // Process payments
     let totalRevenue = 0;
     let pendingPayments = 0;
-    payments.forEach(doc => {
+    paymentsSnapshot.forEach(doc => {
       const data = doc.data();
       if (data.status === 'completed') {
         totalRevenue += data.amount || 0;
@@ -1734,24 +1753,62 @@ export const getDashboardStats = async () => {
       }
     });
 
-    return {
-      totalStudents: students.size,
-      totalStaff: staff.size,
-      totalCourses: courses.size,
-      totalRevenue: totalRevenue,
-      pendingPayments: pendingPayments,
-      totalApplications: applications.size,
-      totalSerials: serials.size,
-      usedSerials: serials.docs.filter(doc => doc.data().isUsed).length,
-      availableSerials: serials.docs.filter(doc => !doc.data().isUsed).length,
-      pendingStudents: students.docs.filter(doc => doc.data().admissionStatus === 'pending').length,
-      approvedStudents: students.docs.filter(doc => doc.data().admissionStatus === 'approved').length,
-      enrolledStudents: students.docs.filter(doc => doc.data().admissionStatus === 'enrolled').length,
-      rejectedStudents: students.docs.filter(doc => doc.data().admissionStatus === 'rejected').length
+    // Process applications
+    const applications = applicationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const pendingApplications = applications.filter(a => a.status === 'pending' || a.status === 'submitted').length;
+    const approvedApplications = applications.filter(a => a.status === 'approved').length;
+    const rejectedApplications = applications.filter(a => a.status === 'rejected').length;
+
+    // Process serials
+    const serials = serialsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const usedSerials = serials.filter(s => s.isUsed === true).length;
+    const availableSerials = serials.filter(s => s.isUsed !== true).length;
+
+    const stats = {
+      totalStudents,
+      approvedStudents,
+      pendingStudents,
+      rejectedStudents,
+      enrolledStudents,
+      totalApplications: applications.length,
+      pendingApplications,
+      approvedApplications,
+      rejectedApplications,
+      totalRevenue,
+      pendingPayments,
+      completedPayments: totalRevenue - pendingPayments,
+      totalStaff: staffSnapshot.docs.length,
+      totalCourses: coursesSnapshot.docs.length,
+      totalSerials: serials.length,
+      availableSerials,
+      usedSerials
     };
+
+    console.log('📊 Dashboard stats calculated:', stats);
+    return stats;
+    
   } catch (error) {
     console.error('Error getting dashboard stats:', error);
-    throw error;
+    // Return default stats to prevent UI crash
+    return {
+      totalStudents: 0,
+      approvedStudents: 0,
+      pendingStudents: 0,
+      rejectedStudents: 0,
+      enrolledStudents: 0,
+      totalApplications: 0,
+      pendingApplications: 0,
+      approvedApplications: 0,
+      rejectedApplications: 0,
+      totalRevenue: 0,
+      pendingPayments: 0,
+      completedPayments: 0,
+      totalStaff: 0,
+      totalCourses: 0,
+      totalSerials: 0,
+      availableSerials: 0,
+      usedSerials: 0
+    };
   }
 };
 
