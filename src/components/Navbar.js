@@ -1,3 +1,4 @@
+// src/components/Navbar.js
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { getCurrentUser, getUserProfile, logoutUser } from '../services/firebaseService';
@@ -94,7 +95,7 @@ const Navbar = () => {
     }
   };
 
-  // School menu items
+  // School menu items - ONLY SHOWN WHEN NOT LOGGED IN
   const schoolMenuItems = [
     { name: 'School Home', path: '/school', icon: '🏫' },
     { name: 'Admissions', path: '/school/admissions', icon: '📝' },
@@ -110,13 +111,36 @@ const Navbar = () => {
     }
   };
 
-  const navLinks = [
+  // PUBLIC nav links - SHOWN ONLY WHEN NOT LOGGED IN
+  const publicNavLinks = [
     { path: '/', name: 'Home' },
     { path: '/services', name: 'Services' },
     { path: '/portfolio', name: 'Portfolio' },
     { path: '/about', name: 'About' },
     { path: '/contact', name: 'Contact' }
   ];
+
+  // PRIVATE nav links - SHOWN ONLY WHEN LOGGED IN
+  const privateNavLinks = [
+    { path: '/dashboard', name: 'Dashboard' },
+    { path: '/profile', name: 'Profile' },
+    { path: '/settings', name: 'Settings' }
+  ];
+
+  // Get the appropriate nav links based on auth status
+  const getNavLinks = () => {
+    if (currentUser) {
+      // User is logged in - show private links
+      return privateNavLinks;
+    }
+    // User is not logged in - show public links
+    return publicNavLinks;
+  };
+
+  // Check if user should see school menu
+  const showSchoolMenu = () => {
+    return !currentUser; // Only show when NOT logged in
+  };
 
   const getUserDisplayName = () => {
     if (!currentUser) return '';
@@ -154,15 +178,7 @@ const Navbar = () => {
     const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
     
     return (
-      <div className="avatar-placeholder" style={{ 
-        background: 'linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%)',
-        color: '#161b26',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontWeight: 'bold',
-        fontSize: '14px'
-      }}>
+      <div className="avatar-placeholder">
         {initials || 'U'}
       </div>
     );
@@ -208,9 +224,9 @@ const Navbar = () => {
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Navigation - CONDITIONAL based on auth */}
         <div className="nav-links">
-          {navLinks.map((link) => (
+          {getNavLinks().map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
@@ -225,43 +241,60 @@ const Navbar = () => {
             </NavLink>
           ))}
 
-          {/* School Dropdown */}
-          <div 
-            className="nav-dropdown-container"
-            onMouseEnter={() => setIsSchoolDropdownOpen(true)}
-            onMouseLeave={() => setIsSchoolDropdownOpen(false)}
-          >
-            <button 
-              className={`nav-link school-dropdown-btn school-trigger ${isSchoolDropdownOpen ? 'active' : ''}`}
-              onClick={toggleSchoolDropdown}
+          {/* School Dropdown - ONLY SHOW WHEN NOT LOGGED IN */}
+          {showSchoolMenu() && (
+            <div 
+              className="nav-dropdown-container"
+              onMouseEnter={() => setIsSchoolDropdownOpen(true)}
+              onMouseLeave={() => setIsSchoolDropdownOpen(false)}
             >
-              <span className="link-text">School</span>
-              <svg className="dropdown-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span className="link-indicator"></span>
-            </button>
+              <button 
+                className={`nav-link school-dropdown-btn school-trigger ${isSchoolDropdownOpen ? 'active' : ''}`}
+                onClick={toggleSchoolDropdown}
+                aria-expanded={isSchoolDropdownOpen}
+              >
+                <span className="link-text">School</span>
+                <svg className="dropdown-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="link-indicator"></span>
+              </button>
 
-            <div className={`school-dropdown ${isSchoolDropdownOpen ? 'show' : ''}`}>
-              {schoolMenuItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className="dropdown-item"
-                  onClick={() => handleNavigation(item.path)}
-                >
-                  <span className="dropdown-icon">{item.icon}</span>
-                  <span className="dropdown-text">{item.name}</span>
-                  <svg className="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </Link>
-              ))}
+              <div className={`school-dropdown ${isSchoolDropdownOpen ? 'show' : ''}`}>
+                <div className="school-dropdown-header">
+                  <h3>Fast Multimedia School</h3>
+                  <p>Your path to excellence in digital education</p>
+                </div>
+                <div className="school-dropdown-grid">
+                  {schoolMenuItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`dropdown-item ${item.name === 'Student Portal' ? 'student-portal' : ''}`}
+                      onClick={() => handleNavigation(item.path)}
+                    >
+                      <span className="dropdown-icon">{item.icon}</span>
+                      <span className="dropdown-text">{item.name}</span>
+                      <svg className="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </Link>
+                  ))}
+                </div>
+                <div className="school-dropdown-footer">
+                  <Link to="/school" className="school-cta">
+                    Explore School <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M4 8H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      <path d="M8 4L12 8L8 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </Link>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Desktop Action Buttons */}
+        {/* Desktop Action Buttons - CONDITIONAL based on auth */}
         <div className="nav-actions">
           {currentUser ? (
             <div 
@@ -291,18 +324,7 @@ const Navbar = () => {
                       {userProfile?.avatar_url ? (
                         <img src={userProfile.avatar_url} alt={userProfile.fullName || 'User'} />
                       ) : (
-                        <div className="avatar-placeholder-large" style={{
-                          background: 'linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%)',
-                          color: '#161b26',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 'bold',
-                          fontSize: '20px',
-                          borderRadius: '50%',
-                          width: '48px',
-                          height: '48px'
-                        }}>
+                        <div className="avatar-placeholder-large">
                           {(userProfile?.fullName || userProfile?.name || 'U').charAt(0).toUpperCase()}
                         </div>
                       )}
@@ -346,7 +368,7 @@ const Navbar = () => {
                 <div className="dropdown-divider"></div>
                 
                 <button 
-                  className="dropdown-item logout-item"
+                  className="dropdown-item logout"
                   onClick={handleLogout}
                 >
                   <svg className="item-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -373,6 +395,10 @@ const Navbar = () => {
                 onClick={() => handleNavigation('/contact')}
               >
                 Get Started
+                <svg className="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M4 8H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M8 4L12 8L8 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </Link>
             </div>
           )}
@@ -396,7 +422,7 @@ const Navbar = () => {
         <div className="mobile-overlay" onClick={toggleMenu}></div>
       )}
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - CONDITIONAL based on auth */}
       <div className={`mobile-menu ${isMenuOpen ? 'show' : ''}`}>
         <div className="mobile-header">
           <div className="mobile-logo">
@@ -432,7 +458,8 @@ const Navbar = () => {
         </div>
 
         <div className="mobile-links">
-          {navLinks.map((link) => (
+          {/* Show appropriate mobile links based on auth */}
+          {getNavLinks().map((link) => (
             <Link
               key={link.path}
               to={link.path}
@@ -447,38 +474,57 @@ const Navbar = () => {
             </Link>
           ))}
           
-          {/* Mobile School Section */}
-          <div className="mobile-school-section">
-            <button 
-              className={`mobile-school-header ${isMobileSchoolOpen ? 'open' : ''}`}
-              onClick={toggleMobileSchoolMenu}
-            >
-              <span className="school-header-title">🏫 School</span>
-              <svg className="mobile-school-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            
-            <div className={`mobile-school-content ${isMobileSchoolOpen ? 'show' : ''}`}>
-              {Object.entries(groupedSchoolItems).map(([key, category]) => (
-                category.items.length > 0 && (
-                  <div key={key} className="mobile-school-category">
-                    {category.items.map((item) => (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        className="mobile-school-link"
-                        onClick={() => handleNavigation(item.path)}
-                      >
-                        <span className="school-link-icon">{item.icon}</span>
-                        <span>{item.name}</span>
-                      </Link>
-                    ))}
-                  </div>
-                )
-              ))}
+          {/* Mobile School Section - ONLY SHOW WHEN NOT LOGGED IN */}
+          {showSchoolMenu() && (
+            <div className="mobile-school-section">
+              <button 
+                className={`mobile-school-header ${isMobileSchoolOpen ? 'open' : ''}`}
+                onClick={toggleMobileSchoolMenu}
+              >
+                <span className="school-header-icon">🏫</span>
+                <span className="school-header-title">School</span>
+                <svg className="mobile-school-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              
+              <div className={`mobile-school-content ${isMobileSchoolOpen ? 'show' : ''}`}>
+                {/* School Main Link */}
+                <Link 
+                  to="/school" 
+                  className="mobile-school-main-link"
+                  onClick={() => handleNavigation('/school')}
+                >
+                  <span>🏫</span> School Home
+                </Link>
+                
+                {Object.entries(groupedSchoolItems).map(([key, category]) => (
+                  category.items.length > 0 && (
+                    <div key={key} className="mobile-school-category">
+                      <div className="mobile-category-title">
+                        <span className="category-icon">{category.icon}</span>
+                        {category.title}
+                      </div>
+                      {category.items.map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          className={`mobile-school-link ${item.name === 'Student Portal' ? 'student-portal' : ''}`}
+                          onClick={() => handleNavigation(item.path)}
+                        >
+                          <span className="school-link-icon">{item.icon}</span>
+                          <span>{item.name}</span>
+                          {item.name === 'Student Portal' && (
+                            <span className="student-portal-badge">NEW</span>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  )
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="mobile-footer">
@@ -489,18 +535,7 @@ const Navbar = () => {
                   {userProfile?.avatar_url ? (
                     <img src={userProfile.avatar_url} alt={userProfile.fullName || 'User'} />
                   ) : (
-                    <div className="avatar-placeholder" style={{
-                      background: 'linear-gradient(94deg, #ffca41 7.46%, #ffda7a 103.56%)',
-                      color: '#161b26',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 'bold',
-                      fontSize: '16px',
-                      borderRadius: '50%',
-                      width: '40px',
-                      height: '40px'
-                    }}>
+                    <div className="avatar-placeholder">
                       {(userProfile?.fullName || userProfile?.name || 'U').charAt(0).toUpperCase()}
                     </div>
                   )}
