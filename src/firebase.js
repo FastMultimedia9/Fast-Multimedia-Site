@@ -94,4 +94,3 @@ export {
   sendPasswordResetEmail, sendEmailVerification,
   ref, uploadBytes, getDownloadURL, deleteObject
 };
-EOF
