@@ -12,7 +12,7 @@ const SERIAL_TEMPLATE_ID = process.env.REACT_APP_EMAILJS_SERIAL_TEMPLATE_ID;
 const ADMISSION_TEMPLATE_ID = process.env.REACT_APP_EMAILJS_ADMISSION_TEMPLATE_ID;
 
 // Optional - With fallback values
-const SUPPORT_EMAIL = process.env.REACT_APP_SUPPORT_EMAIL || 'fasttech227@gmail.com';
+const SUPPORT_EMAIL = process.env.REACT_APP_SUPPORT_EMAIL || 'fastmultimediainstitute@gmail.com';
 const WHATSAPP_NUMBER = process.env.REACT_APP_WHATSAPP_NUMBER || '+233 50 515 9131';
 
 // ============================================
@@ -39,6 +39,9 @@ try {
   if (PUBLIC_KEY) {
     emailjs.init(PUBLIC_KEY);
     console.log('✅ EmailJS initialized successfully');
+    console.log('📧 Service ID:', SERVICE_ID);
+    console.log('📧 Serial Template:', SERIAL_TEMPLATE_ID);
+    console.log('📧 Admission Template:', ADMISSION_TEMPLATE_ID);
   } else {
     console.warn('⚠️ EmailJS public key not found. Email features will be disabled.');
   }

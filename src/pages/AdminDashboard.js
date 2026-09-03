@@ -2092,89 +2092,140 @@ const AdminDashboard = () => {
       )}
 
       {/* Edit Student Modal */}
-      {showEditModal && editingStudent && (
-        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal-content edit-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowEditModal(false)}>×</button>
-            <h2>Edit Student</h2>
-            <form onSubmit={async (e) => {
-              e.preventDefault();
-              try {
-                await updateStudent(editingStudent.id, editFormData);
-                showNotification('Student updated successfully', 'success');
-                setShowEditModal(false);
-                await loadDashboardData();
-              } catch (error) {
-                console.error('Error updating student:', error);
-                showNotification('Error updating student', 'error');
-              }
-            }}>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Full Name</label>
-                  <input
-                    type="text"
-                    value={editFormData.fullName || ''}
-                    onChange={(e) => setEditFormData({...editFormData, fullName: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    value={editFormData.email || ''}
-                    onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Phone</label>
-                  <input
-                    type="tel"
-                    value={editFormData.phone || ''}
-                    onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Date of Birth</label>
-                  <input
-                    type="date"
-                    value={editFormData.dateOfBirth || ''}
-                    onChange={(e) => setEditFormData({...editFormData, dateOfBirth: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Gender</label>
-                  <select
-                    value={editFormData.gender || ''}
-                    onChange={(e) => setEditFormData({...editFormData, gender: e.target.value})}
-                  >
-                    <option value="">Select</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Admission Status</label>
-                  <select
-                    value={editFormData.admissionStatus || 'pending'}
-                    onChange={(e) => setEditFormData({...editFormData, admissionStatus: e.target.value})}
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="enrolled">Enrolled</option>
-                  </select>
-                </div>
-              </div>
-              <div className="modal-actions">
-                <button type="submit" className="btn-save"><FaSave /> Save Changes</button>
-                <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancel</button>
-              </div>
-            </form>
+      // In AdminDashboard.js - Replace the Edit Student Modal section with this:
+
+{/* Edit Student Modal */}
+{showEditModal && editingStudent && (
+  <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+    <div className="modal-content edit-modal" onClick={(e) => e.stopPropagation()}>
+      <button className="modal-close" onClick={() => setShowEditModal(false)}>×</button>
+      <h2>Edit Student</h2>
+      <form onSubmit={async (e) => {
+        e.preventDefault();
+        try {
+          // Ensure studentId is saved
+          const updateData = {
+            ...editFormData,
+            studentId: editFormData.studentId || editingStudent.studentId || null,
+            updatedAt: new Date().toISOString()
+          };
+          
+          await updateStudent(editingStudent.id, updateData);
+          showNotification('Student updated successfully', 'success');
+          setShowEditModal(false);
+          await loadDashboardData();
+        } catch (error) {
+          console.error('Error updating student:', error);
+          showNotification('Error updating student', 'error');
+        }
+      }}>
+        <div className="form-grid">
+          <div className="form-group">
+            <label>Student ID</label>
+            <input
+              type="text"
+              value={editFormData.studentId || editingStudent.studentId || ''}
+              onChange={(e) => setEditFormData({...editFormData, studentId: e.target.value})}
+              placeholder="e.g., TEVE260001"
+            />
+            <small style={{ color: '#666', fontSize: '11px' }}>
+              {!editFormData.studentId && !editingStudent.studentId && (
+                <span style={{ color: '#e74c3c' }}>⚠️ Student needs an ID</span>
+              )}
+              {editFormData.studentId && (
+                <span style={{ color: '#27ae60' }}>✅ ID: {editFormData.studentId}</span>
+              )}
+            </small>
+          </div>
+          <div className="form-group">
+            <label>Full Name</label>
+            <input
+              type="text"
+              value={editFormData.fullName || ''}
+              onChange={(e) => setEditFormData({...editFormData, fullName: e.target.value})}
+            />
+          </div>
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              value={editFormData.email || ''}
+              onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
+            />
+          </div>
+          <div className="form-group">
+            <label>Phone</label>
+            <input
+              type="tel"
+              value={editFormData.phone || ''}
+              onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
+            />
+          </div>
+          <div className="form-group">
+            <label>Date of Birth</label>
+            <input
+              type="date"
+              value={editFormData.dateOfBirth || ''}
+              onChange={(e) => setEditFormData({...editFormData, dateOfBirth: e.target.value})}
+            />
+          </div>
+          <div className="form-group">
+            <label>Gender</label>
+            <select
+              value={editFormData.gender || ''}
+              onChange={(e) => setEditFormData({...editFormData, gender: e.target.value})}
+            >
+              <option value="">Select</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Course</label>
+            <input
+              type="text"
+              value={editFormData.course || ''}
+              onChange={(e) => setEditFormData({...editFormData, course: e.target.value})}
+            />
+          </div>
+          <div className="form-group">
+            <label>Admission Status</label>
+            <select
+              value={editFormData.admissionStatus || 'pending'}
+              onChange={(e) => setEditFormData({...editFormData, admissionStatus: e.target.value})}
+            >
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="enrolled">Enrolled</option>
+            </select>
+          </div>
+          <div className="form-group full-width">
+            <label>Address</label>
+            <input
+              type="text"
+              value={editFormData.address || ''}
+              onChange={(e) => setEditFormData({...editFormData, address: e.target.value})}
+            />
+          </div>
+          <div className="form-group full-width">
+            <label>City</label>
+            <input
+              type="text"
+              value={editFormData.city || ''}
+              onChange={(e) => setEditFormData({...editFormData, city: e.target.value})}
+            />
           </div>
         </div>
-      )}
+        <div className="modal-actions">
+          <button type="submit" className="btn-save"><FaSave /> Save Changes</button>
+          <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
 
       {/* Add Staff Modal */}
       {showAddStaffModal && (
