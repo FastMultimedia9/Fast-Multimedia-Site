@@ -214,168 +214,159 @@ const AdminDashboard = () => {
   }, [navigate]);
 
   // ============================================
-// LOAD DASHBOARD DATA - CORRECTED
-// ============================================
-const loadDashboardData = async () => {
-  setIsLoading(true);
-  try {
-    // Get fresh stats from the server
-    let statsData = {
-      totalStudents: 0,
-      approvedStudents: 0,
-      pendingStudents: 0,
-      rejectedStudents: 0,
-      enrolledStudents: 0,
-      totalApplications: 0,
-      pendingApplications: 0,
-      approvedApplications: 0,
-      rejectedApplications: 0,
-      totalRevenue: 0,
-      pendingPayments: 0,
-      completedPayments: 0,
-      totalStaff: 0,
-      totalCourses: 0,
-      totalSerials: 0,
-      availableSerials: 0
-    };
-    
-    let studentsData = [];
-    let admissionsData = [];
-    let applicationsData = [];
-    let paymentsData = [];
-    let staffData = [];
-    let coursesData = [];
-    let serialsData = [];
-    
-    // Fetch all data in parallel
+  // LOAD DASHBOARD DATA - CORRECTED
+  // ============================================
+  const loadDashboardData = async () => {
+    setIsLoading(true);
     try {
-      const result = await getDashboardStats();
-      statsData = result || statsData;
-      console.log('📊 Stats loaded:', statsData);
-    } catch (statsError) {
-      console.error('Error loading stats:', statsError);
-    }
-    
-    try {
-      const students = await getAllStudents();
-      studentsData = students || [];
-      console.log('📚 Students loaded:', studentsData.length);
-      // Log student statuses for debugging
-      const statusCounts = {};
-      studentsData.forEach(s => {
-        const status = s.admissionStatus || 'unknown';
-        statusCounts[status] = (statusCounts[status] || 0) + 1;
+      let statsData = {
+        totalStudents: 0,
+        approvedStudents: 0,
+        pendingStudents: 0,
+        rejectedStudents: 0,
+        enrolledStudents: 0,
+        totalApplications: 0,
+        pendingApplications: 0,
+        approvedApplications: 0,
+        rejectedApplications: 0,
+        totalRevenue: 0,
+        pendingPayments: 0,
+        completedPayments: 0,
+        totalStaff: 0,
+        totalCourses: 0,
+        totalSerials: 0,
+        availableSerials: 0
+      };
+      
+      let studentsData = [];
+      let admissionsData = [];
+      let applicationsData = [];
+      let paymentsData = [];
+      let staffData = [];
+      let coursesData = [];
+      let serialsData = [];
+      
+      try {
+        const result = await getDashboardStats();
+        statsData = result || statsData;
+        console.log('📊 Stats loaded:', statsData);
+      } catch (statsError) {
+        console.error('Error loading stats:', statsError);
+      }
+      
+      try {
+        const students = await getAllStudents();
+        studentsData = students || [];
+        console.log('📚 Students loaded:', studentsData.length);
+        const statusCounts = {};
+        studentsData.forEach(s => {
+          const status = s.admissionStatus || 'unknown';
+          statusCounts[status] = (statusCounts[status] || 0) + 1;
+        });
+        console.log('📊 Student status counts:', statusCounts);
+      } catch (studentsError) {
+        console.error('Error loading students:', studentsError);
+        studentsData = [];
+      }
+      
+      try {
+        const admissions = await getAllAdmissions();
+        admissionsData = admissions || [];
+        console.log('📋 Admissions loaded:', admissionsData.length);
+      } catch (admissionsError) {
+        console.error('Error loading admissions:', admissionsError);
+        admissionsData = [];
+      }
+      
+      try {
+        const apps = await getAllApplications();
+        applicationsData = apps || [];
+        console.log('📄 Applications loaded:', applicationsData.length);
+      } catch (appsError) {
+        console.error('Error loading applications:', appsError);
+        applicationsData = [];
+      }
+      
+      try {
+        const payments = await getAllPayments();
+        paymentsData = payments || [];
+        console.log('💰 Payments loaded:', paymentsData.length);
+      } catch (paymentsError) {
+        console.error('Error loading payments:', paymentsError);
+        paymentsData = [];
+      }
+      
+      try {
+        const staff = await getAllStaff();
+        staffData = staff || [];
+        console.log('👤 Staff loaded:', staffData.length);
+      } catch (staffError) {
+        console.error('Error loading staff:', staffError);
+        staffData = [];
+      }
+      
+      try {
+        const courses = await getAllCourses();
+        coursesData = courses || [];
+        console.log('📚 Courses loaded:', coursesData.length);
+      } catch (coursesError) {
+        console.error('Error loading courses:', coursesError);
+        coursesData = [];
+      }
+      
+      try {
+        const serials = await getAllSerials();
+        serialsData = serials || [];
+        console.log('🔑 Serials loaded:', serialsData.length);
+      } catch (serialsError) {
+        console.error('Error loading serials:', serialsError);
+        serialsData = [];
+      }
+      
+      setStats(statsData);
+      const approvedStudents = (studentsData || []).filter(s => 
+        s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
+      );
+      setStudents(approvedStudents);
+      setAdmissions(admissionsData || []);
+      setApplications(applicationsData || []);
+      setPayments(paymentsData || []);
+      setStaff(staffData || []);
+      setCourses(coursesData || []);
+      setSerials(serialsData || []);
+      
+      console.log('✅ Dashboard data loaded successfully');
+      console.log('📊 Final stats:', {
+        totalStudents: statsData.totalStudents,
+        approved: statsData.approvedStudents,
+        pending: statsData.pendingStudents,
+        rejected: statsData.rejectedStudents,
+        enrolled: statsData.enrolledStudents,
+        totalApps: statsData.totalApplications,
+        pendingApps: statsData.pendingApplications
       });
-      console.log('📊 Student status counts:', statusCounts);
-    } catch (studentsError) {
-      console.error('Error loading students:', studentsError);
-      studentsData = [];
+      
+      showNotification('Dashboard data loaded successfully', 'success');
+    } catch (error) {
+      console.error('❌ Error loading dashboard data:', error);
+      showNotification('Error loading dashboard data. Using default values.', 'error');
+      setStudents([]);
+      setAdmissions([]);
+      setApplications([]);
+      setPayments([]);
+      setStaff([]);
+      setCourses([]);
+      setSerials([]);
+    } finally {
+      setIsLoading(false);
     }
-    
-    try {
-      const admissions = await getAllAdmissions();
-      admissionsData = admissions || [];
-      console.log('📋 Admissions loaded:', admissionsData.length);
-    } catch (admissionsError) {
-      console.error('Error loading admissions:', admissionsError);
-      admissionsData = [];
-    }
-    
-    try {
-      const apps = await getAllApplications();
-      applicationsData = apps || [];
-      console.log('📄 Applications loaded:', applicationsData.length);
-    } catch (appsError) {
-      console.error('Error loading applications:', appsError);
-      applicationsData = [];
-    }
-    
-    try {
-      const payments = await getAllPayments();
-      paymentsData = payments || [];
-      console.log('💰 Payments loaded:', paymentsData.length);
-    } catch (paymentsError) {
-      console.error('Error loading payments:', paymentsError);
-      paymentsData = [];
-    }
-    
-    try {
-      const staff = await getAllStaff();
-      staffData = staff || [];
-      console.log('👤 Staff loaded:', staffData.length);
-    } catch (staffError) {
-      console.error('Error loading staff:', staffError);
-      staffData = [];
-    }
-    
-    try {
-      const courses = await getAllCourses();
-      coursesData = courses || [];
-      console.log('📚 Courses loaded:', coursesData.length);
-    } catch (coursesError) {
-      console.error('Error loading courses:', coursesError);
-      coursesData = [];
-    }
-    
-    try {
-      const serials = await getAllSerials();
-      serialsData = serials || [];
-      console.log('🔑 Serials loaded:', serialsData.length);
-    } catch (serialsError) {
-      console.error('Error loading serials:', serialsError);
-      serialsData = [];
-    }
-    
-    // Set stats
-    setStats(statsData);
-    
-    // Filter approved/enrolled students for the students list
-    const approvedStudents = (studentsData || []).filter(s => 
-      s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
-    );
-    setStudents(approvedStudents);
-    
-    // Set all other data
-    setAdmissions(admissionsData || []);
-    setApplications(applicationsData || []);
-    setPayments(paymentsData || []);
-    setStaff(staffData || []);
-    setCourses(coursesData || []);
-    setSerials(serialsData || []);
-    
-    console.log('✅ Dashboard data loaded successfully');
-    console.log('📊 Final stats:', {
-      totalStudents: statsData.totalStudents,
-      approved: statsData.approvedStudents,
-      pending: statsData.pendingStudents,
-      rejected: statsData.rejectedStudents,
-      enrolled: statsData.enrolledStudents,
-      totalApps: statsData.totalApplications,
-      pendingApps: statsData.pendingApplications
-    });
-    
-    showNotification('Dashboard data loaded successfully', 'success');
-  } catch (error) {
-    console.error('❌ Error loading dashboard data:', error);
-    showNotification('Error loading dashboard data. Using default values.', 'error');
-    setStudents([]);
-    setAdmissions([]);
-    setApplications([]);
-    setPayments([]);
-    setStaff([]);
-    setCourses([]);
-    setSerials([]);
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 5000);
   };
 
-  // Handle logout
   const handleLogout = async () => {
     try {
       await logoutUser();
@@ -387,33 +378,17 @@ const loadDashboardData = async () => {
   };
 
   // ============================================
-// FORMAT CURRENCY - CORRECTED
-// ============================================
-const formatCurrency = (amount) => {
-  if (!amount) return 'GH₵ 0.00';
-  return new Intl.NumberFormat('en-GH', {
-    style: 'currency',
-    currency: 'GHS',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(amount);
-};
-
-// ============================================
-// FORMAT CURRENCY - With GHS symbol
-// ============================================
-const formatCurrencyGHS = (amount) => {
-  if (!amount) return 'GH₵ 0.00';
-  return `GH₵ ${amount.toFixed(2)}`;
-};
-
-// ============================================
-// FORMAT CURRENCY - For Paystack (amount in pesewas)
-// ============================================
-const formatPaystackAmount = (amount) => {
-  // Paystack expects amount in pesewas (GHS * 100)
-  return Math.round(amount * 100);
-};
+  // FORMAT CURRENCY - FIXED (No division by 100)
+  // ============================================
+  const formatCurrency = (amount) => {
+    if (!amount) return 'GH₵ 0.00';
+    return new Intl.NumberFormat('en-GH', {
+      style: 'currency',
+      currency: 'GHS',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
 
   // ============================================
   // STUDENT FEES MANAGEMENT FUNCTIONS
@@ -442,7 +417,6 @@ const formatPaystackAmount = (amount) => {
       const paymentsData = await getPaymentsByStudent(studentId);
       setStudentPayments(paymentsData || []);
       
-      // Calculate summary
       let totalPaid = 0;
       let paymentCount = 0;
       paymentsData.forEach(p => {
@@ -491,7 +465,6 @@ const formatPaystackAmount = (amount) => {
       });
     }
     
-    // Sort by date (newest first)
     filtered.sort((a, b) => {
       const dateA = new Date(a.createdAt?.seconds * 1000 || a.createdAt);
       const dateB = new Date(b.createdAt?.seconds * 1000 || b.createdAt);
@@ -809,7 +782,6 @@ const formatPaystackAmount = (amount) => {
         return;
       }
 
-      // Check if admission already exists
       const existingAdmission = admissions.find(a => a.applicationId === appId);
       if (existingAdmission) {
         showNotification('Admission already exists for this application', 'warning');
@@ -853,117 +825,109 @@ const formatPaystackAmount = (amount) => {
   };
 
   // ============================================
-// FIX: Manually Create Student from Admission
-// ============================================
-const fixAdmissionToStudent = async (admissionId) => {
-  try {
-    const admission = admissions.find(a => a.id === admissionId);
-    if (!admission) {
-      showNotification('Admission not found', 'error');
-      return;
-    }
+  // FIX: Manually Create Student from Admission
+  // ============================================
+  const fixAdmissionToStudent = async (admissionId) => {
+    try {
+      const admission = admissions.find(a => a.id === admissionId);
+      if (!admission) {
+        showNotification('Admission not found', 'error');
+        return;
+      }
 
-    // Check if student already exists
-    const existingStudent = await getStudentByEmail(admission.email);
-    if (existingStudent) {
-      showNotification(`Student already exists: ${existingStudent.studentId || existingStudent.id}`, 'warning');
-      // Update admission with student ID
+      const existingStudent = await getStudentByEmail(admission.email);
+      if (existingStudent) {
+        showNotification(`Student already exists: ${existingStudent.studentId || existingStudent.id}`, 'warning');
+        await updateAdmission(admission.id, {
+          studentId: existingStudent.studentId || existingStudent.id,
+          updatedAt: new Date().toISOString()
+        });
+        await loadDashboardData();
+        return;
+      }
+
+      const newStudentId = await generateStudentId(admission.fullName);
+      console.log('📝 Generated Student ID:', newStudentId);
+      
       await updateAdmission(admission.id, {
-        studentId: existingStudent.studentId || existingStudent.id,
+        studentId: newStudentId,
         updatedAt: new Date().toISOString()
       });
+      
+      const studentData = {
+        fullName: admission.fullName || 'N/A',
+        email: admission.email || 'N/A',
+        phone: admission.phone || 'N/A',
+        dateOfBirth: admission.dateOfBirth || '',
+        gender: admission.gender || '',
+        address: admission.address || '',
+        city: admission.city || '',
+        course: admission.course || 'Not specified',
+        educationLevel: admission.educationLevel || '',
+        previousSchool: admission.previousSchool || '',
+        preferredStudyMode: admission.preferredStudyMode || '',
+        guardianName: admission.guardianName || '',
+        guardianPhone: admission.guardianPhone || '',
+        guardianEmail: admission.guardianEmail || '',
+        guardianRelationship: admission.guardianRelationship || '',
+        hearAboutUs: admission.hearAboutUs || '',
+        reasonToJoin: admission.reasonToJoin || '',
+        specialNeeds: admission.specialNeeds || 'None',
+        admissionStatus: admission.status || 'approved',
+        serialNumber: admission.serialNumber || '',
+        applicationDate: admission.applicationDate || new Date().toISOString(),
+        enrolledCourses: [admission.course || 'Not specified'],
+        status: 'active',
+        studentId: newStudentId,
+        password: DEFAULT_PASSWORD,
+        passwordUpdated: false,
+        authCreated: false,
+        paymentHistory: [],
+        attendance: { total: 0, present: 0, absent: 0 },
+        grades: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const studentRef = doc(db, 'students', newStudentId);
+      await setDoc(studentRef, {
+        ...studentData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
+      console.log(`✅ Student created with ID: ${newStudentId}`);
+      
+      try {
+        const methods = await fetchSignInMethodsForEmail(auth, admission.email);
+        if (methods && methods.length > 0) {
+          await updateStudent(newStudentId, { authCreated: true });
+        } else {
+          await createFirebaseAuthUser(admission.email, DEFAULT_PASSWORD, studentData);
+        }
+      } catch (authError) {
+        if (authError.code === 'auth/email-already-in-use') {
+          await updateStudent(newStudentId, { authCreated: true });
+        }
+      }
+      
+      showNotification(`✅ Student created with ID: ${newStudentId}`, 'success');
       await loadDashboardData();
-      return;
+    } catch (error) {
+      console.error('Error creating student from admission:', error);
+      showNotification('Error creating student: ' + error.message, 'error');
     }
-
-    // Generate proper Student ID
-    const newStudentId = await generateStudentId(admission.fullName);
-    console.log('📝 Generated Student ID:', newStudentId);
-    
-    // Update admission with student ID
-    await updateAdmission(admission.id, {
-      studentId: newStudentId,
-      updatedAt: new Date().toISOString()
-    });
-    
-    // Create student
-    const studentData = {
-      fullName: admission.fullName || 'N/A',
-      email: admission.email || 'N/A',
-      phone: admission.phone || 'N/A',
-      dateOfBirth: admission.dateOfBirth || '',
-      gender: admission.gender || '',
-      address: admission.address || '',
-      city: admission.city || '',
-      course: admission.course || 'Not specified',
-      educationLevel: admission.educationLevel || '',
-      previousSchool: admission.previousSchool || '',
-      preferredStudyMode: admission.preferredStudyMode || '',
-      guardianName: admission.guardianName || '',
-      guardianPhone: admission.guardianPhone || '',
-      guardianEmail: admission.guardianEmail || '',
-      guardianRelationship: admission.guardianRelationship || '',
-      hearAboutUs: admission.hearAboutUs || '',
-      reasonToJoin: admission.reasonToJoin || '',
-      specialNeeds: admission.specialNeeds || 'None',
-      admissionStatus: admission.status || 'approved',
-      serialNumber: admission.serialNumber || '',
-      applicationDate: admission.applicationDate || new Date().toISOString(),
-      enrolledCourses: [admission.course || 'Not specified'],
-      status: 'active',
-      studentId: newStudentId,
-      password: DEFAULT_PASSWORD,
-      passwordUpdated: false,
-      authCreated: false,
-      paymentHistory: [],
-      attendance: { total: 0, present: 0, absent: 0 },
-      grades: {},
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    const studentRef = doc(db, 'students', newStudentId);
-    await setDoc(studentRef, {
-      ...studentData,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-    
-    console.log(`✅ Student created with ID: ${newStudentId}`);
-    
-    // Check if auth exists
-    try {
-      const methods = await fetchSignInMethodsForEmail(auth, admission.email);
-      if (methods && methods.length > 0) {
-        await updateStudent(newStudentId, { authCreated: true });
-      } else {
-        await createFirebaseAuthUser(admission.email, DEFAULT_PASSWORD, studentData);
-      }
-    } catch (authError) {
-      if (authError.code === 'auth/email-already-in-use') {
-        await updateStudent(newStudentId, { authCreated: true });
-      }
-    }
-    
-    showNotification(`✅ Student created with ID: ${newStudentId}`, 'success');
-    await loadDashboardData();
-  } catch (error) {
-    console.error('Error creating student from admission:', error);
-    showNotification('Error creating student: ' + error.message, 'error');
-  }
-};
+  };
 
   // ============================================
   // ENSURE AUTH USER EXISTS
   // ============================================
   const ensureAuthUserExists = async (admission, student) => {
     try {
-      // Check if auth user already exists
       try {
         const methods = await fetchSignInMethodsForEmail(auth, admission.email);
         if (methods && methods.length > 0) {
           console.log(`ℹ️ Auth user already exists for ${admission.email}`);
-          // Update student to mark auth as created
           if (student && student.id) {
             await updateStudent(student.id, {
               authCreated: true,
@@ -976,7 +940,6 @@ const fixAdmissionToStudent = async (admissionId) => {
         console.log('Could not check existing user:', checkError.message);
       }
 
-      // Try to create auth user
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         admission.email,
@@ -984,12 +947,10 @@ const fixAdmissionToStudent = async (admissionId) => {
       );
       console.log(`✅ Auth user created for ${admission.email}`);
       
-      // Update profile
       await updateProfile(userCredential.user, {
         displayName: admission.fullName || 'Student'
       });
       
-      // Create user doc
       const userRef = doc(db, 'users', userCredential.user.uid);
       await setDoc(userRef, {
         uid: userCredential.user.uid,
@@ -1004,7 +965,6 @@ const fixAdmissionToStudent = async (admissionId) => {
         updatedAt: serverTimestamp()
       });
       
-      // Update student record
       if (student && student.id) {
         await updateStudent(student.id, {
           authCreated: true,
@@ -1018,7 +978,6 @@ const fixAdmissionToStudent = async (admissionId) => {
     } catch (authError) {
       if (authError.code === 'auth/email-already-in-use') {
         console.log(`ℹ️ Auth user already exists for ${admission.email}`);
-        // Update student to mark auth as created
         if (student && student.id) {
           await updateStudent(student.id, {
             authCreated: true,
@@ -1106,11 +1065,9 @@ const fixAdmissionToStudent = async (admissionId) => {
         updatedAt: new Date().toISOString()
       };
 
-      // 1. Create student in Firestore
       const createdStudentId = await createStudent(studentData);
       console.log(`✅ Student created successfully with ID: ${createdStudentId}`);
       
-      // 2. Create Firebase Auth user
       let authCreated = false;
       try {
         await createFirebaseAuthUser(admission.email, DEFAULT_PASSWORD, studentData);
@@ -1125,7 +1082,6 @@ const fixAdmissionToStudent = async (admissionId) => {
         }
       }
       
-      // Update authCreated status
       if (authCreated) {
         await updateStudent(createdStudentId, { authCreated: true });
       }
@@ -1138,245 +1094,225 @@ const fixAdmissionToStudent = async (admissionId) => {
   };
 
   // ============================================
-// HANDLE ADMISSION STATUS UPDATE - COMPLETELY FIXED
-// ============================================
-const handleUpdateAdmissionStatus = async (admissionId, status, studentData = null) => {
-  try {
-    console.log(`🔄 Updating admission status to ${status} for:`, admissionId);
-    
-    let admission = studentData;
-    if (!admission) {
-      admission = admissions.find(a => a.id === admissionId);
+  // HANDLE ADMISSION STATUS UPDATE - COMPLETELY FIXED
+  // ============================================
+  const handleUpdateAdmissionStatus = async (admissionId, status, studentData = null) => {
+    try {
+      console.log(`🔄 Updating admission status to ${status} for:`, admissionId);
+      
+      let admission = studentData;
       if (!admission) {
-        try {
-          const admissionById = await getAdmission(admissionId);
-          if (admissionById) {
-            admission = admissionById;
+        admission = admissions.find(a => a.id === admissionId);
+        if (!admission) {
+          try {
+            const admissionById = await getAdmission(admissionId);
+            if (admissionById) {
+              admission = admissionById;
+            }
+          } catch (fetchError) {
+            console.error('Error fetching admission:', fetchError);
           }
-        } catch (fetchError) {
-          console.error('Error fetching admission:', fetchError);
         }
       }
-    }
 
-    if (!admission) {
-      console.error('❌ Admission not found for ID:', admissionId);
-      showNotification('Admission not found', 'error');
-      return;
-    }
+      if (!admission) {
+        console.error('❌ Admission not found for ID:', admissionId);
+        showNotification('Admission not found', 'error');
+        return;
+      }
 
-    console.log('✅ Admission found:', admission);
+      console.log('✅ Admission found:', admission);
 
-    // Update admission status
-    await updateAdmissionStatus(admissionId, status);
+      await updateAdmissionStatus(admissionId, status);
 
-    let studentCreated = false;
-    let studentIdCreated = null;
-    let existingStudent = null;
+      let studentCreated = false;
+      let studentIdCreated = null;
+      let existingStudent = null;
 
-    // Only process student if status is approved or enrolled
-    if (status === 'approved' || status === 'enrolled') {
-      try {
-        // FIRST: Check if student already exists by email
-        existingStudent = await getStudentByEmail(admission.email);
-        
-        if (existingStudent) {
-          // ✅ Student exists - just update
-          console.log('✅ Student already exists:', existingStudent.id);
+      if (status === 'approved' || status === 'enrolled') {
+        try {
+          existingStudent = await getStudentByEmail(admission.email);
           
-          await updateStudent(existingStudent.id, { 
-            admissionStatus: status,
-            course: admission.course || existingStudent.course,
-            enrolledCourses: existingStudent.enrolledCourses ? [...existingStudent.enrolledCourses, admission.course] : [admission.course],
-            updatedAt: new Date().toISOString()
-          });
-          
-          studentIdCreated = existingStudent.id;
-          
-          // Update admission with student ID
-          await updateAdmission(admission.id, {
-            studentId: existingStudent.studentId || existingStudent.id,
-            updatedAt: new Date().toISOString()
-          });
-          
-          // Ensure auth exists (check if auth already exists)
-          try {
-            const methods = await fetchSignInMethodsForEmail(auth, admission.email);
-            if (methods && methods.length > 0) {
-              console.log('✅ Auth already exists, marking as created');
-              await updateStudent(existingStudent.id, { authCreated: true });
-            } else {
-              // Create auth if it doesn't exist
-              await createFirebaseAuthUser(admission.email, DEFAULT_PASSWORD, existingStudent);
-              await updateStudent(existingStudent.id, { authCreated: true });
-            }
-          } catch (authError) {
-            console.error('Error ensuring auth exists:', authError);
-            // Don't fail - student already exists
-          }
-          
-          showNotification(`✅ Student already exists: ${existingStudent.studentId || existingStudent.id}`, 'info');
-          
-        } else {
-          // ✅ No existing student - create new one
-          try {
-            // Generate proper Student ID
-            const newStudentId = await generateStudentId(admission.fullName);
-            console.log('📝 Generated Student ID:', newStudentId);
+          if (existingStudent) {
+            console.log('✅ Student already exists:', existingStudent.id);
             
-            // Prepare student data
-            const studentData = {
-              fullName: admission.fullName || 'N/A',
-              email: admission.email || 'N/A',
-              phone: admission.phone || 'N/A',
-              dateOfBirth: admission.dateOfBirth || '',
-              gender: admission.gender || '',
-              address: admission.address || '',
-              city: admission.city || '',
-              course: admission.course || 'Not specified',
-              educationLevel: admission.educationLevel || '',
-              previousSchool: admission.previousSchool || '',
-              preferredStudyMode: admission.preferredStudyMode || '',
-              guardianName: admission.guardianName || '',
-              guardianPhone: admission.guardianPhone || '',
-              guardianEmail: admission.guardianEmail || '',
-              guardianRelationship: admission.guardianRelationship || '',
-              hearAboutUs: admission.hearAboutUs || '',
-              reasonToJoin: admission.reasonToJoin || '',
-              specialNeeds: admission.specialNeeds || 'None',
+            await updateStudent(existingStudent.id, { 
               admissionStatus: status,
-              serialNumber: admission.serialNumber || '',
-              applicationDate: admission.applicationDate || new Date().toISOString(),
-              enrolledCourses: [admission.course || 'Not specified'],
-              status: 'active',
-              studentId: newStudentId,
-              password: DEFAULT_PASSWORD,
-              passwordUpdated: false,
-              authCreated: false,
-              paymentHistory: [],
-              attendance: { total: 0, present: 0, absent: 0 },
-              grades: {},
-              createdAt: new Date().toISOString(),
+              course: admission.course || existingStudent.course,
+              enrolledCourses: existingStudent.enrolledCourses ? [...existingStudent.enrolledCourses, admission.course] : [admission.course],
               updatedAt: new Date().toISOString()
-            };
-
-            // Create student using the studentId as the document ID
-            const studentRef = doc(db, 'students', newStudentId);
-            await setDoc(studentRef, {
-              ...studentData,
-              createdAt: serverTimestamp(),
-              updatedAt: serverTimestamp()
             });
             
-            console.log(`✅ Student created with ID: ${newStudentId}`);
-            studentIdCreated = newStudentId;
-            studentCreated = true;
+            studentIdCreated = existingStudent.id;
             
-            // Update admission with student ID
             await updateAdmission(admission.id, {
-              studentId: newStudentId,
+              studentId: existingStudent.studentId || existingStudent.id,
               updatedAt: new Date().toISOString()
             });
             
-            // Create Firebase Auth user (if not exists)
             try {
               const methods = await fetchSignInMethodsForEmail(auth, admission.email);
               if (methods && methods.length > 0) {
-                console.log('✅ Auth already exists for', admission.email);
-                await updateStudent(newStudentId, { authCreated: true });
+                console.log('✅ Auth already exists, marking as created');
+                await updateStudent(existingStudent.id, { authCreated: true });
               } else {
-                const userCredential = await createUserWithEmailAndPassword(
-                  auth,
-                  admission.email,
-                  DEFAULT_PASSWORD
-                );
-                
-                await updateProfile(userCredential.user, {
-                  displayName: admission.fullName || 'Student'
-                });
-                
-                const userRef = doc(db, 'users', userCredential.user.uid);
-                await setDoc(userRef, {
-                  uid: userCredential.user.uid,
-                  email: admission.email,
-                  fullName: admission.fullName,
-                  role: 'student',
-                  studentId: newStudentId,
-                  course: admission.course,
-                  enrolledCourses: [admission.course],
-                  admissionStatus: status,
-                  createdAt: serverTimestamp(),
-                  updatedAt: serverTimestamp()
-                });
-                
-                await updateStudent(newStudentId, { authCreated: true });
-                console.log('✅ Auth created for', admission.email);
+                await createFirebaseAuthUser(admission.email, DEFAULT_PASSWORD, existingStudent);
+                await updateStudent(existingStudent.id, { authCreated: true });
               }
             } catch (authError) {
-              if (authError.code === 'auth/email-already-in-use') {
-                console.log('✅ Auth already exists (caught)');
-                await updateStudent(newStudentId, { authCreated: true });
-              } else {
-                console.error('Auth error:', authError);
-                // Don't fail - student is created
-              }
+              console.error('Error ensuring auth exists:', authError);
             }
             
-          } catch (createError) {
-            console.error('❌ Error creating student:', createError);
-            showNotification('Error creating student account: ' + createError.message, 'error');
-            // Don't return - continue with admission approval
+            showNotification(`✅ Student already exists: ${existingStudent.studentId || existingStudent.id}`, 'info');
+            
+          } else {
+            try {
+              const newStudentId = await generateStudentId(admission.fullName);
+              console.log('📝 Generated Student ID:', newStudentId);
+              
+              const studentData = {
+                fullName: admission.fullName || 'N/A',
+                email: admission.email || 'N/A',
+                phone: admission.phone || 'N/A',
+                dateOfBirth: admission.dateOfBirth || '',
+                gender: admission.gender || '',
+                address: admission.address || '',
+                city: admission.city || '',
+                course: admission.course || 'Not specified',
+                educationLevel: admission.educationLevel || '',
+                previousSchool: admission.previousSchool || '',
+                preferredStudyMode: admission.preferredStudyMode || '',
+                guardianName: admission.guardianName || '',
+                guardianPhone: admission.guardianPhone || '',
+                guardianEmail: admission.guardianEmail || '',
+                guardianRelationship: admission.guardianRelationship || '',
+                hearAboutUs: admission.hearAboutUs || '',
+                reasonToJoin: admission.reasonToJoin || '',
+                specialNeeds: admission.specialNeeds || 'None',
+                admissionStatus: status,
+                serialNumber: admission.serialNumber || '',
+                applicationDate: admission.applicationDate || new Date().toISOString(),
+                enrolledCourses: [admission.course || 'Not specified'],
+                status: 'active',
+                studentId: newStudentId,
+                password: DEFAULT_PASSWORD,
+                passwordUpdated: false,
+                authCreated: false,
+                paymentHistory: [],
+                attendance: { total: 0, present: 0, absent: 0 },
+                grades: {},
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              };
+
+              const studentRef = doc(db, 'students', newStudentId);
+              await setDoc(studentRef, {
+                ...studentData,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+              });
+              
+              console.log(`✅ Student created with ID: ${newStudentId}`);
+              studentIdCreated = newStudentId;
+              studentCreated = true;
+              
+              await updateAdmission(admission.id, {
+                studentId: newStudentId,
+                updatedAt: new Date().toISOString()
+              });
+              
+              try {
+                const methods = await fetchSignInMethodsForEmail(auth, admission.email);
+                if (methods && methods.length > 0) {
+                  console.log('✅ Auth already exists for', admission.email);
+                  await updateStudent(newStudentId, { authCreated: true });
+                } else {
+                  const userCredential = await createUserWithEmailAndPassword(
+                    auth,
+                    admission.email,
+                    DEFAULT_PASSWORD
+                  );
+                  
+                  await updateProfile(userCredential.user, {
+                    displayName: admission.fullName || 'Student'
+                  });
+                  
+                  const userRef = doc(db, 'users', userCredential.user.uid);
+                  await setDoc(userRef, {
+                    uid: userCredential.user.uid,
+                    email: admission.email,
+                    fullName: admission.fullName,
+                    role: 'student',
+                    studentId: newStudentId,
+                    course: admission.course,
+                    enrolledCourses: [admission.course],
+                    admissionStatus: status,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                  });
+                  
+                  await updateStudent(newStudentId, { authCreated: true });
+                  console.log('✅ Auth created for', admission.email);
+                }
+              } catch (authError) {
+                if (authError.code === 'auth/email-already-in-use') {
+                  console.log('✅ Auth already exists (caught)');
+                  await updateStudent(newStudentId, { authCreated: true });
+                } else {
+                  console.error('Auth error:', authError);
+                }
+              }
+              
+            } catch (createError) {
+              console.error('❌ Error creating student:', createError);
+              showNotification('Error creating student account: ' + createError.message, 'error');
+            }
           }
+        } catch (studentError) {
+          console.error('Error handling student record:', studentError);
+          showNotification('Error processing student: ' + studentError.message, 'error');
         }
-      } catch (studentError) {
-        console.error('Error handling student record:', studentError);
-        showNotification('Error processing student: ' + studentError.message, 'error');
-        // Don't return - continue with admission approval
       }
+
+      try {
+        const emailSent = await sendAdmissionStatusEmailToStudent(admission, status);
+        console.log('📧 Email sent:', emailSent);
+      } catch (emailError) {
+        console.error('Email error:', emailError);
+      }
+
+      try {
+        await sendNotification({
+          userId: admissionId,
+          title: `Admission ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+          message: `Your admission has been ${status}. ${existingStudent ? 'Your student account is ready.' : 'Your student account has been created.'}`,
+          type: 'admission',
+          link: '/student/portal'
+        });
+      } catch (notifError) {
+        console.error('Notification error:', notifError);
+      }
+
+      const statusMessages = {
+        approved: 'approved 🎉',
+        enrolled: 'enrolled ✅',
+        rejected: 'rejected ❌'
+      };
+
+      const studentMessage = studentCreated ? ' Student record created!' : existingStudent ? ' Student record updated!' : '';
+
+      showNotification(
+        `Admission ${statusMessages[status] || status}.${studentMessage}`,
+        'success'
+      );
+      
+      await loadDashboardData();
+      
+    } catch (error) {
+      console.error('❌ Error updating admission status:', error);
+      showNotification('Error updating admission status: ' + error.message, 'error');
     }
-
-    // Send email notification
-    try {
-      const emailSent = await sendAdmissionStatusEmailToStudent(admission, status);
-      console.log('📧 Email sent:', emailSent);
-    } catch (emailError) {
-      console.error('Email error:', emailError);
-    }
-
-    // Send in-app notification
-    try {
-      await sendNotification({
-        userId: admissionId,
-        title: `Admission ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-        message: `Your admission has been ${status}. ${existingStudent ? 'Your student account is ready.' : 'Your student account has been created.'}`,
-        type: 'admission',
-        link: '/student/portal'
-      });
-    } catch (notifError) {
-      console.error('Notification error:', notifError);
-    }
-
-    const statusMessages = {
-      approved: 'approved 🎉',
-      enrolled: 'enrolled ✅',
-      rejected: 'rejected ❌'
-    };
-
-    const studentMessage = studentCreated ? ' Student record created!' : existingStudent ? ' Student record updated!' : '';
-
-    showNotification(
-      `Admission ${statusMessages[status] || status}.${studentMessage}`,
-      'success'
-    );
-    
-    // Reload data
-    await loadDashboardData();
-    
-  } catch (error) {
-    console.error('❌ Error updating admission status:', error);
-    showNotification('Error updating admission status: ' + error.message, 'error');
-  }
-};
+  };
 
   // ============================================
   // HANDLE APPLICATION STATUS UPDATE - Creates Admission on Approve
@@ -1385,7 +1321,6 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
     try {
       console.log('🔄 handleUpdateApplicationStatus called with:', { appId, status });
       
-      // Find the application
       const app = applications.find(a => a.id === appId);
       console.log('📋 Found application:', app);
       
@@ -1394,29 +1329,24 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
         return;
       }
 
-      // Check if application is already approved
       if (app.status === 'approved' && status === 'approved') {
         showNotification('Application is already approved', 'warning');
         return;
       }
 
-      // Update application status
       console.log('📝 Updating application status to:', status);
       await updateApplicationStatus(appId, status);
       console.log('✅ Application status updated');
 
-      // If approved, create an admission record
       if (status === 'approved') {
         console.log('🎯 Status is approved, creating admission...');
         
-        // Check if admission already exists for this email
         const existingAdmission = admissions.find(a => a.email === app.email);
         console.log('🔍 Existing admission found?', existingAdmission ? 'Yes' : 'No');
         
         let admissionId = null;
         
         if (!existingAdmission) {
-          // Create new admission record
           const admissionData = {
             fullName: app.fullName || app.studentName || 'N/A',
             email: app.email || 'N/A',
@@ -1471,7 +1401,6 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
           }
         }
 
-        // Send notification to student (don't block if it fails)
         try {
           await sendNotification({
             userId: app.email,
@@ -1485,7 +1414,6 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
           console.warn('Notification not sent:', notifError.message);
         }
 
-        // Send email notification (don't block if it fails)
         try {
           await sendAdmissionStatusEmail(
             app.email,
@@ -1516,17 +1444,14 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
         }
       }
 
-      // Force reload data
       console.log('🔄 Reloading dashboard data...');
       await loadDashboardData();
       console.log('✅ Dashboard data reloaded');
       
-      // After reload, check if the admission was created
       try {
         const updatedAdmissions = await getAllAdmissions();
         console.log('📊 Updated admissions count:', updatedAdmissions.length);
         
-        // Check if the new admission exists
         const newAdmission = updatedAdmissions.find(a => a.applicationId === appId);
         if (newAdmission) {
           console.log('✅ New admission found in Firestore:', newAdmission.id, newAdmission.status);
@@ -1720,43 +1645,37 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
   };
 
   // ============================================
-  // GROUP STUDENTS BY COURSE
+  // GET STUDENTS GROUPED BY COURSE - INDIVIDUALLY
   // ============================================
- // ============================================
-// GET STUDENTS GROUPED BY COURSE - INDIVIDUALLY
-// ============================================
-const getStudentsGroupedByCourse = () => {
-  const grouped = {};
-  
-  const approvedStudents = students.filter(s => 
-    s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
-  );
-  
-  approvedStudents.forEach(student => {
-    // Get all courses for this student
-    const studentCourses = student.enrolledCourses || [student.course] || ['Not Assigned'];
+  const getStudentsGroupedByCourse = () => {
+    const grouped = {};
     
-    // Add student to each course they're enrolled in
-    studentCourses.forEach(course => {
-      if (!grouped[course]) {
-        grouped[course] = [];
-      }
-      // Avoid duplicates
-      const exists = grouped[course].some(s => s.id === student.id);
-      if (!exists) {
-        grouped[course].push(student);
-      }
+    const approvedStudents = students.filter(s => 
+      s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
+    );
+    
+    approvedStudents.forEach(student => {
+      const studentCourses = student.enrolledCourses || [student.course] || ['Not Assigned'];
+      
+      studentCourses.forEach(course => {
+        const cleanCourse = course.trim();
+        if (!grouped[cleanCourse]) {
+          grouped[cleanCourse] = [];
+        }
+        const exists = grouped[cleanCourse].some(s => s.id === student.id);
+        if (!exists) {
+          grouped[cleanCourse].push(student);
+        }
+      });
     });
-  });
-  
-  // Sort courses alphabetically
-  const sortedGrouped = {};
-  Object.keys(grouped).sort().forEach(key => {
-    sortedGrouped[key] = grouped[key];
-  });
-  
-  return sortedGrouped;
-};
+    
+    const sortedGrouped = {};
+    Object.keys(grouped).sort().forEach(key => {
+      sortedGrouped[key] = grouped[key];
+    });
+    
+    return sortedGrouped;
+  };
 
   // Toggle course expansion
   const toggleCourseExpansion = (courseName) => {
@@ -1823,7 +1742,6 @@ const getStudentsGroupedByCourse = () => {
   const getFilteredApplications = () => {
     let filtered = applications;
 
-    // Search filter
     if (appSearchQuery) {
       const query = appSearchQuery.toLowerCase();
       filtered = filtered.filter(app =>
@@ -1836,12 +1754,10 @@ const getStudentsGroupedByCourse = () => {
       );
     }
 
-    // Status filter
     if (appStatusFilter !== 'all') {
       filtered = filtered.filter(app => app.status === appStatusFilter);
     }
 
-    // Date filter
     if (appDateFilter !== 'all') {
       filtered = filtered.filter(app => {
         const date = new Date(app.createdAt?.seconds * 1000 || app.applicationDate);
@@ -1849,7 +1765,6 @@ const getStudentsGroupedByCourse = () => {
       });
     }
 
-    // Sort by date (newest first)
     filtered.sort((a, b) => {
       const dateA = new Date(a.createdAt?.seconds * 1000 || a.applicationDate);
       const dateB = new Date(b.createdAt?.seconds * 1000 || b.applicationDate);
@@ -2007,39 +1922,68 @@ const getStudentsGroupedByCourse = () => {
   );
 
   // ============================================
-// RENDER STUDENTS - SEPARATED BY COURSE (INDIVIDUALLY)
-// ============================================
-const renderStudents = () => {
-  // Get all students that are approved or enrolled
-  const approvedStudents = students.filter(s => 
-    s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
-  );
-  
-  // Create a map of course -> students
-  const courseMap = {};
-  
-  approvedStudents.forEach(student => {
-    // Get all courses for this student
-    const studentCourses = student.enrolledCourses || [student.course] || ['Not Assigned'];
+  // RENDER STUDENTS - SEPARATED BY COURSE (INDIVIDUALLY)
+  // ============================================
+  const renderStudents = () => {
+    const approvedStudents = students.filter(s => 
+      s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
+    );
     
-    // For each course, add the student to that course's list
-    studentCourses.forEach(course => {
-      if (!courseMap[course]) {
-        courseMap[course] = [];
-      }
-      // Check if student already exists in this course to avoid duplicates
-      const exists = courseMap[course].some(s => s.id === student.id);
-      if (!exists) {
-        courseMap[course].push(student);
-      }
+    const courseMap = {};
+    
+    approvedStudents.forEach(student => {
+      const studentCourses = student.enrolledCourses || [student.course] || ['Not Assigned'];
+      
+      studentCourses.forEach(course => {
+        const cleanCourse = course.trim();
+        if (!courseMap[cleanCourse]) {
+          courseMap[cleanCourse] = [];
+        }
+        const exists = courseMap[cleanCourse].some(s => s.id === student.id);
+        if (!exists) {
+          courseMap[cleanCourse].push(student);
+        }
+      });
     });
-  });
-  
-  // Sort courses alphabetically
-  const sortedCourses = Object.keys(courseMap).sort();
-  
-  // If no students, show message
-  if (sortedCourses.length === 0) {
+    
+    const sortedCourses = Object.keys(courseMap).sort();
+    
+    if (sortedCourses.length === 0) {
+      return (
+        <div className="students-content">
+          <div className="content-header">
+            <h2>Student Management</h2>
+            <div className="header-actions">
+              <div className="search-box">
+                <FaSearch />
+                <input
+                  type="text"
+                  placeholder="Search students..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <select
+                className="filter-select"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="all">All Status</option>
+                <option value="approved">Approved</option>
+                <option value="enrolled">Enrolled</option>
+              </select>
+              <button className="export-btn" onClick={() => exportToCSV(students, 'students')}>
+                <FaDownloadIcon /> Export
+              </button>
+            </div>
+          </div>
+          <div className="no-students-message">
+            <FaInfoCircle /> No approved students found. Please approve admissions first.
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="students-content">
         <div className="content-header">
@@ -2068,200 +2012,161 @@ const renderStudents = () => {
             </button>
           </div>
         </div>
-        <div className="no-students-message">
-          <FaInfoCircle /> No approved students found. Please approve admissions first.
+
+        <div className="students-grouped">
+          {sortedCourses.map((courseName) => {
+            let courseStudents = courseMap[courseName] || [];
+            
+            let filteredStudents = courseStudents;
+            if (searchQuery) {
+              const query = searchQuery.toLowerCase();
+              filteredStudents = courseStudents.filter(s => 
+                s.fullName?.toLowerCase().includes(query) ||
+                s.email?.toLowerCase().includes(query) ||
+                s.studentId?.toLowerCase().includes(query)
+              );
+            }
+            
+            if (filterStatus !== 'all') {
+              filteredStudents = filteredStudents.filter(s => s.admissionStatus === filterStatus);
+            }
+            
+            const isExpanded = expandedCourses[courseName] || false;
+            const studentCount = filteredStudents.length;
+            
+            if (searchQuery && studentCount === 0) return null;
+            
+            return (
+              <div key={courseName} className="course-group">
+                <div 
+                  className="course-group-header"
+                  onClick={() => toggleCourseExpansion(courseName)}
+                >
+                  <div className="course-group-title">
+                    <span className="course-icon">
+                      <FaBookOpen />
+                    </span>
+                    <span className="course-name">{courseName}</span>
+                    <span className="course-count">
+                      <FaUsers /> {studentCount} {studentCount === 1 ? 'Student' : 'Students'}
+                    </span>
+                  </div>
+                  <div className="course-group-actions">
+                    <span className={`expand-icon ${isExpanded ? 'expanded' : ''}`}>
+                      {isExpanded ? <FaChevronDown /> : <FaChevronRight />}
+                    </span>
+                  </div>
+                </div>
+                
+                {isExpanded && (
+                  <div className="course-group-body">
+                    {filteredStudents.length === 0 ? (
+                      <div className="no-students-message">
+                        <FaInfoCircle /> No students match your filters
+                      </div>
+                    ) : (
+                      <div className="students-table">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Student ID</th>
+                              <th>Name</th>
+                              <th>Email</th>
+                              <th>Phone</th>
+                              <th>Auth</th>
+                              <th>Status</th>
+                              <th>Date</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredStudents.map((student) => (
+                              <tr key={student.id}>
+                                <td><strong>{student.studentId || 'N/A'}</strong></td>
+                                <td>{student.fullName}</td>
+                                <td>{student.email}</td>
+                                <td>{student.phone}</td>
+                                <td>
+                                  <span className={`auth-status ${student.authCreated ? 'auth-yes' : 'auth-no'}`}>
+                                    {student.authCreated ? '✅ Yes' : '❌ No'}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span className={`status-badge ${getStatusColor(student.admissionStatus)}`}>
+                                    {getStatusIcon(student.admissionStatus)} {student.admissionStatus || 'pending'}
+                                  </span>
+                                </td>
+                                <td>{new Date(student.createdAt?.seconds * 1000).toLocaleDateString()}</td>
+                                <td>
+                                  <div className="action-buttons">
+                                    <button 
+                                      className="action-btn-icon view"
+                                      onClick={() => {
+                                        setSelectedStudent(student);
+                                        setShowStudentModal(true);
+                                      }}
+                                    >
+                                      <FaEye />
+                                    </button>
+                                    <button 
+                                      className="action-btn-icon edit"
+                                      onClick={() => {
+                                        setEditingStudent(student);
+                                        setEditFormData(student);
+                                        setShowEditModal(true);
+                                      }}
+                                    >
+                                      <FaEdit />
+                                    </button>
+                                    <button
+                                      className="action-btn-icon fees"
+                                      onClick={() => viewStudentFees(student)}
+                                      title="View Fees & Payments"
+                                      style={{ color: '#FF6B35' }}
+                                    >
+                                      <FaWallet />
+                                    </button>
+                                    {!student.authCreated && (
+                                      <button 
+                                        className="action-btn-icon auth"
+                                        onClick={() => manuallyCreateAuthUser(student)}
+                                        disabled={isCreatingAuth}
+                                        title="Create Firebase Auth account"
+                                        style={{ color: '#9b59b6' }}
+                                      >
+                                        {isCreatingAuth ? <FaSpinner className="spinner" /> : <FaKey />}
+                                      </button>
+                                    )}
+                                    <button 
+                                      className="action-btn-icon delete"
+                                      onClick={() => handleDeleteStudent(student.id)}
+                                      disabled={isDeleting}
+                                    >
+                                      {isDeleting ? <FaSpinner className="spinner" /> : <FaTrash />}
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          
+          {sortedCourses.length === 0 && (
+            <div className="no-students-message">
+              <FaInfoCircle /> No students found
+            </div>
+          )}
         </div>
       </div>
     );
-  }
-
-  return (
-    <div className="students-content">
-      <div className="content-header">
-        <h2>Student Management</h2>
-        <div className="header-actions">
-          <div className="search-box">
-            <FaSearch />
-            <input
-              type="text"
-              placeholder="Search students..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <select
-            className="filter-select"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="all">All Status</option>
-            <option value="approved">Approved</option>
-            <option value="enrolled">Enrolled</option>
-          </select>
-          <button className="export-btn" onClick={() => exportToCSV(students, 'students')}>
-            <FaDownloadIcon /> Export
-          </button>
-        </div>
-      </div>
-
-      <div className="students-grouped">
-        {sortedCourses.map((courseName) => {
-          // Get students for this course
-          let courseStudents = courseMap[courseName] || [];
-          
-          // Apply search filter
-          let filteredStudents = courseStudents;
-          if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            filteredStudents = courseStudents.filter(s => 
-              s.fullName?.toLowerCase().includes(query) ||
-              s.email?.toLowerCase().includes(query) ||
-              s.studentId?.toLowerCase().includes(query)
-            );
-          }
-          
-          // Apply status filter
-          if (filterStatus !== 'all') {
-            filteredStudents = filteredStudents.filter(s => s.admissionStatus === filterStatus);
-          }
-          
-          const isExpanded = expandedCourses[courseName] || false;
-          const studentCount = filteredStudents.length;
-          
-          // Skip if search doesn't match
-          if (searchQuery && studentCount === 0) return null;
-          
-          return (
-            <div key={courseName} className="course-group">
-              <div 
-                className="course-group-header"
-                onClick={() => toggleCourseExpansion(courseName)}
-              >
-                <div className="course-group-title">
-                  <span className="course-icon">
-                    <FaBookOpen />
-                  </span>
-                  <span className="course-name">{courseName}</span>
-                  <span className="course-count">
-                    <FaUsers /> {studentCount} {studentCount === 1 ? 'Student' : 'Students'}
-                  </span>
-                </div>
-                <div className="course-group-actions">
-                  <span className={`expand-icon ${isExpanded ? 'expanded' : ''}`}>
-                    {isExpanded ? <FaChevronDown /> : <FaChevronRight />}
-                  </span>
-                </div>
-              </div>
-              
-              {isExpanded && (
-                <div className="course-group-body">
-                  {filteredStudents.length === 0 ? (
-                    <div className="no-students-message">
-                      <FaInfoCircle /> No students match your filters
-                    </div>
-                  ) : (
-                    <div className="students-table">
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>Student ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Auth</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredStudents.map((student) => (
-                            <tr key={student.id}>
-                              <td><strong>{student.studentId || 'N/A'}</strong></td>
-                              <td>{student.fullName}</td>
-                              <td>{student.email}</td>
-                              <td>{student.phone}</td>
-                              <td>
-                                <span className={`auth-status ${student.authCreated ? 'auth-yes' : 'auth-no'}`}>
-                                  {student.authCreated ? '✅ Yes' : '❌ No'}
-                                </span>
-                              </td>
-                              <td>
-                                <span className={`status-badge ${getStatusColor(student.admissionStatus)}`}>
-                                  {getStatusIcon(student.admissionStatus)} {student.admissionStatus || 'pending'}
-                                </span>
-                              </td>
-                              <td>{new Date(student.createdAt?.seconds * 1000).toLocaleDateString()}</td>
-                              <td>
-                                <div className="action-buttons">
-                                  <button 
-                                    className="action-btn-icon view"
-                                    onClick={() => {
-                                      setSelectedStudent(student);
-                                      setShowStudentModal(true);
-                                    }}
-                                  >
-                                    <FaEye />
-                                  </button>
-                                  <button 
-                                    className="action-btn-icon edit"
-                                    onClick={() => {
-                                      setEditingStudent(student);
-                                      setEditFormData(student);
-                                      setShowEditModal(true);
-                                    }}
-                                  >
-                                    <FaEdit />
-                                  </button>
-                                  <button
-                                    className="action-btn-icon fees"
-                                    onClick={() => viewStudentFees(student)}
-                                    title="View Fees & Payments"
-                                    style={{ color: '#FF6B35' }}
-                                  >
-                                    <FaWallet />
-                                  </button>
-                                  {!student.authCreated && (
-                                    <button 
-                                      className="action-btn-icon auth"
-                                      onClick={() => manuallyCreateAuthUser(student)}
-                                      disabled={isCreatingAuth}
-                                      title="Create Firebase Auth account"
-                                      style={{ color: '#9b59b6' }}
-                                    >
-                                      {isCreatingAuth ? <FaSpinner className="spinner" /> : <FaKey />}
-                                    </button>
-                                  )}
-                                  <button 
-                                    className="action-btn-icon delete"
-                                    onClick={() => handleDeleteStudent(student.id)}
-                                    disabled={isDeleting}
-                                  >
-                                    {isDeleting ? <FaSpinner className="spinner" /> : <FaTrash />}
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
-        
-        {sortedCourses.length === 0 && (
-          <div className="no-students-message">
-            <FaInfoCircle /> No students found
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+  };
 
   // ============================================
   // RENDER ADMISSIONS - WITH CREATE STUDENT BUTTON
