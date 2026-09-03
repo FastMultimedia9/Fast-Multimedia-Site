@@ -1782,3 +1782,58 @@
     justify-content: center;
   }
 }
+
+/* AdminDashboard.css - Add these styles */
+
+/* Fix Students and Auth Buttons */
+.fix-students-btn {
+  background: linear-gradient(135deg, #2196F3, #1976D2) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.fix-students-btn:hover {
+  background: linear-gradient(135deg, #1976D2, #0D47A1) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.fix-auth-btn {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.fix-auth-btn:hover {
+  background: linear-gradient(135deg, #8e44ad, #7d3c98) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+}
+
+/* Auth Status Styles */
+.auth-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.auth-status.auth-no {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.auth-status.auth-yes {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+/* Action Button Icon for Auth */
+.action-btn-icon.auth {
+  background: #f3e5f5;
+  color: #9b59b6;
+}
+
+.action-btn-icon.auth:hover {
+  background: #e1bee7;
+  transform: scale(1.05);
+}

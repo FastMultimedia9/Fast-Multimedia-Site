@@ -1,3 +1,4 @@
+// src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -181,122 +182,118 @@ const AdminDashboard = () => {
     checkAuth();
   }, [navigate]);
 
-  // In AdminDashboard.js - REPLACE the existing loadDashboardData function with this
-
-const loadDashboardData = async () => {
-  setIsLoading(true);
-  try {
-    // Initialize with default values
-    let statsData = {
-      totalStudents: 0,
-      approvedStudents: 0,
-      pendingStudents: 0,
-      rejectedStudents: 0,
-      enrolledStudents: 0,
-      totalApplications: 0,
-      pendingApplications: 0,
-      approvedApplications: 0,
-      rejectedApplications: 0,
-      totalRevenue: 0,
-      pendingPayments: 0,
-      completedPayments: 0,
-      totalStaff: 0,
-      totalCourses: 0,
-      totalSerials: 0,
-      availableSerials: 0
-    };
-    
-    let studentsData = [];
-    let admissionsData = [];
-    let paymentsData = [];
-    let staffData = [];
-    let coursesData = [];
-    let serialsData = [];
-    
-    // Try to get each collection individually with error handling
+  // ============================================
+  // LOAD DASHBOARD DATA
+  // ============================================
+  const loadDashboardData = async () => {
+    setIsLoading(true);
     try {
-      const result = await getDashboardStats();
-      statsData = result || statsData;
-    } catch (statsError) {
-      console.error('Error loading stats:', statsError);
-      // Use default stats
+      let statsData = {
+        totalStudents: 0,
+        approvedStudents: 0,
+        pendingStudents: 0,
+        rejectedStudents: 0,
+        enrolledStudents: 0,
+        totalApplications: 0,
+        pendingApplications: 0,
+        approvedApplications: 0,
+        rejectedApplications: 0,
+        totalRevenue: 0,
+        pendingPayments: 0,
+        completedPayments: 0,
+        totalStaff: 0,
+        totalCourses: 0,
+        totalSerials: 0,
+        availableSerials: 0
+      };
+      
+      let studentsData = [];
+      let admissionsData = [];
+      let paymentsData = [];
+      let staffData = [];
+      let coursesData = [];
+      let serialsData = [];
+      
+      try {
+        const result = await getDashboardStats();
+        statsData = result || statsData;
+      } catch (statsError) {
+        console.error('Error loading stats:', statsError);
+      }
+      
+      try {
+        const students = await getAllStudents();
+        studentsData = students || [];
+      } catch (studentsError) {
+        console.error('Error loading students:', studentsError);
+        studentsData = [];
+      }
+      
+      try {
+        const admissions = await getAllAdmissions();
+        admissionsData = admissions || [];
+      } catch (admissionsError) {
+        console.error('Error loading admissions:', admissionsError);
+        admissionsData = [];
+      }
+      
+      try {
+        const payments = await getAllPayments();
+        paymentsData = payments || [];
+      } catch (paymentsError) {
+        console.error('Error loading payments:', paymentsError);
+        paymentsData = [];
+      }
+      
+      try {
+        const staff = await getAllStaff();
+        staffData = staff || [];
+      } catch (staffError) {
+        console.error('Error loading staff:', staffError);
+        staffData = [];
+      }
+      
+      try {
+        const courses = await getAllCourses();
+        coursesData = courses || [];
+      } catch (coursesError) {
+        console.error('Error loading courses:', coursesError);
+        coursesData = [];
+      }
+      
+      try {
+        const serials = await getAllSerials();
+        serialsData = serials || [];
+      } catch (serialsError) {
+        console.error('Error loading serials:', serialsError);
+        serialsData = [];
+      }
+      
+      setStats(statsData);
+      const approvedStudents = (studentsData || []).filter(s => 
+        s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
+      );
+      setStudents(approvedStudents);
+      setAdmissions(admissionsData || []);
+      setPayments(paymentsData || []);
+      setStaff(staffData || []);
+      setCourses(coursesData || []);
+      setSerials(serialsData || []);
+      
+      showNotification('Dashboard data loaded successfully', 'success');
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      showNotification('Error loading dashboard data. Using default values.', 'error');
+      setStudents([]);
+      setAdmissions([]);
+      setPayments([]);
+      setStaff([]);
+      setCourses([]);
+      setSerials([]);
+    } finally {
+      setIsLoading(false);
     }
-    
-    try {
-      const students = await getAllStudents();
-      studentsData = students || [];
-    } catch (studentsError) {
-      console.error('Error loading students:', studentsError);
-      studentsData = [];
-    }
-    
-    try {
-      const admissions = await getAllAdmissions();
-      admissionsData = admissions || [];
-    } catch (admissionsError) {
-      console.error('Error loading admissions:', admissionsError);
-      admissionsData = [];
-    }
-    
-    try {
-      const payments = await getAllPayments();
-      paymentsData = payments || [];
-    } catch (paymentsError) {
-      console.error('Error loading payments:', paymentsError);
-      paymentsData = [];
-    }
-    
-    try {
-      const staff = await getAllStaff();
-      staffData = staff || [];
-    } catch (staffError) {
-      console.error('Error loading staff:', staffError);
-      staffData = [];
-    }
-    
-    try {
-      const courses = await getAllCourses();
-      coursesData = courses || [];
-    } catch (coursesError) {
-      console.error('Error loading courses:', coursesError);
-      coursesData = [];
-    }
-    
-    try {
-      const serials = await getAllSerials();
-      serialsData = serials || [];
-    } catch (serialsError) {
-      console.error('Error loading serials:', serialsError);
-      serialsData = [];
-    }
-    
-    setStats(statsData);
-    // Only show approved/enrolled students in the students list
-    const approvedStudents = (studentsData || []).filter(s => 
-      s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
-    );
-    setStudents(approvedStudents);
-    setAdmissions(admissionsData || []);
-    setPayments(paymentsData || []);
-    setStaff(staffData || []);
-    setCourses(coursesData || []);
-    setSerials(serialsData || []);
-    
-    showNotification('Dashboard data loaded successfully', 'success');
-  } catch (error) {
-    console.error('Error loading dashboard data:', error);
-    showNotification('Error loading dashboard data. Using default values.', 'error');
-    // Set empty arrays to prevent further errors
-    setStudents([]);
-    setAdmissions([]);
-    setPayments([]);
-    setStaff([]);
-    setCourses([]);
-    setSerials([]);
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
@@ -314,7 +311,7 @@ const loadDashboardData = async () => {
     }
   };
 
-  // Format currency - FIXED: Convert from pesewas to GHS
+  // Format currency
   const formatCurrency = (amount) => {
     if (!amount) return 'GH₵ 0.00';
     const amountInGHS = amount > 100 ? amount / 100 : amount;
@@ -333,7 +330,6 @@ const loadDashboardData = async () => {
     try {
       console.log('🔐 Creating Firebase Auth user for:', email);
       
-      // Check if user already exists
       try {
         const signInMethods = await fetchSignInMethodsForEmail(auth, email);
         if (signInMethods && signInMethods.length > 0) {
@@ -344,17 +340,14 @@ const loadDashboardData = async () => {
         console.log('Could not check existing user:', checkError.message);
       }
       
-      // Create the auth user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       console.log('✅ Firebase Auth user created:', user.uid);
       
-      // Update user profile
       await updateProfile(user, {
         displayName: studentData.fullName || 'Student'
       });
       
-      // Create user document in Firestore
       const userRef = doc(db, 'users', user.uid);
       await setDoc(userRef, {
         uid: user.uid,
@@ -393,13 +386,11 @@ const loadDashboardData = async () => {
     try {
       console.log('🔐 Manually creating auth user for:', student.email);
       
-      // Check if auth user already exists
       try {
         const methods = await fetchSignInMethodsForEmail(auth, student.email);
         if (methods && methods.length > 0) {
           showNotification(`✅ Auth user already exists for ${student.email}`, 'success');
           setIsCreatingAuth(false);
-          // Update student record
           await updateStudent(student.id, {
             authCreated: true,
             updatedAt: new Date().toISOString()
@@ -411,7 +402,6 @@ const loadDashboardData = async () => {
         console.log('Could not check existing user:', checkError.message);
       }
 
-      // Create auth user
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         student.email,
@@ -421,12 +411,10 @@ const loadDashboardData = async () => {
       const user = userCredential.user;
       console.log('✅ Auth user created:', user.uid);
       
-      // Update profile
       await updateProfile(user, {
         displayName: student.fullName || 'Student'
       });
       
-      // Create user document
       const userRef = doc(db, 'users', user.uid);
       await setDoc(userRef, {
         uid: user.uid,
@@ -440,7 +428,6 @@ const loadDashboardData = async () => {
         updatedAt: serverTimestamp()
       });
       
-      // Update student record
       await updateStudent(student.id, {
         authCreated: true,
         password: DEFAULT_PASSWORD,
@@ -454,7 +441,6 @@ const loadDashboardData = async () => {
       console.error('Error creating auth user:', error);
       if (error.code === 'auth/email-already-in-use') {
         showNotification(`✅ Auth user already exists for ${student.email}`, 'warning');
-        // Update student record
         try {
           await updateStudent(student.id, {
             authCreated: true,
@@ -473,11 +459,161 @@ const loadDashboardData = async () => {
   };
 
   // ============================================
+  // FIX: Generate Student IDs for existing students
+  // ============================================
+  const fixExistingStudents = async () => {
+    if (!window.confirm('This will generate Student IDs for all existing students who don\'t have one. Continue?')) {
+      return;
+    }
+
+    setIsLoading(true);
+    let fixedCount = 0;
+    let errorCount = 0;
+
+    try {
+      const allStudents = await getAllStudents();
+      console.log(`📊 Found ${allStudents.length} students to process`);
+
+      for (const student of allStudents) {
+        try {
+          if (!student.studentId || student.studentId === 'N/A' || student.studentId === 'Student ID not assigned') {
+            const newStudentId = await generateStudentId(student.fullName || 'Student');
+            
+            await updateStudent(student.id, {
+              studentId: newStudentId,
+              updatedAt: new Date().toISOString()
+            });
+            
+            console.log(`✅ Generated Student ID: ${newStudentId} for ${student.fullName}`);
+            fixedCount++;
+          } else {
+            console.log(`ℹ️ Student ${student.fullName} already has ID: ${student.studentId}`);
+          }
+        } catch (err) {
+          console.error(`Error processing student ${student.fullName}:`, err);
+          errorCount++;
+        }
+      }
+
+      showNotification(
+        `✅ Fixed ${fixedCount} student IDs, ${errorCount} errors`,
+        'success'
+      );
+
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error fixing students:', error);
+      showNotification('Error fixing students', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ============================================
+  // FIX: Create Auth accounts for existing students
+  // ============================================
+  const fixExistingAuth = async () => {
+    if (!window.confirm('This will create Firebase Auth accounts for all existing students who don\'t have one. Continue?')) {
+      return;
+    }
+
+    setIsLoading(true);
+    let fixedCount = 0;
+    let errorCount = 0;
+
+    try {
+      const allStudents = await getAllStudents();
+      console.log(`📊 Found ${allStudents.length} students to process`);
+
+      for (const student of allStudents) {
+        try {
+          if (!student.authCreated) {
+            let studentId = student.studentId;
+            if (!studentId || studentId === 'N/A' || studentId === 'Student ID not assigned') {
+              studentId = await generateStudentId(student.fullName || 'Student');
+              await updateStudent(student.id, {
+                studentId: studentId,
+                updatedAt: new Date().toISOString()
+              });
+              console.log(`📝 Generated student ID: ${studentId} for ${student.fullName}`);
+            }
+
+            try {
+              const userCredential = await createUserWithEmailAndPassword(
+                auth,
+                student.email,
+                DEFAULT_PASSWORD
+              );
+              
+              const user = userCredential.user;
+              console.log(`✅ Auth user created for ${student.email}: ${user.uid}`);
+              
+              await updateProfile(user, {
+                displayName: student.fullName || 'Student'
+              });
+              
+              const userRef = doc(db, 'users', user.uid);
+              await setDoc(userRef, {
+                uid: user.uid,
+                email: student.email,
+                fullName: student.fullName || 'Student',
+                role: 'student',
+                studentId: studentId,
+                course: student.course || 'Not specified',
+                admissionStatus: student.admissionStatus || 'approved',
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+              });
+              
+              await updateStudent(student.id, {
+                authCreated: true,
+                password: DEFAULT_PASSWORD,
+                passwordUpdated: false,
+                updatedAt: new Date().toISOString()
+              });
+              
+              fixedCount++;
+              console.log(`✅ Auth created for ${student.email}`);
+            } catch (authError) {
+              if (authError.code === 'auth/email-already-in-use') {
+                console.log(`⚠️ Auth already exists for ${student.email}`);
+                await updateStudent(student.id, {
+                  authCreated: true,
+                  updatedAt: new Date().toISOString()
+                });
+                fixedCount++;
+              } else {
+                throw authError;
+              }
+            }
+          } else {
+            console.log(`ℹ️ Student ${student.fullName} already has auth`);
+          }
+        } catch (err) {
+          console.error(`Error processing student ${student.fullName}:`, err);
+          errorCount++;
+        }
+      }
+
+      showNotification(
+        `✅ Created ${fixedCount} auth accounts, ${errorCount} errors`,
+        'success'
+      );
+
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error fixing auth:', error);
+      showNotification('Error fixing auth', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ============================================
   // ENSURE AUTH USER EXISTS
   // ============================================
   const ensureAuthUserExists = async (admission, student) => {
     try {
-      // Check if auth user already exists
       try {
         const methods = await fetchSignInMethodsForEmail(auth, admission.email);
         if (methods && methods.length > 0) {
@@ -488,7 +624,6 @@ const loadDashboardData = async () => {
         console.log('Could not check existing user:', checkError.message);
       }
 
-      // Try to create auth user
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         admission.email,
@@ -496,12 +631,10 @@ const loadDashboardData = async () => {
       );
       console.log(`✅ Auth user created for ${admission.email}`);
       
-      // Update profile
       await updateProfile(userCredential.user, {
         displayName: admission.fullName || 'Student'
       });
       
-      // Create user doc
       const userRef = doc(db, 'users', userCredential.user.uid);
       await setDoc(userRef, {
         uid: userCredential.user.uid,
@@ -515,7 +648,6 @@ const loadDashboardData = async () => {
         updatedAt: serverTimestamp()
       });
       
-      // Update student record
       await updateStudent(student.id, {
         authCreated: true,
         password: DEFAULT_PASSWORD,
@@ -608,11 +740,9 @@ const loadDashboardData = async () => {
         updatedAt: new Date().toISOString()
       };
 
-      // 1. Create student in Firestore
       await createStudent(studentData);
       console.log(`✅ Student created successfully with ID: ${studentId}`);
       
-      // 2. Create Firebase Auth user
       let authCreated = false;
       try {
         await createFirebaseAuthUser(admission.email, DEFAULT_PASSWORD, studentData);
@@ -627,7 +757,6 @@ const loadDashboardData = async () => {
         }
       }
       
-      // Update authCreated status
       if (authCreated) {
         await updateStudent(studentId, { authCreated: true });
       }
@@ -640,7 +769,7 @@ const loadDashboardData = async () => {
   };
 
   // ============================================
-  // HANDLE ADMISSION STATUS UPDATE - WITH STUDENT CREATION
+  // HANDLE ADMISSION STATUS UPDATE
   // ============================================
   const handleUpdateAdmissionStatus = async (studentId, status, studentData = null) => {
     try {
@@ -669,13 +798,11 @@ const loadDashboardData = async () => {
 
       console.log('✅ Admission found:', admission);
 
-      // Update admission status
       await updateAdmissionStatus(studentId, status);
 
       let studentCreated = false;
       let studentIdCreated = null;
 
-      // Only create student if status is approved or enrolled
       if (status === 'approved' || status === 'enrolled') {
         try {
           let existingStudent = students.find(s => s.email === admission.email);
@@ -692,10 +819,8 @@ const loadDashboardData = async () => {
             console.log('✅ Existing student updated:', existingStudent.id);
             studentIdCreated = existingStudent.id;
             
-            // Make sure auth user exists
             await ensureAuthUserExists(admission, existingStudent);
           } else {
-            // Create new student with auth
             studentIdCreated = await createStudentFromAdmission(admission);
             studentCreated = true;
             console.log('✅ New student created with auth:', studentIdCreated);
@@ -707,10 +832,8 @@ const loadDashboardData = async () => {
         }
       }
 
-      // Send email notification
       const emailSent = await sendAdmissionStatusEmailToStudent(admission, status);
 
-      // Send in-app notification
       await sendNotification({
         userId: studentId,
         title: `Admission ${status.charAt(0).toUpperCase() + status.slice(1)}`,
@@ -732,7 +855,6 @@ const loadDashboardData = async () => {
         emailSent ? 'success' : 'warning'
       );
       
-      // Reload data to reflect changes
       await loadDashboardData();
     } catch (error) {
       console.error('Error updating admission status:', error);
@@ -781,13 +903,10 @@ const loadDashboardData = async () => {
     setIsDeleting(true);
     
     try {
-      // 1. Delete from Firestore students collection
       await deleteStudentService(studentId);
       console.log(`✅ Student deleted from Firestore: ${studentId}`);
 
-      // 2. Try to delete Firebase Auth user
       try {
-        // Try to sign in and delete
         const userCredential = await auth.signInWithEmailAndPassword(
           studentToDelete.email, 
           DEFAULT_PASSWORD
@@ -802,20 +921,12 @@ const loadDashboardData = async () => {
           console.log(`ℹ️ Auth user not found for ${studentToDelete.email}, skipping`);
         } else if (authError.code === 'auth/wrong-password') {
           console.log('⚠️ Wrong password for auth deletion, trying admin method...');
-          // Try to find the user by email through admin
-          try {
-            // Note: This requires Firebase Admin SDK which is not available in client
-            // We'll just log and continue
-            console.log('ℹ️ Could not delete auth user, but student record removed');
-          } catch (e) {
-            console.log('Could not delete auth user:', e.message);
-          }
+          console.log('ℹ️ Could not delete auth user, but student record removed');
         } else {
           console.warn('⚠️ Could not delete auth user:', authError.message);
         }
       }
 
-      // 3. Delete from admissions if it exists
       try {
         const admission = admissions.find(a => a.email === studentToDelete.email);
         if (admission) {
@@ -907,12 +1018,11 @@ const loadDashboardData = async () => {
   };
 
   // ============================================
-  // GROUP STUDENTS BY COURSE - ONLY APPROVED/ENROLLED
+  // GROUP STUDENTS BY COURSE
   // ============================================
   const getStudentsGroupedByCourse = () => {
     const grouped = {};
     
-    // Only include approved or enrolled students
     const approvedStudents = students.filter(s => 
       s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
     );
@@ -1014,7 +1124,9 @@ const loadDashboardData = async () => {
     }
   };
 
-  // Render Dashboard
+  // ============================================
+  // RENDER DASHBOARD - WITH FIX BUTTONS
+  // ============================================
   const renderDashboard = () => (
     <div className="dashboard-content">
       <div className="stats-grid">
@@ -1095,13 +1207,27 @@ const loadDashboardData = async () => {
           <button className="action-btn" onClick={() => setActiveTab('serials')}>
             <FaFileAlt /> View Serials
           </button>
+          
+          {/* NEW: Fix Existing Students Buttons */}
+          <button 
+            className="action-btn fix-students-btn" 
+            onClick={fixExistingStudents}
+          >
+            <FaIdCard /> Fix Student IDs
+          </button>
+          <button 
+            className="action-btn fix-auth-btn" 
+            onClick={fixExistingAuth}
+          >
+            <FaKey /> Create Auth Accounts
+          </button>
         </div>
       </div>
     </div>
   );
 
   // ============================================
-  // RENDER STUDENTS - WITH AUTH FIX BUTTON
+  // RENDER STUDENTS
   // ============================================
   const renderStudents = () => {
     const groupedStudents = getStudentsGroupedByCourse();
