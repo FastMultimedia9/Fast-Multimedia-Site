@@ -1,3 +1,4 @@
+// src/services/firebaseService.js
 import { 
   db, 
   auth, 
@@ -38,7 +39,6 @@ import {
 // GENERATE MEMORABLE STUDENT ID
 // ============================================
 
-// Generate a memorable student ID using full first name + 4-digit number
 export const generateStudentId = async (fullName) => {
   try {
     // Extract first name (first part of full name)
@@ -122,7 +122,8 @@ export const createStudent = async (studentData) => {
       grades: studentData.grades || {},
       admissionStatus: studentData.admissionStatus || 'pending',
       passwordUpdated: studentData.passwordUpdated || false,
-      password: studentData.password || 'FastMultimedia2024@' // Default password for first login
+      password: studentData.password || 'FastMultimedia2024@', // Default password for first login
+      authCreated: studentData.authCreated || false
     });
     
     console.log(`✅ Student created with ID: ${studentId}`);
@@ -562,7 +563,7 @@ export const getAdmissionByEmail = async (email) => {
   }
 };
 
-// Get admission by serial number
+// Get admission by serial number - ADDED THIS MISSING FUNCTION
 export const getAdmissionBySerial = async (serialNumber) => {
   try {
     const q = query(
@@ -631,6 +632,10 @@ export const updateAdmissionStatus = async (admissionId, status, notes = null) =
     
     if (status === 'rejected') {
       updateData.rejectedAt = serverTimestamp();
+    }
+    
+    if (status === 'enrolled') {
+      updateData.enrolledAt = serverTimestamp();
     }
     
     if (notes) {
@@ -1789,7 +1794,7 @@ export default {
   createAdmission,
   getAdmission,
   getAdmissionByEmail,
-  getAdmissionBySerial,
+  getAdmissionBySerial,  // ✅ ADDED THIS
   getAllAdmissions,
   updateAdmissionStatus,
   deleteAdmission,

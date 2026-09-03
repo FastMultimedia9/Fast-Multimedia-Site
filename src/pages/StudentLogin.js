@@ -28,6 +28,7 @@ import {
   getAdmissionByEmail,
   createStudent,
   generateStudentId,
+  generateStudentId,
   updateUserProfile,
   updateStudent
 } from '../services/firebaseService';
