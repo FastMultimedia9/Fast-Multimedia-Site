@@ -181,37 +181,122 @@ const AdminDashboard = () => {
     checkAuth();
   }, [navigate]);
 
-  const loadDashboardData = async () => {
-    setIsLoading(true);
+  // In AdminDashboard.js - REPLACE the existing loadDashboardData function with this
+
+const loadDashboardData = async () => {
+  setIsLoading(true);
+  try {
+    // Initialize with default values
+    let statsData = {
+      totalStudents: 0,
+      approvedStudents: 0,
+      pendingStudents: 0,
+      rejectedStudents: 0,
+      enrolledStudents: 0,
+      totalApplications: 0,
+      pendingApplications: 0,
+      approvedApplications: 0,
+      rejectedApplications: 0,
+      totalRevenue: 0,
+      pendingPayments: 0,
+      completedPayments: 0,
+      totalStaff: 0,
+      totalCourses: 0,
+      totalSerials: 0,
+      availableSerials: 0
+    };
+    
+    let studentsData = [];
+    let admissionsData = [];
+    let paymentsData = [];
+    let staffData = [];
+    let coursesData = [];
+    let serialsData = [];
+    
+    // Try to get each collection individually with error handling
     try {
-      const [statsData, studentsData, admissionsData, paymentsData, staffData, coursesData, serialsData] = await Promise.all([
-        getDashboardStats(),
-        getAllStudents(),
-        getAllAdmissions(),
-        getAllPayments(),
-        getAllStaff(),
-        getAllCourses(),
-        getAllSerials()
-      ]);
-      
-      setStats(statsData);
-      // Only show approved/enrolled students in the students list
-      const approvedStudents = (studentsData || []).filter(s => 
-        s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
-      );
-      setStudents(approvedStudents);
-      setAdmissions(admissionsData || []);
-      setPayments(paymentsData || []);
-      setStaff(staffData || []);
-      setCourses(coursesData || []);
-      setSerials(serialsData || []);
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
-      showNotification('Error loading dashboard data', 'error');
-    } finally {
-      setIsLoading(false);
+      const result = await getDashboardStats();
+      statsData = result || statsData;
+    } catch (statsError) {
+      console.error('Error loading stats:', statsError);
+      // Use default stats
     }
-  };
+    
+    try {
+      const students = await getAllStudents();
+      studentsData = students || [];
+    } catch (studentsError) {
+      console.error('Error loading students:', studentsError);
+      studentsData = [];
+    }
+    
+    try {
+      const admissions = await getAllAdmissions();
+      admissionsData = admissions || [];
+    } catch (admissionsError) {
+      console.error('Error loading admissions:', admissionsError);
+      admissionsData = [];
+    }
+    
+    try {
+      const payments = await getAllPayments();
+      paymentsData = payments || [];
+    } catch (paymentsError) {
+      console.error('Error loading payments:', paymentsError);
+      paymentsData = [];
+    }
+    
+    try {
+      const staff = await getAllStaff();
+      staffData = staff || [];
+    } catch (staffError) {
+      console.error('Error loading staff:', staffError);
+      staffData = [];
+    }
+    
+    try {
+      const courses = await getAllCourses();
+      coursesData = courses || [];
+    } catch (coursesError) {
+      console.error('Error loading courses:', coursesError);
+      coursesData = [];
+    }
+    
+    try {
+      const serials = await getAllSerials();
+      serialsData = serials || [];
+    } catch (serialsError) {
+      console.error('Error loading serials:', serialsError);
+      serialsData = [];
+    }
+    
+    setStats(statsData);
+    // Only show approved/enrolled students in the students list
+    const approvedStudents = (studentsData || []).filter(s => 
+      s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
+    );
+    setStudents(approvedStudents);
+    setAdmissions(admissionsData || []);
+    setPayments(paymentsData || []);
+    setStaff(staffData || []);
+    setCourses(coursesData || []);
+    setSerials(serialsData || []);
+    
+    showNotification('Dashboard data loaded successfully', 'success');
+  } catch (error) {
+    console.error('Error loading dashboard data:', error);
+    showNotification('Error loading dashboard data. Using default values.', 'error');
+    // Set empty arrays to prevent further errors
+    setStudents([]);
+    setAdmissions([]);
+    setPayments([]);
+    setStaff([]);
+    setCourses([]);
+    setSerials([]);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });

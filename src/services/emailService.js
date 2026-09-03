@@ -1,22 +1,64 @@
 // src/services/emailService.js
 import emailjs from '@emailjs/browser';
 
-// Get configuration from environment variables
-const PUBLIC_KEY = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'a48f87f647d099b3e988739f2e33262f';
-const SERVICE_ID = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_25rh2nj';
+// ============================================
+// LOAD CONFIGURATION FROM ENVIRONMENT VARIABLES
+// ============================================
 
-// TWO DIFFERENT TEMPLATE IDs
-const SERIAL_TEMPLATE_ID = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_kjuy3g3';
-const ADMISSION_TEMPLATE_ID = process.env.REACT_APP_EMAILJS_ADMISSION_TEMPLATE_ID || 'template_admission_status';
+// Required - These must be set in Vercel Environment Variables
+const PUBLIC_KEY = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
+const SERVICE_ID = process.env.REACT_APP_EMAILJS_SERVICE_ID;
+const SERIAL_TEMPLATE_ID = process.env.REACT_APP_EMAILJS_SERIAL_TEMPLATE_ID;
+const ADMISSION_TEMPLATE_ID = process.env.REACT_APP_EMAILJS_ADMISSION_TEMPLATE_ID;
+
+// Optional - With fallback values
+const SUPPORT_EMAIL = process.env.REACT_APP_SUPPORT_EMAIL || 'fasttech227@gmail.com';
+const WHATSAPP_NUMBER = process.env.REACT_APP_WHATSAPP_NUMBER || '+233 50 515 9131';
+
+// ============================================
+// VALIDATE CONFIGURATION
+// ============================================
+
+const validateConfig = () => {
+  const missing = [];
+  if (!PUBLIC_KEY) missing.push('REACT_APP_EMAILJS_PUBLIC_KEY');
+  if (!SERVICE_ID) missing.push('REACT_APP_EMAILJS_SERVICE_ID');
+  if (!SERIAL_TEMPLATE_ID) missing.push('REACT_APP_EMAILJS_SERIAL_TEMPLATE_ID');
+  if (!ADMISSION_TEMPLATE_ID) missing.push('REACT_APP_EMAILJS_ADMISSION_TEMPLATE_ID');
+  
+  if (missing.length > 0) {
+    console.warn('⚠️ Missing EmailJS environment variables:', missing.join(', '));
+    console.warn('Please add these to your Vercel Environment Variables');
+    return false;
+  }
+  return true;
+};
 
 // Initialize EmailJS with Public API Key
-emailjs.init(PUBLIC_KEY);
+try {
+  if (PUBLIC_KEY) {
+    emailjs.init(PUBLIC_KEY);
+    console.log('✅ EmailJS initialized successfully');
+  } else {
+    console.warn('⚠️ EmailJS public key not found. Email features will be disabled.');
+  }
+} catch (error) {
+  console.error('❌ EmailJS initialization failed:', error);
+}
+
+// ============================================
+// EMAIL FUNCTIONS
+// ============================================
 
 /**
  * Send serial number email to applicant - Uses SERIAL_TEMPLATE_ID
  */
 export const sendSerialEmail = async (email, name, serial, course) => {
   try {
+    if (!validateConfig()) {
+      throw new Error('EmailJS configuration is incomplete. Check your Vercel environment variables.');
+    }
+
     if (!email || !name || !serial) {
       throw new Error('Missing required fields: email, name, or serial number');
     }
@@ -28,10 +70,10 @@ export const sendSerialEmail = async (email, name, serial, course) => {
       course: course || 'Not specified',
       application_link: `${window.location.origin}/school/application-form`,
       current_year: new Date().getFullYear(),
-      whatsapp_number: '+233 50 515 9131',
-      support_email: 'fasttech227@gmail.com',
+      whatsapp_number: WHATSAPP_NUMBER,
+      support_email: SUPPORT_EMAIL,
       from_name: 'Fast Multimedia Institute',
-      reply_to: 'fasttech227@gmail.com',
+      reply_to: SUPPORT_EMAIL,
       subject: 'Your Admission Serial Number - Fast Multimedia Institute'
     };
 
@@ -40,7 +82,7 @@ export const sendSerialEmail = async (email, name, serial, course) => {
 
     const result = await emailjs.send(
       SERVICE_ID,
-      SERIAL_TEMPLATE_ID,  // Uses serial template
+      SERIAL_TEMPLATE_ID,
       templateParams
     );
 
@@ -61,6 +103,10 @@ export const sendSerialEmail = async (email, name, serial, course) => {
  */
 export const sendAdmissionStatusEmail = async (email, name, status, studentId, course, serialNumber, notes = '') => {
   try {
+    if (!validateConfig()) {
+      throw new Error('EmailJS configuration is incomplete. Check your Vercel environment variables.');
+    }
+
     if (!email || !name || !status || !studentId) {
       throw new Error('Missing required fields: email, name, status, or studentId');
     }
@@ -139,12 +185,12 @@ export const sendAdmissionStatusEmail = async (email, name, status, studentId, c
       
       // Footer
       current_year: new Date().getFullYear(),
-      whatsapp_number: '+233 50 515 9131',
-      support_email: 'fasttech227@gmail.com',
+      whatsapp_number: WHATSAPP_NUMBER,
+      support_email: SUPPORT_EMAIL,
       
       // Email Metadata
       from_name: 'Fast Multimedia Institute',
-      reply_to: 'fasttech227@gmail.com',
+      reply_to: SUPPORT_EMAIL,
       subject: `Admission ${status.charAt(0).toUpperCase() + status.slice(1)} - ${course || 'Fast Multimedia Institute'}`
     };
 
@@ -153,10 +199,9 @@ export const sendAdmissionStatusEmail = async (email, name, status, studentId, c
     console.log('📧 Course:', course);
     console.log('📧 Using template ID:', ADMISSION_TEMPLATE_ID);
 
-    // Uses ADMISSION_TEMPLATE_ID
     const result = await emailjs.send(
       SERVICE_ID,
-      ADMISSION_TEMPLATE_ID,  // Uses admission template
+      ADMISSION_TEMPLATE_ID,
       templateParams
     );
 
@@ -177,6 +222,10 @@ export const sendAdmissionStatusEmail = async (email, name, status, studentId, c
  */
 export const resendSerialEmail = async (email, serial, name, course) => {
   try {
+    if (!validateConfig()) {
+      throw new Error('EmailJS configuration is incomplete. Check your Vercel environment variables.');
+    }
+
     const templateParams = {
       to_email: email,
       to_name: name || 'Applicant',
@@ -185,10 +234,10 @@ export const resendSerialEmail = async (email, serial, name, course) => {
       application_link: `${window.location.origin}/school/application-form`,
       resend: true,
       current_year: new Date().getFullYear(),
-      whatsapp_number: '+233 50 515 9131',
-      support_email: 'fasttech227@gmail.com',
+      whatsapp_number: WHATSAPP_NUMBER,
+      support_email: SUPPORT_EMAIL,
       from_name: 'Fast Multimedia Institute',
-      reply_to: 'fasttech227@gmail.com',
+      reply_to: SUPPORT_EMAIL,
       subject: 'Your Admission Serial Number - Fast Multimedia Institute'
     };
 
@@ -214,6 +263,10 @@ export const resendSerialEmail = async (email, serial, name, course) => {
  */
 export const testEmailConnection = async (email) => {
   try {
+    if (!validateConfig()) {
+      throw new Error('EmailJS configuration is incomplete. Check your Vercel environment variables.');
+    }
+
     const testParams = {
       to_email: email || 'test@example.com',
       to_name: 'Test User',
@@ -221,10 +274,10 @@ export const testEmailConnection = async (email) => {
       course: 'Test Course',
       application_link: `${window.location.origin}/school/application-form`,
       current_year: new Date().getFullYear(),
-      whatsapp_number: '+233 50 515 9131',
-      support_email: 'fasttech227@gmail.com',
+      whatsapp_number: WHATSAPP_NUMBER,
+      support_email: SUPPORT_EMAIL,
       from_name: 'Fast Multimedia Institute',
-      reply_to: 'fasttech227@gmail.com',
+      reply_to: SUPPORT_EMAIL,
       subject: 'Email Test - Fast Multimedia Institute'
     };
 
@@ -245,21 +298,34 @@ export const testEmailConnection = async (email) => {
   }
 };
 
-export const emailConfig = {
-  publicKey: PUBLIC_KEY,
-  serviceId: SERVICE_ID,
-  serialTemplateId: SERIAL_TEMPLATE_ID,
-  admissionTemplateId: ADMISSION_TEMPLATE_ID,
-  isInitialized: true,
-  publicKeyMasked: PUBLIC_KEY.substring(0, 10) + '...'
+/**
+ * Get email configuration status
+ */
+export const getEmailConfig = () => {
+  const isConfigured = validateConfig();
+  return {
+    isConfigured,
+    serviceId: SERVICE_ID,
+    serialTemplateId: SERIAL_TEMPLATE_ID,
+    admissionTemplateId: ADMISSION_TEMPLATE_ID,
+    supportEmail: SUPPORT_EMAIL,
+    whatsappNumber: WHATSAPP_NUMBER,
+    publicKeyMasked: PUBLIC_KEY ? PUBLIC_KEY.substring(0, 10) + '...' : 'Not set',
+    publicKey: PUBLIC_KEY ? '***' : 'Not set',
+    environment: process.env.NODE_ENV || 'development'
+  };
 };
+
+// ============================================
+// EXPORT
+// ============================================
 
 const emailService = {
   sendSerialEmail,
   sendAdmissionStatusEmail,
   resendSerialEmail,
   testEmailConnection,
-  emailConfig
+  getEmailConfig
 };
 
 export default emailService;
