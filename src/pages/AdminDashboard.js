@@ -59,7 +59,10 @@ import {
   FaChevronRight,
   FaUser,
   FaKey,
-  FaSync
+  FaSync,
+  FaWallet,
+  FaReceipt,
+  FaHistory
 } from 'react-icons/fa';
 import {
   getAllStudents,
@@ -93,7 +96,9 @@ import {
   getUserProfile,
   deleteDoc,
   doc,
-  db
+  db,
+  getPaymentsByStudent,
+  updatePaymentStatus
 } from '../services/firebaseService';
 import { sendAdmissionStatusEmail } from '../services/emailService';
 import { 
@@ -103,7 +108,7 @@ import {
   fetchSignInMethodsForEmail
 } from 'firebase/auth';
 import { auth } from '../firebase';
-import { serverTimestamp, setDoc } from 'firebase/firestore';
+import { serverTimestamp, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -161,6 +166,21 @@ const AdminDashboard = () => {
   const [appDateFilter, setAppDateFilter] = useState('all');
   const [appStatusFilter, setAppStatusFilter] = useState('all');
   const [isDeletingApp, setIsDeletingApp] = useState(false);
+
+  // Student Fees states
+  const [showFeesModal, setShowFeesModal] = useState(false);
+  const [selectedStudentForFees, setSelectedStudentForFees] = useState(null);
+  const [studentPayments, setStudentPayments] = useState([]);
+  const [studentFeeSummary, setStudentFeeSummary] = useState({
+    totalPaid: 0,
+    totalDue: 0,
+    outstanding: 0,
+    courseFee: 0,
+    paymentCount: 0
+  });
+  const [feeSearchQuery, setFeeSearchQuery] = useState('');
+  const [feeDateFilter, setFeeDateFilter] = useState('all');
+  const [feeStatusFilter, setFeeStatusFilter] = useState('all');
 
   // Default password for students
   const DEFAULT_PASSWORD = 'FastMultimedia2024@';
@@ -350,33 +370,127 @@ const loadDashboardData = async () => {
   }
 };
 
-const showNotification = (message, type = 'success') => {
-  setNotification({ message, type });
-  setTimeout(() => setNotification(null), 5000);
-};
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 5000);
+  };
 
-// Handle logout
-const handleLogout = async () => {
-  try {
-    await logoutUser();
-    navigate('/login', { state: { from: '/admin' } });
-  } catch (error) {
-    console.error('Logout error:', error);
-    showNotification('Error logging out', 'error');
-  }
-};
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      navigate('/login', { state: { from: '/admin' } });
+    } catch (error) {
+      console.error('Logout error:', error);
+      showNotification('Error logging out', 'error');
+    }
+  };
 
-// Format currency
-const formatCurrency = (amount) => {
-  if (!amount) return 'GH₵ 0.00';
-  const amountInGHS = amount > 100 ? amount / 100 : amount;
-  return new Intl.NumberFormat('en-GH', {
-    style: 'currency',
-    currency: 'GHS',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(amountInGHS || 0);
-};
+  // Format currency
+  const formatCurrency = (amount) => {
+    if (!amount) return 'GH₵ 0.00';
+    const amountInGHS = amount > 100 ? amount / 100 : amount;
+    return new Intl.NumberFormat('en-GH', {
+      style: 'currency',
+      currency: 'GHS',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amountInGHS || 0);
+  };
+
+  // ============================================
+  // STUDENT FEES MANAGEMENT FUNCTIONS
+  // ============================================
+  
+  const viewStudentFees = async (student) => {
+    setSelectedStudentForFees(student);
+    setStudentPayments([]);
+    setStudentFeeSummary({
+      totalPaid: 0,
+      totalDue: 0,
+      outstanding: 0,
+      courseFee: 0,
+      paymentCount: 0
+    });
+    setFeeSearchQuery('');
+    setFeeDateFilter('all');
+    setFeeStatusFilter('all');
+    setShowFeesModal(true);
+    await loadStudentPaymentHistory(student);
+  };
+
+  const loadStudentPaymentHistory = async (student) => {
+    try {
+      const studentId = student.studentId || student.id;
+      const paymentsData = await getPaymentsByStudent(studentId);
+      setStudentPayments(paymentsData || []);
+      
+      // Calculate summary
+      let totalPaid = 0;
+      let paymentCount = 0;
+      paymentsData.forEach(p => {
+        if (p.status === 'completed' || p.status === 'paid') {
+          totalPaid += p.amount || 0;
+          paymentCount++;
+        }
+      });
+      
+      const courseFee = student.courseFee || 600;
+      const outstanding = courseFee - totalPaid;
+      
+      setStudentFeeSummary({
+        totalPaid,
+        totalDue: courseFee,
+        outstanding: outstanding > 0 ? outstanding : 0,
+        courseFee: courseFee,
+        paymentCount
+      });
+    } catch (error) {
+      console.error('Error loading student payments:', error);
+      showNotification('Error loading payment history', 'error');
+    }
+  };
+
+  const getFilteredStudentPayments = () => {
+    let filtered = studentPayments;
+    
+    if (feeSearchQuery) {
+      const query = feeSearchQuery.toLowerCase();
+      filtered = filtered.filter(p =>
+        p.description?.toLowerCase().includes(query) ||
+        p.reference?.toLowerCase().includes(query) ||
+        p.paymentId?.toLowerCase().includes(query)
+      );
+    }
+    
+    if (feeStatusFilter !== 'all') {
+      filtered = filtered.filter(p => p.status === feeStatusFilter);
+    }
+    
+    if (feeDateFilter !== 'all') {
+      filtered = filtered.filter(p => {
+        const date = new Date(p.createdAt?.seconds * 1000 || p.createdAt);
+        return date.toISOString().split('T')[0] === feeDateFilter;
+      });
+    }
+    
+    // Sort by date (newest first)
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.createdAt?.seconds * 1000 || a.createdAt);
+      const dateB = new Date(b.createdAt?.seconds * 1000 || b.createdAt);
+      return dateB - dateA;
+    });
+    
+    return filtered;
+  };
+
+  const getUniqueFeeDates = () => {
+    const dates = studentPayments.map(p => {
+      const date = new Date(p.createdAt?.seconds * 1000 || p.createdAt);
+      return date.toISOString().split('T')[0];
+    });
+    return [...new Set(dates)].sort().reverse();
+  };
 
   // ============================================
   // CREATE FIREBASE AUTH USER FOR STUDENT
@@ -411,6 +525,7 @@ const formatCurrency = (amount) => {
         role: 'student',
         studentId: studentData.studentId,
         course: studentData.course,
+        enrolledCourses: studentData.enrolledCourses || [],
         admissionStatus: studentData.admissionStatus || 'approved',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -478,6 +593,7 @@ const formatCurrency = (amount) => {
         role: 'student',
         studentId: student.studentId || student.id,
         course: student.course,
+        enrolledCourses: student.enrolledCourses || [],
         admissionStatus: student.admissionStatus || 'approved',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -615,6 +731,7 @@ const formatCurrency = (amount) => {
                 role: 'student',
                 studentId: studentId,
                 course: student.course || 'Not specified',
+                enrolledCourses: student.enrolledCourses || [],
                 admissionStatus: student.admissionStatus || 'approved',
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp()
@@ -864,6 +981,7 @@ const fixAdmissionToStudent = async (admissionId) => {
         role: 'student',
         studentId: student.studentId || student.id,
         course: admission.course,
+        enrolledCourses: student.enrolledCourses || [],
         admissionStatus: 'approved',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -1052,6 +1170,7 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
           await updateStudent(existingStudent.id, { 
             admissionStatus: status,
             course: admission.course || existingStudent.course,
+            enrolledCourses: existingStudent.enrolledCourses ? [...existingStudent.enrolledCourses, admission.course] : [admission.course],
             updatedAt: new Date().toISOString()
           });
           
@@ -1167,6 +1286,7 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
                   role: 'student',
                   studentId: newStudentId,
                   course: admission.course,
+                  enrolledCourses: [admission.course],
                   admissionStatus: status,
                   createdAt: serverTimestamp(),
                   updatedAt: serverTimestamp()
@@ -1592,11 +1712,11 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
       s.admissionStatus === 'approved' || s.admissionStatus === 'enrolled'
     );
     
-    const allCourses = [...new Set(approvedStudents.map(s => s.course || s.enrolledCourses?.[0] || 'Not Assigned'))];
+    const allCourses = [...new Set(approvedStudents.flatMap(s => s.enrolledCourses || [s.course] || ['Not Assigned']))];
     
     allCourses.forEach(course => {
       grouped[course] = approvedStudents.filter(s => 
-        (s.course || s.enrolledCourses?.[0] || 'Not Assigned') === course
+        (s.enrolledCourses || [s.course] || ['Not Assigned']).includes(course)
       );
     });
     
@@ -1729,6 +1849,8 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
         return renderApplications();
       case 'payments':
         return renderPayments();
+      case 'fees':
+        return renderStudentFees();
       case 'staff':
         return renderStaff();
       case 'courses':
@@ -1815,6 +1937,9 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
           </button>
           <button className="action-btn" onClick={() => setActiveTab('applications')}>
             <FaFileAlt /> View Applications
+          </button>
+          <button className="action-btn" onClick={() => setActiveTab('fees')}>
+            <FaWallet /> Student Fees
           </button>
           <button className="action-btn" onClick={() => setShowAddStaffModal(true)}>
             <FaUserTie /> Add Staff
@@ -1970,6 +2095,14 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
                                       }}
                                     >
                                       <FaEdit />
+                                    </button>
+                                    <button
+                                      className="action-btn-icon fees"
+                                      onClick={() => viewStudentFees(student)}
+                                      title="View Fees & Payments"
+                                      style={{ color: '#FF6B35' }}
+                                    >
+                                      <FaWallet />
                                     </button>
                                     {!student.authCreated && (
                                       <button 
@@ -2542,7 +2675,237 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
     );
   };
 
-  // Render Payments
+  // ============================================
+  // RENDER STUDENT FEES - NEW TAB
+  // ============================================
+  const renderStudentFees = () => {
+    const filteredStudents = students.filter(s => 
+      s.fullName?.toLowerCase().includes(feeSearchQuery.toLowerCase()) ||
+      s.email?.toLowerCase().includes(feeSearchQuery.toLowerCase()) ||
+      s.studentId?.toLowerCase().includes(feeSearchQuery.toLowerCase())
+    );
+
+    return (
+      <div className="fees-content">
+        <div className="content-header">
+          <h2>Student Fees Management</h2>
+          <div className="header-actions">
+            <div className="search-box">
+              <FaSearch />
+              <input
+                type="text"
+                placeholder="Search students..."
+                value={feeSearchQuery}
+                onChange={(e) => setFeeSearchQuery(e.target.value)}
+              />
+            </div>
+            <button className="export-btn" onClick={() => exportToCSV(students, 'students-fees')}>
+              <FaDownloadIcon /> Export
+            </button>
+          </div>
+        </div>
+
+        <div className="fees-summary-cards">
+          <div className="fee-stat-card">
+            <div className="fee-stat-icon blue">
+              <FaUsers />
+            </div>
+            <div className="fee-stat-info">
+              <h3>{students.length}</h3>
+              <p>Total Students</p>
+            </div>
+          </div>
+          <div className="fee-stat-card">
+            <div className="fee-stat-icon green">
+              <FaMoneyBillWave />
+            </div>
+            <div className="fee-stat-info">
+              <h3>{formatCurrency(payments.filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount || 0), 0))}</h3>
+              <p>Total Fees Collected</p>
+            </div>
+          </div>
+          <div className="fee-stat-card">
+            <div className="fee-stat-icon orange">
+              <FaClock />
+            </div>
+            <div className="fee-stat-info">
+              <h3>{payments.filter(p => p.status === 'pending').length}</h3>
+              <p>Pending Payments</p>
+            </div>
+          </div>
+          <div className="fee-stat-card">
+            <div className="fee-stat-icon purple">
+              <FaReceipt />
+            </div>
+            <div className="fee-stat-info">
+              <h3>{payments.length}</h3>
+              <p>Total Transactions</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="fees-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Course</th>
+                <th>Course Fee</th>
+                <th>Total Paid</th>
+                <th>Outstanding</th>
+                <th>Payments</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStudents.map((student) => {
+                const studentPaymentsList = payments.filter(p => p.studentId === student.studentId || p.studentId === student.id);
+                const totalPaid = studentPaymentsList.filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount || 0), 0);
+                const courseFee = student.courseFee || 600;
+                const outstanding = courseFee - totalPaid;
+                const completedCount = studentPaymentsList.filter(p => p.status === 'completed').length;
+                
+                return (
+                  <tr key={student.id}>
+                    <td><strong>{student.studentId || 'N/A'}</strong></td>
+                    <td>{student.fullName}</td>
+                    <td>{student.course || 'Not assigned'}</td>
+                    <td>{formatCurrency(courseFee)}</td>
+                    <td>{formatCurrency(totalPaid)}</td>
+                    <td>{formatCurrency(outstanding > 0 ? outstanding : 0)}</td>
+                    <td>{completedCount}</td>
+                    <td>
+                      <span className={`status-badge ${outstanding <= 0 ? 'status-approved' : 'status-pending'}`}>
+                        {outstanding <= 0 ? '✅ Paid' : '⚠️ Pending'}
+                      </span>
+                    </td>
+                    <td>
+                      <button 
+                        className="btn-view-fees"
+                        onClick={() => viewStudentFees(student)}
+                        style={{
+                          background: '#FF6B35',
+                          color: 'white',
+                          border: 'none',
+                          padding: '6px 12px',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <FaWallet /> View Details
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Student Fees Detail Modal */}
+        {showFeesModal && selectedStudentForFees && (
+          <div className="modal-overlay" onClick={() => setShowFeesModal(false)}>
+            <div className="modal-content fees-detail-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={() => setShowFeesModal(false)}>×</button>
+              <h2><FaWallet /> Fee Details</h2>
+              
+              <div className="student-fees-header">
+                <div className="student-info">
+                  <h3>{selectedStudentForFees.fullName}</h3>
+                  <p>Student ID: <strong>{selectedStudentForFees.studentId || 'N/A'}</strong></p>
+                  <p>Course: <strong>{selectedStudentForFees.course || 'Not assigned'}</strong></p>
+                  <p>Email: <strong>{selectedStudentForFees.email}</strong></p>
+                </div>
+                <div className="fee-summary">
+                  <div className="fee-summary-item">
+                    <span>Course Fee</span>
+                    <strong>{formatCurrency(studentFeeSummary.courseFee)}</strong>
+                  </div>
+                  <div className="fee-summary-item">
+                    <span>Total Paid</span>
+                    <strong style={{ color: '#27ae60' }}>{formatCurrency(studentFeeSummary.totalPaid)}</strong>
+                  </div>
+                  <div className="fee-summary-item">
+                    <span>Outstanding</span>
+                    <strong style={{ color: studentFeeSummary.outstanding > 0 ? '#e74c3c' : '#27ae60' }}>
+                      {formatCurrency(studentFeeSummary.outstanding)}
+                    </strong>
+                  </div>
+                  <div className="fee-summary-item">
+                    <span>Payments Made</span>
+                    <strong>{studentFeeSummary.paymentCount}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="payment-filters">
+                <div className="search-box">
+                  <FaSearch />
+                  <input
+                    type="text"
+                    placeholder="Search payments..."
+                    value={feeSearchQuery}
+                    onChange={(e) => setFeeSearchQuery(e.target.value)}
+                  />
+                </div>
+                <select
+                  className="filter-select"
+                  value={feeStatusFilter}
+                  onChange={(e) => setFeeStatusFilter(e.target.value)}
+                >
+                  <option value="all">All Status</option>
+                  <option value="completed">Completed</option>
+                  <option value="pending">Pending</option>
+                  <option value="failed">Failed</option>
+                </select>
+                <select
+                  className="filter-select"
+                  value={feeDateFilter}
+                  onChange={(e) => setFeeDateFilter(e.target.value)}
+                >
+                  <option value="all">All Dates</option>
+                  {getUniqueFeeDates().map(date => (
+                    <option key={date} value={date}>
+                      {new Date(date).toLocaleDateString()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="payment-history-list">
+                {getFilteredStudentPayments().length > 0 ? (
+                  getFilteredStudentPayments().map((payment, index) => (
+                    <div key={index} className="payment-history-item">
+                      <div className="payment-info">
+                        <span className="payment-amount">{formatCurrency(payment.amount)}</span>
+                        <span className="payment-description">{payment.description || 'Payment'}</span>
+                        <span className="payment-date">
+                          {new Date(payment.createdAt?.seconds * 1000 || payment.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="payment-status">
+                        <span className={`status-badge ${getStatusColor(payment.status)}`}>
+                          {getStatusIcon(payment.status)} {payment.status || 'pending'}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="no-payments-message">
+                    <FaInfoCircle /> No payment records found for this student
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render Payments (Existing)
   const renderPayments = () => (
     <div className="payments-content">
       <div className="content-header">
@@ -2804,6 +3167,7 @@ const handleUpdateAdmissionStatus = async (admissionId, status, studentData = nu
     { id: 'students', icon: <FaUsers />, label: 'Students' },
     { id: 'admissions', icon: <FaClipboardList />, label: 'Admissions' },
     { id: 'applications', icon: <FaFileAlt />, label: 'Applications' },
+    { id: 'fees', icon: <FaWallet />, label: 'Fees' },
     { id: 'payments', icon: <FaCreditCard />, label: 'Payments' },
     { id: 'staff', icon: <FaUserTie />, label: 'Staff' },
     { id: 'courses', icon: <FaBookOpen />, label: 'Courses' },

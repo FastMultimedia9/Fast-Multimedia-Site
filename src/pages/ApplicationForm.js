@@ -1,3 +1,4 @@
+// src/components/ApplicationForm.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -22,7 +23,9 @@ import {
   FaBuilding,
   FaUserTie,
   FaUsers,
-  FaSpinner
+  FaSpinner,
+  FaCheck,
+  FaTimes
 } from 'react-icons/fa';
 import { 
   verifySerial, 
@@ -56,6 +59,7 @@ const ApplicationForm = () => {
     city: '',
     region: '',
     course: '',
+    selectedCourses: [], // NEW: For multiple course selection
     educationLevel: '',
     previousSchool: '',
     yearsCompleted: '',
@@ -128,6 +132,9 @@ const ApplicationForm = () => {
         console.log('Found admission data:', admission);
         setSerialData(admission);
         
+        // If there's a single course from purchase, add it to selectedCourses
+        const initialCourses = admission.course ? [admission.course] : [];
+        
         setFormData(prev => ({
           ...prev,
           fullName: admission.fullName || '',
@@ -136,6 +143,7 @@ const ApplicationForm = () => {
           dateOfBirth: admission.dateOfBirth || '',
           gender: admission.gender || '',
           course: admission.course || '',
+          selectedCourses: initialCourses,
           address: admission.address || prev.address,
           city: admission.city || prev.city,
           region: admission.region || prev.region,
@@ -160,6 +168,7 @@ const ApplicationForm = () => {
                 preferredStudyMode: existingStudent.preferredStudyMode || prev.preferredStudyMode,
                 hasLaptop: existingStudent.hasLaptop || prev.hasLaptop,
                 internetAccess: existingStudent.internetAccess || prev.internetAccess,
+                enrolledCourses: existingStudent.enrolledCourses || [],
               }));
             }
           } catch (studentError) {
@@ -179,6 +188,17 @@ const ApplicationForm = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCourseToggle = (course) => {
+    setFormData(prev => {
+      const selected = prev.selectedCourses || [];
+      if (selected.includes(course)) {
+        return { ...prev, selectedCourses: selected.filter(c => c !== course) };
+      } else {
+        return { ...prev, selectedCourses: [...selected, course] };
+      }
+    });
   };
 
   const verifySerialNumber = async () => {
@@ -206,14 +226,21 @@ const ApplicationForm = () => {
   };
 
   // ============================================
-  // FIXED: handleSubmit - ONLY saves to database, NO WhatsApp
+  // HANDLE SUBMIT - WITH MULTIPLE COURSE SUPPORT
   // ============================================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Validate that at least one course is selected
+    if (!formData.selectedCourses || formData.selectedCourses.length === 0) {
+      alert('Please select at least one course.');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      // Prepare student data
+      // Prepare student data with multiple courses
       const studentData = {
         fullName: formData.fullName,
         email: formData.email,
@@ -233,7 +260,7 @@ const ApplicationForm = () => {
         preferredStudyMode: formData.preferredStudyMode,
         hasLaptop: formData.hasLaptop,
         internetAccess: formData.internetAccess,
-        enrolledCourses: [formData.course],
+        enrolledCourses: formData.selectedCourses, // Multiple courses
         status: 'pending',
         applicationStatus: 'applied',
         serialNumber: serialNumber,
@@ -247,6 +274,7 @@ const ApplicationForm = () => {
       // Save application to Firebase
       const appId = await saveApplication({
         ...formData,
+        selectedCourses: formData.selectedCourses,
         serialNumber: serialNumber,
         applicationDate: new Date().toISOString(),
         status: 'pending',
@@ -265,7 +293,7 @@ const ApplicationForm = () => {
       await updateApplicationStatus(appId, 'submitted', 'Application submitted successfully');
       console.log('✅ Application status updated');
 
-      // Send notification (optional - keep this)
+      // Send notification
       await sendNotification({
         userId: formData.email,
         title: 'Application Submitted',
@@ -274,9 +302,6 @@ const ApplicationForm = () => {
         link: '/school/application-status'
       });
 
-      // ✅ REMOVED: WhatsApp redirection
-      // ✅ REMOVED: window.open(whatsappUrl, '_blank');
-      
       // Show success message
       setSubmissionSuccess(true);
       setFormStep(3);
@@ -386,7 +411,7 @@ const ApplicationForm = () => {
             )}
             <h2>Fill Your Application</h2>
             <p className="form-description">
-              Please fill in all required fields. We'll contact you within 24 hours.
+              Please fill in all required fields. You can select multiple courses.
             </p>
 
             <form className="application-form" onSubmit={handleSubmit}>
@@ -567,25 +592,38 @@ const ApplicationForm = () => {
                 </div>
               </div>
 
-              {/* Academic Information */}
+              {/* Academic Information - UPDATED with Multiple Course Selection */}
               <div className="form-section">
                 <h3><FaGraduationCap /> Academic Information</h3>
                 <div className="form-grid">
                   <div className="form-group full-width">
-                    <label>Select Course *</label>
-                    <select
-                      name="course"
-                      value={formData.course}
-                      onChange={handleInputChange}
-                      required
-                      className={formData.course ? 'pre-filled' : ''}
-                    >
-                      <option value="">Choose a course</option>
+                    <label>Select Courses *</label>
+                    <div className="course-selection-grid">
                       {courses.map((course) => (
-                        <option key={course} value={course}>{course}</option>
+                        <div 
+                          key={course} 
+                          className={`course-option ${formData.selectedCourses?.includes(course) ? 'selected' : ''}`}
+                          onClick={() => handleCourseToggle(course)}
+                        >
+                          <div className="course-checkbox">
+                            {formData.selectedCourses?.includes(course) ? (
+                              <FaCheck className="checked-icon" />
+                            ) : (
+                              <div className="unchecked-box" />
+                            )}
+                          </div>
+                          <span className="course-name">{course}</span>
+                        </div>
                       ))}
-                    </select>
-                    {formData.course && <small className="pre-filled-hint">✓ Pre-filled from your purchase</small>}
+                    </div>
+                    <small className="form-hint">
+                      Click on a course to select it. You can select multiple courses.
+                      {formData.selectedCourses && formData.selectedCourses.length > 0 && (
+                        <span className="selected-count">
+                          {formData.selectedCourses.length} course{formData.selectedCourses.length > 1 ? 's' : ''} selected
+                        </span>
+                      )}
+                    </small>
                   </div>
                   <div className="form-group">
                     <label>Highest Education Level</label>
@@ -677,13 +715,13 @@ const ApplicationForm = () => {
                     </select>
                   </div>
                   <div className="form-group full-width">
-                    <label>Why do you want to join this course?</label>
+                    <label>Why do you want to join these courses?</label>
                     <textarea
                       name="motivation"
                       value={formData.motivation}
                       onChange={handleInputChange}
                       rows="3"
-                      placeholder="Tell us why you're interested in this course"
+                      placeholder="Tell us why you're interested in these courses"
                     />
                   </div>
                   <div className="form-group full-width">
@@ -703,7 +741,7 @@ const ApplicationForm = () => {
                       value={formData.goals}
                       onChange={handleInputChange}
                       rows="3"
-                      placeholder="What do you hope to achieve after completing this course?"
+                      placeholder="What do you hope to achieve after completing these courses?"
                     />
                   </div>
                   <div className="form-group full-width">
@@ -744,7 +782,7 @@ const ApplicationForm = () => {
                 <button
                   type="submit"
                   className="submit-btn"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !formData.selectedCourses || formData.selectedCourses.length === 0}
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit Application'}
                 </button>
@@ -770,7 +808,7 @@ const ApplicationForm = () => {
                 <FaUser /> Applicant: <strong>{formData.fullName}</strong>
               </div>
               <div className="detail-item">
-                <FaBookOpen /> Course: <strong>{formData.course}</strong>
+                <FaBookOpen /> Courses: <strong>{formData.selectedCourses?.join(', ') || formData.course}</strong>
               </div>
               <div className="detail-item">
                 <FaFileAlt /> Application ID: <strong>{applicationId}</strong>
