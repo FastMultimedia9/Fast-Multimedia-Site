@@ -481,7 +481,7 @@ const StudentPortal = () => {
   };
 
   // ============================================
-// PAYMENT HANDLER - ALTERNATIVE (Matches Admissions page)
+// PAYMENT HANDLER - COMPLETELY FIXED
 // ============================================
 const handlePayment = async (e) => {
   e.preventDefault();
@@ -536,48 +536,87 @@ const handlePayment = async (e) => {
     // Get public key from environment
     const publicKey = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY || PAYSTACK_PUBLIC_KEY;
     
-    // Open Paystack popup using the same method as Admissions page
+    // Open Paystack popup - Using the SAME pattern as Admissions page
     const paystack = window.PaystackPop;
     
-    // Use the exact same pattern as Admissions page
-    const paymentResult = await new Promise((resolve, reject) => {
-      const handler = paystack.setup({
-        key: publicKey,
-        email: paymentEmail,
-        amount: parseFloat(paymentAmount) * 100,
-        currency: 'GHS',
-        ref: reference,
-        metadata: {
-          name: paymentName,
-          phone: paymentPhone || student?.phone || '',
-          course: student?.course || 'Not specified',
-          student_id: student?.studentId || '',
-          type: 'school_fees'
-        },
-        callback: function(response) {
-          console.log('✅ Payment successful:', response);
-          resolve(response);
-        },
-        onClose: function() {
-          console.log('❌ Payment window closed by user');
-          reject(new Error('Payment was cancelled'));
-        }
-      });
+    // IMPORTANT: Define callbacks as regular functions (NOT async)
+    const paymentCallback = function(response) {
+      console.log('✅ Payment successful:', response);
+      
+      // Handle payment success - use a separate async function
+      handlePaymentSuccess(response, reference);
+    };
 
-      // Open the payment iframe
-      if (typeof handler.openIframe === 'function') {
-        handler.openIframe();
-      } else if (typeof handler.open === 'function') {
-        handler.open();
-      } else if (typeof handler === 'function') {
-        handler();
-      } else {
-        reject(new Error('Could not open payment window'));
-      }
+    const paymentOnClose = function() {
+      console.log('❌ Payment window closed by user');
+      // Handle payment close - use a separate async function
+      handlePaymentClose(reference);
+    };
+
+    // Create the handler with proper callbacks
+    const handler = paystack.setup({
+      key: publicKey,
+      email: paymentEmail,
+      amount: parseFloat(paymentAmount) * 100, // Convert to pesewas
+      currency: 'GHS',
+      ref: reference,
+      metadata: {
+        custom_fields: [
+          {
+            display_name: "Student ID",
+            variable_name: "student_id",
+            value: student?.studentId || ''
+          },
+          {
+            display_name: "Course",
+            variable_name: "course",
+            value: student?.course || ''
+          },
+          {
+            display_name: "Phone",
+            variable_name: "phone",
+            value: paymentPhone || student?.phone || ''
+          }
+        ]
+      },
+      callback: paymentCallback,
+      onClose: paymentOnClose
     });
 
-    console.log('✅ Payment successful:', paymentResult);
+    // Open the payment iframe
+    if (typeof handler.openIframe === 'function') {
+      handler.openIframe();
+    } else if (typeof handler.open === 'function') {
+      handler.open();
+    } else if (typeof handler === 'function') {
+      handler();
+    } else {
+      throw new Error('Could not open payment window');
+    }
     
+  } catch (error) {
+    console.error('Payment initialization error:', error);
+    
+    // Check for specific Paystack errors
+    const errorMessage = error.message || 'Payment initialization failed. Please try again.';
+    
+    if (errorMessage.includes('loading')) {
+      setPaymentError('Payment system is loading. Please refresh and try again.');
+    } else if (errorMessage.includes('Paystack')) {
+      setPaymentError('Paystack configuration error. Please contact support.');
+    } else {
+      setPaymentError(errorMessage);
+    }
+    
+    setIsProcessingPayment(false);
+  }
+};
+
+// ============================================
+// PAYMENT SUCCESS HANDLER (Separate function)
+// ============================================
+const handlePaymentSuccess = async (response, reference) => {
+  try {
     // Update payment status
     await updatePaymentStatus(reference, 'completed');
     console.log('✅ Payment status updated to completed');
@@ -605,31 +644,27 @@ const handlePayment = async (e) => {
     setPaymentAmount('');
     setIsProcessingPayment(false);
     setPaymentError('');
-    
   } catch (error) {
-    console.error('Payment initialization error:', error);
-    
-    // Check for specific Paystack errors
-    const errorMessage = error.message || 'Payment initialization failed. Please try again.';
-    
-    if (errorMessage.includes('cancelled')) {
-      setPaymentError('Payment was cancelled. You can try again when ready.');
-      // Update payment as failed
-      try {
-        await updatePaymentStatus(paymentReference, 'failed');
-      } catch (updateError) {
-        console.error('Error updating payment status:', updateError);
-      }
-    } else if (errorMessage.includes('loading')) {
-      setPaymentError('Payment system is loading. Please refresh and try again.');
-    } else if (errorMessage.includes('Paystack')) {
-      setPaymentError('Paystack configuration error. Please contact support.');
-    } else {
-      setPaymentError(errorMessage);
-    }
-    
+    console.error('Error processing successful payment:', error);
+    showNotification('Payment was successful but there was an error updating your record. Please contact support.', 'warning');
     setIsProcessingPayment(false);
   }
+};
+
+// ============================================
+// PAYMENT CLOSE HANDLER (Separate function)
+// ============================================
+const handlePaymentClose = async (reference) => {
+  console.log('Payment window closed');
+  try {
+    // Update payment as failed if not completed
+    await updatePaymentStatus(reference, 'failed');
+    console.log('✅ Payment status updated to failed');
+  } catch (error) {
+    console.error('Error updating payment status on close:', error);
+  }
+  showNotification('Payment was cancelled', 'warning');
+  setIsProcessingPayment(false);
 };
 
   // Render Dashboard
