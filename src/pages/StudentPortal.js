@@ -79,8 +79,8 @@ import { signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import './StudentPortal.css';
 
-// Paystack integration
-const PAYSTACK_PUBLIC_KEY = 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'; // Replace with your key
+// Paystack configuration - Use the same key as Admissions page
+const PAYSTACK_PUBLIC_KEY = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY || 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 const StudentPortal = () => {
   const navigate = useNavigate();
@@ -130,10 +130,24 @@ const StudentPortal = () => {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentEmail, setPaymentEmail] = useState('');
   const [paymentName, setPaymentName] = useState('');
+  const [paymentPhone, setPaymentPhone] = useState('');
   const [paymentReference, setPaymentReference] = useState('');
+  const [paymentError, setPaymentError] = useState('');
 
   // Default password
   const DEFAULT_PASSWORD = 'FastMultimedia2024@';
+
+  // Load Paystack script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://js.paystack.co/v1/inline.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   // Check authentication on mount
   useEffect(() => {
@@ -182,6 +196,7 @@ const StudentPortal = () => {
         setEditFormData(studentData);
         setPaymentEmail(studentData.email || '');
         setPaymentName(studentData.fullName || '');
+        setPaymentPhone(studentData.phone || '');
         
         // Load all data
         await loadStudentData(studentData);
@@ -213,6 +228,8 @@ const StudentPortal = () => {
         calculateGradeStats(gradesData || []);
       } catch (error) {
         console.error('Error loading grades:', error);
+        setGrades([]);
+        calculateGradeStats([]);
       }
       
       // Get payments - FIXED: now handles errors gracefully
@@ -233,6 +250,7 @@ const StudentPortal = () => {
         setCourses(coursesData || []);
       } catch (error) {
         console.error('Error loading courses:', error);
+        setCourses([]);
       }
       
     } catch (error) {
@@ -462,19 +480,30 @@ const StudentPortal = () => {
     }));
   };
 
-  // Initialize Paystack payment
-  const initializePayment = async () => {
+  // ============================================
+  // PAYMENT HANDLER - FIXED VERSION
+  // ============================================
+  const handlePayment = async (e) => {
+    e.preventDefault();
+    
     if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
-      showNotification('Please enter a valid amount', 'error');
+      setPaymentError('Please enter a valid amount');
       return;
     }
 
-    // Check if Paystack is loaded
-    if (typeof window.PaystackPop === 'undefined') {
-      showNotification('Payment system is loading. Please try again.', 'error');
+    if (!paymentEmail || !paymentName) {
+      setPaymentError('Please fill in all required fields');
       return;
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(paymentEmail)) {
+      setPaymentError('Please enter a valid email address');
+      return;
+    }
+
+    setPaymentError('');
     setIsProcessingPayment(true);
 
     try {
@@ -497,11 +526,22 @@ const StudentPortal = () => {
       };
 
       await createPayment(paymentData);
+      console.log('✅ Payment record created:', reference);
 
+      // Check if Paystack is loaded
+      if (typeof window.PaystackPop === 'undefined') {
+        throw new Error('Payment system is loading. Please refresh and try again.');
+      }
+
+      // Get public key from environment or use default
+      const publicKey = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY || PAYSTACK_PUBLIC_KEY;
+      
       // Initialize Paystack
-      const handler = window.PaystackPop.setup({
-        key: PAYSTACK_PUBLIC_KEY,
-        email: paymentEmail || student?.email || '',
+      const paystack = window.PaystackPop;
+      
+      const handler = paystack.setup({
+        key: publicKey,
+        email: paymentEmail,
         amount: parseFloat(paymentAmount) * 100, // Convert to pesewas
         currency: 'GHS',
         ref: reference,
@@ -516,24 +556,34 @@ const StudentPortal = () => {
               display_name: "Course",
               variable_name: "course",
               value: student?.course || ''
+            },
+            {
+              display_name: "Phone",
+              variable_name: "phone",
+              value: paymentPhone || student?.phone || ''
             }
           ]
         },
         callback: async (response) => {
-          console.log('Payment successful:', response);
+          console.log('✅ Payment successful:', response);
           
           try {
             // Update payment status
             await updatePaymentStatus(reference, 'completed');
+            console.log('✅ Payment status updated to completed');
             
             // Send notification
-            await sendNotification({
-              userId: student?.id || '',
-              title: 'Payment Successful',
-              message: `Your payment of ${formatCurrency(parseFloat(paymentAmount))} for ${student?.course || 'Course'} has been confirmed.`,
-              type: 'payment',
-              link: '/student/portal'
-            });
+            try {
+              await sendNotification({
+                userId: student?.id || '',
+                title: 'Payment Successful',
+                message: `Your payment of ${formatCurrency(parseFloat(paymentAmount))} for ${student?.course || 'Course'} has been confirmed.`,
+                type: 'payment',
+                link: '/student/portal'
+              });
+            } catch (notifError) {
+              console.warn('Notification error:', notifError);
+            }
 
             showNotification(`Payment of ${formatCurrency(parseFloat(paymentAmount))} successful!`, 'success');
           } catch (error) {
@@ -548,12 +598,14 @@ const StudentPortal = () => {
           setShowPaymentModal(false);
           setPaymentAmount('');
           setIsProcessingPayment(false);
+          setPaymentError('');
         },
         onClose: async () => {
           console.log('Payment window closed');
           try {
             // Update payment as failed if not completed
             await updatePaymentStatus(reference, 'failed');
+            console.log('✅ Payment status updated to failed');
           } catch (error) {
             console.error('Error updating payment status on close:', error);
           }
@@ -563,9 +615,21 @@ const StudentPortal = () => {
       });
 
       handler.openIframe();
+      
     } catch (error) {
       console.error('Payment initialization error:', error);
-      showNotification('Error initializing payment: ' + error.message, 'error');
+      
+      // Check for specific Paystack errors
+      const errorMessage = error.message || 'Payment initialization failed. Please try again.';
+      
+      if (errorMessage.includes('loading')) {
+        setPaymentError('Payment system is loading. Please refresh and try again.');
+      } else if (errorMessage.includes('Paystack')) {
+        setPaymentError('Paystack configuration error. Please contact support.');
+      } else {
+        setPaymentError(errorMessage);
+      }
+      
       setIsProcessingPayment(false);
     }
   };
@@ -785,7 +849,11 @@ const StudentPortal = () => {
         <div className="content-header">
           <h2>Account & Fees</h2>
           <div className="header-actions">
-            <button className="btn-pay-fees" onClick={() => setShowPaymentModal(true)}>
+            <button className="btn-pay-fees" onClick={() => {
+              setPaymentError('');
+              setPaymentAmount('');
+              setShowPaymentModal(true);
+            }}>
               <FaPlus /> Pay Fees
             </button>
           </div>
@@ -837,10 +905,6 @@ const StudentPortal = () => {
           <div className="breakdown-item">
             <span>Course Fee</span>
             <span>{formatCurrency(student.courseFee || 600)}</span>
-          </div>
-          <div className="breakdown-item">
-            <span>Registration Fee</span>
-            <span>{formatCurrency(0)}</span>
           </div>
           <div className="breakdown-item">
             <span>Total Paid</span>
@@ -896,11 +960,14 @@ const StudentPortal = () => {
           </div>
         </div>
 
-        {/* Payment Modal */}
+        {/* Payment Modal - UPDATED */}
         {showPaymentModal && (
           <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
             <div className="modal-content payment-modal" onClick={(e) => e.stopPropagation()}>
-              <button className="modal-close" onClick={() => setShowPaymentModal(false)}>×</button>
+              <button className="modal-close" onClick={() => {
+                setShowPaymentModal(false);
+                setPaymentError('');
+              }}>×</button>
               <h2><FaWallet /> Make Payment</h2>
               
               <div className="payment-summary-info">
@@ -909,7 +976,13 @@ const StudentPortal = () => {
                 <p><strong>Outstanding Balance:</strong> {formatCurrency(paymentStats.outstanding)}</p>
               </div>
 
-              <form onSubmit={(e) => { e.preventDefault(); initializePayment(); }}>
+              {paymentError && (
+                <div className="payment-error" style={{whiteSpace: 'pre-line'}}>
+                  <FaInfoCircle /> {paymentError}
+                </div>
+              )}
+
+              <form onSubmit={handlePayment}>
                 <div className="form-group">
                   <label>Amount to Pay (GH₵)</label>
                   <input
@@ -925,7 +998,7 @@ const StudentPortal = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Email (for receipt)</label>
+                  <label>Email (for receipt) *</label>
                   <input
                     type="email"
                     value={paymentEmail}
@@ -936,13 +1009,23 @@ const StudentPortal = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Full Name</label>
+                  <label>Full Name *</label>
                   <input
                     type="text"
                     value={paymentName}
                     onChange={(e) => setPaymentName(e.target.value)}
                     placeholder="Your full name"
                     required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Phone Number</label>
+                  <input
+                    type="tel"
+                    value={paymentPhone}
+                    onChange={(e) => setPaymentPhone(e.target.value)}
+                    placeholder="024XXXXXXX"
                   />
                 </div>
 
@@ -969,7 +1052,10 @@ const StudentPortal = () => {
                   <button 
                     type="button" 
                     className="btn-cancel" 
-                    onClick={() => setShowPaymentModal(false)}
+                    onClick={() => {
+                      setShowPaymentModal(false);
+                      setPaymentError('');
+                    }}
                   >
                     Cancel
                   </button>
