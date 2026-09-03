@@ -58,7 +58,8 @@ import {
   FaChevronDown,
   FaChevronRight,
   FaUser,
-  FaKey
+  FaKey,
+  FaSync
 } from 'react-icons/fa';
 import {
   getAllStudents,
@@ -631,6 +632,60 @@ const AdminDashboard = () => {
   };
 
   // ============================================
+  // FIX: Create Admission for Existing Approved Application
+  // ============================================
+  const fixExistingApprovedApplication = async (appId) => {
+    try {
+      const app = applications.find(a => a.id === appId);
+      if (!app) {
+        showNotification('Application not found', 'error');
+        return;
+      }
+
+      // Check if admission already exists
+      const existingAdmission = admissions.find(a => a.applicationId === appId);
+      if (existingAdmission) {
+        showNotification('Admission already exists for this application', 'warning');
+        return;
+      }
+
+      const admissionData = {
+        fullName: app.fullName || app.studentName || 'N/A',
+        email: app.email || 'N/A',
+        phone: app.phone || 'N/A',
+        dateOfBirth: app.dateOfBirth || '',
+        gender: app.gender || '',
+        address: app.address || '',
+        city: app.city || '',
+        course: app.course || 'Not specified',
+        educationLevel: app.educationLevel || '',
+        previousSchool: app.previousSchool || '',
+        preferredStudyMode: app.preferredStudyMode || '',
+        guardianName: app.guardianName || '',
+        guardianPhone: app.guardianPhone || '',
+        guardianEmail: app.guardianEmail || '',
+        guardianRelationship: app.guardianRelationship || '',
+        hearAboutUs: app.hearAbout || '',
+        reasonToJoin: app.motivation || '',
+        specialNeeds: app.medicalInfo || 'None',
+        serialNumber: app.serialNumber || '',
+        applicationDate: app.applicationDate || new Date().toISOString(),
+        applicationId: appId,
+        status: 'pending',
+        studentId: app.studentId || '',
+        source: 'application'
+      };
+
+      await createAdmission(admissionData);
+      showNotification('✅ Admission created successfully!', 'success');
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error creating admission:', error);
+      showNotification('Error creating admission: ' + error.message, 'error');
+    }
+  };
+
+  // ============================================
   // ENSURE AUTH USER EXISTS
   // ============================================
   const ensureAuthUserExists = async (admission, student) => {
@@ -888,20 +943,37 @@ const AdminDashboard = () => {
   // ============================================
   const handleUpdateApplicationStatus = async (appId, status) => {
     try {
+      console.log('🔄 handleUpdateApplicationStatus called with:', { appId, status });
+      
       // Find the application
       const app = applications.find(a => a.id === appId);
+      console.log('📋 Found application:', app);
+      
       if (!app) {
         showNotification('Application not found', 'error');
         return;
       }
 
+      // Check if application is already approved
+      if (app.status === 'approved' && status === 'approved') {
+        showNotification('Application is already approved', 'warning');
+        return;
+      }
+
       // Update application status
+      console.log('📝 Updating application status to:', status);
       await updateApplicationStatus(appId, status);
+      console.log('✅ Application status updated');
 
       // If approved, create an admission record
       if (status === 'approved') {
+        console.log('🎯 Status is approved, creating admission...');
+        
         // Check if admission already exists for this email
         const existingAdmission = admissions.find(a => a.email === app.email);
+        console.log('🔍 Existing admission found?', existingAdmission ? 'Yes' : 'No');
+        
+        let admissionId = null;
         
         if (!existingAdmission) {
           // Create new admission record
@@ -927,23 +999,39 @@ const AdminDashboard = () => {
             serialNumber: app.serialNumber || '',
             applicationDate: app.applicationDate || new Date().toISOString(),
             applicationId: appId,
-            status: 'pending', // Starts as pending in admissions
+            status: 'pending',
             studentId: app.studentId || '',
-            source: 'application', // Track where it came from
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
+            source: 'application'
           };
 
-          await createAdmission(admissionData);
-          console.log('✅ Admission created from approved application');
-          showNotification('Application approved! Admission record created. Go to Admissions tab to enroll.', 'success');
+          console.log('📝 Creating admission with data:', admissionData);
+          
+          try {
+            admissionId = await createAdmission(admissionData);
+            console.log('✅ Admission created with ID:', admissionId);
+          } catch (createError) {
+            console.error('❌ Failed to create admission:', createError);
+            showNotification('Failed to create admission: ' + createError.message, 'error');
+          }
+          
+          if (admissionId) {
+            showNotification('✅ Application approved! Admission created. Go to Admissions tab to enroll.', 'success');
+          } else {
+            showNotification('⚠️ Application approved but admission creation failed. Please check logs.', 'warning');
+          }
         } else {
-          // Update existing admission
-          await updateAdmissionStatus(existingAdmission.id, 'pending');
-          showNotification('Application approved! Existing admission updated.', 'success');
+          console.log('📝 Updating existing admission...');
+          try {
+            await updateAdmissionStatus(existingAdmission.id, 'pending');
+            admissionId = existingAdmission.id;
+            showNotification('✅ Application approved! Existing admission updated.', 'success');
+          } catch (updateError) {
+            console.error('❌ Failed to update admission:', updateError);
+            showNotification('Failed to update admission: ' + updateError.message, 'error');
+          }
         }
 
-        // Send notification to student
+        // Send notification to student (don't block if it fails)
         try {
           await sendNotification({
             userId: app.email,
@@ -952,11 +1040,12 @@ const AdminDashboard = () => {
             type: 'application',
             link: '/student/portal'
           });
+          console.log('✅ Notification sent');
         } catch (notifError) {
           console.warn('Notification not sent:', notifError.message);
         }
 
-        // Send email notification
+        // Send email notification (don't block if it fails)
         try {
           await sendAdmissionStatusEmail(
             app.email,
@@ -972,7 +1061,7 @@ const AdminDashboard = () => {
         }
 
       } else if (status === 'rejected') {
-        // Send rejection notification
+        console.log('🎯 Status is rejected, sending rejection notification...');
         try {
           await sendNotification({
             userId: app.email,
@@ -981,14 +1070,35 @@ const AdminDashboard = () => {
             type: 'application',
             link: '/school/application-status'
           });
+          console.log('✅ Rejection notification sent');
         } catch (notifError) {
           console.warn('Notification not sent:', notifError.message);
         }
       }
 
+      // Force reload data
+      console.log('🔄 Reloading dashboard data...');
       await loadDashboardData();
+      console.log('✅ Dashboard data reloaded');
+      
+      // After reload, check if the admission was created
+      try {
+        const updatedAdmissions = await getAllAdmissions();
+        console.log('📊 Updated admissions count:', updatedAdmissions.length);
+        
+        // Check if the new admission exists
+        const newAdmission = updatedAdmissions.find(a => a.applicationId === appId);
+        if (newAdmission) {
+          console.log('✅ New admission found in Firestore:', newAdmission.id, newAdmission.status);
+        } else {
+          console.warn('⚠️ New admission NOT found in Firestore');
+        }
+      } catch (checkError) {
+        console.error('Error checking for new admission:', checkError);
+      }
+      
     } catch (error) {
-      console.error('Error updating application status:', error);
+      console.error('❌ Error updating application status:', error);
       showNotification('Error updating application status: ' + error.message, 'error');
     }
   };
@@ -1818,7 +1928,7 @@ const AdminDashboard = () => {
   };
 
   // ============================================
-  // RENDER APPLICATIONS - WITH SEARCH, FILTERS, AND DELETE
+  // RENDER APPLICATIONS - WITH SEARCH, FILTERS, DELETE, AND FIX BUTTON
   // ============================================
   const renderApplications = () => {
     const filteredApps = getFilteredApplications();
@@ -2015,6 +2125,26 @@ const AdminDashboard = () => {
                             }}
                           >
                             <FaEye /> View
+                          </button>
+                          {/* NEW: Fix Admission Button */}
+                          <button
+                            className="btn-fix"
+                            onClick={() => fixExistingApprovedApplication(app.id)}
+                            style={{
+                              background: '#FF6B35',
+                              color: 'white',
+                              border: 'none',
+                              padding: '6px 14px',
+                              borderRadius: '5px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontSize: '13px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            <FaSync /> Create Admission
                           </button>
                           <button
                             className="btn-delete"
