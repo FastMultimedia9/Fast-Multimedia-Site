@@ -481,158 +481,164 @@ const StudentPortal = () => {
   };
 
   // ============================================
-  // PAYMENT HANDLER - FIXED VERSION
-  // ============================================
-  const handlePayment = async (e) => {
-    e.preventDefault();
+// PAYMENT HANDLER - FIXED PAYSTACK INTEGRATION
+// ============================================
+const handlePayment = async (e) => {
+  e.preventDefault();
+  
+  if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
+    setPaymentError('Please enter a valid amount');
+    return;
+  }
+
+  if (!paymentEmail || !paymentName) {
+    setPaymentError('Please fill in all required fields');
+    return;
+  }
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(paymentEmail)) {
+    setPaymentError('Please enter a valid email address');
+    return;
+  }
+
+  setPaymentError('');
+  setIsProcessingPayment(true);
+
+  try {
+    // Generate reference
+    const reference = `PAY-${Date.now()}-${student?.studentId || 'STU'}`;
+    setPaymentReference(reference);
+
+    // Create payment record in Firestore
+    const paymentData = {
+      studentId: student?.id || '',
+      studentName: student?.fullName || '',
+      studentEmail: student?.email || '',
+      amount: parseFloat(paymentAmount),
+      description: `School Fees Payment - ${student?.course || 'Course'}`,
+      reference: reference,
+      status: 'pending',
+      paymentType: 'school_fees',
+      method: 'paystack',
+      createdAt: new Date().toISOString()
+    };
+
+    await createPayment(paymentData);
+    console.log('✅ Payment record created:', reference);
+
+    // Check if Paystack is loaded
+    if (typeof window.PaystackPop === 'undefined') {
+      throw new Error('Payment system is loading. Please refresh and try again.');
+    }
+
+    // Get public key from environment or use default
+    const publicKey = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY || PAYSTACK_PUBLIC_KEY;
     
-    if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
-      setPaymentError('Please enter a valid amount');
-      return;
-    }
-
-    if (!paymentEmail || !paymentName) {
-      setPaymentError('Please fill in all required fields');
-      return;
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(paymentEmail)) {
-      setPaymentError('Please enter a valid email address');
-      return;
-    }
-
-    setPaymentError('');
-    setIsProcessingPayment(true);
-
-    try {
-      // Generate reference
-      const reference = `PAY-${Date.now()}-${student?.studentId || 'STU'}`;
-      setPaymentReference(reference);
-
-      // Create payment record in Firestore
-      const paymentData = {
-        studentId: student?.id || '',
-        studentName: student?.fullName || '',
-        studentEmail: student?.email || '',
-        amount: parseFloat(paymentAmount),
-        description: `School Fees Payment - ${student?.course || 'Course'}`,
-        reference: reference,
-        status: 'pending',
-        paymentType: 'school_fees',
-        method: 'paystack',
-        createdAt: new Date().toISOString()
-      };
-
-      await createPayment(paymentData);
-      console.log('✅ Payment record created:', reference);
-
-      // Check if Paystack is loaded
-      if (typeof window.PaystackPop === 'undefined') {
-        throw new Error('Payment system is loading. Please refresh and try again.');
-      }
-
-      // Get public key from environment or use default
-      const publicKey = process.env.REACT_APP_PAYSTACK_LIVE_PUBLIC_KEY || PAYSTACK_PUBLIC_KEY;
+    // Initialize Paystack
+    const paystack = window.PaystackPop;
+    
+    // Define callback functions
+    const paymentCallback = async (response) => {
+      console.log('✅ Payment successful:', response);
       
-      // Initialize Paystack
-      const paystack = window.PaystackPop;
-      
-      const handler = paystack.setup({
-        key: publicKey,
-        email: paymentEmail,
-        amount: parseFloat(paymentAmount) * 100, // Convert to pesewas
-        currency: 'GHS',
-        ref: reference,
-        metadata: {
-          custom_fields: [
-            {
-              display_name: "Student ID",
-              variable_name: "student_id",
-              value: student?.studentId || ''
-            },
-            {
-              display_name: "Course",
-              variable_name: "course",
-              value: student?.course || ''
-            },
-            {
-              display_name: "Phone",
-              variable_name: "phone",
-              value: paymentPhone || student?.phone || ''
-            }
-          ]
-        },
-        callback: async (response) => {
-          console.log('✅ Payment successful:', response);
-          
-          try {
-            // Update payment status
-            await updatePaymentStatus(reference, 'completed');
-            console.log('✅ Payment status updated to completed');
-            
-            // Send notification
-            try {
-              await sendNotification({
-                userId: student?.id || '',
-                title: 'Payment Successful',
-                message: `Your payment of ${formatCurrency(parseFloat(paymentAmount))} for ${student?.course || 'Course'} has been confirmed.`,
-                type: 'payment',
-                link: '/student/portal'
-              });
-            } catch (notifError) {
-              console.warn('Notification error:', notifError);
-            }
-
-            showNotification(`Payment of ${formatCurrency(parseFloat(paymentAmount))} successful!`, 'success');
-          } catch (error) {
-            console.error('Error processing successful payment:', error);
-            showNotification('Payment was successful but there was an error updating your record. Please contact support.', 'warning');
-          }
-          
-          // Reload data
-          if (student) {
-            await loadStudentData(student);
-          }
-          setShowPaymentModal(false);
-          setPaymentAmount('');
-          setIsProcessingPayment(false);
-          setPaymentError('');
-        },
-        onClose: async () => {
-          console.log('Payment window closed');
-          try {
-            // Update payment as failed if not completed
-            await updatePaymentStatus(reference, 'failed');
-            console.log('✅ Payment status updated to failed');
-          } catch (error) {
-            console.error('Error updating payment status on close:', error);
-          }
-          showNotification('Payment was cancelled', 'warning');
-          setIsProcessingPayment(false);
+      try {
+        // Update payment status
+        await updatePaymentStatus(reference, 'completed');
+        console.log('✅ Payment status updated to completed');
+        
+        // Send notification
+        try {
+          await sendNotification({
+            userId: student?.id || '',
+            title: 'Payment Successful',
+            message: `Your payment of ${formatCurrency(parseFloat(paymentAmount))} for ${student?.course || 'Course'} has been confirmed.`,
+            type: 'payment',
+            link: '/student/portal'
+          });
+        } catch (notifError) {
+          console.warn('Notification error:', notifError);
         }
-      });
 
-      handler.openIframe();
-      
-    } catch (error) {
-      console.error('Payment initialization error:', error);
-      
-      // Check for specific Paystack errors
-      const errorMessage = error.message || 'Payment initialization failed. Please try again.';
-      
-      if (errorMessage.includes('loading')) {
-        setPaymentError('Payment system is loading. Please refresh and try again.');
-      } else if (errorMessage.includes('Paystack')) {
-        setPaymentError('Paystack configuration error. Please contact support.');
-      } else {
-        setPaymentError(errorMessage);
+        showNotification(`Payment of ${formatCurrency(parseFloat(paymentAmount))} successful!`, 'success');
+      } catch (error) {
+        console.error('Error processing successful payment:', error);
+        showNotification('Payment was successful but there was an error updating your record. Please contact support.', 'warning');
       }
       
+      // Reload data
+      if (student) {
+        await loadStudentData(student);
+      }
+      setShowPaymentModal(false);
+      setPaymentAmount('');
       setIsProcessingPayment(false);
+      setPaymentError('');
+    };
+
+    const paymentOnClose = () => {
+      console.log('Payment window closed');
+      // Update payment as failed if not completed
+      updatePaymentStatus(reference, 'failed')
+        .then(() => {
+          console.log('✅ Payment status updated to failed');
+        })
+        .catch((error) => {
+          console.error('Error updating payment status on close:', error);
+        });
+      showNotification('Payment was cancelled', 'warning');
+      setIsProcessingPayment(false);
+    };
+
+    const handler = paystack.setup({
+      key: publicKey,
+      email: paymentEmail,
+      amount: parseFloat(paymentAmount) * 100, // Convert to pesewas
+      currency: 'GHS',
+      ref: reference,
+      metadata: {
+        custom_fields: [
+          {
+            display_name: "Student ID",
+            variable_name: "student_id",
+            value: student?.studentId || ''
+          },
+          {
+            display_name: "Course",
+            variable_name: "course",
+            value: student?.course || ''
+          },
+          {
+            display_name: "Phone",
+            variable_name: "phone",
+            value: paymentPhone || student?.phone || ''
+          }
+        ]
+      },
+      callback: paymentCallback,
+      onClose: paymentOnClose
+    });
+
+    handler.openIframe();
+    
+  } catch (error) {
+    console.error('Payment initialization error:', error);
+    
+    // Check for specific Paystack errors
+    const errorMessage = error.message || 'Payment initialization failed. Please try again.';
+    
+    if (errorMessage.includes('loading')) {
+      setPaymentError('Payment system is loading. Please refresh and try again.');
+    } else if (errorMessage.includes('Paystack')) {
+      setPaymentError('Paystack configuration error. Please contact support.');
+    } else {
+      setPaymentError(errorMessage);
     }
-  };
+    
+    setIsProcessingPayment(false);
+  }
+};
 
   // Render Dashboard
   const renderDashboard = () => {
