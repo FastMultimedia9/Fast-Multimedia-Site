@@ -780,7 +780,7 @@ const SchoolPage = () => {
       <div className="school-footer">
         <div className="container">
           <h2><FaRocket /> Start Your Learning Journey Today</h2>
-          <p>2 Months • Online & In-Person • Certificate Awarded • Start Date: {startDate}</p>
+          <p>2 Months • Online & In-Person • Certificate Awarded • Start Date: October 2026</p>
           <div className="footer-buttons">
             <button 
               className="footer-btn primary"
