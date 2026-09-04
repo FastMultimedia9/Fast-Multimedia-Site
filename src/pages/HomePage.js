@@ -125,7 +125,7 @@ const HomePage = () => {
       id: 1,
       title: "New Courses Available",
       subtitle: "2-Month Online Programs",
-      description: "Enroll now for Basic ICT, Graphic Design & Web Development. Start Date: 17th September 2026",
+      description: "Enroll now for Basic ICT, Graphic Design & Web Development. Start Date: October 2026",
       image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
       cta: "Learn More",
       tag: "🎓 New",

@@ -1320,7 +1320,7 @@ const Admissions = () => {
             </div>
             <div className="footer-contact">
               <span><FaPhone /> +233 50 515 9131</span>
-              <span><FaEnvelope /> fasttech227@gmail.com</span>
+              <span><FaEnvelope /> fastmultimediainstitute@gmail.com</span>
             </div>
           </div>
         </div>
