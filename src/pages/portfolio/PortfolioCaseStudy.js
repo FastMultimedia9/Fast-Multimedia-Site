@@ -5,75 +5,41 @@ import './PortfolioCaseStudy.css';
 const PortfolioCaseStudy = () => {
   const { projectId } = useParams();
   
-  // Sample project data - in real app, fetch based on projectId
+  // Generic project data - replace with actual data fetching if needed
   const projects = {
-    'santas-workshop': {
-      title: "Santa's Workshop Branding",
-      category: "Christmas Branding",
-      description: "Complete Christmas branding for holiday retail store",
-      year: "2023",
+    'default': {
+      title: "Project Title",
+      category: "Brand Identity",
+      description: "A comprehensive design project focused on delivering measurable business results.",
+      year: "2025",
       duration: "4 weeks",
-      client: "Santa's Workshop Retail",
-      image: "https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+      client: "Client Name",
+      image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
       stats: [
-        { value: "200%", label: "Sales Increase" },
-        { value: "85%", label: "Customer Satisfaction" },
-        { value: "30%", label: "Social Media Growth" }
+        { value: "40%", label: "Increase in Engagement" },
+        { value: "95%", label: "Client Satisfaction" },
+        { value: "2x", label: "Return on Investment" }
       ],
       sections: [
         {
           title: "The Challenge",
-          content: "Create a brand identity that captures the magic of Christmas while maintaining professionalism for a retail business that operates year-round. The design needed to work across physical and digital platforms.",
-          image: "https://images.unsplash.com/photo-1543470371-128f2246eb72?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+          content: "The client needed a modern, scalable solution that could adapt to their growing needs while maintaining a strong connection with their existing audience. The previous design was outdated and lacked a cohesive visual identity.",
+          image: "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
         },
         {
           title: "The Solution",
-          content: "Developed a comprehensive brand system with festive color palette, custom typography, and magical illustrations. Created a versatile logo that works in both full-color and monochrome applications.",
-          image: "https://images.unsplash.com/photo-1482517967863-00e15c9b44be?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+          content: "We developed a comprehensive design system that prioritized user experience and brand consistency. Through thorough research and iterative prototyping, we created a solution that not only looked great but also performed exceptionally well across all platforms.",
+          image: "https://images.unsplash.com/photo-1558655146-9f40138edfeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
         }
-      ]
-    },
-    'north-pole-packaging': {
-      title: "North Pole Packaging",
-      category: "Holiday Packaging",
-      description: "Festive packaging designs for Christmas product line",
-      year: "2023",
-      duration: "3 weeks",
-      client: "North Pole Products",
-      image: "https://images.unsplash.com/photo-1512386233331-f023884a92e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      stats: [
-        { value: "150%", label: "Product Sales" },
-        { value: "95%", label: "Customer Feedback" },
-        { value: "40%", label: "Repeat Purchases" }
-      ]
-    },
-    'reindeer-games': {
-      title: "Reindeer Games Campaign",
-      category: "Christmas Marketing",
-      description: "Christmas marketing campaign for gaming company",
-      year: "2023",
-      duration: "5 weeks",
-      client: "Reindeer Games Inc.",
-      image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      stats: [
-        { value: "300%", label: "Engagement Rate" },
-        { value: "50K", label: "New Followers" },
-        { value: "25%", label: "Conversion Rate" }
       ]
     }
   };
 
-  const project = projects[projectId] || projects['santas-workshop'];
+  // Use the default project if specific ID not found
+  const project = projects[projectId] || projects['default'];
 
   return (
     <div className="case-study-page">
-      {/* Christmas Snowfall */}
-      <div className="snowfall">
-        {[...Array(30)].map((_, i) => (
-          <div key={i} className="snowflake"></div>
-        ))}
-      </div>
-
       {/* Hero Section */}
       <section className="case-study-hero">
         <div className="container">
@@ -85,7 +51,7 @@ const PortfolioCaseStudy = () => {
           
           <div className="hero-content">
             <div className="case-study-badge">
-              <span>🎅 Christmas Special Project</span>
+              <span>Case Study</span>
             </div>
             <h1 className="case-study-title">{project.title}</h1>
             <p className="case-study-subtitle">{project.description}</p>
@@ -158,14 +124,14 @@ const PortfolioCaseStudy = () => {
       <section className="case-study-cta">
         <div className="container">
           <div className="cta-content">
-            <h2>Want a Similar Christmas Project?</h2>
+            <h2>Want a Similar Project?</h2>
             <p>
-              Let's create something amazing for your holiday season. 
-              Get your free Christmas design consultation today!
+              Let's create something amazing together. 
+              Get your free design consultation today!
             </p>
             <div className="cta-buttons">
-              <Link to="/contact?project=christmas" className="btn btn-christmas">
-                <i className="fas fa-gift"></i> Get Christmas Quote
+              <Link to="/contact" className="btn btn-christmas">
+                <i className="fas fa-paper-plane"></i> Start Your Project
               </Link>
               <Link to="/portfolio" className="btn btn-secondary">
                 <i className="fas fa-images"></i> View More Projects

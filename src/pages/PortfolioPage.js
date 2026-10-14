@@ -10,7 +10,7 @@ const PortfolioPage = () => {
   const [activeView, setActiveView] = useState('grid');
   const navigate = useNavigate();
 
-  // Complete projects data with all 55 projects including new ones
+  // Complete projects data
   const allProjects = [
     {
       id: 1,
@@ -28,7 +28,7 @@ const PortfolioPage = () => {
       results: ['40% increase in online bookings', '25% higher user engagement', '5-star client satisfaction'],
       color: '#D4AF37',
       link: 'https://www.goldennesthotelgh.com',
-      mockups: []
+      gallery: []
     },
     {
       id: 2,
@@ -45,7 +45,11 @@ const PortfolioPage = () => {
       deliverables: ['Anniversary Logo', 'Brand Guidelines', 'Stationery System', 'Merchandise Application'],
       results: ['Selected as winning design from open competition', 'Successfully launched for 80th anniversary', 'Adopted across all hospital communications'],
       color: '#2E5A9C',
-      mockups: []
+      gallery: [
+        '80th.jpg',
+        '80th-2.jpg',
+        '80th-3.jpg'
+      ]
     },
     {
       id: 3,
@@ -62,7 +66,7 @@ const PortfolioPage = () => {
       deliverables: ['Wireframes', 'High-fidelity Prototypes', 'Design System', 'User Testing Reports'],
       results: ['User retention increased by 45%', 'App Store rating: 4.8 stars', '1M+ downloads in first month'],
       color: '#2196F3',
-      mockups: []
+      gallery: []
     },
     {
       id: 4,
@@ -79,7 +83,7 @@ const PortfolioPage = () => {
       deliverables: ['Product Photography', 'Advertisement Design', 'Digital Assets', 'Print Materials'],
       results: ['Compelling visual campaign', 'Enhanced brand perception', 'Effective product presentation'],
       color: '#0097A7',
-      mockups: []
+      gallery: []
     },
     {
       id: 5,
@@ -96,7 +100,7 @@ const PortfolioPage = () => {
       deliverables: ['Brand Identity System', 'Logo Design', 'Product Packaging', 'Brand Guidelines'],
       results: ['Strong brand presence', 'Market differentiation', 'Positive brand recognition'],
       color: '#E65100',
-      mockups: []
+      gallery: []
     },
     {
       id: 6,
@@ -113,7 +117,7 @@ const PortfolioPage = () => {
       deliverables: ['Logo Design', 'Brand Guidelines', 'Typography System', 'Brand Applications'],
       results: ['Distinctive brand identity', 'Strong brand philosophy', 'Versatile brand system'],
       color: '#7B1FA2',
-      mockups: []
+      gallery: []
     },
     {
       id: 7,
@@ -130,7 +134,7 @@ const PortfolioPage = () => {
       deliverables: ['Packaging Designs', 'Production Files', 'Material Specifications', 'Print Samples'],
       results: ['Sales increased by 35%', 'Packaging award winner', 'Featured on retail design blog'],
       color: '#8BC34A',
-      mockups: []
+      gallery: []
     },
     {
       id: 8,
@@ -147,7 +151,7 @@ const PortfolioPage = () => {
       deliverables: ['Responsive Website', 'CMS Setup', 'Content Strategy', 'SEO Optimization'],
       results: ['Traffic increased by 200%', 'Improved SEO ranking', 'Positive investor feedback'],
       color: '#673AB7',
-      mockups: []
+      gallery: []
     },
     {
       id: 9,
@@ -164,7 +168,7 @@ const PortfolioPage = () => {
       deliverables: ['App Design', 'User Flows', 'Interactive Prototype', 'Design System'],
       results: ['User engagement up 55%', '4.9 App Store rating', '100k active users'],
       color: '#FF5722',
-      mockups: []
+      gallery: []
     },
     {
       id: 10,
@@ -181,7 +185,7 @@ const PortfolioPage = () => {
       deliverables: ['Business Card Design', 'Print-Ready Files'],
       results: ['Professional identity established', 'Ready for immediate print and distribution', 'Client-approved final design'],
       color: '#1565C0',
-      mockups: []
+      gallery: []
     },
     {
       id: 11,
@@ -198,7 +202,7 @@ const PortfolioPage = () => {
       deliverables: ['Custom Birthday Graphic', 'Digital Files', 'Social Media Version'],
       results: ['Delivered on time for the celebration', 'Client delighted with personalized touch', 'Graphic used across multiple platforms'],
       color: '#FF4081',
-      mockups: []
+      gallery: []
     },
     {
       id: 12,
@@ -215,7 +219,7 @@ const PortfolioPage = () => {
       deliverables: ['T-Shirt Graphic', 'Print-Ready File', 'Color Variations'],
       results: ['Design approved for print', 'Versatile for multiple apparel products', 'Clean, scalable artwork delivered'],
       color: '#FF0000',
-      mockups: []
+      gallery: []
     },
     {
       id: 13,
@@ -232,7 +236,7 @@ const PortfolioPage = () => {
       deliverables: ['Primary Logo', 'Brand Guidelines', 'Stationery Application', 'Mockups'],
       results: ['Successfully launched brand identity', 'Positions brand in premium fashion segment', 'Received positive client feedback'],
       color: '#111111',
-      mockups: []
+      gallery: []
     },
     {
       id: 14,
@@ -249,7 +253,7 @@ const PortfolioPage = () => {
       deliverables: ['Print-Ready Label Design', 'Compliance Layout', 'Digital Proof'],
       results: ['Label meets regulatory requirements', 'Clear and attractive product presentation', 'Supports brand credibility'],
       color: '#FFB74D',
-      mockups: []
+      gallery: []
     },
     {
       id: 15,
@@ -266,7 +270,7 @@ const PortfolioPage = () => {
       deliverables: ['Compliant Label Design', 'Safety-Focused Layout', 'Print-Ready Artwork'],
       results: ['Clear communication of safety protocols', 'Meets healthcare packaging standards', 'Strengthens institutional branding'],
       color: '#D32F2F',
-      mockups: []
+      gallery: []
     },
     {
       id: 16,
@@ -283,7 +287,7 @@ const PortfolioPage = () => {
       deliverables: ['Promotional Flyer', 'Print-Ready File', 'Digital Version'],
       results: ['Clear communication of service offerings', 'Effective for customer education', 'Strengthens local service visibility'],
       color: '#FF9900',
-      mockups: []
+      gallery: []
     },
     {
       id: 17,
@@ -300,7 +304,7 @@ const PortfolioPage = () => {
       deliverables: ['Funeral Program Booklet', 'Print-Ready Files', 'Digital Proof'],
       results: ['Clear communication of funeral events', 'Dignified tribute to the deceased', 'Provided organized memorial materials'],
       color: '#5D4037',
-      mockups: []
+      gallery: []
     },
     {
       id: 18,
@@ -317,7 +321,7 @@ const PortfolioPage = () => {
       deliverables: ['Service Flyer', 'Digital Version', 'Print-Ready Files'],
       results: ['Clear service communication', 'Improved patient awareness', 'Professional hospital branding'],
       color: '#2E5A9C',
-      mockups: []
+      gallery: []
     },
     {
       id: 19,
@@ -334,7 +338,7 @@ const PortfolioPage = () => {
       deliverables: ['Services Information Sheet', 'Digital Display Version', 'Print Materials'],
       results: ['Patient education improved', 'Service awareness increased', 'Professional medical presentation'],
       color: '#1976D2',
-      mockups: []
+      gallery: []
     },
     {
       id: 20,
@@ -351,7 +355,7 @@ const PortfolioPage = () => {
       deliverables: ['Comprehensive Service Flyer', 'Digital Version', 'Print-Ready Files'],
       results: ['All services clearly presented', 'Contact information prominent', 'Professional business image'],
       color: '#FF6B35',
-      mockups: []
+      gallery: []
     },
     {
       id: 21,
@@ -368,7 +372,7 @@ const PortfolioPage = () => {
       deliverables: ['Primary Logo', 'Brand Guidelines', 'File Formats'],
       results: ['Clean brand identity established', 'Appetizing design aesthetic', 'Versatile for various applications'],
       color: '#FF7043',
-      mockups: []
+      gallery: []
     },
     {
       id: 22,
@@ -385,7 +389,7 @@ const PortfolioPage = () => {
       deliverables: ['Event Program Outline', 'Schedule Design', 'Digital Version'],
       results: ['Organized event scheduling', 'Clear participant assignments', 'Professional event materials'],
       color: '#E91E63',
-      mockups: []
+      gallery: []
     },
     {
       id: 23,
@@ -402,7 +406,7 @@ const PortfolioPage = () => {
       deliverables: ['Promotional Design', 'Digital Files', 'Print Version'],
       results: ['Services clearly highlighted', 'Contact information prominent', 'Eye-catching design'],
       color: '#0047AB',
-      mockups: []
+      gallery: []
     },
     {
       id: 24,
@@ -419,7 +423,7 @@ const PortfolioPage = () => {
       deliverables: ['Event Poster', 'Digital Promotion', 'Print Materials'],
       results: ['Cultural celebration promoted', 'Community engagement', 'Hospital cultural initiative'],
       color: '#795548',
-      mockups: []
+      gallery: []
     },
     {
       id: 25,
@@ -436,7 +440,7 @@ const PortfolioPage = () => {
       deliverables: ['Promotional Flyer', 'Print-Ready Files', 'Digital Version'],
       results: ['Clear service presentation', 'Effective contact information display', 'Professional marketing material'],
       color: '#0047AB',
-      mockups: []
+      gallery: []
     },
     {
       id: 26,
@@ -453,7 +457,7 @@ const PortfolioPage = () => {
       deliverables: ['Event Graphic', 'Social Media Assets', 'Digital Banner'],
       results: ['Community engagement', 'Farmers appreciation', 'Hospital community relations'],
       color: '#228B22',
-      mockups: []
+      gallery: []
     },
     {
       id: 27,
@@ -470,7 +474,7 @@ const PortfolioPage = () => {
       deliverables: ['Birthday Greeting', 'Digital Card', 'Social Media Version'],
       results: ['Elegant birthday presentation', 'Modern design aesthetic', 'Versatile usage'],
       color: '#FF6B6B',
-      mockups: []
+      gallery: []
     },
     {
       id: 28,
@@ -487,7 +491,7 @@ const PortfolioPage = () => {
       deliverables: ['Celebration Graphic', 'Thematic Design', 'Social Media Assets'],
       results: ['Thematic birthday design', 'Positive birthday message', 'Professional celebration graphic'],
       color: '#FF9800',
-      mockups: []
+      gallery: []
     },
     {
       id: 29,
@@ -504,7 +508,7 @@ const PortfolioPage = () => {
       deliverables: ['Logo System', 'Brand Guidelines', 'Stationery Suite', 'Brand Applications'],
       results: ['Established strong corporate identity', 'Unified brand across all touchpoints', 'Enhanced brand recognition'],
       color: '#0047AB',
-      mockups: []
+      gallery: []
     },
     {
       id: 30,
@@ -521,7 +525,7 @@ const PortfolioPage = () => {
       deliverables: ['Menu Design', 'Print Files', 'Digital Menu', 'Price List'],
       results: ['Clear menu organization', 'Appetizing food presentation', 'Easy ordering process'],
       color: '#228B22',
-      mockups: []
+      gallery: []
     },
     {
       id: 31,
@@ -538,7 +542,7 @@ const PortfolioPage = () => {
       deliverables: ['Event Flyer', 'Social Media Kit', 'Digital Promotion Assets'],
       results: ['Successfully promoted events', 'Increased ticket sales', 'Enhanced brand visibility'],
       color: '#FF4081',
-      mockups: []
+      gallery: []
     },
     {
       id: 32,
@@ -555,7 +559,7 @@ const PortfolioPage = () => {
       deliverables: ['Travel Package Design', 'Itinerary Layout', 'Promotional Materials'],
       results: ['Clear communication of package details', 'Attractive presentation', 'Increased bookings'],
       color: '#00BCD4',
-      mockups: []
+      gallery: []
     },
     {
       id: 33,
@@ -572,7 +576,7 @@ const PortfolioPage = () => {
       deliverables: ['Event Poster', 'Social Media Graphics', 'Promotional Flyers'],
       results: ['Successful event promotion', 'Increased attendance', 'Positive venue branding'],
       color: '#FFC107',
-      mockups: []
+      gallery: []
     },
     {
       id: 34,
@@ -589,7 +593,7 @@ const PortfolioPage = () => {
       deliverables: ['Business Card Design', 'Contact Information Layout', 'Print-Ready Files'],
       results: ['Professional brand representation', 'Clear contact information', 'Modern design aesthetic'],
       color: '#E91E63',
-      mockups: []
+      gallery: []
     },
     {
       id: 35,
@@ -606,7 +610,7 @@ const PortfolioPage = () => {
       deliverables: ['Service Flyer', 'Digital Version', 'Social Media Graphics'],
       results: ['Clear service communication', 'Professional presentation', 'Effective marketing tool'],
       color: '#3F51B5',
-      mockups: []
+      gallery: []
     },
     {
       id: 36,
@@ -623,7 +627,7 @@ const PortfolioPage = () => {
       deliverables: ['Event Posters', 'Program Schedule', 'Social Media Assets'],
       results: ['Successful event promotion', 'Clear program communication', 'Enhanced student engagement'],
       color: '#FF5722',
-      mockups: []
+      gallery: []
     },
     {
       id: 37,
@@ -640,7 +644,7 @@ const PortfolioPage = () => {
       deliverables: ['Program Schedule', 'Event Outline', 'Print Materials'],
       results: ['Organized event scheduling', 'Clear activity communication', 'Professional presentation'],
       color: '#4CAF50',
-      mockups: []
+      gallery: []
     },
     {
       id: 38,
@@ -657,7 +661,7 @@ const PortfolioPage = () => {
       deliverables: ['Event Poster', 'Promotional Materials', 'Digital Assets'],
       results: ['Cultural event promotion', 'Community engagement', 'Hospital branding'],
       color: '#795548',
-      mockups: []
+      gallery: []
     },
     {
       id: 39,
@@ -674,7 +678,7 @@ const PortfolioPage = () => {
       deliverables: ['Ceremony Invitation', 'Event Details', 'Family Information'],
       results: ['Cultural representation', 'Clear event communication', 'Professional invitation'],
       color: '#8D6E63',
-      mockups: []
+      gallery: []
     },
     {
       id: 40,
@@ -691,7 +695,7 @@ const PortfolioPage = () => {
       deliverables: ['Monthly Outline', 'Event Schedule', 'Campaign Materials'],
       results: ['Organized monthly planning', 'Clear communication', 'Staff engagement'],
       color: '#1976D2',
-      mockups: []
+      gallery: []
     },
     {
       id: 41,
@@ -708,7 +712,7 @@ const PortfolioPage = () => {
       deliverables: ['Appreciation Card', 'Memorial Design', 'Printable Files'],
       results: ['Respectful design', 'Emotional support', 'Clear communication'],
       color: '#455A64',
-      mockups: []
+      gallery: []
     },
     {
       id: 42,
@@ -725,7 +729,7 @@ const PortfolioPage = () => {
       deliverables: ['Visual Tribute', 'Memorial Design', 'Celebration Elements'],
       results: ['Beautiful memorial', 'Celebration of life', 'Emotional impact'],
       color: '#37474F',
-      mockups: []
+      gallery: []
     },
     {
       id: 43,
@@ -742,7 +746,7 @@ const PortfolioPage = () => {
       deliverables: ['Marketing Flyer', 'Course Layout', 'Print Files'],
       results: ['Professional marketing material', 'Clear course presentation', 'Enrollment driven'],
       color: '#007AFF',
-      mockups: []
+      gallery: []
     },
     {
       id: 44,
@@ -759,7 +763,7 @@ const PortfolioPage = () => {
       deliverables: ['Event Flyer', 'Digital Promotion', 'Print-Ready Files'],
       results: ['Successful event promotion', 'High attendance rate', 'Positive community response'],
       color: '#FF6F00',
-      mockups: []
+      gallery: []
     },
     {
       id: 45,
@@ -776,7 +780,7 @@ const PortfolioPage = () => {
       deliverables: ['Event Flyer', 'Community Outreach Material', 'Digital Version'],
       results: ['Strong community participation', 'Increased health awareness', 'Successful clean-up event'],
       color: '#2E7D32',
-      mockups: []
+      gallery: []
     },
     {
       id: 46,
@@ -793,7 +797,7 @@ const PortfolioPage = () => {
       deliverables: ['Expo Flyer', 'Space Booking Information', 'Promotional Material'],
       results: ['High exhibition space bookings', 'Successful staff engagement', 'Professional event presentation'],
       color: '#C62828',
-      mockups: []
+      gallery: []
     },
     {
       id: 47,
@@ -810,7 +814,7 @@ const PortfolioPage = () => {
       deliverables: ['Packaging System', 'Sustainable Materials Guide', 'Production Files', 'Brand Applications'],
       results: ['40% reduction in packaging waste', 'Award-winning design', 'Increased brand recognition'],
       color: '#2E7D32',
-      mockups: []
+      gallery: []
     },
     {
       id: 48,
@@ -840,9 +844,10 @@ const PortfolioPage = () => {
         'Positive brand recognition'
       ],
       color: '#C62828',
-      mockups: [
-        '/images/mockups/jersey-mockup-1.jpg',
-        '/images/mockups/jersey-mockup-2.jpg'
+      gallery: [
+        'REP1.jpg',
+        'REP2.jpg',
+        'REP3.jpg'
       ]
     },
     {
@@ -873,9 +878,9 @@ const PortfolioPage = () => {
         'Successful sports division launch'
       ],
       color: '#1A1A2E',
-      mockups: [
-        '/images/mockups/sports-brand-1.jpg',
-        '/images/mockups/sports-brand-2.jpg'
+      gallery: [
+        'ghana.jpg',
+        'ghana2.jpg'
       ]
     },
     {
@@ -905,8 +910,9 @@ const PortfolioPage = () => {
         'Strengthened chapter community spirit'
       ],
       color: '#004D40',
-      mockups: [
-        '/images/mockups/excursion-poster.jpg'
+      gallery: [
+        'grnma.jpg',
+        'grnma2.jpg'
       ]
     },
     {
@@ -936,9 +942,9 @@ const PortfolioPage = () => {
         'Honored her contribution to healthcare'
       ],
       color: '#5D4037',
-      mockups: [
-        '/images/mockups/memorial-tribute-1.jpg',
-        '/images/mockups/memorial-tribute-2.jpg'
+      gallery: [
+        'Eunice 1.jpg',
+        'Eunice 2.jpg'
       ]
     },
     {
@@ -956,7 +962,7 @@ const PortfolioPage = () => {
       deliverables: ['Website Design', 'Interactive Prototypes', 'Style Guide', 'Design System'],
       results: ['300% increase in inquiries', 'Featured on design blogs', 'New high-value clients'],
       color: '#D32F2F',
-      mockups: []
+      gallery: []
     },
     {
       id: 53,
@@ -973,11 +979,123 @@ const PortfolioPage = () => {
       deliverables: ['Label Designs', 'Illustrations', 'Brand Applications', 'Production Files'],
       results: ['Featured in craft beer magazine', 'Increased sales by 45%', 'Award-winning design'],
       color: '#E65100',
-      mockups: []
+      gallery: []
+    },
+    {
+      id: 54,
+      title: 'Senchi Breast Cancer Awareness Campaign',
+      category: 'event',
+      description: 'Breast cancer awareness and screening event promotional design in collaboration with Royal Senchi',
+      detailedDescription: 'Designed a comprehensive promotional campaign for a breast cancer awareness and screening event hosted by Royal Senchi Resort in collaboration with St. Martin De Porres Catholic Hospital. The design features a gentle pink aesthetic with the iconic pink ribbon, clear event details (Akwakwa, 21st October 2025), and a professional yet compassionate visual language to encourage community participation in health screening.',
+      tags: ['Health Awareness', 'Event Design', 'Breast Cancer Awareness', 'Medical Campaign', 'Print Design'],
+      image: 'senchi.jpg',
+      client: 'Royal Senchi Resort & St. Martin Hospital',
+      year: '2025',
+      duration: '1 week',
+      role: 'Lead Campaign Designer',
+      deliverables: ['Awareness Poster', 'Digital Assets', 'Event Promotion Materials'],
+      results: ['Increased community awareness', 'Successful event turnout', 'Promoted early detection'],
+      color: '#E91E63',
+      gallery: [
+        'senchi.jpg',
+        'senchi2.jpg'
+      ]
+    },
+    {
+      id: 55,
+      title: '80th Anniversary Climax Celebration & Appreciation',
+      category: 'event',
+      description: 'Complete event branding, promotional materials, and appreciation designs for St. Martin Hospital 80th Anniversary',
+      detailedDescription: 'Developed a comprehensive suite of designs for the 80th Anniversary Climax Celebration of St. Martin De Porres Catholic Hospital. This project included the main event banner featuring the keynote speaker (Most Rev. Joseph Afrifah-Agyekum), a countdown promotional graphic, and heartfelt appreciation cards for donors and attendees. The theme "Honouring the Past, Strengthening the Present, Shaping the Future" was carried through all designs with a consistent color palette and elegant typography.',
+      tags: ['Anniversary', 'Event Branding', 'Appreciation Cards', 'Banner Design', 'Healthcare Branding', 'Institutional Event'],
+      image: '80th-anniversary-climax.jpg',
+      client: 'St. Martin De Porres Catholic Hospital',
+      year: '2026',
+      duration: '3 weeks',
+      role: 'Lead Event & Brand Designer',
+      deliverables: [
+        'Event Banner', 
+        'Countdown Graphics', 
+        'Appreciation Cards', 
+        'Social Media Assets',
+        'Program Outline'
+      ],
+      results: [
+        'Successful event promotion', 
+        'High attendance', 
+        'Meaningful appreciation of supporters'
+      ],
+      color: '#2E5A9C',
+      gallery: [
+        '80th-anniversary-climax.jpg',
+        '80th-anniversary-countdown.jpg',
+        '80th-anniversary-appreciation.jpg',
+        '80th-anniversary-appreciation2.jpg'
+      ]
+    },
+    {
+      id: 56,
+      title: 'Chu Chu\'s Bounce and Play Rentals - Family Funfair',
+      category: 'event',
+      description: 'Vibrant event flyer design for Family Funfair 2026 by Chu Chu\'s Bounce and Play Rentals',
+      detailedDescription: 'Designed a playful and energetic event flyer for Chu Chu\'s Bounce and Play Rentals\' Family Funfair 2026. The design features bright, inviting colors, showcasing the various bounce houses and activities. It clearly communicates the event details including the rate (GH₵30), venue (Manya Krobo Municipal Assembly), date (Sunday, 1st November 2026), and time (10:00 AM - 6:00 PM).',
+      tags: ['Event Flyer', 'Family Funfair', 'Children\'s Event', 'Promotional Design', 'Print Material'],
+      image: 'chuchu-funfair.jpg',
+      client: 'Chu Chu\'s Bounce and Play Rentals',
+      year: '2026',
+      duration: '3 days',
+      role: 'Graphic Designer',
+      deliverables: ['Event Flyer', 'Social Media Graphics', 'Print-Ready File'],
+      results: ['Clear communication of event details', 'Attractive and family-friendly design', 'High engagement'],
+      color: '#9C27B0',
+      gallery: [
+        'chuchu-funfair.jpg',
+        'chuchu-funfair2.jpg'
+      ]
+    },
+    {
+      id: 57,
+      title: 'Coni\'s Cravings - Coated Nut Brand Promotion',
+      category: 'branding',
+      description: 'Appetizing promotional banner design for Coni\'s Cravings Coated Nut',
+      detailedDescription: 'Created a mouth-watering promotional banner for Coni\'s Cravings Coated Nut. The design focuses on highlighting the delicious, golden-brown texture of the product with a warm and inviting color palette. It includes essential business information such as delivery services and contact details, effectively encouraging customer orders.',
+      tags: ['Brand Promotion', 'Food Banner', 'Product Marketing', 'Graphic Design', 'Visual Marketing'],
+      image: 'conis-cravings.jpg',
+      client: 'Coni\'s Cravings',
+      year: '2026',
+      duration: '2 days',
+      role: 'Graphic Designer',
+      deliverables: ['Promotional Banner', 'Digital Assets', 'Print Version'],
+      results: ['Appealing product presentation', 'Clear contact information', 'Effective marketing tool'],
+      color: '#E65100',
+      gallery: [
+        'conis-cravings.jpg',
+        'conis-cravings2.jpg'
+      ]
+    },
+    {
+      id: 58,
+      title: 'St. Martin Hospital Thanksgiving Service',
+      category: 'event',
+      description: 'Thanksgiving Service event poster for St. Martin De Porres Catholic Hospital',
+      detailedDescription: 'Designed a reverent and inviting poster for St. Martin Hospital\'s Thanksgiving Service. The design features uplifting imagery and clear event details, including the time (7:00 AM), venue (Holy Trinity Catholic Church, Agomanya), and dress code (Hospital Cloth). The design fosters a sense of community and gratitude.',
+      tags: ['Event Poster', 'Thanksgiving Service', 'Hospital Event', 'Print Design', 'Layout'],
+      image: 'st-martin-thanksgiving.jpg',
+      client: 'St. Martin De Porres Catholic Hospital',
+      year: '2026',
+      duration: '3 days',
+      role: 'Event & Print Designer',
+      deliverables: ['Event Poster', 'Digital Promotion', 'Print Materials'],
+      results: ['Clear event communication', 'Professional and respectful design', 'Encouraged community participation'],
+      color: '#795548',
+      gallery: [
+        'st-martin-thanksgiving.jpg',
+        'st-martin-thanksgiving2.jpg'
+      ]
     }
   ];
 
-  // Categories with updated counts (53 projects total)
+  // Categories with updated counts
   const categories = [
     { id: 'all', name: 'All Projects', icon: 'fas fa-th', count: allProjects.length },
     { id: 'web', name: 'Web Design', icon: 'fas fa-desktop', count: allProjects.filter(p => p.category === 'web').length },
@@ -1070,8 +1188,6 @@ const PortfolioPage = () => {
                 <i className="fas fa-arrow-down"></i> View Featured Work
               </a>
             </div>
-            
-            
           </div>
         </div>
       </section>
@@ -1438,6 +1554,14 @@ const PortfolioPage = () => {
             <div className="modal-body">
               <div className="modal-image">
                 <img src={selectedProject.image} alt={selectedProject.title} />
+                {/* Display Gallery Images if they exist */}
+                {selectedProject.gallery && selectedProject.gallery.length > 0 && (
+                  <div className="modal-gallery">
+                    {selectedProject.gallery.map((img, index) => (
+                      <img key={index} src={img} alt={`${selectedProject.title} - view ${index + 1}`} />
+                    ))}
+                  </div>
+                )}
               </div>
               
               <div className="modal-info">

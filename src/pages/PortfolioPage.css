@@ -1348,3 +1348,30 @@
 .portfolio-page i.fab {
   font-style: normal !important;
 }
+
+/* ===== MODAL GALLERY STYLES ===== */
+.portfolio-page .modal-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.portfolio-page .modal-gallery img {
+  width: calc(50% - 7.5px); /* Two images per row on desktop */
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.portfolio-page .modal-gallery img:hover {
+  transform: scale(1.03);
+}
+
+@media (max-width: 768px) {
+  .portfolio-page .modal-gallery img {
+    width: 100%; /* One image per row on mobile */
+  }
+}
