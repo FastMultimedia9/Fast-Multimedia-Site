@@ -51,7 +51,7 @@ const AboutPage = () => {
       id: 4,
       name: 'Dzogbeti Franklin',
       role: 'UI/UX Designer',
-      bio: 'Ama creates intuitive digital experiences that blend beautiful design with exceptional functionality.',
+      bio: 'Franklin creates intuitive digital experiences that blend beautiful design with exceptional functionality.',
       image: '/images/Dzogbeti Franklin.jpg'
     }
   ];
