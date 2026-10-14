@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FaPalette, FaDesktop, FaPenFancy, FaLaptop, FaPrint, FaGlobe,
   FaTools, FaCogs, FaCloudUploadAlt, FaWifi,
-  FaArrowRight, FaStar, FaCheckCircle, FaPlay,
-  FaUsers, FaClock, FaHeadset, FaRocket, FaTrello,
-  FaFileAlt, FaSync, FaTimes, FaCheck,
+  FaArrowRight, FaStar, FaCheckCircle,
   FaBehance, FaFacebookF, FaLinkedinIn, FaInstagram, FaYoutube,
   FaUserTie, FaCreditCard, FaClipboardList, FaUserPlus,
   FaTasks, FaComments, FaCheckDouble, FaPlusCircle
@@ -16,9 +14,7 @@ const HomePage = () => {
   const [showQuickView, setShowQuickView] = useState(false);
   const [quickViewProject, setQuickViewProject] = useState(null);
   const [showPackageModal, setShowPackageModal] = useState(false);
-  const [activeServiceCategory, setActiveServiceCategory] = useState('design');
   const [selectedPackage, setSelectedPackage] = useState('starter');
-  const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
 
   const processSteps = [
@@ -81,7 +77,6 @@ const HomePage = () => {
         { head: 'Unlimited Requests', desc: 'Submit as many design tasks as you need — no limits' },
         { head: 'Unlimited Revisions', desc: 'We revise the designs until you\'re completely satisfied' },
         { head: 'Cancel Anytime', desc: 'No long-term commitments — cancel your subscription anytime' }
-        
       ]
     },
     {
@@ -174,7 +169,7 @@ const HomePage = () => {
       subtitle: '80th Anniversary',
       category: 'Brand Identity',
       description: 'Award-winning logo design celebrating heritage and future vision.',
-      image: 'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      image: '80th.jpg', // Updated actual image
       tags: ['Logo Design', 'Healthcare'],
       details: ['Winning competition design', 'Heritage meets future concept', 'Clean sans-serif typography'],
       client: 'St. Martin De Porres Hospital',
@@ -186,7 +181,7 @@ const HomePage = () => {
       subtitle: 'Clothing Brand',
       category: 'Brand Identity',
       description: 'Sophisticated fashion brand with "Exclusively Different" positioning.',
-      image: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      image: 'day1.jpg', // Updated actual image
       tags: ['Fashion', 'Luxury'],
       details: ['Complete brand identity', 'Premium positioning', 'Brand guidelines'],
       client: 'Mr. Wise Clothing',
@@ -198,7 +193,7 @@ const HomePage = () => {
       subtitle: 'Mango Ice-Cream',
       category: 'Packaging',
       description: 'Product label design with clear ingredient listing.',
-      image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      image: 'cover.jpg', // Updated actual image
       tags: ['Packaging', 'Food'],
       details: ['Regulatory compliance', 'Professional retail appearance', 'Clear ingredient display'],
       client: 'Abidan Royal Enterprise',
@@ -206,13 +201,7 @@ const HomePage = () => {
     },
   ];
 
-  React.useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // Removed the isScrolled state and useEffect since the toggle bar is gone
 
   const handleUpdateClick = (update) => {
     const updateData = {
@@ -365,55 +354,26 @@ const HomePage = () => {
       <section className="hero">
         <div className="hero-container">
           <div className="hero-left">
-            <div className={`service-toggle-wrapper ${isScrolled ? 'scrolled' : ''}`}>
-              <div className="toggle-container">
-                <button
-                  className={`toggle-btn ${activeServiceCategory === 'design' ? 'active' : ''}`}
-                  onClick={() => setActiveServiceCategory('design')}
-                >
-                  <FaPalette className="toggle-icon" />
-                  <span className="toggle-text">Design Services</span>
-                </button>
-                <button
-                  className={`toggle-btn ${activeServiceCategory === 'tech' ? 'active' : ''}`}
-                  onClick={() => setActiveServiceCategory('tech')}
-                >
-                  <FaDesktop className="toggle-icon" />
-                  <span className="toggle-text">Tech Services</span>
-                </button>
-              </div>
-            </div>
+            {/* Top toggle bar removed here */}
 
             <div className="hero-badge">
               <span className="badge-text">YOUR FULL SERVICE DESIGN PARTNER</span>
             </div>
             
             <h1 className="hero-title">
-              {activeServiceCategory === 'design' ? (
-                <>Design <span className="gradient-text">Without Limits</span></>
-              ) : (
-                <>Tech <span className="gradient-text">Without Limits</span></>
-              )}
+              Design <span className="gradient-text">Without Limits</span>
             </h1>
             
             <p className="hero-subtitle">
-              {activeServiceCategory === 'design'
-                ? 'Unlimited design for a flat monthly fee. We will take care of all your creative needs. No lengthy hiring procedures. No inefficient freelancers. No contracts.'
-                : 'Professional IT solutions to keep your systems running smoothly and efficiently.'}
+              Unlimited design for a flat monthly fee. We will take care of all your creative needs. No lengthy hiring procedures. No inefficient freelancers. No contracts.
             </p>
             
             <div className="hero-actions">
               <button
                 className="btn btn-primary"
-                onClick={() => {
-                  if (activeServiceCategory === 'design') {
-                    setShowPackageModal(true);
-                  } else {
-                    navigate('/services');
-                  }
-                }}
+                onClick={() => setShowPackageModal(true)}
               >
-                {activeServiceCategory === 'design' ? 'View Packages' : 'Explore Services'}
+                View Packages
                 <FaArrowRight className="btn-arrow" />
               </button>
               <button className="btn btn-secondary" onClick={() => navigate('/contact')}>
@@ -549,7 +509,10 @@ const HomePage = () => {
             </div>
             <div className="partner-section__right">
               <div className="partner-section__list partner-logos-scroll">
-                <div className="partner-section__item"><span>Logo 1</span></div>
+                {/* Updated logo 1 with actual image */}
+                <div className="partner-section__item">
+                  <img src="logo1.png" alt="Logo 1" className="partner-logo-img" />
+                </div>
                 <div className="partner-section__item"><span>Logo 2</span></div>
                 <div className="partner-section__item"><span>Logo 3</span></div>
                 <div className="partner-section__item"><span>Logo 4</span></div>
@@ -572,30 +535,24 @@ const HomePage = () => {
         </div>
         <div className="services-carousel">
           <div className="services-carousel__track">
-            {services[activeServiceCategory].map((service, index) => {
-              const imageSet = activeServiceCategory === 'design' ? serviceImages : techServiceImages;
-              return (
-                <div key={`service-1-${index}`} className="services-carousel__item">
-                  <img src={imageSet[index % imageSet.length]} alt={service.name} />
-                  <span className="services-carousel__head">{service.name}</span>
-                </div>
-              );
-            })}
-            {services[activeServiceCategory].map((service, index) => {
-              const imageSet = activeServiceCategory === 'design' ? serviceImages : techServiceImages;
-              return (
-                <div key={`service-2-${index}`} className="services-carousel__item">
-                  <img src={imageSet[index % imageSet.length]} alt={service.name} />
-                  <span className="services-carousel__head">{service.name}</span>
-                </div>
-              );
-            })}
+            {services.design.map((service, index) => (
+              <div key={`service-1-${index}`} className="services-carousel__item">
+                <img src={serviceImages[index % serviceImages.length]} alt={service.name} />
+                <span className="services-carousel__head">{service.name}</span>
+              </div>
+            ))}
+            {services.design.map((service, index) => (
+              <div key={`service-2-${index}`} className="services-carousel__item">
+                <img src={serviceImages[index % serviceImages.length]} alt={service.name} />
+                <span className="services-carousel__head">{service.name}</span>
+              </div>
+            ))}
           </div>
         </div>
         <div className="container">
           <div className="services-carousel__btn text-center">
             <button className="btn btn-secondary" onClick={() => navigate('/services')}>
-              {activeServiceCategory === 'design' ? 'All Design Services' : 'All Tech Services'}
+              All Design Services
               <FaArrowRight className="btn-arrow" />
             </button>
           </div>
@@ -767,16 +724,14 @@ const HomePage = () => {
       <section className="services-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">
-              {activeServiceCategory === 'design' ? 'Design Services' : 'Tech Services'}
-            </h2>
+            <h2 className="section-title">Design Services</h2>
             <p className="section-subtitle">
               Professional solutions tailored to your needs
             </p>
           </div>
 
           <div className="services-grid">
-            {services[activeServiceCategory].map((service, index) => {
+            {services.design.map((service, index) => {
               const Icon = service.icon;
               return (
                 <div
@@ -1012,8 +967,7 @@ const HomePage = () => {
         <div className="container">
           <div className="cta-content">
             <h2 className="cta-title">
-              Ready to Transform Your{' '}
-              {activeServiceCategory === 'design' ? 'Brand' : 'Business'}?
+              Ready to Transform Your Brand?
             </h2>
             <p className="cta-subtitle">
               Let's create something amazing together. Get in touch to discuss your project.
