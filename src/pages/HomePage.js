@@ -177,15 +177,15 @@ const HomePage = () => {
     },
     {
       id: 'featured-2',
-      title: 'Mr. Wise',
-      subtitle: 'Clothing Brand',
+      title: 'Countdown',
+      subtitle: 'Flyer Design',
       category: 'Brand Identity',
-      description: 'Sophisticated fashion brand with "Exclusively Different" positioning.',
+      description: 'A vibrant promotional graphic designed to build excitement for St. Martin Hospitals milestone celebration, featuring the official logo, event details, and celebratory imagery.',
       image: 'day1.jpg', // Updated actual image
       tags: ['Fashion', 'Luxury'],
       details: ['Complete brand identity', 'Premium positioning', 'Brand guidelines'],
-      client: 'Mr. Wise Clothing',
-      year: '2025'
+      client: 'Anniversary Countdown',
+      year: '2026'
     },
     {
       id: 'featured-3',
