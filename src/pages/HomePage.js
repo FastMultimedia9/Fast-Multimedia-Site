@@ -187,17 +187,17 @@ const HomePage = () => {
       client: 'Anniversary Countdown',
       year: '2026'
     },
-    {
+        {
       id: 'featured-3',
-      title: 'Abidan Royal',
-      subtitle: 'Mango Ice-Cream',
-      category: 'Packaging',
-      description: 'Product label design with clear ingredient listing.',
-      image: 'cover.jpg', // Updated actual image
-      tags: ['Packaging', 'Food'],
-      details: ['Regulatory compliance', 'Professional retail appearance', 'Clear ingredient display'],
-      client: 'Abidan Royal Enterprise',
-      year: '2024'
+      title: 'St. Martin Hospital',
+      subtitle: '80th Anniversary Brochure',
+      category: 'Print Design',
+      description: 'Commemorative brochure cover celebrating a legacy of healthcare excellence.',
+      image: 'brochure.jpg', // Updated actual image name
+      tags: ['Print Design', 'Brochure', 'Healthcare'],
+      details: ['Dynamic photo collage', 'Official anniversary branding', 'Clear event typography'],
+      client: 'St. Martin De Porres Hospital',
+      year: '2026'
     },
   ];
 
