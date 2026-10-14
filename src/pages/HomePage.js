@@ -830,7 +830,7 @@ const HomePage = () => {
               <p>"From logo design to website, they handled everything. Highly recommend their design services."</p>
               <div className="testimonial-author">
                 <strong>Kwame Osei</strong>
-                <span>Founder, Abidan Royal</span>
+                <span>St. Martin Hospital</span>
               </div>
             </div>
           </div>
